@@ -2,6 +2,7 @@ package go_dom_test
 
 import (
 	"fmt"
+	"strings"
 
 	. "github.com/stroiman/go-dom"
 	"github.com/stroiman/go-dom/interfaces"
@@ -12,9 +13,9 @@ import (
 )
 
 func parseString(s string) interfaces.Node {
-	tokens := lexer.Tokenize(s)
+	tokens := lexer.Tokenize(strings.NewReader(s))
 	fmt.Println("Tokens", tokens)
-	return Parse(s)
+	return Parse(strings.NewReader(s))
 
 }
 
