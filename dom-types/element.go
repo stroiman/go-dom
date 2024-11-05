@@ -6,10 +6,10 @@ type Element struct {
 
 func NewElement(tagName string) Element { return Element{tagName} }
 
-func (e HTMLElement) NodeName() string {
+func (e Element) NodeName() string {
 	return e.TagName()
 }
 
-func (e HTMLElement) TagName() string {
+func (e Element) TagName() string {
 	return e.tagName
 }

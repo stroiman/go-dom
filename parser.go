@@ -1,12 +1,13 @@
 package go_dom
 
 import (
-	"io"
-
-	. "github.com/stroiman/go-dom/dom-types"
+	// . "github.com/stroiman/go-dom/dom-types"
 	"github.com/stroiman/go-dom/interfaces"
+	"github.com/stroiman/go-dom/lexer"
+	"github.com/stroiman/go-dom/parser"
 )
 
-func Parse(r io.Reader) interfaces.Node {
-	return NewHTMLHtmlElement()
+func Parse(s string) interfaces.Node {
+	tokens := lexer.Tokenize(s)
+	return parser.Parse(tokens)
 }

@@ -1,18 +1,21 @@
 package go_dom_test
 
 import (
-	"strings"
+	"fmt"
 
 	. "github.com/stroiman/go-dom"
-	//. "github.com/stroiman/go-dom/dom-types"
 	"github.com/stroiman/go-dom/interfaces"
+	"github.com/stroiman/go-dom/lexer"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 func parseString(s string) interfaces.Node {
-	return Parse(strings.NewReader(s))
+	tokens := lexer.Tokenize(s)
+	fmt.Println("Tokens", tokens)
+	return Parse(s)
+
 }
 
 var _ = Describe("Parser", func() {
