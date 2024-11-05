@@ -153,17 +153,21 @@ func (l *lexer) remainder() io.RuneReader {
 	return bufio.NewReader(l.source.fork()) //bytes.NewBufferString(l.source[l.pos:])
 }
 
+func createPattern(s string) *regexp.Regexp {
+	return regexp.MustCompile("^" + s)
+}
+
 func createLexer(source io.Reader) *lexer {
 	return &lexer{
 		pos:    0,
 		source: newBuffer(source),
 		tokens: []Token{},
 		patterns: []regexPattern{
-			{regexp.MustCompile("</"), defaultHandler(TAG_CLOSE_START, "</")},
-			{regexp.MustCompile("<"), defaultHandler(TAG_START, "<")},
-			{regexp.MustCompile("/>"), defaultHandler(TAG_CLOSE_END, "/>")},
-			{regexp.MustCompile(">"), defaultHandler(TAG_END, ">")},
-			{regexp.MustCompile(`\w+`), stringHandler},
+			{createPattern("</"), defaultHandler(TAG_CLOSE_START, "</")},
+			{createPattern("<"), defaultHandler(TAG_START, "<")},
+			{createPattern("/>"), defaultHandler(TAG_CLOSE_END, "/>")},
+			{createPattern(">"), defaultHandler(TAG_END, ">")},
+			{createPattern(`\w+`), stringHandler},
 		},
 	}
 }
