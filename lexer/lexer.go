@@ -1,79 +1,12 @@
 package lexer
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"regexp"
 )
 
 type regexHandler func(lex *lexer, m match)
-
-// TODO, performance could _potentially_ be improved by letting multiple threads
-// search for tokens in parallel; in which case this needs to be made thread safe
-type buffer struct {
-	reader io.Reader
-	cache  []byte
-	eof    bool
-	pos    int
-}
-
-func (b *buffer) debug() {
-	fmt.Printf("Pos %d\nConsumed: %s\nRemaining:%s\n", b.pos, b.cache[:b.pos], b.cache[b.pos:])
-}
-
-type fork struct {
-	buffer *buffer
-	pos    int
-}
-
-func newBuffer(reader io.Reader) *buffer {
-	return &buffer{reader: reader}
-}
-
-func (b *buffer) fork() *fork {
-	return &fork{b, b.pos}
-}
-
-func (b *buffer) advanceCache(count int) error {
-	tmp := make([]byte, count)
-	read, err := b.reader.Read(tmp)
-	b.cache = append(b.cache, tmp[:read]...)
-	// b.debug()
-	if err == io.EOF {
-		b.eof = true
-		err = nil
-	}
-	return err
-}
-
-func (b *buffer) advance(length int) {
-	if len(b.cache) < (length + b.pos) {
-		panic("Cannot advance beyone what has been read")
-	}
-	b.pos += length
-}
-
-func (b *buffer) subString(start int, end int) string {
-	return (string)(b.cache[b.pos+start : b.pos+end])
-}
-
-func (f *fork) Read(b []byte) (count int, err error) {
-	if f.buffer.eof && f.pos >= len(f.buffer.cache) {
-		return 0, io.EOF
-	}
-	cacheSize := len(f.buffer.cache)
-	desiredCacheSize := len(b) // TODO: This is wrong
-	if desiredCacheSize > cacheSize {
-		err = f.buffer.advanceCache(desiredCacheSize - cacheSize)
-	}
-	count = copy(b, f.buffer.cache[f.pos:])
-	f.pos += count
-	if f.buffer.eof && err == nil {
-		err = io.EOF
-	}
-	return
-}
 
 type regexPattern struct {
 	regex   *regexp.Regexp
@@ -83,7 +16,7 @@ type regexPattern struct {
 type lexer struct {
 	patterns []regexPattern
 	tokens   []Token
-	source   *buffer
+	source   *forkableReader
 	pos      int
 }
 
@@ -92,7 +25,6 @@ func Tokenize(source io.Reader) []Token {
 
 	for !lex.at_eof() {
 		matched := false
-
 		for _, pattern := range lex.patterns {
 			loc := pattern.regex.FindReaderSubmatchIndex(lex.remainder())
 			if loc != nil {
@@ -119,7 +51,7 @@ func Tokenize(source io.Reader) []Token {
 }
 
 type match struct {
-	b       *buffer
+	b       *forkableReader
 	matches []int
 }
 
@@ -152,11 +84,13 @@ func (l *lexer) remainderString() string {
 }
 
 func (l *lexer) remainder() io.RuneReader {
-	return bufio.NewReader(l.source.fork()) //bytes.NewBufferString(l.source[l.pos:])
+	return l.source.forkRuneReader()
 }
 
 func createPattern(s string, kind TokenKind) regexPattern {
 	return regexPattern{
+		// Match the beginning of the string. When searching for a token, we are
+		// always looking for the next token.
 		regexp.MustCompile("^" + s),
 		func(lex *lexer, m match) {
 			lex.push(NewToken(kind, m.getMatch()))
@@ -171,8 +105,8 @@ func createLexer(source io.Reader) *lexer {
 		source: newBuffer(source),
 		tokens: []Token{},
 		patterns: []regexPattern{
-			createPattern("<([a-zA-Z]+)", TAG_OPEN_BEGIN),
-			createPattern("</([a-zA-Z]+)", TAG_CLOSE_BEGIN),
+			createPattern("<([[:alpha:]]+)", TAG_OPEN_BEGIN),
+			createPattern("</([[:alpha:]]+)", TAG_CLOSE_BEGIN),
 			createPattern("/>", TAG_CLOSE_END), // Unused atm
 			createPattern(">", TAG_END),
 			createPattern(`\w+`, IDENTIFIER), // Unused atm
