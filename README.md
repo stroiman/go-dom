@@ -84,11 +84,43 @@ There is much to do, which includes (but this is not a full list):
 - Implement default browser behaviour for user interaction, e.g. pressing 
   <key>enter</key> when an input field has focus should submit the form.
 
+### Long Term Goals
+
+#### CSS Parsing
+
 Parsing CSS woule be nice, allowing test code to verify the resulting styles of
 an element; but having a working DOM with a JavaScript engine is higher
 priority.
 
+
+#### Mock external sites
+
+The system may depend on external sites in the browser, most notably identity
+providers (IDP), where your app redirects to the IDP, which redirects on
+successful login; but could be other services such as map providers, etc.
+
+For testing purposes, replacing this with a dummy replacement would have some
+benefits:
+
+- The verification of your system doesn't depend on the availability of an
+  external service; when working offline
+- Avoid tests breaking because of changes to the external system.
+- For an identity provider
+  - Avoid pollution of dummy accounts to run your test suite.
+  - Avoid the locking the account due to _suspiscious activity_.
+  - The IDP may use a Captcha or 2FA that can be impossible; or difficult to
+    control from tests, and would cause a significant slowdown to the test
+    suite.
+- For applications like map providers
+  - Avoid being billed for API use during testing.
+
 ## Out of scope.
+
+### Visual Rendering
+
+It is not a goal to be able to provide a visual rendering of the DOM.
+
+### Accessibility tree
 
 It is not currently planned that this library should maintain the accessibility
 tree; nor provide higher level testing capabilities like what
