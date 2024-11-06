@@ -22,21 +22,20 @@ verify the response.
 
 But if you need to test at a higher lever, for example verify how any JavaScript
 code effects the page; you would need to use browser automation, like
-[Selenium](https://www.selenium.dev/), and this introduces a significant overhead.
+[Selenium](https://www.selenium.dev/), and this introduces a significant 
+overhead; not only from out-of-process communication with the browser, but also
+the necessity of launching your server.
 
-You need to control launching your server, tests need to wait for the browser to
-launch, and communication with the browser has the overhead of out-of-process
-communication.
-
-This overhead is so massive that it discourages a TDD loop.
+This overhead discourages a TDD loop.
 
 The purpose of this project is to support a TDD feedback loop for code
 delivering HTML, and where merely veryifying the HTTP response isn't enough, but
 you want to verify:
 
 - JavaScript code has the desired behaviour
-- General browser behaviour is verified, e.g. clicking a `<button type="submit">`,
-  submits a form, and a redirect response is followed.
+- General browser behaviour is verified, e.g. 
+  - clicking a `<button type="submit">` submits the form
+  - A and a redirect response is followed.
 
 Some advantages of a native headless browser are:
 
@@ -44,39 +43,50 @@ Some advantages of a native headless browser are:
 - Everything works in-process, so interacting with the browser from test does
   not incur the overhead of out-of-process communication, and you could for
   example redirect all console output to go code easily.
-- You wouln't actually need to start an HTTP server. You could just pass an
-  `HTTPHandler` instance to the "browser", and instead of making HTTP requests,
-  this calls your handler.
+- You can request application directly through the 
+  [`http.Handler`](https://pkg.go.dev/net/http#Handler); so no need to start an
+  HTTP server.
 - You can run parallel tests in isolation as each can create their own _instance_
   of the HTTP handler.[^2]
 
-Some disadvantages to e.g. Selenium.
+Some disadvantages compared to e.g. Selenium.
 
-- You cannot verify how things look; e.g. you cannot get a screenshot of a failing test
+- You cannot verify how it look; e.g. you cannot get a screenshot of a failing test
   - This means you cannot create snap-shot tests detect undesired UI changes.[^3]
 - You cannot verify that everything works in _all supported browsers_.
 
+This isn't intended as a replacement for the cases where an end-2-end test is
+the right choice. It is intended as a tool to help when you want a smaller
+isolated test, e.g. mocking out part of the behaviour; but 
+
 ## Project status
 
-Coding has just begun. Planned first steps
+Coding has just begun, and currently just some simple HTML parsing is underway.
+Planned first steps:
 
-1. Create a simple HTML parser, that can parse just the basic HTML tags.
+1. Create a simple HTML parser, that can parse just the basic HTML tags, and
+   generate a valid subset of a [`Document`](https://developer.mozilla.org/en-US/docs/Web/API/Document)
 2. Integrate with an [`http.Handler`](https://pkg.go.dev/net/http#Handler)
 3. Embed a v8 engine, to allow running javascript code.
 4. Expose the DOM objects in a way compatible with v8.
 
 There is much to do, which includes (but this is not a full list):
 
-- Support all DOM elements
+- Support all DOM elements, including SVG elements and other namespaces.
 - Handle bad HTML gracefully (browsers don't generate an error if an end tag is
   missing or misplaced)
 - Implement all standard JavaScript classes that a browser should support; but
   not provided by the V8 engine.
-  - JavaScript polyfills would be a good starting point, where they exist.
-  - Over time, the most commonly used, in particular `fetch` could be replaced
-    with a Go implementation for performance optimization.
+  - JavaScript polyfills would be a good starting point, where some exist.
+  - Conversion to native go implementations would be prioritized on usage, e.g.
+    [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) 
+    would be high in the list of priorities.
 - Implement default browser behaviour for user interaction, e.g. pressing 
   <key>enter</key> when an input field has focus should submit the form.
+
+Parsing CSS woule be nice, allowing test code to verify the resulting styles of
+an element; but having a working DOM with a JavaScript engine is higher
+priority.
 
 ## Out of scope.
 
