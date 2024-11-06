@@ -1,12 +1,17 @@
 # go-dom - Headless browser for Go
 
-> [!NOTE] This is only a POC
+> [!NOTE] 
+>
+> This is only a POC
+>
 > This readme file was written before any code was added, and describes the
 > intent of the project; why it was conceived, and the benefits that it brings.
 >
 > Also this starts as a hobby project for learning; there is no guarantee that
 > it will ever become a useful tool; unless it will gain traction and support of
 > multiple developers.
+
+[Software license](./LICENSE.txt)
 
 While the SPA[^1] dominates the web today, some applications still render
 server-side HTML, and HTMX is gaining in popularity. Go has some popularity as a
