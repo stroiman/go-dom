@@ -8,16 +8,39 @@ import (
 	"github.com/stroiman/go-dom/lexer"
 )
 
-type parser struct {
-	tokens []lexer.Token
-	pos    int
+// Provides tokens in a pure lazy-loaded list such that we can start multiple
+// branches of parsing that don't affect each other.
+type tokenWrapper struct {
+	lexer.Token
+	next   *tokenWrapper
+	stream <-chan lexer.Token
 }
 
-func Parse(tokens []lexer.Token) interfaces.Node {
+func createWrapperFromStream(stream <-chan lexer.Token) *tokenWrapper {
+	if nextToken, ok := <-stream; ok {
+		fmt.Printf("Consume token: %s\n", nextToken)
+		return &tokenWrapper{nextToken, nil, stream}
+	} else {
+		panic("Stream depleted")
+	}
+}
+
+func (w *tokenWrapper) nextToken() *tokenWrapper {
+	if w.next == nil {
+		w.next = createWrapperFromStream(w.stream)
+	}
+	return w.next
+}
+
+type parser struct {
+	w *tokenWrapper
+}
+
+func Parse(tokens <-chan lexer.Token) interfaces.Node {
 	p := createParser(tokens)
 
 	e := parseElement(p, nil)
-	expect(p, lexer.EOF)
+	expect(p, lexer.EOF) // TODO, handle this differently!
 
 	return e
 }
@@ -31,28 +54,30 @@ func parseElement(p *parser, stack []string) interfaces.Element {
 }
 
 func expect(p *parser, kind lexer.TokenKind) lexer.Token {
-	token := p.advance()
+	token := p.currentToken()
 	if token.Kind != kind {
 		panic(fmt.Sprintf("Unexpected token. Expected %s, got %s", kind, token))
+	}
+	if token.Kind != lexer.EOF {
+		p.advance()
 	}
 	return token
 }
 
-func createParser(tokens []lexer.Token) *parser {
+func createParser(tokens <-chan lexer.Token) *parser {
 	return &parser{
-		tokens,
-		0,
+		createWrapperFromStream(tokens),
 	}
 }
 
 func (p *parser) currentToken() lexer.Token {
-	return p.tokens[p.pos]
+	return p.w.Token
 }
 
 func (p *parser) advance() lexer.Token {
-	tk := p.currentToken()
-	p.pos++
-	return tk
+	result := p.w.Token
+	p.w = p.w.nextToken()
+	return result
 }
 
 func (p *parser) currentTokenKind() lexer.TokenKind {
@@ -60,5 +85,5 @@ func (p *parser) currentTokenKind() lexer.TokenKind {
 }
 
 func (p *parser) hasTokens() bool {
-	return p.pos < len(p.tokens) && p.currentTokenKind() != lexer.EOF
+	return p.w.Token.Kind != lexer.EOF
 }

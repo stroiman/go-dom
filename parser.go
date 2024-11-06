@@ -9,7 +9,19 @@ import (
 	"github.com/stroiman/go-dom/parser"
 )
 
+func streamOfTokens(input []lexer.Token) <-chan lexer.Token {
+	resp := make(chan lexer.Token)
+	go func() {
+		defer close(resp)
+		for _, elm := range input {
+			resp <- elm
+		}
+	}()
+	return resp
+}
+
 func Parse(s io.Reader) interfaces.Node {
 	tokens := lexer.Tokenize(s)
-	return parser.Parse(tokens)
+
+	return parser.Parse(streamOfTokens(tokens))
 }
