@@ -18,7 +18,7 @@ type tokenWrapper struct {
 
 func createWrapperFromStream(stream <-chan lexer.Token) (*tokenWrapper, bool) {
 	if nextToken, ok := <-stream; ok {
-		fmt.Printf("Consume token: %s\n", nextToken)
+		// fmt.Printf("Consume token: %s\n", nextToken)
 		return &tokenWrapper{nextToken, nil, stream}, true
 	} else {
 		return nil, false

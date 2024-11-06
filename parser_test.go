@@ -1,6 +1,7 @@
 package go_dom_test
 
 import (
+	"net/http"
 	"strings"
 
 	. "github.com/stroiman/go-dom"
@@ -15,8 +16,21 @@ func parseString(s string) interfaces.Node {
 }
 
 var _ = Describe("Parser", func() {
-	It("Should start with a test", func() {
+	It("Should be able to parse an empty HTML document", func() {
 		result := parseString("<html></html>")
+		element := result.(interfaces.Element)
+		Expect(element.NodeName()).To(Equal("HTML"))
+		Expect(element.TagName()).To(Equal("HTML"))
+	})
+
+	It("Should be able to read from an http.Handler instance", func() {
+		handler := (http.HandlerFunc)(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			w.Header().Add("Content-Type", "text/html") // For good measure, not used yet"
+			w.Write([]byte("<html></html>"))
+		})
+		browser := NewBrowserFromHandler(handler)
+		result := browser.Open("/")
 		element := result.(interfaces.Element)
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
