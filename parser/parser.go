@@ -23,11 +23,9 @@ func Parse(tokens []lexer.Token) interfaces.Node {
 }
 
 func parseElement(p *parser, stack []string) interfaces.Element {
-	expect(p, lexer.TAG_START)
-	token := expect(p, lexer.IDENTIFIER)
+	token := expect(p, lexer.TAG_OPEN_BEGIN)
 	expect(p, lexer.TAG_END)
-	expect(p, lexer.TAG_CLOSE_START)
-	expect(p, lexer.IDENTIFIER)
+	expect(p, lexer.TAG_CLOSE_BEGIN)
 	expect(p, lexer.TAG_END)
 	return dom.NewHTMLElement(token.Data)
 }

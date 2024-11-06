@@ -5,11 +5,13 @@ import "fmt"
 type TokenKind int
 
 const (
-	EOF             TokenKind = iota
-	TAG_START                 // Start of tag: <
-	TAG_CLOSE_START           // Start of close tag </
-	TAG_END                   // >
-	TAG_CLOSE_END             // self-closing tag />
+	EOF TokenKind = iota
+	TAG_OPEN_BEGIN
+	TAG_CLOSE_BEGIN
+	TAG_START       // Start of tag: <
+	TAG_CLOSE_START // Start of close tag </
+	TAG_END         // >
+	TAG_CLOSE_END   // self-closing tag />
 	IDENTIFIER
 )
 
@@ -22,6 +24,8 @@ func NewToken(kind TokenKind, data string) Token { return Token{kind, data} }
 
 var names = map[TokenKind]string{
 	EOF:             "EOF",
+	TAG_OPEN_BEGIN:  "<",
+	TAG_CLOSE_BEGIN: "<",
 	TAG_START:       "<",
 	TAG_CLOSE_START: "</",
 	TAG_END:         ">",

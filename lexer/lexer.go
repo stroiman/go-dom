@@ -7,14 +7,15 @@ import (
 	"regexp"
 )
 
-type regexHandler func(lex *lexer, regex *regexp.Regexp)
+type regexHandler func(lex *lexer, m match)
 
+// TODO, performance could _potentially_ be improved by letting multiple threads
+// search for tokens in parallel; in which case this needs to be made thread safe
 type buffer struct {
 	reader io.Reader
 	cache  []byte
 	eof    bool
 	pos    int
-	// TODO threading
 }
 
 func (b *buffer) debug() {
@@ -93,10 +94,12 @@ func Tokenize(source io.Reader) []Token {
 		matched := false
 
 		for _, pattern := range lex.patterns {
-			// lex.source.debug()
-			loc := pattern.regex.FindReaderIndex(lex.remainder())
-			if loc != nil && loc[0] == 0 {
-				pattern.handler(lex, pattern.regex)
+			loc := pattern.regex.FindReaderSubmatchIndex(lex.remainder())
+			if loc != nil {
+				if loc[0] != 0 {
+					panic("Error in code; match should start at beginning of string")
+				}
+				pattern.handler(lex, match{lex.source, loc})
 				matched = true
 				break
 			}
@@ -111,25 +114,24 @@ func Tokenize(source io.Reader) []Token {
 			)
 		}
 	}
-	lex.push(NewToken(EOF, "EOF"))
+	lex.push(NewToken(EOF, ""))
 	return lex.tokens
 }
 
-func defaultHandler(kind TokenKind, value string) regexHandler {
-	return func(lex *lexer, regex *regexp.Regexp) {
-		lex.advance(len(value))
-		lex.push(NewToken(kind, value))
-	}
+type match struct {
+	b       *buffer
+	matches []int
 }
 
-func stringHandler(l *lexer, regex *regexp.Regexp) {
-	index := regex.FindReaderIndex(l.remainder())
-	if index == nil {
-		panic("Should have found something")
+func (m match) getMatch() string {
+	if len(m.matches) < 4 {
+		return ""
 	}
-	match := l.source.subString(index[0], index[1]) // [l.pos+index[0] : l.pos+index[1]]
-	l.push(NewToken(IDENTIFIER, match))
-	l.advance(len(match))
+	return m.b.subString(m.matches[2], m.matches[3])
+}
+
+func (m match) getLength() int {
+	return m.matches[1]
 }
 
 func (l *lexer) advance(count int) {
@@ -153,8 +155,14 @@ func (l *lexer) remainder() io.RuneReader {
 	return bufio.NewReader(l.source.fork()) //bytes.NewBufferString(l.source[l.pos:])
 }
 
-func createPattern(s string) *regexp.Regexp {
-	return regexp.MustCompile("^" + s)
+func createPattern(s string, kind TokenKind) regexPattern {
+	return regexPattern{
+		regexp.MustCompile("^" + s),
+		func(lex *lexer, m match) {
+			lex.push(NewToken(kind, m.getMatch()))
+			lex.advance(m.getLength())
+		},
+	}
 }
 
 func createLexer(source io.Reader) *lexer {
@@ -163,11 +171,11 @@ func createLexer(source io.Reader) *lexer {
 		source: newBuffer(source),
 		tokens: []Token{},
 		patterns: []regexPattern{
-			{createPattern("</"), defaultHandler(TAG_CLOSE_START, "</")},
-			{createPattern("<"), defaultHandler(TAG_START, "<")},
-			{createPattern("/>"), defaultHandler(TAG_CLOSE_END, "/>")},
-			{createPattern(">"), defaultHandler(TAG_END, ">")},
-			{createPattern(`\w+`), stringHandler},
+			createPattern("<([a-zA-Z]+)", TAG_OPEN_BEGIN),
+			createPattern("</([a-zA-Z]+)", TAG_CLOSE_BEGIN),
+			createPattern("/>", TAG_CLOSE_END), // Unused atm
+			createPattern(">", TAG_END),
+			createPattern(`\w+`, IDENTIFIER), // Unused atm
 		},
 	}
 }
