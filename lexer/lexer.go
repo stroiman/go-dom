@@ -15,39 +15,44 @@ type regexPattern struct {
 
 type lexer struct {
 	patterns []regexPattern
-	tokens   []Token
+	c        chan Token
 	source   *forkableReader
 	pos      int
 }
 
-func Tokenize(source io.Reader) []Token {
+func TokenizeStream(source io.Reader) <-chan Token {
 	lex := createLexer(source)
 
-	for !lex.at_eof() {
-		matched := false
-		for _, pattern := range lex.patterns {
-			loc := pattern.regex.FindReaderSubmatchIndex(lex.remainder())
-			if loc != nil {
-				if loc[0] != 0 {
-					panic("Error in code; match should start at beginning of string")
+	go func() {
+		defer lex.Close()
+		for !lex.at_eof() {
+			matched := false
+			for _, pattern := range lex.patterns {
+				loc := pattern.regex.FindReaderSubmatchIndex(lex.remainder())
+				if loc != nil {
+					if loc[0] != 0 {
+						panic("Error in code; match should start at beginning of string")
+					}
+					pattern.handler(lex, match{lex.source, loc})
+					matched = true
+					break
 				}
-				pattern.handler(lex, match{lex.source, loc})
-				matched = true
-				break
+			}
+
+			if !matched {
+				// TODO: HTML parsing should handle parse errors gracefully. A browser
+				// doesn't panic because of a parse error.
+				panic(
+					fmt.Sprintf(
+						"Lexer::Error -> unrecognized token near %s",
+						string(lex.remainderString()),
+					),
+				)
 			}
 		}
-
-		if !matched {
-			panic(
-				fmt.Sprintf(
-					"Lexer::Error -> unrecognized token near %s",
-					string(lex.remainderString()),
-				),
-			)
-		}
-	}
-	lex.push(NewToken(EOF, ""))
-	return lex.tokens
+		lex.push(NewToken(EOF, ""))
+	}()
+	return lex.c
 }
 
 type match struct {
@@ -72,7 +77,7 @@ func (l *lexer) advance(count int) {
 }
 
 func (l *lexer) push(token Token) {
-	l.tokens = append(l.tokens, token)
+	l.c <- token
 }
 
 func (l *lexer) at_eof() bool {
@@ -102,8 +107,8 @@ func createPattern(s string, kind TokenKind) regexPattern {
 func createLexer(source io.Reader) *lexer {
 	return &lexer{
 		pos:    0,
+		c:      make(chan Token),
 		source: newBuffer(source),
-		tokens: []Token{},
 		patterns: []regexPattern{
 			createPattern("<([[:alpha:]]+)", TAG_OPEN_BEGIN),
 			createPattern("</([[:alpha:]]+)", TAG_CLOSE_BEGIN),
@@ -112,4 +117,8 @@ func createLexer(source io.Reader) *lexer {
 			createPattern(`\w+`, IDENTIFIER), // Unused atm
 		},
 	}
+}
+
+func (l *lexer) Close() {
+	close(l.c)
 }

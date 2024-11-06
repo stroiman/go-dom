@@ -21,7 +21,5 @@ func streamOfTokens(input []lexer.Token) <-chan lexer.Token {
 }
 
 func Parse(s io.Reader) interfaces.Node {
-	tokens := lexer.Tokenize(s)
-
-	return parser.Parse(streamOfTokens(tokens))
+	return parser.Parse(lexer.TokenizeStream(s))
 }
