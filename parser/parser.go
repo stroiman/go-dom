@@ -16,32 +16,34 @@ type tokenWrapper struct {
 	stream <-chan lexer.Token
 }
 
-func createWrapperFromStream(stream <-chan lexer.Token) *tokenWrapper {
+func createWrapperFromStream(stream <-chan lexer.Token) (*tokenWrapper, bool) {
 	if nextToken, ok := <-stream; ok {
 		fmt.Printf("Consume token: %s\n", nextToken)
-		return &tokenWrapper{nextToken, nil, stream}
+		return &tokenWrapper{nextToken, nil, stream}, true
 	} else {
-		panic("Stream depleted")
+		return nil, false
 	}
 }
 
-func (w *tokenWrapper) nextToken() *tokenWrapper {
+func (w *tokenWrapper) nextToken() (*tokenWrapper, bool) {
+	ok := true
 	if w.next == nil {
-		w.next = createWrapperFromStream(w.stream)
+		w.next, ok = createWrapperFromStream(w.stream)
 	}
-	return w.next
+	return w.next, ok
 }
 
 type parser struct {
-	w *tokenWrapper
+	w   *tokenWrapper
+	eof bool
 }
 
 func Parse(tokens <-chan lexer.Token) interfaces.Node {
 	p := createParser(tokens)
-
 	e := parseElement(p, nil)
-	expect(p, lexer.EOF) // TODO, handle this differently!
-
+	if !p.eof {
+		panic("Didn't parse to EOF")
+	}
 	return e
 }
 
@@ -58,15 +60,19 @@ func expect(p *parser, kind lexer.TokenKind) lexer.Token {
 	if token.Kind != kind {
 		panic(fmt.Sprintf("Unexpected token. Expected %s, got %s", kind, token))
 	}
-	if token.Kind != lexer.EOF {
-		p.advance()
-	}
+	p.advance()
 	return token
 }
 
 func createParser(tokens <-chan lexer.Token) *parser {
-	return &parser{
-		createWrapperFromStream(tokens),
+	if first, ok :=
+		createWrapperFromStream(tokens); ok {
+		return &parser{
+			first,
+			false,
+		}
+	} else {
+		panic("Stream has no data")
 	}
 }
 
@@ -75,8 +81,12 @@ func (p *parser) currentToken() lexer.Token {
 }
 
 func (p *parser) advance() lexer.Token {
+	var ok bool
 	result := p.w.Token
-	p.w = p.w.nextToken()
+	p.w, ok = p.w.nextToken()
+	if !ok {
+		p.eof = true
+	}
 	return result
 }
 
@@ -85,5 +95,5 @@ func (p *parser) currentTokenKind() lexer.TokenKind {
 }
 
 func (p *parser) hasTokens() bool {
-	return p.w.Token.Kind != lexer.EOF
+	return !p.eof
 }

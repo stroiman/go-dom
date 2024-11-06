@@ -50,7 +50,6 @@ func TokenizeStream(source io.Reader) <-chan Token {
 				)
 			}
 		}
-		lex.push(NewToken(EOF, ""))
 	}()
 	return lex.c
 }
