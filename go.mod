@@ -26,10 +26,11 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// Use a WIP version of the code
+// Use a WIP version of the code, use this line for replace.
 // replace github.com/tommie/v8go v0.22.0 => /Users/peter/go/src/github/stroiman/v8go
 
-// Use the version from github
-// Replace the actual line with this line, and run `go mod tidy`
-// replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go external-support
+// Use the v8go version from github.
+// Run the two commands:
+// go mod edit -replace="github.com/tommie/v8go@v0.22.0=github.com/stroiman/v8go@external-support"
+// go mod tidy
 replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go v0.0.0-20241106214940-8fca5578e930
