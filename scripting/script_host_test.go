@@ -10,14 +10,14 @@ import (
 var _ = Describe("ScriptHost", Ordered, func() {
 	var (
 		host *ScriptHost
-		ctx  *ScriptContext
+		ctx  TestScriptContext
 	)
 
 	BeforeAll(func() {
 		host = NewScriptHost()
 	})
 	BeforeEach(func() {
-		ctx = host.NewContext()
+		ctx = TestScriptContext{host.NewContext()}
 	})
 	AfterEach(func() {
 		ctx.Dispose()
@@ -28,13 +28,14 @@ var _ = Describe("ScriptHost", Ordered, func() {
 
 	Describe("Script host", func() {
 		It("Has window as the global object", func() {
-			result, err := ctx.RunScript("globalThis === window && window === window.window")
-			Expect(err).ToNot(HaveOccurred())
-			Expect(result.Boolean()).To(BeTrue())
-			result2, err := ctx.RunScript("1 === 2")
-			Expect(err).ToNot(HaveOccurred())
-			Expect(result2.Boolean()).To(BeFalse())
+			result := ctx.RunTestScript("globalThis === window && window === window.window")
+			Expect(result).To(BeTrue())
+			result2 := ctx.RunTestScript("1 === 2")
+			Expect(result2).To(BeFalse())
+		})
 
+		It("Should handle bools", func() {
+			Expect(ctx.RunTestScript("1 === 1")).To(BeTrue())
 		})
 	})
 })
