@@ -11,7 +11,9 @@
 > it will ever become a useful tool; unless it will gain traction and support of
 > multiple developers.
 
-[Software license](./LICENSE.txt)
+[Software license](./LICENSE.txt) (note: I currently distribute the source under
+the MIT license, but as this will most likely depend on v8go, I need to verify
+that the license is compatible).
 
 While the SPA[^1] dominates the web today, some applications still render
 server-side HTML, and HTMX is gaining in popularity. Go has some popularity as a
@@ -61,14 +63,23 @@ isolated test, e.g. mocking out part of the behaviour; but
 
 ## Project status
 
-Coding has just begun, and currently just some simple HTML parsing is underway.
+Coding has just begun, and I have the following extremely basic features:
+
+- Simple streaming tokenizer and parser, can only parse the text `<html></html>`
+- Ability to receive directly to an `http.Handler`
+- Experimental embed of v8 engine.[^4]
+  - This is not in the main branch, as it significantly increase build times.
+    [embed-v8-engine branch](https://github.com/stroiman/go-dom/tree/embed-v8-engine)
+  - This was done early to identify the risk; or impact this could have on how
+    the DOM objects should be implemented.
+
 Planned first steps:
 
 1. Create a simple HTML parser, that can parse just the basic HTML tags, and
    generate a valid subset of a [`Document`](https://developer.mozilla.org/en-US/docs/Web/API/Document)
 2. Integrate with an [`http.Handler`](https://pkg.go.dev/net/http#Handler)
-3. Embed a v8 engine, to allow running javascript code.
-4. Expose the DOM objects in a way compatible with v8.
+3. Embed a v8 engine, to allow running javascript code. (partially done)
+4. Expose the DOM objects to v8.
 
 There is much to do, which includes (but this is not a full list):
 
@@ -114,6 +125,27 @@ benefits:
 - For applications like map providers
   - Avoid being billed for API use during testing.
 
+## Help
+
+This project will likely die without help. If you are interested in this, I
+would welcome contributions. Particularly if:
+
+- You have experience building tokenisers and parsers, especially HTML.
+- You have _intimate knowledge_ of how the DOM works in the browser, and can 
+  help detect poor design decisions early. For example:
+  - should the internal implementation use `document.CreateElement()`
+    when parsing HTML into DOM? 
+    - Would it be a big mistake to do so? 
+    - Would it be a big mistake to _not_ do so? 
+    - Is is it a _doesn't matter_, whatever makes the code clean, issue?
+  - Which "objects" should I expose from Go to v8? and where should the
+    functions live? The objects themselves, or should I create prototype
+    in Go code? (I think I _should_ make prototype objects)
+- You have experience working with the v8 engine, particularly exposing internal
+  objects to JavaScript (which is then External to JavaScript).
+  - In particular, if you've done this from Go.
+
+
 ## Out of scope.
 
 ### Visual Rendering
@@ -138,3 +170,6 @@ non-trivial; depending on the type of application.
 behaviour, only that the outcome mustn't change. There are a few cases where
 where snapshot tests are the right choice, but they should be avoided for a TDD
 process.
+[^3]: The engine is based on the v8go project by originally by @rogchap, later
+kept up-to-date by @tommie. The project is missing some features in dealing with
+external objects; which I work on adding in my own fork.
