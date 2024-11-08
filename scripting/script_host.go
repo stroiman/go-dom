@@ -21,8 +21,7 @@ type ScriptContext struct {
 	window *Window
 }
 
-func NewScriptHost() *ScriptHost {
-	iso := v8.NewIsolate()
+func CreateWindowTemplate(iso *v8.Isolate) *v8.ObjectTemplate {
 	windowTemplate := v8.NewObjectTemplate(iso)
 	windowTemplate.SetInternalFieldCount(1)
 	windowTemplate.SetAccessorProperty(
@@ -34,8 +33,13 @@ func NewScriptHost() *ScriptHost {
 			return v8.Undefined(iso)
 		}),
 	)
+	return windowTemplate
+}
 
-	return &ScriptHost{iso, windowTemplate}
+func NewScriptHost() *ScriptHost {
+	iso := v8.NewIsolate()
+
+	return &ScriptHost{iso, CreateWindowTemplate(iso)}
 }
 
 func (host *ScriptHost) Dispose() {

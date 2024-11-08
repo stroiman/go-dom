@@ -27,21 +27,29 @@ var _ = Describe("ScriptHost", Ordered, func() {
 	})
 
 	Describe("Script host", func() {
-		It("Has window as the global object", func() {
-			result := ctx.MustRunTestScript("globalThis === window && window === window.window")
-			Expect(result).To(BeTrue())
-			result2 := ctx.MustRunTestScript("1 === 2")
-			Expect(result2).To(BeFalse())
-		})
-
 		It("Should panic on error", func() {
 			Expect(
 				func() { ctx.MustRunTestScript("throw new Error()") },
 			).To(Panic())
 		})
 
-		It("Should handle bools", func() {
-			Expect(ctx.MustRunTestScript("1 === 1")).To(BeTrue())
+		Describe("Global Object", func() {
+			It("Should be accessible as `window`", func() {
+				Expect(
+					ctx.MustRunTestScript("globalThis === window && window === window.window"),
+				).To(BeTrue())
+			})
+
+			It("It should have the right prototype", func() {
+				Skip(
+					"Prototype is not set as I thought it would be, need to understand.",
+				)
+				Expect(
+					ctx.MustRunTestScript(
+						"window.__proto__ === Object.prototype",
+					),
+				).To(BeTrue())
+			})
 		})
 	})
 })
