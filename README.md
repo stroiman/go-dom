@@ -68,8 +68,6 @@ Coding has just begun, and I have the following extremely basic features:
 - Simple streaming tokenizer and parser, can only parse the text `<html></html>`
 - Ability to receive directly to an `http.Handler`
 - Experimental embed of v8 engine.[^4]
-  - This is not in the main branch, as it significantly increase build times.
-    [embed-v8-engine branch](https://github.com/stroiman/go-dom/tree/embed-v8-engine)
   - This was done early to identify the risk; or impact this could have on how
     the DOM objects should be implemented.
 
