@@ -38,13 +38,15 @@ type parser struct {
 	eof bool
 }
 
-func Parse(tokens <-chan lexer.Token) interfaces.Node {
+func Parse(tokens <-chan lexer.Token) interfaces.Document {
 	p := createParser(tokens)
 	e := parseElement(p, nil)
 	if !p.eof {
 		panic("Didn't parse to EOF")
 	}
-	return e
+	d := dom.NewDocument()
+	d.Append(e)
+	return d
 }
 
 func parseElement(p *parser, stack []string) interfaces.Element {

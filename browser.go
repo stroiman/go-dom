@@ -14,7 +14,7 @@ type Browser struct {
 	Client http.Client
 }
 
-func (b Browser) Open(url string) interfaces.Node {
+func (b Browser) Open(url string) interfaces.Document {
 	resp, err := b.Client.Get(url)
 	if err != nil {
 		panic("err")

@@ -11,14 +11,14 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func parseString(s string) interfaces.Node {
+func parseString(s string) interfaces.Document {
 	return Parse(strings.NewReader(s))
 }
 
 var _ = Describe("Parser", func() {
 	It("Should be able to parse an empty HTML document", func() {
 		result := parseString("<html></html>")
-		element := result.(interfaces.Element)
+		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
 	})
@@ -31,7 +31,7 @@ var _ = Describe("Parser", func() {
 		})
 		browser := NewBrowserFromHandler(handler)
 		result := browser.Open("/")
-		element := result.(interfaces.Element)
+		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
 	})
