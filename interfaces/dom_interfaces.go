@@ -9,10 +9,18 @@ type Node interface {
 
 type Document interface {
 	Node
+	Body() Element
+	CreateElement(string) Element
+	DocumentElement() Element
+	Append(Element) Element
+	SetBody(e Element)
 }
 
 type Element interface {
 	Node
+	Append(Element) Element
+	Children() []Element
+	IsConnected() bool
 	TagName() string
 }
 
