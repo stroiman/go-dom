@@ -40,13 +40,13 @@ var _ = Describe("ScriptHost", Ordered, func() {
 				).To(BeTrue())
 			})
 
-			It("It should have the right prototype", func() {
+			It("It should have the prototype 'Window'", func() {
 				Skip(
-					"Prototype is not set as I thought it would be, need to understand.",
+					"This is desired behaviour, but I haven't yet grokked the prototype on ObjectTemplates.",
 				)
 				Expect(
 					ctx.MustRunTestScript(
-						"window.__proto__ === Object.prototype",
+						`Object.getPrototypeOf(window).constructor.name === "Window"`,
 					),
 				).To(BeTrue())
 			})

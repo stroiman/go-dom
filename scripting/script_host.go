@@ -26,12 +26,10 @@ func CreateWindowTemplate(iso *v8.Isolate) *v8.ObjectTemplate {
 	windowTemplate.SetInternalFieldCount(1)
 	windowTemplate.SetAccessorProperty(
 		"window",
-		*v8.NewFunctionTemplate(iso, func(info *v8.FunctionCallbackInfo) *v8.Value {
-			return info.This().Value
-		}),
-		*v8.NewFunctionTemplate(iso, func(info *v8.FunctionCallbackInfo) *v8.Value {
-			return v8.Undefined(iso)
-		}),
+		v8.AccessProp{
+			Get: func(info *v8.FunctionCallbackInfo) *v8.Value { return info.This().Value },
+			Set: func(info *v8.FunctionCallbackInfo) *v8.Value { return v8.Undefined(iso) },
+		},
 	)
 	return windowTemplate
 }

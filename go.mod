@@ -33,4 +33,4 @@ require (
 // Run the two commands:
 // go mod edit -replace="github.com/tommie/v8go@v0.22.0=github.com/stroiman/v8go@external-support"
 // go mod tidy
-replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go v0.0.0-20241106214940-8fca5578e930
+replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go v0.0.0-20241108144935-a0bde64f1268
