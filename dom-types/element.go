@@ -3,7 +3,7 @@ package dom_types
 import "github.com/stroiman/go-dom/interfaces"
 
 type Element struct {
-	Node
+	node
 	tagName     string
 	isConnected bool
 	// We might want a "prototype" as a value, rather than a Go type, as new types
@@ -11,7 +11,7 @@ type Element struct {
 	// node.
 }
 
-func NewElement(tagName string) *Element { return &Element{Node{}, tagName, false} }
+func NewElement(tagName string) *Element { return &Element{node{}, tagName, false} }
 
 func (e *Element) Children() []interfaces.Element {
 	// TODO: Is encapsulated in an HTMLCollection

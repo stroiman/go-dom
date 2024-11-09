@@ -6,13 +6,13 @@ import (
 
 type EventTarget interface{}
 
-type Nodex interface {
+type Node interface {
 	EventTarget
 	NodeName() string
 }
 
 type Document interface {
-	Nodex
+	Node
 	Body() *Element
 	CreateElement(string) *Element
 	DocumentElement() *Element

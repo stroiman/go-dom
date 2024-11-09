@@ -1,14 +1,14 @@
 package dom_types
 
-type Node struct {
+type node struct {
 	// Not correct, but currently we have only elements
 	childNodes []*Element
 	name       string
 }
 
-func (parent *Node) AppendChild(child *Element) *Element {
+func (parent *node) AppendChild(child *Element) *Element {
 	parent.childNodes = append(parent.childNodes, child)
 	return child
 }
 
-func (n *Node) ChildNodes() []*Element { return n.childNodes }
+func (n *node) ChildNodes() []*Element { return n.childNodes }
