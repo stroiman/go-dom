@@ -3,6 +3,7 @@ package scripting_test
 import (
 	"fmt"
 
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/stroiman/go-dom/scripting"
 	"github.com/tommie/v8go"
 )
@@ -51,4 +52,18 @@ func v8ValueToGoValue(result *v8go.Value) interface{} {
 		return nil
 	}
 	panic(fmt.Sprintf("Value not yet supported: %v", *result))
+}
+
+func InitializeContext() *TestScriptContext {
+	ctx := &TestScriptContext{}
+
+	BeforeEach(func() {
+		ctx.ScriptContext = host.NewContext()
+	})
+
+	AfterEach(func() {
+		ctx.Dispose()
+	})
+
+	return ctx
 }
