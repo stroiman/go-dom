@@ -1,27 +1,24 @@
-package go_dom_test
+package browser_test
 
 import (
 	"fmt"
 	"net/http"
 	"strings"
 
-	. "github.com/stroiman/go-dom"
-	dom "github.com/stroiman/go-dom/dom-types"
-	"github.com/stroiman/go-dom/interfaces"
+	dom "github.com/stroiman/go-dom/browser"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 )
 
-func parseString(s string) interfaces.Document {
-	return Parse(strings.NewReader(s))
+func parseString(s string) dom.Document {
+	return dom.ParseHtmlStream(strings.NewReader(s))
 }
 
 var _ = Describe("Parser", func() {
 	It("Should be able to parse an empty HTML document", func() {
-		result, ok := (parseString("<html><head></head><body></body></html>")).(*dom.Document)
-		Expect(ok).To(BeTrue())
+		result := (parseString("<html><head></head><body></body></html>"))
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
@@ -33,8 +30,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should wrap contents in an HTML element if missing", func() {
-		result, ok := (parseString("<head></head><body></body>")).(*dom.Document)
-		Expect(ok).To(BeTrue())
+		result := parseString("<head></head><body></body>")
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
@@ -45,8 +41,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should create a HEAD if missing", func() {
-		result, ok := (parseString("<html><body></body></html>")).(*dom.Document)
-		Expect(ok).To(BeTrue())
+		result := (parseString("<html><body></body></html>"))
 		Expect(result).To(
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),
@@ -54,8 +49,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should create HTML and HEAD if missing", func() {
-		result, ok := (parseString("<body></body>")).(*dom.Document)
-		Expect(ok).To(BeTrue())
+		result := (parseString("<body></body>"))
 		Expect(result).To(
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),
@@ -63,8 +57,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should embed a root <div> in an HTML document structure", func() {
-		result, ok := (parseString("<div></div>")).(*dom.Document)
-		Expect(ok).To(BeTrue())
+		result := (parseString("<div></div>"))
 		Expect(result).To(
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),
@@ -79,9 +72,8 @@ var _ = Describe("Parser", func() {
 			w.Header().Add("Content-Type", "text/html") // For good measure, not used yet"
 			w.Write([]byte("<html></html>"))
 		})
-		browser := NewBrowserFromHandler(handler)
-		result, ok := browser.Open("/").(*dom.Document)
-		Expect(ok).To(BeTrue())
+		browser := dom.NewBrowserFromHandler(handler)
+		result := browser.Open("/")
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
@@ -91,13 +83,13 @@ var _ = Describe("Parser", func() {
 func MatchStructure(name string, children ...types.GomegaMatcher) types.GomegaMatcher {
 	return WithTransform(func(node interface{}) (res struct {
 		Name     string
-		Children []*dom.Element
+		Children []dom.Node
 	}) {
-		var element *dom.Element
+		var element dom.Element
 		switch elm := node.(type) {
-		case *dom.Document:
+		case dom.Document:
 			element = elm.DocumentElement()
-		case *dom.Element:
+		case dom.Element:
 			element = elm
 		default:
 			panic(fmt.Sprintf("Unknown type %T for element", elm))
