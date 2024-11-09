@@ -7,15 +7,6 @@ import (
 )
 
 var _ = Describe("ScriptHost", Ordered, func() {
-	// var (
-	// 	ctx TestScriptContext
-	// )
-	// BeforeEach(func() {
-	// 	ctx = TestScriptContext{host.NewContext()}
-	// })
-	// AfterEach(func() {
-	// 	ctx.Dispose()
-	// })
 	ctx := InitializeContext()
 
 	Describe("Script host", func() {
@@ -41,6 +32,18 @@ var _ = Describe("ScriptHost", Ordered, func() {
 						`Object.getPrototypeOf(window).constructor.name === "Window"`,
 					),
 				).To(BeTrue())
+			})
+		})
+
+		Describe("When a document is loaded", func() {
+			It("Should have document instanceof Document", func() {
+				ctx.Window().LoadHTML("<html></html>") // Still creates head and body element
+				Expect(
+					ctx.MustRunTestScript("document instanceof Document"),
+				).To(BeTrue())
+				Expect(
+					ctx.MustRunTestScript("Object.getPrototypeOf(document).constructor.name"),
+				).To(Equal("Document"))
 			})
 		})
 	})

@@ -12,6 +12,12 @@ type TestScriptContext struct {
 	*ScriptContext
 }
 
+// RunTestScript wraps the [v8.RunScript] function but converts the return value
+// to a Go object.
+//
+// If JavaScript code throws an error, an error is returned.
+//
+// Note: This conversion is incomplete.
 func (c TestScriptContext) RunTestScript(script string) (any, error) {
 	result, err := c.RunScript(script)
 	if err == nil {
@@ -54,16 +60,28 @@ func v8ValueToGoValue(result *v8go.Value) interface{} {
 	panic(fmt.Sprintf("Value not yet supported: %v", *result))
 }
 
-func InitializeContext() *TestScriptContext {
-	ctx := &TestScriptContext{}
+type CreateHook func(ctx *ScriptContext)
+
+func InitializeContext(hooks ...CreateHook) *TestScriptContext {
+	ctx := TestScriptContext{}
 
 	BeforeEach(func() {
 		ctx.ScriptContext = host.NewContext()
+		for _, hook := range hooks {
+			hook(ctx.ScriptContext)
+		}
 	})
 
 	AfterEach(func() {
 		ctx.Dispose()
 	})
 
-	return ctx
+	return &ctx
+}
+
+func InitializeContextWithEmptyHtml() *TestScriptContext {
+	return InitializeContext(
+		func(ctx *ScriptContext) {
+			ctx.Window().LoadHTML("<html></html>") // Still creates head and body element
+		})
 }

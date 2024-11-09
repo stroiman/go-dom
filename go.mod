@@ -28,9 +28,10 @@ require (
 
 // Use a WIP version of the code, use this line for replace.
 // replace github.com/tommie/v8go v0.22.0 => /Users/peter/go/src/github/stroiman/v8go
+replace github.com/tommie/v8go v0.22.0 => /Users/peter/go/src/github/stroiman/v8go
 
 // Use the v8go version from github.
 // Run the two commands:
 // go mod edit -replace="github.com/tommie/v8go@v0.22.0=github.com/stroiman/v8go@external-support"
 // go mod tidy
-replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go v0.0.0-20241108144935-a0bde64f1268
+// replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go v0.0.0-20241108144935-a0bde64f1268
