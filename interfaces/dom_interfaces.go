@@ -7,15 +7,6 @@ type Node interface {
 	NodeName() string
 }
 
-type Document interface {
-	Node
-	Body() Element
-	// CreateElement(string) Element
-	// DocumentElement() Element
-	// Append(Element) Element
-	SetBody(e Element)
-}
-
 type Element interface {
 	Node
 	// Append(Element) Element

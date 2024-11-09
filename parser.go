@@ -4,7 +4,7 @@ import (
 	// . "github.com/stroiman/go-dom/dom-types"
 	"io"
 
-	"github.com/stroiman/go-dom/interfaces"
+	dom "github.com/stroiman/go-dom/dom-types"
 	"github.com/stroiman/go-dom/lexer"
 	"github.com/stroiman/go-dom/parser"
 )
@@ -20,6 +20,6 @@ func streamOfTokens(input []lexer.Token) <-chan lexer.Token {
 	return resp
 }
 
-func Parse(s io.Reader) interfaces.Document {
+func Parse(s io.Reader) dom.Document {
 	return parser.Parse(lexer.TokenizeStream(s))
 }

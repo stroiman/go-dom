@@ -5,7 +5,7 @@ import (
 	"net/http/cookiejar"
 	"net/http/httptest"
 
-	"github.com/stroiman/go-dom/interfaces"
+	dom "github.com/stroiman/go-dom/dom-types"
 )
 
 // Pretty stupid right now, but should _probably_ allow handling multiple
@@ -14,7 +14,7 @@ type Browser struct {
 	Client http.Client
 }
 
-func (b Browser) Open(url string) interfaces.Document {
+func (b Browser) Open(url string) dom.Document {
 	resp, err := b.Client.Get(url)
 	if err != nil {
 		panic("err")

@@ -2,8 +2,6 @@ package dom_types
 
 import (
 	"strings"
-
-	"github.com/stroiman/go-dom/interfaces"
 )
 
 func NewHTMLElement(tagName string) *Element {
@@ -14,6 +12,6 @@ func NewHTMLUnknownElement(tagName string) *Element {
 	return NewHTMLElement(strings.ToUpper(tagName))
 }
 
-func NewHTMLHtmlElement(doc interfaces.Document) *Element {
+func NewHTMLHtmlElement(doc *document) *Element {
 	return NewHTMLElement("HTML")
 }

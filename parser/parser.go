@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	dom "github.com/stroiman/go-dom/dom-types"
-	"github.com/stroiman/go-dom/interfaces"
 	"github.com/stroiman/go-dom/lexer"
 )
 
@@ -35,11 +34,11 @@ func (w *tokenWrapper) nextToken() (*tokenWrapper, bool) {
 
 type parser struct {
 	w   *tokenWrapper
-	doc *dom.Document
+	doc dom.Document
 	eof bool
 }
 
-func Parse(tokens <-chan lexer.Token) interfaces.Document {
+func Parse(tokens <-chan lexer.Token) dom.Document {
 	p := createParser(tokens)
 	parseDocument(p, nil)
 	if !p.eof {

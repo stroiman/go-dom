@@ -2,19 +2,32 @@ package dom_types
 
 import (
 	"strings"
-
-	"github.com/stroiman/go-dom/interfaces"
 )
 
-type elementConstructor func(doc *Document) *Element
+type EventTarget interface{}
 
-var defaultElements map[string]elementConstructor = map[string]elementConstructor{
-	"html": func(doc *Document) *Element { return NewHTMLHtmlElement(doc) },
-	"body": func(doc *Document) *Element { return NewHTMLElement("body") },
-	"head": func(doc *Document) *Element { return NewHTMLElement("head") },
+type Nodex interface {
+	EventTarget
+	NodeName() string
 }
 
-type Document struct {
+type Document interface {
+	Nodex
+	Body() *Element
+	CreateElement(string) *Element
+	DocumentElement() *Element
+	Append(*Element) *Element
+	SetBody(e *Element)
+}
+type elementConstructor func(doc *document) *Element
+
+var defaultElements map[string]elementConstructor = map[string]elementConstructor{
+	"html": func(doc *document) *Element { return NewHTMLHtmlElement(doc) },
+	"body": func(doc *document) *Element { return NewHTMLElement("body") },
+	"head": func(doc *document) *Element { return NewHTMLElement("head") },
+}
+
+type document struct {
 	// For HTML, it's an HTML element, for XML, it's an XML document.
 	// While HTMLDocument doesn't exist as a separate type; it's an alias for
 	// Document, XMLDocument inherits from Document; whish is why we can't be more
@@ -22,18 +35,18 @@ type Document struct {
 	//
 	// ... unless internally there are two implementations of the interface.
 	documentElement *Element
-	body            interfaces.Element
+	body            *Element
 }
 
-func NewDocument() *Document {
-	return &Document{}
+func NewDocument() Document {
+	return &document{}
 }
 
-func (d *Document) Body() interfaces.Element {
+func (d *document) Body() *Element {
 	return d.body
 }
 
-func (d *Document) CreateElement(name string) *Element {
+func (d *document) CreateElement(name string) *Element {
 	constructor, ok := defaultElements[strings.ToLower(name)]
 	if ok {
 		return constructor(d)
@@ -41,17 +54,17 @@ func (d *Document) CreateElement(name string) *Element {
 	return NewHTMLUnknownElement(name)
 }
 
-func (d *Document) SetBody(body interfaces.Element) {
+func (d *document) SetBody(body *Element) {
 	d.body = body
 }
 
-func (d *Document) Append(element *Element) *Element {
+func (d *document) Append(element *Element) *Element {
 	d.documentElement = element
 	return element
 }
 
-func (d *Document) DocumentElement() *Element {
+func (d *document) DocumentElement() *Element {
 	return d.documentElement
 }
 
-func (d Document) NodeName() string { return "#document" }
+func (d *document) NodeName() string { return "#document" }
