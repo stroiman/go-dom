@@ -3,7 +3,6 @@ package browser_test
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	dom "github.com/stroiman/go-dom/browser"
 
@@ -12,13 +11,9 @@ import (
 	"github.com/onsi/gomega/types"
 )
 
-func parseString(s string) dom.Document {
-	return dom.ParseHtmlStream(strings.NewReader(s))
-}
-
 var _ = Describe("Parser", func() {
 	It("Should be able to parse an empty HTML document", func() {
-		result := (parseString("<html><head></head><body></body></html>"))
+		result := dom.ParseHtmlString("<html><head></head><body></body></html>")
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
@@ -30,7 +25,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should wrap contents in an HTML element if missing", func() {
-		result := parseString("<head></head><body></body>")
+		result := dom.ParseHtmlString("<head></head><body></body>")
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
@@ -41,7 +36,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should create a HEAD if missing", func() {
-		result := (parseString("<html><body></body></html>"))
+		result := dom.ParseHtmlString("<html><body></body></html>")
 		Expect(result).To(
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),
@@ -49,7 +44,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should create HTML and HEAD if missing", func() {
-		result := (parseString("<body></body>"))
+		result := dom.ParseHtmlString("<body></body>")
 		Expect(result).To(
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),
@@ -57,7 +52,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should embed a root <div> in an HTML document structure", func() {
-		result := (parseString("<div></div>"))
+		result := dom.ParseHtmlString("<div></div>")
 		Expect(result).To(
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),

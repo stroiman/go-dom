@@ -3,6 +3,7 @@ package browser
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/stroiman/go-dom/lexer"
 )
@@ -154,4 +155,8 @@ func streamOfTokens(input []lexer.Token) <-chan lexer.Token {
 
 func ParseHtmlStream(s io.Reader) Document {
 	return Parse(lexer.TokenizeStream(s))
+}
+
+func ParseHtmlString(s string) Document {
+	return ParseHtmlStream(strings.NewReader(s))
 }
