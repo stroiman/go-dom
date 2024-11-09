@@ -84,13 +84,13 @@ var _ = Describe("Parser", func() {
 func MatchStructure(name string, children ...types.GomegaMatcher) types.GomegaMatcher {
 	return WithTransform(func(node interface{}) (res struct {
 		Name     string
-		Children []*dom.Element
+		Children []dom.Node
 	}) {
-		var element *dom.Element
+		var element dom.Element
 		switch elm := node.(type) {
 		case dom.Document:
 			element = elm.DocumentElement()
-		case *dom.Element:
+		case dom.Element:
 			element = elm
 		default:
 			panic(fmt.Sprintf("Unknown type %T for element", elm))

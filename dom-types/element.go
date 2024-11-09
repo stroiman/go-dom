@@ -1,8 +1,14 @@
 package dom_types
 
-import "github.com/stroiman/go-dom/interfaces"
+type Element interface {
+	Node
+	// Append(Element) Element
+	Children() []Element
+	IsConnected() bool
+	TagName() string
+}
 
-type Element struct {
+type element struct {
 	node
 	tagName     string
 	isConnected bool
@@ -11,21 +17,21 @@ type Element struct {
 	// node.
 }
 
-func NewElement(tagName string) *Element { return &Element{node{}, tagName, false} }
+func NewElement(tagName string) Element { return &element{node{}, tagName, false} }
 
-func (e *Element) Children() []interfaces.Element {
+func (e *element) Children() []Element {
 	// TODO: Is encapsulated in an HTMLCollection
 	panic("TODO")
 }
 
-func (e *Element) NodeName() string {
+func (e *element) NodeName() string {
 	return e.TagName()
 }
 
-func (e *Element) TagName() string {
+func (e *element) TagName() string {
 	return e.tagName
 }
 
-func (e *Element) IsConnected() bool { return e.isConnected }
+func (e *element) IsConnected() bool { return e.isConnected }
 
 // func (e *Element) Append(child interfaces.Element) interfaces.Element { return child }
