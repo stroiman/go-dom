@@ -8,7 +8,6 @@ type Node interface {
 }
 
 type node struct {
-	// Not correct, but currently we have only elements
 	childNodes []Node
 	name       string
 }

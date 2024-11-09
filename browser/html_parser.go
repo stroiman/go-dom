@@ -64,10 +64,7 @@ func parseHtmlChildren(p *parser, parent Element) {
 		parseElement(p, parent)
 	}
 	if p.w.Kind != lexer.TAG_OPEN_BEGIN || p.w.Data != "body" {
-		newChild := p.doc.CreateElement("body")
-		parent.AppendChild(newChild)
-		// TODO: Generic
-		parent = newChild
+		parent = parent.Append(p.doc.CreateElement("body"))
 	}
 	parseElementChildren(p, parent)
 }

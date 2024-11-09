@@ -2,9 +2,10 @@ package browser
 
 type Element interface {
 	Node
-	Children() []Element
+	// Children() []Element
 	IsConnected() bool
 	TagName() string
+	Append(Element) Element
 }
 
 type element struct {
@@ -18,9 +19,9 @@ type element struct {
 
 func NewElement(tagName string) Element { return &element{node{}, tagName, false} }
 
-func (e *element) Children() []Element {
-	panic("TODO")
-}
+// func (e *element) Children() []Element {
+// 	panic("TODO")
+// }
 
 func (e *element) NodeName() string {
 	return e.TagName()
@@ -31,3 +32,8 @@ func (e *element) TagName() string {
 }
 
 func (e *element) IsConnected() bool { return e.isConnected }
+
+func (parent *element) Append(child Element) Element {
+	parent.AppendChild(child)
+	return child
+}
