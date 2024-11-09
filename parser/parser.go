@@ -51,21 +51,30 @@ func Parse(tokens <-chan lexer.Token) interfaces.Document {
 func parseDocument(p *parser, parent *dom.Element) {
 	// TODO: Handle processing instructions
 	if p.w.Kind == lexer.TAG_OPEN_BEGIN && p.w.Data == "html" {
-		parseElement(p, parent)
+		parseElementCallback(p, parent, parseHtmlChildren)
 	} else {
 		html := p.doc.Append(p.doc.CreateElement("html"))
-		parseElementChildren(p, html)
-		// parseElement(p, html)
+		parseHtmlChildren(p, html)
 	}
 }
 
-func parseElementChildren(p *parser, parent *dom.Element) {
-	for (!p.eof) && p.w.Kind == lexer.TAG_OPEN_BEGIN {
+func parseHtmlChildren(p *parser, parent *dom.Element) {
+	if p.w.Kind != lexer.TAG_OPEN_BEGIN || p.w.Data != "head" {
+		parent.AppendChild(p.doc.CreateElement("head"))
+	} else {
 		parseElement(p, parent)
 	}
+	if p.w.Kind != lexer.TAG_OPEN_BEGIN || p.w.Data != "body" {
+		parent = parent.AppendChild(p.doc.CreateElement("body"))
+	}
+	parseElementChildren(p, parent)
 }
 
-func parseElement(p *parser, parent *dom.Element) {
+func parseElementCallback(
+	p *parser,
+	parent *dom.Element,
+	callback func(p *parser, parent *dom.Element),
+) {
 	token := expect(p, lexer.TAG_OPEN_BEGIN)
 	expect(p, lexer.TAG_END)
 	e := p.doc.CreateElement(token.Data)
@@ -74,9 +83,19 @@ func parseElement(p *parser, parent *dom.Element) {
 	} else {
 		parent.AppendChild(e)
 	}
-	parseElementChildren(p, e)
+	callback(p, e)
 	expect(p, lexer.TAG_CLOSE_BEGIN)
 	expect(p, lexer.TAG_END)
+}
+
+func parseElement(p *parser, parent *dom.Element) {
+	parseElementCallback(p, parent, parseElementChildren)
+}
+
+func parseElementChildren(p *parser, parent *dom.Element) {
+	for (!p.eof) && p.w.Kind == lexer.TAG_OPEN_BEGIN {
+		parseElement(p, parent)
+	}
 }
 
 func expect(p *parser, kind lexer.TokenKind) lexer.Token {

@@ -28,7 +28,8 @@ var _ = Describe("Parser", func() {
 		Expect(result).To(
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),
-				MatchStructure("BODY")))
+				MatchStructure("BODY"),
+			))
 	})
 
 	It("Should wrap contents in an HTML element if missing", func() {
@@ -41,6 +42,35 @@ var _ = Describe("Parser", func() {
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),
 				MatchStructure("BODY")))
+	})
+
+	It("Should create a HEAD if missing", func() {
+		result, ok := (parseString("<html><body></body></html>")).(*dom.Document)
+		Expect(ok).To(BeTrue())
+		Expect(result).To(
+			MatchStructure("HTML",
+				MatchStructure("HEAD"),
+				MatchStructure("BODY")))
+	})
+
+	It("Should create HTML and HEAD if missing", func() {
+		result, ok := (parseString("<body></body>")).(*dom.Document)
+		Expect(ok).To(BeTrue())
+		Expect(result).To(
+			MatchStructure("HTML",
+				MatchStructure("HEAD"),
+				MatchStructure("BODY")))
+	})
+
+	It("Should embed a root <div> in an HTML document structure", func() {
+		result, ok := (parseString("<div></div>")).(*dom.Document)
+		Expect(ok).To(BeTrue())
+		Expect(result).To(
+			MatchStructure("HTML",
+				MatchStructure("HEAD"),
+				MatchStructure("BODY",
+					MatchStructure("DIV"),
+				)))
 	})
 
 	It("Should be able to read from an http.Handler instance", func() {
