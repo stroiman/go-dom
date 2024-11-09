@@ -1,11 +1,9 @@
-package go_dom
+package browser
 
 import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
-
-	dom "github.com/stroiman/go-dom/dom-types"
 )
 
 // Pretty stupid right now, but should _probably_ allow handling multiple
@@ -14,12 +12,12 @@ type Browser struct {
 	Client http.Client
 }
 
-func (b Browser) Open(url string) dom.Document {
+func (b Browser) Open(url string) Document {
 	resp, err := b.Client.Get(url)
 	if err != nil {
 		panic("err")
 	}
-	return Parse(resp.Body)
+	return ParseHtmlStream(resp.Body)
 }
 
 type HandlerRoundTripper struct{ http.Handler }

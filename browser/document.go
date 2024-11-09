@@ -1,4 +1,4 @@
-package dom_types
+package browser
 
 import (
 	"strings"

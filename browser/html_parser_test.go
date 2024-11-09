@@ -1,12 +1,11 @@
-package go_dom_test
+package browser_test
 
 import (
 	"fmt"
 	"net/http"
 	"strings"
 
-	. "github.com/stroiman/go-dom"
-	dom "github.com/stroiman/go-dom/dom-types"
+	dom "github.com/stroiman/go-dom/browser"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -14,7 +13,7 @@ import (
 )
 
 func parseString(s string) dom.Document {
-	return Parse(strings.NewReader(s))
+	return dom.ParseHtmlStream(strings.NewReader(s))
 }
 
 var _ = Describe("Parser", func() {
@@ -73,7 +72,7 @@ var _ = Describe("Parser", func() {
 			w.Header().Add("Content-Type", "text/html") // For good measure, not used yet"
 			w.Write([]byte("<html></html>"))
 		})
-		browser := NewBrowserFromHandler(handler)
+		browser := dom.NewBrowserFromHandler(handler)
 		result := browser.Open("/")
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))

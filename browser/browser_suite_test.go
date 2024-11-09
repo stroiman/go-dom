@@ -1,4 +1,4 @@
-package dom_types_test
+package browser_test
 
 import (
 	"testing"
@@ -9,5 +9,5 @@ import (
 
 func TestDomTypes(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "DomTypes Suite")
+	RunSpecs(t, "Browser Suite")
 }

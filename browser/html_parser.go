@@ -1,9 +1,9 @@
-package parser
+package browser
 
 import (
 	"fmt"
+	"io"
 
-	dom "github.com/stroiman/go-dom/dom-types"
 	"github.com/stroiman/go-dom/lexer"
 )
 
@@ -34,11 +34,11 @@ func (w *tokenWrapper) nextToken() (*tokenWrapper, bool) {
 
 type parser struct {
 	w   *tokenWrapper
-	doc dom.Document
+	doc Document
 	eof bool
 }
 
-func Parse(tokens <-chan lexer.Token) dom.Document {
+func Parse(tokens <-chan lexer.Token) Document {
 	p := createParser(tokens)
 	parseDocument(p, nil)
 	if !p.eof {
@@ -47,7 +47,7 @@ func Parse(tokens <-chan lexer.Token) dom.Document {
 	return p.doc
 }
 
-func parseDocument(p *parser, parent dom.Element) {
+func parseDocument(p *parser, parent Element) {
 	// TODO: Handle processing instructions
 	if p.w.Kind == lexer.TAG_OPEN_BEGIN && p.w.Data == "html" {
 		parseElementCallback(p, parent, parseHtmlChildren)
@@ -57,7 +57,7 @@ func parseDocument(p *parser, parent dom.Element) {
 	}
 }
 
-func parseHtmlChildren(p *parser, parent dom.Element) {
+func parseHtmlChildren(p *parser, parent Element) {
 	if p.w.Kind != lexer.TAG_OPEN_BEGIN || p.w.Data != "head" {
 		parent.AppendChild(p.doc.CreateElement("head"))
 	} else {
@@ -74,8 +74,8 @@ func parseHtmlChildren(p *parser, parent dom.Element) {
 
 func parseElementCallback(
 	p *parser,
-	parent dom.Element,
-	callback func(p *parser, parent dom.Element),
+	parent Element,
+	callback func(p *parser, parent Element),
 ) {
 	token := expect(p, lexer.TAG_OPEN_BEGIN)
 	expect(p, lexer.TAG_END)
@@ -90,11 +90,11 @@ func parseElementCallback(
 	expect(p, lexer.TAG_END)
 }
 
-func parseElement(p *parser, parent dom.Element) {
+func parseElement(p *parser, parent Element) {
 	parseElementCallback(p, parent, parseElementChildren)
 }
 
-func parseElementChildren(p *parser, parent dom.Element) {
+func parseElementChildren(p *parser, parent Element) {
 	for (!p.eof) && p.w.Kind == lexer.TAG_OPEN_BEGIN {
 		parseElement(p, parent)
 	}
@@ -114,7 +114,7 @@ func createParser(tokens <-chan lexer.Token) *parser {
 		createWrapperFromStream(tokens); ok {
 		return &parser{
 			first,
-			dom.NewDocument(),
+			NewDocument(),
 			false,
 		}
 	} else {
@@ -142,4 +142,19 @@ func (p *parser) currentTokenKind() lexer.TokenKind {
 
 func (p *parser) hasTokens() bool {
 	return !p.eof
+}
+
+func streamOfTokens(input []lexer.Token) <-chan lexer.Token {
+	resp := make(chan lexer.Token)
+	go func() {
+		defer close(resp)
+		for _, elm := range input {
+			resp <- elm
+		}
+	}()
+	return resp
+}
+
+func ParseHtmlStream(s io.Reader) Document {
+	return Parse(lexer.TokenizeStream(s))
 }
