@@ -14,15 +14,3 @@ type Element interface {
 	IsConnected() bool
 	TagName() string
 }
-
-type HTMLElement interface {
-	Element
-}
-
-type HTMLHtmlElement interface {
-	HTMLElement
-}
-
-type HTMLHeadElement interface {
-	HTMLElement
-}
