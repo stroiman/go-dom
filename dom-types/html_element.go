@@ -1,19 +1,19 @@
 package dom_types
 
-import "strings"
+import (
+	"strings"
 
-type HTMLElement struct {
-	*Element
+	"github.com/stroiman/go-dom/interfaces"
+)
+
+func NewHTMLElement(tagName string) *Element {
+	return NewElement(strings.ToUpper(tagName))
 }
 
-type HTMLUnknownElement struct {
-	*HTMLElement
+func NewHTMLUnknownElement(tagName string) *Element {
+	return NewHTMLElement(strings.ToUpper(tagName))
 }
 
-func NewHTMLElement(tagName string) *HTMLElement {
-	return &HTMLElement{NewElement(strings.ToUpper(tagName))}
-}
-
-func NewHTMLUnknownElement(tagName string) *HTMLUnknownElement {
-	return &HTMLUnknownElement{NewHTMLElement(strings.ToUpper(tagName))}
+func NewHTMLHtmlElement(doc interfaces.Document) *Element {
+	return NewHTMLElement("HTML")
 }

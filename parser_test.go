@@ -1,14 +1,17 @@
 package go_dom_test
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
 	. "github.com/stroiman/go-dom"
+	dom "github.com/stroiman/go-dom/dom-types"
 	"github.com/stroiman/go-dom/interfaces"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/types"
 )
 
 func parseString(s string) interfaces.Document {
@@ -17,10 +20,15 @@ func parseString(s string) interfaces.Document {
 
 var _ = Describe("Parser", func() {
 	It("Should be able to parse an empty HTML document", func() {
-		result := parseString("<html></html>")
+		result, ok := (parseString("<html><head></head><body></body></html>")).(*dom.Document)
+		Expect(ok).To(BeTrue())
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
+		Expect(result).To(
+			MatchStructure("HTML",
+				MatchStructure("HEAD"),
+				MatchStructure("BODY")))
 	})
 
 	It("Should be able to read from an http.Handler instance", func() {
@@ -30,9 +38,33 @@ var _ = Describe("Parser", func() {
 			w.Write([]byte("<html></html>"))
 		})
 		browser := NewBrowserFromHandler(handler)
-		result := browser.Open("/")
+		result, ok := browser.Open("/").(*dom.Document)
+		Expect(ok).To(BeTrue())
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
 	})
 })
+
+func MatchStructure(name string, children ...types.GomegaMatcher) types.GomegaMatcher {
+	return WithTransform(func(node interface{}) (res struct {
+		Name     string
+		Children []*dom.Element
+	}) {
+		var element *dom.Element
+		switch elm := node.(type) {
+		case *dom.Document:
+			element = elm.DocumentElement()
+		case *dom.Element:
+			element = elm
+		default:
+			panic(fmt.Sprintf("Unknown type %T for element", elm))
+		}
+		res.Name = element.TagName()
+		res.Children = element.ChildNodes()
+		return
+	}, And(
+		HaveField("Name", Equal(name)),
+		HaveField("Children", HaveExactElements(children)),
+	))
+}

@@ -35,26 +35,33 @@ func (w *tokenWrapper) nextToken() (*tokenWrapper, bool) {
 
 type parser struct {
 	w   *tokenWrapper
+	doc *dom.Document
 	eof bool
 }
 
 func Parse(tokens <-chan lexer.Token) interfaces.Document {
 	p := createParser(tokens)
-	e := parseElement(p, nil)
+	parseElement(p, nil)
 	if !p.eof {
 		panic("Didn't parse to EOF")
 	}
-	d := dom.NewDocument()
-	d.Append(e)
-	return d
+	return p.doc
 }
 
-func parseElement(p *parser, stack []string) interfaces.Element {
+func parseElement(p *parser, parent *dom.Element) {
 	token := expect(p, lexer.TAG_OPEN_BEGIN)
 	expect(p, lexer.TAG_END)
+	e := p.doc.CreateElement(token.Data)
+	if parent == nil {
+		p.doc.Append(e)
+	} else {
+		parent.AppendChild(e)
+	}
+	for p.w.Kind == lexer.TAG_OPEN_BEGIN {
+		parseElement(p, e)
+	}
 	expect(p, lexer.TAG_CLOSE_BEGIN)
 	expect(p, lexer.TAG_END)
-	return dom.NewHTMLElement(token.Data)
 }
 
 func expect(p *parser, kind lexer.TokenKind) lexer.Token {
@@ -71,6 +78,7 @@ func createParser(tokens <-chan lexer.Token) *parser {
 		createWrapperFromStream(tokens); ok {
 		return &parser{
 			first,
+			dom.NewDocument(),
 			false,
 		}
 	} else {
