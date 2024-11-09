@@ -41,11 +41,28 @@ type parser struct {
 
 func Parse(tokens <-chan lexer.Token) interfaces.Document {
 	p := createParser(tokens)
-	parseElement(p, nil)
+	parseDocument(p, nil)
 	if !p.eof {
 		panic("Didn't parse to EOF")
 	}
 	return p.doc
+}
+
+func parseDocument(p *parser, parent *dom.Element) {
+	// TODO: Handle processing instructions
+	if p.w.Kind == lexer.TAG_OPEN_BEGIN && p.w.Data == "html" {
+		parseElement(p, parent)
+	} else {
+		html := p.doc.Append(p.doc.CreateElement("html"))
+		parseElementChildren(p, html)
+		// parseElement(p, html)
+	}
+}
+
+func parseElementChildren(p *parser, parent *dom.Element) {
+	for (!p.eof) && p.w.Kind == lexer.TAG_OPEN_BEGIN {
+		parseElement(p, parent)
+	}
 }
 
 func parseElement(p *parser, parent *dom.Element) {
@@ -57,9 +74,7 @@ func parseElement(p *parser, parent *dom.Element) {
 	} else {
 		parent.AppendChild(e)
 	}
-	for p.w.Kind == lexer.TAG_OPEN_BEGIN {
-		parseElement(p, e)
-	}
+	parseElementChildren(p, e)
 	expect(p, lexer.TAG_CLOSE_BEGIN)
 	expect(p, lexer.TAG_END)
 }

@@ -31,6 +31,18 @@ var _ = Describe("Parser", func() {
 				MatchStructure("BODY")))
 	})
 
+	It("Should wrap contents in an HTML element if missing", func() {
+		result, ok := (parseString("<head></head><body></body>")).(*dom.Document)
+		Expect(ok).To(BeTrue())
+		element := result.DocumentElement()
+		Expect(element.NodeName()).To(Equal("HTML"))
+		Expect(element.TagName()).To(Equal("HTML"))
+		Expect(result).To(
+			MatchStructure("HTML",
+				MatchStructure("HEAD"),
+				MatchStructure("BODY")))
+	})
+
 	It("Should be able to read from an http.Handler instance", func() {
 		handler := (http.HandlerFunc)(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
