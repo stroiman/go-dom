@@ -59,6 +59,13 @@ func (d *document) Append(element Element) Element {
 	return element
 }
 
+func (d *document) AppendChild(node Node) Node {
+	if elm, ok := node.(Element); ok {
+		return d.Append(elm)
+	}
+	return node
+}
+
 func (d *document) DocumentElement() Element {
 	return d.documentElement
 }
