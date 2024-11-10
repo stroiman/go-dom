@@ -16,5 +16,19 @@ var _ = Describe("V8 Document", Ordered, func() {
         doc instanceof Document && doc != document;
       `)).To(BeTrue())
 		})
+
+		It("Should have `createElement` as a function", func() {
+			Expect(
+				ctx.RunTestScript(`typeof (new Document().createElement)`),
+			).To(Equal("function"))
+		})
+
+		It("Should support Document functions", func() {
+			Skip("createElement and HTMLElement are missing")
+			Expect(
+				ctx.RunTestScript(`document.createElement("div") instanceof HTMLElement`),
+			).Error().
+				ToNot(HaveOccurred())
+		})
 	})
 })
