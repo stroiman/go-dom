@@ -1,0 +1,4 @@
+#!/bin/sh
+go mod edit -replace="github.com/tommie/v8go@v0.22.0=github.com/stroiman/v8go@external-support"
+go mod tidy
+

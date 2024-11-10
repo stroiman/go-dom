@@ -28,7 +28,7 @@ require (
 
 // Use a WIP version of the code, use this line for replace.
 // replace github.com/tommie/v8go v0.22.0 => /Users/peter/go/src/github/stroiman/v8go
-replace github.com/tommie/v8go v0.22.0 => /Users/peter/go/src/github/stroiman/v8go
+replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go v0.0.0-20241110110701-8c0878270b53
 
 // Use the v8go version from github.
 // Run the two commands:
