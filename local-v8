@@ -1,5 +1,5 @@
 #!/bin/sh
-go mod edit -replace="github.com/tommie/v8go@v0.22.0=$HOME/go/src/stroiman/v8go@external-support"
+go mod edit -replace="github.com/tommie/v8go@v0.22.0=$HOME/go/src/github/stroiman/v8go"
 go mod tidy
 
 

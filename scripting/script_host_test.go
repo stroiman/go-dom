@@ -37,13 +37,23 @@ var _ = Describe("ScriptHost", Ordered, func() {
 
 		Describe("When a document is loaded", func() {
 			It("Should have document instanceof Document", func() {
-				ctx.Window().LoadHTML("<html></html>") // Still creates head and body element
 				Expect(
 					ctx.MustRunTestScript("document instanceof Document"),
 				).To(BeTrue())
 				Expect(
 					ctx.MustRunTestScript("Object.getPrototypeOf(document).constructor.name"),
 				).To(Equal("Document"))
+			})
+			It("Should have document instanceof Document", func() {
+				Expect(
+					ctx.MustRunTestScript("document instanceof Document"),
+				).To(BeTrue())
+				Expect(
+					ctx.MustRunTestScript("Object.getPrototypeOf(document).constructor.name"),
+				).To(Equal("Document"))
+				Expect(
+					ctx.MustRunTestScript("Object.getPrototypeOf(document) === Document.prototype"),
+				).To(BeTrue())
 			})
 		})
 	})

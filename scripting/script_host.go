@@ -41,6 +41,8 @@ type ScriptHost struct {
 	iso            *v8.Isolate
 	windowTemplate *v8.ObjectTemplate
 	document       *v8.FunctionTemplate
+	node           *v8.FunctionTemplate
+	eventTarget    *v8.FunctionTemplate
 }
 
 type ScriptContext struct {
@@ -71,13 +73,19 @@ func CreateWindowTemplate(host *ScriptHost) *v8.ObjectTemplate {
 			},
 		})
 	windowTemplate.Set("Document", host.document)
+	windowTemplate.Set("Node", host.node)
+	windowTemplate.Set("EventTarget", host.eventTarget)
 	return windowTemplate
 }
 
 func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
 	host.document = CreateDocumentPrototype(host.iso)
+	host.node = CreateNode(host.iso)
+	host.eventTarget = CreateEventTarget(host.iso)
 	host.windowTemplate = CreateWindowTemplate(host)
+	host.document.Inherit(host.node)
+	host.node.Inherit(host.eventTarget)
 	return host
 }
 
@@ -102,6 +110,16 @@ func (host *ScriptHost) NewContext() *ScriptContext {
 	global.SetInternalField(0, v8.NewExternalValue(host.iso, ptr))
 
 	return context
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (host *ScriptHost) createPrototypeChains() {
+	host.document.Inherit(host.node)
 }
 
 func (ctx *ScriptContext) Dispose() {
