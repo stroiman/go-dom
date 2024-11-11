@@ -1,6 +1,8 @@
 package scripting_test
 
 import (
+	"fmt"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	// . "github.com/stroiman/go-dom/scripting"
@@ -44,6 +46,7 @@ var _ = Describe("ScriptHost", Ordered, func() {
 					ctx.MustRunTestScript("Object.getPrototypeOf(document).constructor.name"),
 				).To(Equal("Document"))
 			})
+
 			It("Should have document instanceof Document", func() {
 				Expect(
 					ctx.MustRunTestScript("document instanceof Document"),
@@ -54,6 +57,21 @@ var _ = Describe("ScriptHost", Ordered, func() {
 				Expect(
 					ctx.MustRunTestScript("Object.getPrototypeOf(document) === Document.prototype"),
 				).To(BeTrue())
+			})
+		})
+
+		Describe("Load document with script", func() {
+			It("Runs script when loaded", Focus, func() {
+				// Skip("Todo")
+				window := ctx.Window()
+				fmt.Println("Doc before", window.Document())
+				window.SetScriptRunner(ctx)
+				window.LoadHTML(
+					"<html><body><script>window.sut = document.outerHTML</script></body></html>",
+				)
+				Expect(
+					ctx.MustRunTestScript("window.sut"),
+				).To(Equal("<html><head></head><body><script>window.sut = document.outerHTML</script></body></html>"))
 			})
 		})
 	})

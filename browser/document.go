@@ -1,6 +1,8 @@
 package browser
 
 import (
+	"fmt"
+
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -57,6 +59,7 @@ func (d *document) SetBody(body Element) {
 }
 
 func (d *document) Append(element Element) Element {
+	fmt.Println("Set document element", element)
 	d.documentElement = element
 	return element
 }
@@ -73,3 +76,5 @@ func (d *document) DocumentElement() Element {
 }
 
 func (d *document) NodeName() string { return "#document" }
+
+func (d *document) Connected() bool { return true }

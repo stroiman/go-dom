@@ -23,17 +23,18 @@ func NewV8Window(host *ScriptHost, w Window) *V8Window {
 }
 
 func (w *V8Window) V8Document(ctx *v8.Context) *V8Document {
-	if w.document == nil {
-		document := &V8Document{}
-		// v8.FunctionCallbackInfo
-		value, err := w.host.document.GetInstanceTemplate().NewInstance(ctx)
-		if err != nil {
-			panic(err.Error())
-		}
-		value.SetInternalField(0, unsafe.Pointer(document))
-		w.document = document
-		document.Value = value.Value
+	// if w.document == nil {
+	document := &V8Document{}
+	// v8.FunctionCallbackInfo
+	value, err := w.host.document.GetInstanceTemplate().NewInstance(ctx)
+	if err != nil {
+		panic(err.Error())
 	}
+	value.SetInternalField(0, v8.NewExternalValue(ctx.Isolate(), unsafe.Pointer(document)))
+	document.Value = value.Value
+	document.document = w.window.Document()
+	w.document = document
+	// }
 	return w.document
 }
 
@@ -127,6 +128,10 @@ func (ctx *ScriptContext) Dispose() {
 }
 
 func (ctx *ScriptContext) RunScript(script string) (*v8.Value, error) {
+	return ctx.ctx.RunScript(script, "")
+}
+
+func (ctx *ScriptContext) Run(script string) (interface{}, error) {
 	return ctx.ctx.RunScript(script, "")
 }
 
