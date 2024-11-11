@@ -1,17 +1,17 @@
 package browser
 
 import (
-	"strings"
+	"golang.org/x/net/html"
 )
 
-func NewHTMLElement(tagName string) Element {
-	return NewElement(strings.ToUpper(tagName))
+func NewHTMLElement(node *html.Node) Element {
+	return NewElement(node.Data, node)
 }
 
-func NewHTMLUnknownElement(tagName string) Element {
-	return NewHTMLElement(strings.ToUpper(tagName))
+func NewHTMLUnknownElement(node *html.Node) Element {
+	return NewHTMLElement(node)
 }
 
-func NewHTMLHtmlElement(doc *document) Element {
-	return NewHTMLElement("HTML")
+func NewHTMLHtmlElement(node *html.Node) Element {
+	return NewHTMLElement(node)
 }

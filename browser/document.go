@@ -1,7 +1,8 @@
 package browser
 
 import (
-	"strings"
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 type EventTarget interface{}
@@ -10,17 +11,12 @@ type Document interface {
 	Node
 	Body() Element
 	CreateElement(string) Element
+	wrapElement(*html.Node) Element
 	DocumentElement() Element
 	Append(Element) Element
 	SetBody(e Element)
 }
 type elementConstructor func(doc *document) Element
-
-var defaultElements map[string]elementConstructor = map[string]elementConstructor{
-	"html": func(doc *document) Element { return NewHTMLHtmlElement(doc) },
-	"body": func(doc *document) Element { return NewHTMLElement("body") },
-	"head": func(doc *document) Element { return NewHTMLElement("head") },
-}
 
 type document struct {
 	node
@@ -43,11 +39,17 @@ func (d *document) Body() Element {
 }
 
 func (d *document) CreateElement(name string) Element {
-	constructor, ok := defaultElements[strings.ToLower(name)]
-	if ok {
-		return constructor(d)
+	node := &html.Node{
+		Type:      html.ElementNode,
+		DataAtom:  atom.Lookup([]byte(name)),
+		Data:      name,
+		Namespace: "",
 	}
-	return NewHTMLUnknownElement(name)
+	return d.wrapElement(node)
+}
+
+func (d *document) wrapElement(node *html.Node) Element {
+	return NewHTMLElement(node)
 }
 
 func (d *document) SetBody(body Element) {

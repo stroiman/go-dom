@@ -22,7 +22,7 @@ func iterate(d Document, dest Node, source *html.Node) {
 	for child := range source.ChildNodes() {
 		switch child.Type {
 		case html.ElementNode:
-			newElm := d.CreateElement(child.Data)
+			newElm := d.wrapElement(child)
 			dest.AppendChild(newElm)
 			iterate(d, newElm, child)
 		}
