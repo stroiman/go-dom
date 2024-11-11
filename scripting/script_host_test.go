@@ -1,8 +1,6 @@
 package scripting_test
 
 import (
-	"fmt"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	// . "github.com/stroiman/go-dom/scripting"
@@ -61,10 +59,8 @@ var _ = Describe("ScriptHost", Ordered, func() {
 		})
 
 		Describe("Load document with script", func() {
-			It("Runs script when loaded", Focus, func() {
-				// Skip("Todo")
+			It("Runs script when loaded", func() {
 				window := ctx.Window()
-				fmt.Println("Doc before", window.Document())
 				window.SetScriptRunner(ctx)
 				window.LoadHTML(
 					"<html><body><script>window.sut = document.outerHTML</script></body></html>",

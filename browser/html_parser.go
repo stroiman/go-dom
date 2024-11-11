@@ -1,7 +1,6 @@
 package browser
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
@@ -42,18 +41,14 @@ func parseStream(w Window, doc Document, r io.Reader) Document {
 }
 
 func iterate(w Window, d Document, dest Node, source *html.Node) {
-	fmt.Println("Before", d.ChildNodes())
 	for child := range source.ChildNodes() {
 		switch child.Type {
 		case html.ElementNode:
 			rules := ElementMap[child.DataAtom]
-			fmt.Println("Type", child.Data, rules)
 			newElm := d.wrapElement(child)
 			dest.AppendChild(newElm)
-			fmt.Println("Dest child nodes", dest.ChildNodes())
 			// if newElm.Connected() {
 			if rules != nil {
-				fmt.Println("Connected!")
 				if w != nil {
 					rules.Connected(w, newElm)
 				}

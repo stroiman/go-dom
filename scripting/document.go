@@ -1,7 +1,6 @@
 package scripting
 
 import (
-	"fmt"
 	"runtime"
 	"unsafe"
 
@@ -46,10 +45,7 @@ func CreateDocumentPrototype(iso *v8.Isolate) *v8.FunctionTemplate {
 	proto.SetAccessorProperty("outerHTML", v8.AccessProp{
 		Get: func(info *v8.FunctionCallbackInfo) *v8.Value {
 			tmp := info.This().GetInternalField(0)
-			fmt.Println("Getting tmp", tmp.IsExternal())
 			V8Document := (*V8Document)(tmp.External())
-			fmt.Println("Document", V8Document.document)
-			// return v8.Undefined(iso)
 			v, _ := v8.NewValue(iso, V8Document.document.DocumentElement().OuterHTML())
 			return v
 		}})
