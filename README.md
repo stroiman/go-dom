@@ -110,28 +110,42 @@ It("Runs the script when connected to DOM", func() {
 })
 ```
 
-(This is not _exactly_ the current version. The priority was to address the
-correct excution flow of `<script>` element. To get there quicker, I cheated and
-placed an `outerHTML` property on the `document` itself)
+(I'm cheating a bit here, `outerHTML` was temporarily placed on `document`, to
+more quickly address script executing during parsing; In the Go DOM, it's on the
+`element`)
+
 
 ### Next up
 
-Apart from code cleanup, and identifying patterns, the next major issue I
-believe I need to address is memory management.
+
+#### Cleanup
+
+First a bit of cleanup. Necessary dependencies was identified in order to
+execute scripts during parsing. Minimal code was written to get the test to
+pass; but a bit messy.
+
+#### Memory Management
 
 This is an integration between two languages both with their own Garbage
-collector. JavaScript objects are created to wrap Go objects. Two JavaScript
+collector; The same object lives in two worlds; but can at any time be reachable
+in both; or just one. In the latter case, the object must be kept alive in the
+other. When not reachable in either world, it should be ready for garbage
+collection in both.
+
+##### Keep JavaScript objects alive
+
+JavaScript objects are created to wrap Go objects. Two JavaScript
 values representing the same DOM object must always be equal. Therefore the Go
 code needs to keep JavaScript objects alive, even when they are out of scope in
 JavaScript. V8 has mechanisms for controlling this.
+
+##### Keep Go objects alive
 
 But also, A Go object may have run out of scope, e.g. an element was
 disconnected from the DOM. But a JavaScript object may still have a reference to
 this object. So JavaScript code needs to keep Go objects alive; but when the
 JavaScript object goes out of scope, the Go object should be ready for garbage
 collection. V8 also has some support for this.
-
-A tricky part here is to verify the correct behaviour.
 
 ### Future goals
 
@@ -215,6 +229,14 @@ tree; nor provide higher level testing capabilities like what
 These problems _should_ eventually be solved, but could easily be implemented in
 a different library with dependency to the DOM alone.
 
+### Visual Rendering
+
+It is not a goal to be able to provide a visual rendering of the DOM. 
+
+But just like the accessibility tree, this could be implemented in a new library
+depending only on the interface from here.
+
+
 [^1]: Single-Page app
 [^2]: This approach allows you to mock databases, and other external services;
 A few integration tests that use a real database, message bus, or other external
@@ -225,12 +247,6 @@ behaviour, only that the outcome mustn't change. There are a few cases where
 where snapshot tests are the right choice, but they should be avoided for a TDD
 process.
 [^4]: The engine is based on the v8go project by originally by @rogchap, later
-kept up-to-date by @tommie. The project is missing some features in dealing with
-external objects; which I work on adding in my own fork.
-
-### Visual Rendering
-
-It is not a goal to be able to provide a visual rendering of the DOM. 
-
-But just like the accessibility tree, this could be implemented in a new library
-depending only on the interface from here.
+kept up-to-date by @tommie; who did a remarkale job of automatically keeping the
+v8 dependencies up-to-date. But many necessary features of V8 are not exported;
+which I am adding in my own fork.
