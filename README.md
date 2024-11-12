@@ -63,21 +63,21 @@ isolated test, e.g. mocking out part of the behaviour; but
 
 ## Project status
 
-Coding has just begun, and I have the following extremely basic features:
+This is still very early in the project. Currently, I have
 
-- Simple streaming tokenizer and parser, can only parse the text `<html></html>`
-- Ability to receive directly to an `http.Handler`
-- Experimental embed of v8 engine.[^4]
-  - This was done early to identify the risk; or impact this could have on how
-    the DOM objects should be implemented.
-
-Planned first steps:
-
-1. Create a simple HTML parser, that can parse just the basic HTML tags, and
-   generate a valid subset of a [`Document`](https://developer.mozilla.org/en-US/docs/Web/API/Document)
-2. Integrate with an [`http.Handler`](https://pkg.go.dev/net/http#Handler)
-3. Embed a v8 engine, to allow running javascript code. (partially done)
-4. Expose the DOM objects to v8.
+- Parsing of HTML using [x/net/html](https://pkg.go.dev/golang.org/x/net/html)
+  - Using `x/net/html` gives HTML rendering (i.e., support for `outerHTML`) out
+    of the box.
+  - Libraries exist implementing XPath on top of this.
+- 2nd pass into my own structure
+  - `x/net/html` does not have the interface that a Browser wants, so I wrap
+  this to provide the browser DOM both to JavaScript and Go.
+  - The library doesn't support the insertion steps, e.g., when a `<script>` is
+    connected to the DOM, it should be executed (simplified).
+- Embedding of v8 engine.[^4]
+  - This currently only exposes a subset of the DOM functions, but is enough to
+    identify the issues 
+- Ability to connect directly to an `http.Handler`
 
 There is much to do, which includes (but this is not a full list):
 
@@ -92,6 +92,40 @@ There is much to do, which includes (but this is not a full list):
     would be high in the list of priorities.
 - Implement default browser behaviour for user interaction, e.g. pressing 
   <key>enter</key> when an input field has focus should submit the form.
+
+### Demonstration
+
+An early example showing HTML being loaded with a script. Notice:
+
+- The HTML parser creates a `<head>`, even if missing in the source.
+- Whitespace is not inserted in the DOM outside the body (line break and
+  indentation is only processed in the body.
+- The script is executed when connected to the DOM; which is why it doesn't see
+  the `<div>` element after, as well as whitespace.
+
+```go
+It("Runs the script when connected to DOM", func() {
+    window := ctx.Window()
+    window.SetScriptRunner(ctx)
+    window.LoadHTML(`
+<html>
+  <body>
+    <script>window.sut = document.documentElement.outerHTML</script>
+    <div>I should not be in the output</div>
+  </body>
+</html>
+`,
+    )
+    Expect(
+        ctx.MustRunTestScript("window.sut"),
+    ).To(Equal(`<html><head></head><body>
+    <script>window.sut = document.documentElement.outerHTML</script></body></html>`))
+})
+```
+
+(This is not _exactly_ the current version. The priority was to address the
+correct excution flow of `<script>` element. To get there quicker, I cheated and
+placed an `outerHTML` property on the `document` itself)
 
 ### Long Term Goals
 
@@ -168,6 +202,6 @@ non-trivial; depending on the type of application.
 behaviour, only that the outcome mustn't change. There are a few cases where
 where snapshot tests are the right choice, but they should be avoided for a TDD
 process.
-[^3]: The engine is based on the v8go project by originally by @rogchap, later
+[^4]: The engine is based on the v8go project by originally by @rogchap, later
 kept up-to-date by @tommie. The project is missing some features in dealing with
 external objects; which I work on adding in my own fork.
