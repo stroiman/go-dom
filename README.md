@@ -4,11 +4,11 @@
 >
 > This is only a POC
 >
-> This readme file was written before any code was added, and describes the
-> intent of the project; why it was conceived, and the benefits that it brings.
+> Much of this readme file was written before any code was added, and describes
+> the intent of the project, and the benefits that it brings.
 >
-> Also this starts as a hobby project for learning; there is no guarantee that
-> it will ever become a useful tool; unless it will gain traction and support of
+> This starts as a hobby project for learning; there is no guarantee that it
+> will ever become a useful tool; unless it will gain traction and support of
 > multiple developers.
 
 [Software license](./LICENSE.txt) (note: I currently distribute the source under
@@ -79,19 +79,6 @@ This is still very early in the project. Currently, I have
     identify the issues 
 - Ability to connect directly to an `http.Handler`
 
-There is much to do, which includes (but this is not a full list):
-
-- Support all DOM elements, including SVG elements and other namespaces.
-- Handle bad HTML gracefully (browsers don't generate an error if an end tag is
-  missing or misplaced)
-- Implement all standard JavaScript classes that a browser should support; but
-  not provided by the V8 engine.
-  - JavaScript polyfills would be a good starting point, where some exist.
-  - Conversion to native go implementations would be prioritized on usage, e.g.
-    [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) 
-    would be high in the list of priorities.
-- Implement default browser behaviour for user interaction, e.g. pressing 
-  <key>enter</key> when an input field has focus should submit the form.
 
 ### Demonstration
 
@@ -126,6 +113,41 @@ It("Runs the script when connected to DOM", func() {
 (This is not _exactly_ the current version. The priority was to address the
 correct excution flow of `<script>` element. To get there quicker, I cheated and
 placed an `outerHTML` property on the `document` itself)
+
+### Next up
+
+Apart from code cleanup, and identifying patterns, the next major issue I
+believe I need to address is memory management.
+
+This is an integration between two languages both with their own Garbage
+collector. JavaScript objects are created to wrap Go objects. Two JavaScript
+values representing the same DOM object must always be equal. Therefore the Go
+code needs to keep JavaScript objects alive, even when they are out of scope in
+JavaScript. V8 has mechanisms for controlling this.
+
+But also, A Go object may have run out of scope, e.g. an element was
+disconnected from the DOM. But a JavaScript object may still have a reference to
+this object. So JavaScript code needs to keep Go objects alive; but when the
+JavaScript object goes out of scope, the Go object should be ready for garbage
+collection. V8 also has some support for this.
+
+A tricky part here is to verify the correct behaviour.
+
+### Future goals
+
+There is much to do, which includes (but this is not a full list):
+
+- Support all DOM elements, including SVG elements and other namespaces.
+- Handle bad HTML gracefully (browsers don't generate an error if an end tag is
+  missing or misplaced)
+- Implement all standard JavaScript classes that a browser should support; but
+  not provided by the V8 engine.
+  - JavaScript polyfills would be a good starting point, where some exist.
+  - Conversion to native go implementations would be prioritized on usage, e.g.
+    [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) 
+    would be high in the list of priorities.
+- Implement default browser behaviour for user interaction, e.g. pressing 
+  <key>enter</key> when an input field has focus should submit the form.
 
 ### Long Term Goals
 
@@ -162,7 +184,12 @@ benefits:
 This project will likely die without help. If you are interested in this, I
 would welcome contributions. Particularly if:
 
-- You have experience building tokenisers and parsers, especially HTML.
+- ~~You have experience building tokenisers and parsers, especially HTML.~~
+  - After first building my own parser, I moved to `x/net/html`, which seems
+    like the right choice.
+- You have intimate knowledge of Go's garbage collection mechanics.
+  - If you don't have the time or desire to help _code_ on this project, I would
+    appreciate peer reviews on those parts of the code.
 - You have _intimate knowledge_ of how the DOM works in the browser, and can 
   help detect poor design decisions early. For example:
   - should the internal implementation use `document.CreateElement()`
@@ -177,12 +204,7 @@ would welcome contributions. Particularly if:
   objects to JavaScript (which is then External to JavaScript).
   - In particular, if you've done this from Go.
 
-
 ## Out of scope.
-
-### Visual Rendering
-
-It is not a goal to be able to provide a visual rendering of the DOM.
 
 ### Accessibility tree
 
@@ -205,3 +227,10 @@ process.
 [^4]: The engine is based on the v8go project by originally by @rogchap, later
 kept up-to-date by @tommie. The project is missing some features in dealing with
 external objects; which I work on adding in my own fork.
+
+### Visual Rendering
+
+It is not a goal to be able to provide a visual rendering of the DOM. 
+
+But just like the accessibility tree, this could be implemented in a new library
+depending only on the interface from here.
