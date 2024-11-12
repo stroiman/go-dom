@@ -29,13 +29,15 @@ var ElementMap = map[atom.Atom]ElementSteps{
 }
 
 func parseStream(w *window, doc Document, r io.Reader) Document {
+	if doc != nil {
+		panic("Don't doc me")
+	}
 	node, err := html.Parse(r)
 	if err != nil {
 		panic(err)
 	}
-	if doc == nil {
-		doc = NewDocument()
-	}
+	doc = NewDocument()
+	doc.setWrappedNode(node)
 	if w != nil {
 		w.document = doc
 	}
@@ -43,13 +45,25 @@ func parseStream(w *window, doc Document, r io.Reader) Document {
 	return doc
 }
 
+func cloneNode(n *html.Node) *html.Node {
+	return &html.Node{
+		Type:      n.Type,
+		Data:      n.Data,
+		DataAtom:  n.DataAtom,
+		Namespace: n.Namespace,
+		Attr:      n.Attr,
+	}
+}
+
 func iterate(w Window, d Document, dest Node, source *html.Node) {
 	for child := range source.ChildNodes() {
 		switch child.Type {
 		case html.ElementNode:
 			rules := ElementMap[child.DataAtom]
-			newElm := d.wrapElement(child)
+			newElm := d.createElement(cloneNode(child))
 			dest.AppendChild(newElm)
+			iterate(w, d, newElm, child)
+			// ?
 			// if newElm.Connected() {
 			if rules != nil {
 				if w != nil {
@@ -57,7 +71,9 @@ func iterate(w Window, d Document, dest Node, source *html.Node) {
 				}
 			}
 			// }
-			iterate(w, d, newElm, child)
+		default:
+			clone := newNode(cloneNode(child))
+			dest.AppendChild(&clone)
 		}
 	}
 }

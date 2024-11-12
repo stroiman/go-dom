@@ -59,11 +59,11 @@ var _ = Describe("ScriptHost", Ordered, func() {
 		})
 
 		Describe("Load document with script", func() {
-			It("Runs script when loaded", func() {
+			It("Runs the script when connected to DOM", func() {
 				window := ctx.Window()
 				window.SetScriptRunner(ctx)
 				window.LoadHTML(
-					"<html><body><script>window.sut = document.outerHTML</script></body></html>",
+					"<html><body><script>window.sut = document.outerHTML</script></body><div>I should not be in the output</div></html>",
 				)
 				Expect(
 					ctx.MustRunTestScript("window.sut"),

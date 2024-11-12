@@ -11,7 +11,7 @@ type Document interface {
 	Node
 	Body() Element
 	CreateElement(string) Element
-	wrapElement(*html.Node) Element
+	createElement(*html.Node) Element
 	DocumentElement() Element
 	Append(Element) Element
 	SetBody(e Element)
@@ -45,10 +45,10 @@ func (d *document) CreateElement(name string) Element {
 		Data:      name,
 		Namespace: "",
 	}
-	return d.wrapElement(node)
+	return d.createElement(node)
 }
 
-func (d *document) wrapElement(node *html.Node) Element {
+func (d *document) createElement(node *html.Node) Element {
 	return NewHTMLElement(node)
 }
 
