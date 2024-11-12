@@ -30,8 +30,18 @@ type document struct {
 	body            Element
 }
 
+func newDocument(node *html.Node) Document {
+	return &document{
+		node: newNode(node),
+	}
+}
+
 func NewDocument() Document {
-	return &document{}
+	return &document{
+		node: newNode(&html.Node{
+			Type: html.DocumentNode,
+		}),
+	}
 }
 
 func (d *document) Body() Element {

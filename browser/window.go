@@ -20,10 +20,7 @@ type window struct {
 }
 
 func NewWindow() Window {
-	return &window{
-		NewDocument(),
-		nil,
-	}
+	return &window{}
 }
 
 func (w *window) Document() Document {
@@ -31,7 +28,7 @@ func (w *window) Document() Document {
 }
 
 func (w *window) LoadHTML(html string) {
-	parseStream(w, nil, strings.NewReader(html))
+	parseStream(w, strings.NewReader(html))
 }
 
 func (w *window) Eval(script string) (any, error) {

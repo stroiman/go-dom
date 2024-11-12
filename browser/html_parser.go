@@ -28,16 +28,12 @@ var ElementMap = map[atom.Atom]ElementSteps{
 	atom.Script: ScriptElementRules{},
 }
 
-func parseStream(w *window, doc Document, r io.Reader) Document {
-	if doc != nil {
-		panic("Don't doc me")
-	}
+func parseStream(w *window, r io.Reader) Document {
 	node, err := html.Parse(r)
 	if err != nil {
 		panic(err)
 	}
-	doc = NewDocument()
-	doc.setWrappedNode(node)
+	doc := newDocument(node)
 	if w != nil {
 		w.document = doc
 	}
@@ -79,7 +75,7 @@ func iterate(w Window, d Document, dest Node, source *html.Node) {
 }
 
 func ParseHtmlStream(s io.Reader) Document {
-	return parseStream(nil, nil, s)
+	return parseStream(nil, s)
 }
 
 func ParseHtmlString(s string) Document {
