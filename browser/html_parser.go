@@ -28,13 +28,16 @@ var ElementMap = map[atom.Atom]ElementSteps{
 	atom.Script: ScriptElementRules{},
 }
 
-func parseStream(w Window, doc Document, r io.Reader) Document {
+func parseStream(w *window, doc Document, r io.Reader) Document {
 	node, err := html.Parse(r)
 	if err != nil {
 		panic(err)
 	}
 	if doc == nil {
 		doc = NewDocument()
+	}
+	if w != nil {
+		w.document = doc
 	}
 	iterate(w, doc, doc, node)
 	return doc

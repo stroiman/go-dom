@@ -31,9 +31,7 @@ func (w *window) Document() Document {
 }
 
 func (w *window) LoadHTML(html string) {
-	doc := NewDocument()
-	w.document = doc
-	parseStream(w, doc, strings.NewReader(html))
+	parseStream(w, nil, strings.NewReader(html))
 }
 
 func (w *window) Eval(script string) (any, error) {
