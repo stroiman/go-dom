@@ -62,12 +62,19 @@ var _ = Describe("ScriptHost", Ordered, func() {
 			It("Runs the script when connected to DOM", func() {
 				window := ctx.Window()
 				window.SetScriptRunner(ctx)
-				window.LoadHTML(
-					"<html><body><script>window.sut = document.outerHTML</script></body><div>I should not be in the output</div></html>",
+				window.LoadHTML(`
+<html>
+  <body>
+    <script>window.sut = document.outerHTML</script>
+    <div>I should not be in the output</div>
+  </body>
+</html>
+`,
 				)
 				Expect(
 					ctx.MustRunTestScript("window.sut"),
-				).To(Equal("<html><head></head><body><script>window.sut = document.outerHTML</script></body></html>"))
+				).To(Equal(`<html><head></head><body>
+    <script>window.sut = document.outerHTML</script></body></html>`))
 			})
 		})
 	})
