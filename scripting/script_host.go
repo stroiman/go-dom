@@ -82,9 +82,9 @@ func CreateWindowTemplate(host *ScriptHost) *v8.ObjectTemplate {
 
 func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
-	host.document = CreateDocumentPrototype(host.iso)
+	host.document = CreateDocumentPrototype(host)
 	host.node = CreateNode(host.iso)
-	host.eventTarget = CreateEventTarget(host.iso)
+	host.eventTarget = CreateEventTarget(host)
 	host.windowTemplate = CreateWindowTemplate(host)
 	host.document.Inherit(host.node)
 	host.node.Inherit(host.eventTarget)

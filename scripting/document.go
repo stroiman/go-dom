@@ -27,7 +27,8 @@ func NewCachedValue[T Node](val *v8.Value, doc T) *CachedElement[T] {
 	return result
 }
 
-func CreateDocumentPrototype(iso *v8.Isolate) *v8.FunctionTemplate {
+func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
+	iso := host.iso
 	res := v8.NewFunctionTemplate(
 		iso,
 		func(args *v8.FunctionCallbackInfo) *v8.Value {
