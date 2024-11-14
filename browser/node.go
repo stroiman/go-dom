@@ -1,9 +1,34 @@
 package browser
 
-import "golang.org/x/net/html"
+import (
+	"golang.org/x/net/html"
+)
+
+var idSeq <-chan uintptr
+
+type ObjectId = uintptr
+
+func init() {
+	c := make(chan uintptr)
+	idSeq = c
+	go func() {
+		val := uintptr(1)
+		for {
+			c <- val
+			val = val + 1
+		}
+	}()
+}
+
+func NewObjectId() ObjectId {
+	return <-idSeq
+}
 
 type Node interface {
 	EventTarget
+	// ObjectId is used internally to use nodes as keys in a map without keeping
+	// the objects reachable.
+	ObjectId() ObjectId
 	NodeName() string
 	AppendChild(node Node) Node
 	ChildNodes() []Node
@@ -14,6 +39,7 @@ type Node interface {
 }
 
 type node struct {
+	objectId   ObjectId
 	childNodes []Node
 	name       string
 	htmlNode   *html.Node
@@ -21,8 +47,11 @@ type node struct {
 }
 
 func newNode(htmlNode *html.Node) node {
-	return node{[]Node{}, htmlNode.Data, htmlNode, nil}
+	id := NewObjectId()
+	return node{id, []Node{}, htmlNode.Data, htmlNode, nil}
 }
+
+func (n *node) ObjectId() ObjectId { return n.objectId }
 
 func (parent *node) AppendChild(child Node) Node {
 	parent.htmlNode.AppendChild(child.wrappedNode())
