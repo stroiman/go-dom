@@ -39,6 +39,19 @@ type ScriptContext struct {
 	domNodes map[ObjectId]Node
 }
 
+func (c *ScriptContext) CacheNode(obj *v8.Object, node Node) (*v8.Value, error) {
+	val := obj.Value
+	objectId := node.ObjectId()
+	c.v8nodes[objectId] = val
+	c.domNodes[objectId] = node
+	internal, err := v8.NewValue(c.host.iso, objectId)
+	if err != nil {
+		return nil, err
+	}
+	obj.SetInternalField(0, internal)
+	return val, nil
+}
+
 func (c *ScriptContext) GetInstanceForNode(
 	prototype *v8.FunctionTemplate,
 	node Node,
@@ -53,14 +66,7 @@ func (c *ScriptContext) GetInstanceForNode(
 		if cached, ok := c.v8nodes[objectId]; ok {
 			return cached, nil
 		}
-		c.v8nodes[objectId] = value.Value
-		c.domNodes[objectId] = node
-		internal, err := v8.NewValue(iso, objectId)
-		if err != nil {
-			return nil, err
-		}
-		value.SetInternalField(0, internal)
-		return value.Value, nil
+		return c.CacheNode(value, node)
 	}
 	return nil, err
 }
