@@ -9,19 +9,21 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type V8Document struct {
+type CachedElement[T Node] struct {
 	Value    *v8.Value
-	document Document
-	pinner   runtime.Pinner
+	document T
+	pinner   *runtime.Pinner
 }
 
-func NewV8Document(val *v8.Value, doc Document) *V8Document {
-	result := &V8Document{
+func NewCachedValue[T Node](val *v8.Value, doc T) *CachedElement[T] {
+	result := &CachedElement[T]{
 		Value:    val,
 		document: doc,
+		pinner:   new(runtime.Pinner),
 	}
-	result.pinner.Pin(result)
-	result.pinner.Pin(doc)
+	result.pinner.Pin(result.pinner)
+	result.pinner.Pin(result.document)
+	result.pinner.Pin(result.Value)
 	return result
 }
 
@@ -30,8 +32,8 @@ func CreateDocumentPrototype(iso *v8.Isolate) *v8.FunctionTemplate {
 		iso,
 		func(args *v8.FunctionCallbackInfo) *v8.Value {
 			doc := NewDocument()
-			v8Doc := NewV8Document(args.This().Value, doc)
-			args.This().SetInternalField(0, unsafe.Pointer(v8Doc))
+			v8Doc := NewCachedValue(args.This().Value, doc)
+			args.This().SetInternalField(0, v8.NewExternalValue(iso, unsafe.Pointer(v8Doc)))
 			return v8.Undefined(iso)
 		},
 	)
@@ -45,7 +47,7 @@ func CreateDocumentPrototype(iso *v8.Isolate) *v8.FunctionTemplate {
 	proto.SetAccessorProperty("outerHTML", v8.AccessProp{
 		Get: func(info *v8.FunctionCallbackInfo) *v8.Value {
 			tmp := info.This().GetInternalField(0)
-			V8Document := (*V8Document)(tmp.External())
+			V8Document := (*CachedElement[Document])(tmp.External())
 			v, _ := v8.NewValue(iso, V8Document.document.DocumentElement().OuterHTML())
 			return v
 		}})

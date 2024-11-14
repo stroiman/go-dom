@@ -20,7 +20,9 @@ type window struct {
 }
 
 func NewWindow() Window {
-	return &window{}
+	return &window{
+		document: NewDocument(),
+	}
 }
 
 func (w *window) Document() Document {

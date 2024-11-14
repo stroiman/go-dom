@@ -12,7 +12,7 @@ import (
 type V8Window struct {
 	host     *ScriptHost
 	window   Window
-	document *V8Document
+	document *CachedElement[Document]
 }
 
 func NewV8Window(host *ScriptHost, w Window) *V8Window {
@@ -22,19 +22,16 @@ func NewV8Window(host *ScriptHost, w Window) *V8Window {
 	}
 }
 
-func (w *V8Window) V8Document(ctx *v8.Context) *V8Document {
-	// if w.document == nil {
-	document := &V8Document{}
-	// v8.FunctionCallbackInfo
+func (w *V8Window) V8Document(ctx *v8.Context) *CachedElement[Document] {
+	if w.document != nil && w.document.document == w.window.Document() {
+		return w.document
+	}
 	value, err := w.host.document.GetInstanceTemplate().NewInstance(ctx)
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
-	value.SetInternalField(0, v8.NewExternalValue(ctx.Isolate(), unsafe.Pointer(document)))
-	document.Value = value.Value
-	document.document = w.window.Document()
-	w.document = document
-	// }
+	w.document = NewCachedValue(value.Value, w.window.Document())
+	value.SetInternalField(0, v8.NewExternalValue(ctx.Isolate(), unsafe.Pointer(w.document)))
 	return w.document
 }
 

@@ -35,14 +35,14 @@ var _ = Describe("V8 Document", func() {
 
 	Describe("Class Hierarchy of new Document()", func() {
 		BeforeEach(func() {
-			ctx.RunTestScript("const actual = window.document")
+			ctx.RunTestScript("const actual = new Document()")
 		})
 		itShouldBeADocument()
 	})
 
 	Describe("Class Hierarchy of `window.document`", func() {
 		BeforeEach(func() {
-			ctx.RunTestScript("const actual = new Document()")
+			ctx.RunTestScript("const actual = window.document")
 		})
 		itShouldBeADocument()
 	})
