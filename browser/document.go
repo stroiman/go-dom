@@ -5,8 +5,6 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-type EventTarget interface{}
-
 type Document interface {
 	Node
 	Body() Element

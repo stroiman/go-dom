@@ -3,6 +3,7 @@ package browser
 import "strings"
 
 type Window interface {
+	EventTarget
 	Document() Document
 	// TODO: Remove, for testing
 	LoadHTML(string)
@@ -15,13 +16,15 @@ type ScriptEngine interface {
 }
 
 type window struct {
+	eventTarget
 	document     Document
 	scriptEngine ScriptEngine
 }
 
 func NewWindow() Window {
 	return &window{
-		document: NewDocument(),
+		eventTarget: newEventTarget(),
+		document:    NewDocument(),
 	}
 }
 
