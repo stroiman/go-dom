@@ -2,7 +2,6 @@ package scripting
 
 import (
 	"errors"
-	"unsafe"
 
 	. "github.com/stroiman/go-dom/browser"
 
@@ -20,7 +19,12 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			id := doc.ObjectId()
 			scriptContext.v8nodes[id] = args.This().Value
 			scriptContext.domNodes[id] = doc
-			args.This().SetInternalField(0, v8.NewExternalValue(iso, unsafe.Pointer(id)))
+			internal, err := v8.NewValue(iso, id)
+			if err != nil {
+				// TODO
+				panic(err)
+			}
+			args.This().SetInternalField(0, internal)
 			return v8.Undefined(iso)
 		},
 	)
@@ -35,7 +39,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		Get: func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			v8Context := info.Context()
 			context := host.contexts[v8Context]
-			id := ObjectId(info.This().GetInternalField(0).External())
+			id := info.This().GetInternalField(0).Int32()
 			val := context.domNodes[id]
 			if doc, ok := val.(Document); ok {
 				v, _ := v8.NewValue(iso, doc.DocumentElement().OuterHTML())

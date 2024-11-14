@@ -1,47 +1,13 @@
 package scripting
 
 import (
+	"errors"
 	"runtime"
-	"unsafe"
 
 	. "github.com/stroiman/go-dom/browser"
 
 	v8 "github.com/tommie/v8go"
 )
-
-type V8Window struct {
-	host   *ScriptHost
-	window Window
-}
-
-func NewV8Window(host *ScriptHost, w Window) *V8Window {
-	return &V8Window{
-		host:   host,
-		window: w,
-	}
-}
-
-func (w *V8Window) V8Document(ctx *v8.Context) *v8.Value {
-	domDocument := w.window.Document()
-	if cached, ok := w.host.contexts[ctx].v8nodes[domDocument.ObjectId()]; ok {
-		return cached
-	}
-	object, err := w.host.document.GetInstanceTemplate().NewInstance(ctx)
-	if err != nil {
-		panic(err) // TODO
-	}
-	value := object.Value
-	docNode := w.window.Document()
-	id := docNode.ObjectId()
-	myContext := w.host.contexts[ctx]
-	myContext.v8nodes[id] = value
-	myContext.domNodes[id] = docNode
-	object.SetInternalField(
-		0,
-		v8.NewExternalValue(ctx.Isolate(), unsafe.Pointer(id)),
-	)
-	return value
-}
 
 type ScriptHost struct {
 	iso            *v8.Isolate
@@ -52,6 +18,11 @@ type ScriptHost struct {
 	contexts       map[*v8.Context]*ScriptContext
 }
 
+func (h *ScriptHost) GetContext(v8ctx *v8.Context) (*ScriptContext, bool) {
+	ctx, ok := h.contexts[v8ctx]
+	return ctx, ok
+}
+
 type ScriptContext struct {
 	host     *ScriptHost
 	v8ctx    *v8.Context
@@ -59,6 +30,32 @@ type ScriptContext struct {
 	pinner   runtime.Pinner
 	v8nodes  map[ObjectId]*v8.Value
 	domNodes map[ObjectId]Node
+}
+
+func (c *ScriptContext) GetInstanceForNode(
+	prototype *v8.FunctionTemplate,
+	node Node,
+) (*v8.Value, error) {
+	iso := c.host.iso
+	if node == nil {
+		return v8.Null(iso), nil
+	}
+	value, err := prototype.GetInstanceTemplate().NewInstance(c.v8ctx)
+	if err == nil {
+		objectId := node.ObjectId()
+		if cached, ok := c.v8nodes[objectId]; ok {
+			return cached, nil
+		}
+		c.v8nodes[objectId] = value.Value
+		c.domNodes[objectId] = node
+		internal, err := v8.NewValue(iso, objectId)
+		if err != nil {
+			return nil, err
+		}
+		value.SetInternalField(0, internal)
+		return value.Value, nil
+	}
+	return nil, err
 }
 
 func CreateWindowTemplate(host *ScriptHost) *v8.ObjectTemplate {
@@ -74,12 +71,14 @@ func CreateWindowTemplate(host *ScriptHost) *v8.ObjectTemplate {
 			Attributes: v8.ReadOnly,
 		},
 	)
-	windowTemplate.SetAccessorProperty(
+	windowTemplate.SetAccessorPropertyWithError(
 		"document",
-		v8.AccessProp{
-			Get: func(info *v8.FunctionCallbackInfo) *v8.Value {
-				v8window := (*V8Window)(info.This().GetInternalField(0).External())
-				return v8window.V8Document(info.Context())
+		v8.AccessPropWithError{
+			Get: func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				if ctx, ok := host.GetContext(info.Context()); ok {
+					return ctx.GetInstanceForNode(host.document, ctx.window.Document())
+				}
+				return nil, errors.New("Must have a context")
 			},
 		})
 	windowTemplate.Set("Document", host.document)
@@ -108,7 +107,6 @@ var global *v8.Object
 
 func (host *ScriptHost) NewContext() *ScriptContext {
 	window := NewWindow()
-	v8window := NewV8Window(host, window)
 	context := &ScriptContext{
 		host:     host,
 		v8ctx:    v8.NewContext(host.iso, host.windowTemplate),
@@ -118,11 +116,6 @@ func (host *ScriptHost) NewContext() *ScriptContext {
 	}
 	global = context.v8ctx.Global()
 	host.contexts[context.v8ctx] = context
-	ptr := unsafe.Pointer(v8window)
-	context.pinner.Pin(ptr)
-	context.pinner.Pin(v8window.window)
-	context.pinner.Pin(v8window.host)
-	global.SetInternalField(0, v8.NewExternalValue(host.iso, ptr))
 
 	return context
 }

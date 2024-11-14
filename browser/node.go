@@ -4,7 +4,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-type ObjectId = uintptr
+type ObjectId = int32
 
 var idSeq <-chan ObjectId
 
