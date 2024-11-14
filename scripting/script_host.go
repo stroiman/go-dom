@@ -41,12 +41,16 @@ type ScriptHost struct {
 	document       *v8.FunctionTemplate
 	node           *v8.FunctionTemplate
 	eventTarget    *v8.FunctionTemplate
+	contexts       map[*v8.Context]*ScriptContext
 }
 
 type ScriptContext struct {
-	ctx    *v8.Context
-	window Window
-	pinner runtime.Pinner
+	host     *ScriptHost
+	v8ctx    *v8.Context
+	window   Window
+	pinner   runtime.Pinner
+	v8nodes  map[uintptr]*v8.Value
+	domNodes map[uintptr]Node
 }
 
 func CreateWindowTemplate(host *ScriptHost) *v8.ObjectTemplate {
@@ -84,6 +88,7 @@ func NewScriptHost() *ScriptHost {
 	host.windowTemplate = CreateWindowTemplate(host)
 	host.document.Inherit(host.node)
 	host.node.Inherit(host.eventTarget)
+	host.contexts = make(map[*v8.Context]*ScriptContext)
 	return host
 }
 
@@ -97,10 +102,12 @@ func (host *ScriptHost) NewContext() *ScriptContext {
 	window := NewWindow()
 	v8window := NewV8Window(host, window)
 	context := &ScriptContext{
-		ctx:    v8.NewContext(host.iso, host.windowTemplate),
+		host:   host,
+		v8ctx:  v8.NewContext(host.iso, host.windowTemplate),
 		window: window,
 	}
-	global = context.ctx.Global()
+	global = context.v8ctx.Global()
+	host.contexts[context.v8ctx] = context
 	ptr := unsafe.Pointer(v8window)
 	context.pinner.Pin(ptr)
 	context.pinner.Pin(v8window.window)
@@ -121,15 +128,16 @@ func (host *ScriptHost) createPrototypeChains() {
 }
 
 func (ctx *ScriptContext) Dispose() {
-	ctx.ctx.Close()
+	delete(ctx.host.contexts, ctx.v8ctx)
+	ctx.v8ctx.Close()
 }
 
 func (ctx *ScriptContext) RunScript(script string) (*v8.Value, error) {
-	return ctx.ctx.RunScript(script, "")
+	return ctx.v8ctx.RunScript(script, "")
 }
 
 func (ctx *ScriptContext) Run(script string) (interface{}, error) {
-	return ctx.ctx.RunScript(script, "")
+	return ctx.v8ctx.RunScript(script, "")
 }
 
 func (ctx *ScriptContext) Window() Window {
