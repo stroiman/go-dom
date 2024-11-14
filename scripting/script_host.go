@@ -10,9 +10,8 @@ import (
 )
 
 type V8Window struct {
-	host     *ScriptHost
-	window   Window
-	document *CachedElement[Document]
+	host   *ScriptHost
+	window Window
 }
 
 func NewV8Window(host *ScriptHost, w Window) *V8Window {
@@ -22,17 +21,26 @@ func NewV8Window(host *ScriptHost, w Window) *V8Window {
 	}
 }
 
-func (w *V8Window) V8Document(ctx *v8.Context) *CachedElement[Document] {
-	if w.document != nil && w.document.document == w.window.Document() {
-		return w.document
+func (w *V8Window) V8Document(ctx *v8.Context) *v8.Value {
+	domDocument := w.window.Document()
+	if cached, ok := w.host.contexts[ctx].v8nodes[domDocument.ObjectId()]; ok {
+		return cached
 	}
-	value, err := w.host.document.GetInstanceTemplate().NewInstance(ctx)
+	object, err := w.host.document.GetInstanceTemplate().NewInstance(ctx)
 	if err != nil {
-		panic(err)
+		panic(err) // TODO
 	}
-	w.document = NewCachedValue(value.Value, w.window.Document())
-	value.SetInternalField(0, v8.NewExternalValue(ctx.Isolate(), unsafe.Pointer(w.document)))
-	return w.document
+	value := object.Value
+	docNode := w.window.Document()
+	id := docNode.ObjectId()
+	myContext := w.host.contexts[ctx]
+	myContext.v8nodes[id] = value
+	myContext.domNodes[id] = docNode
+	object.SetInternalField(
+		0,
+		v8.NewExternalValue(ctx.Isolate(), unsafe.Pointer(id)),
+	)
+	return value
 }
 
 type ScriptHost struct {
@@ -49,8 +57,8 @@ type ScriptContext struct {
 	v8ctx    *v8.Context
 	window   Window
 	pinner   runtime.Pinner
-	v8nodes  map[uintptr]*v8.Value
-	domNodes map[uintptr]Node
+	v8nodes  map[ObjectId]*v8.Value
+	domNodes map[ObjectId]Node
 }
 
 func CreateWindowTemplate(host *ScriptHost) *v8.ObjectTemplate {
@@ -71,7 +79,7 @@ func CreateWindowTemplate(host *ScriptHost) *v8.ObjectTemplate {
 		v8.AccessProp{
 			Get: func(info *v8.FunctionCallbackInfo) *v8.Value {
 				v8window := (*V8Window)(info.This().GetInternalField(0).External())
-				return v8window.V8Document(info.Context()).Value
+				return v8window.V8Document(info.Context())
 			},
 		})
 	windowTemplate.Set("Document", host.document)
@@ -102,9 +110,11 @@ func (host *ScriptHost) NewContext() *ScriptContext {
 	window := NewWindow()
 	v8window := NewV8Window(host, window)
 	context := &ScriptContext{
-		host:   host,
-		v8ctx:  v8.NewContext(host.iso, host.windowTemplate),
-		window: window,
+		host:     host,
+		v8ctx:    v8.NewContext(host.iso, host.windowTemplate),
+		window:   window,
+		v8nodes:  make(map[ObjectId]*v8.Value),
+		domNodes: make(map[ObjectId]Node),
 	}
 	global = context.v8ctx.Global()
 	host.contexts[context.v8ctx] = context

@@ -1,7 +1,7 @@
 package scripting
 
 import (
-	"runtime"
+	"errors"
 	"unsafe"
 
 	. "github.com/stroiman/go-dom/browser"
@@ -9,32 +9,18 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type CachedElement[T Node] struct {
-	Value    *v8.Value
-	document T
-	pinner   *runtime.Pinner
-}
-
-func NewCachedValue[T Node](val *v8.Value, doc T) *CachedElement[T] {
-	result := &CachedElement[T]{
-		Value:    val,
-		document: doc,
-		pinner:   new(runtime.Pinner),
-	}
-	result.pinner.Pin(result.pinner)
-	result.pinner.Pin(result.document)
-	result.pinner.Pin(result.Value)
-	return result
-}
-
 func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	res := v8.NewFunctionTemplate(
 		iso,
 		func(args *v8.FunctionCallbackInfo) *v8.Value {
+			v8Context := args.Context()
+			scriptContext := host.contexts[v8Context]
 			doc := NewDocument()
-			v8Doc := NewCachedValue(args.This().Value, doc)
-			args.This().SetInternalField(0, v8.NewExternalValue(iso, unsafe.Pointer(v8Doc)))
+			id := doc.ObjectId()
+			scriptContext.v8nodes[id] = args.This().Value
+			scriptContext.domNodes[id] = doc
+			args.This().SetInternalField(0, v8.NewExternalValue(iso, unsafe.Pointer(id)))
 			return v8.Undefined(iso)
 		},
 	)
@@ -45,12 +31,18 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		func(info *v8.FunctionCallbackInfo) *v8.Value {
 			return v8.Undefined(iso)
 		}))
-	proto.SetAccessorProperty("outerHTML", v8.AccessProp{
-		Get: func(info *v8.FunctionCallbackInfo) *v8.Value {
-			tmp := info.This().GetInternalField(0)
-			V8Document := (*CachedElement[Document])(tmp.External())
-			v, _ := v8.NewValue(iso, V8Document.document.DocumentElement().OuterHTML())
-			return v
+	proto.SetAccessorPropertyWithError("outerHTML", v8.AccessPropWithError{
+		Get: func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			v8Context := info.Context()
+			context := host.contexts[v8Context]
+			id := ObjectId(info.This().GetInternalField(0).External())
+			val := context.domNodes[id]
+			if doc, ok := val.(Document); ok {
+				v, _ := v8.NewValue(iso, doc.DocumentElement().OuterHTML())
+				return v, nil
+			} else {
+				return nil, errors.New("Not a document")
+			}
 		}})
 	return res
 }

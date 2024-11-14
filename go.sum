@@ -16,8 +16,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/stroiman/v8go v0.0.0-20241111151954-b00bf0177bf3 h1:+fA7BZsaZsilXlR2R6cBA30N8d+XBKzmgZdcag+ubHI=
-github.com/stroiman/v8go v0.0.0-20241111151954-b00bf0177bf3/go.mod h1:F/xlthVZVdModtSNWyoW4tEpYCp450K0Y3AC1Xyx0uQ=
+github.com/stroiman/v8go v0.0.0-20241114151837-02041c65cbca h1:RBZ4MraIFANDmaGfU50Qb1WDY9b1NWehUZ9Gi8C3s8k=
+github.com/stroiman/v8go v0.0.0-20241114151837-02041c65cbca/go.mod h1:F/xlthVZVdModtSNWyoW4tEpYCp450K0Y3AC1Xyx0uQ=
 github.com/tommie/v8go/deps/android_amd64 v0.0.0-20241023013435-d8e1c56d9e6a h1:0Rn3ONyQDVlPYMRFONWiq28syw6CBKifHoa/+DGaQls=
 github.com/tommie/v8go/deps/android_amd64 v0.0.0-20241023013435-d8e1c56d9e6a/go.mod h1:+SU4RWSqMXAx2oR/Gzkyc1YAG6F8SCzttMv3sZkh+qY=
 github.com/tommie/v8go/deps/android_arm64 v0.0.0-20241023013435-d8e1c56d9e6a h1:Ox7LbIXvDA6wgti9Nlby0kyh4sg2HAVgVUebBXPkb1A=

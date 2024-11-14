@@ -4,15 +4,15 @@ import (
 	"golang.org/x/net/html"
 )
 
-var idSeq <-chan uintptr
-
 type ObjectId = uintptr
 
+var idSeq <-chan ObjectId
+
 func init() {
-	c := make(chan uintptr)
+	c := make(chan ObjectId)
 	idSeq = c
 	go func() {
-		val := uintptr(1)
+		var val ObjectId = 1
 		for {
 			c <- val
 			val = val + 1
