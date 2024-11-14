@@ -10,22 +10,20 @@ import (
 
 func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	res := v8.NewFunctionTemplate(
+	res := v8.NewFunctionTemplateWithError(
 		iso,
-		func(args *v8.FunctionCallbackInfo) *v8.Value {
-			v8Context := args.Context()
-			scriptContext := host.contexts[v8Context]
+		func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			scriptContext := host.MustGetContext(args.Context())
 			doc := NewDocument()
 			id := doc.ObjectId()
 			scriptContext.v8nodes[id] = args.This().Value
 			scriptContext.domNodes[id] = doc
 			internal, err := v8.NewValue(iso, id)
 			if err != nil {
-				// TODO
-				panic(err)
+				return nil, err
 			}
 			args.This().SetInternalField(0, internal)
-			return v8.Undefined(iso)
+			return v8.Undefined(iso), nil
 		},
 	)
 	instanceTemplate := res.GetInstanceTemplate()

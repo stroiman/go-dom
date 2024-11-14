@@ -23,6 +23,13 @@ func (h *ScriptHost) GetContext(v8ctx *v8.Context) (*ScriptContext, bool) {
 	return ctx, ok
 }
 
+func (h *ScriptHost) MustGetContext(v8ctx *v8.Context) *ScriptContext {
+	if ctx, ok := h.GetContext(v8ctx); ok {
+		return ctx
+	}
+	panic("Unknown v8 context")
+}
+
 type ScriptContext struct {
 	host     *ScriptHost
 	v8ctx    *v8.Context
