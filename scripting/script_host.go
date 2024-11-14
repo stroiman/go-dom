@@ -1,7 +1,6 @@
 package scripting
 
 import (
-	"errors"
 	"runtime"
 
 	. "github.com/stroiman/go-dom/browser"
@@ -11,6 +10,7 @@ import (
 
 type ScriptHost struct {
 	iso            *v8.Isolate
+	window         *v8.FunctionTemplate
 	windowTemplate *v8.ObjectTemplate
 	document       *v8.FunctionTemplate
 	node           *v8.FunctionTemplate
@@ -58,41 +58,14 @@ func (c *ScriptContext) GetInstanceForNode(
 	return nil, err
 }
 
-func CreateWindowTemplate(host *ScriptHost) *v8.ObjectTemplate {
-	iso := host.iso
-	windowTemplate := v8.NewObjectTemplate(iso)
-	windowTemplate.SetInternalFieldCount(1)
-	windowTemplate.SetAccessorProperty(
-		"window",
-		v8.AccessProp{
-			Get: func(i *v8.FunctionCallbackInfo) *v8.Value {
-				return i.This().Value
-			},
-			Attributes: v8.ReadOnly,
-		},
-	)
-	windowTemplate.SetAccessorPropertyWithError(
-		"document",
-		v8.AccessPropWithError{
-			Get: func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				if ctx, ok := host.GetContext(info.Context()); ok {
-					return ctx.GetInstanceForNode(host.document, ctx.window.Document())
-				}
-				return nil, errors.New("Must have a context")
-			},
-		})
-	windowTemplate.Set("Document", host.document)
-	windowTemplate.Set("Node", host.node)
-	windowTemplate.Set("EventTarget", host.eventTarget)
-	return windowTemplate
-}
-
 func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
 	host.document = CreateDocumentPrototype(host)
 	host.node = CreateNode(host.iso)
 	host.eventTarget = CreateEventTarget(host)
-	host.windowTemplate = CreateWindowTemplate(host)
+	host.window = CreateWindowTemplate(host)
+	host.window.Inherit(host.eventTarget)
+	host.windowTemplate = host.window.GetInstanceTemplate()
 	host.document.Inherit(host.node)
 	host.node.Inherit(host.eventTarget)
 	host.contexts = make(map[*v8.Context]*ScriptContext)
