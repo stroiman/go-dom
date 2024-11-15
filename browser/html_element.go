@@ -4,6 +4,10 @@ import (
 	"golang.org/x/net/html"
 )
 
+type HTMLElement interface {
+	Element
+}
+
 func NewHTMLElement(node *html.Node) Element {
 	return NewElement(node.Data, node)
 }
