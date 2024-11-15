@@ -110,11 +110,6 @@ It("Runs the script when connected to DOM", func() {
 })
 ```
 
-(I'm cheating a bit here, `outerHTML` was temporarily placed on `document`, to
-more quickly address script executing during parsing; In the Go DOM, it's on the
-`element`)
-
-
 ### Next up
 
 
