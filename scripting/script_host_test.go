@@ -64,7 +64,7 @@ var _ = Describe("ScriptHost", func() {
 				window.LoadHTML(`
 <html>
   <body>
-    <script>window.sut = document.outerHTML</script>
+    <script>window.sut = document.documentElement.outerHTML</script>
     <div>I should not be in the output</div>
   </body>
 </html>
@@ -73,7 +73,8 @@ var _ = Describe("ScriptHost", func() {
 				Expect(
 					ctx.MustRunTestScript("window.sut"),
 				).To(Equal(`<html><head></head><body>
-    <script>window.sut = document.outerHTML</script></body></html>`))
+    <script>window.sut = document.documentElement.outerHTML</script></body></html>`))
+
 			})
 		})
 	})

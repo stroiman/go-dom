@@ -1,8 +1,6 @@
 package scripting
 
 import (
-	"errors"
-
 	. "github.com/stroiman/go-dom/browser"
 
 	v8 "github.com/tommie/v8go"
@@ -14,16 +12,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		iso,
 		func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			scriptContext := host.MustGetContext(args.Context())
-			doc := NewDocument()
-			id := doc.ObjectId()
-			scriptContext.v8nodes[id] = args.This().Value
-			scriptContext.domNodes[id] = doc
-			internal, err := v8.NewValue(iso, id)
-			if err != nil {
-				return nil, err
-			}
-			args.This().SetInternalField(0, internal)
-			return v8.Undefined(iso), nil
+			return scriptContext.CacheNode(args.This(), NewDocument())
 		},
 	)
 	instanceTemplate := res.GetInstanceTemplate()
@@ -33,18 +22,17 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		func(info *v8.FunctionCallbackInfo) *v8.Value {
 			return v8.Undefined(iso)
 		}))
-	proto.SetAccessorPropertyWithError("outerHTML", v8.AccessPropWithError{
-		Get: func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			v8Context := info.Context()
-			context := host.contexts[v8Context]
-			id := info.This().GetInternalField(0).Int32()
-			val := context.domNodes[id]
-			if doc, ok := val.(Document); ok {
-				v, _ := v8.NewValue(iso, doc.DocumentElement().OuterHTML())
-				return v, nil
-			} else {
-				return nil, errors.New("Not a document")
+
+	proto.SetAccessorPropertyWithError("documentElement", v8.AccessPropWithError{
+		Get: func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			ctx := host.MustGetContext(arg.Context())
+			this, ok := ctx.domNodes[arg.This().GetInternalField(0).Int32()]
+			if e, e_ok := this.(Document); ok && e_ok {
+				return ctx.GetInstanceForNode(host.htmlElement, e.DocumentElement())
 			}
-		}})
+			return nil, v8.NewTypeError(iso, "Object not a Document")
+		},
+		Attributes: v8.ReadOnly,
+	})
 	return res
 }

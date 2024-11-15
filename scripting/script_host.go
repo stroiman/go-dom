@@ -14,6 +14,8 @@ type ScriptHost struct {
 	windowTemplate *v8.ObjectTemplate
 	document       *v8.FunctionTemplate
 	node           *v8.FunctionTemplate
+	element        *v8.FunctionTemplate
+	htmlElement    *v8.FunctionTemplate
 	eventTarget    *v8.FunctionTemplate
 	contexts       map[*v8.Context]*ScriptContext
 }
@@ -76,9 +78,13 @@ func NewScriptHost() *ScriptHost {
 	host.document = CreateDocumentPrototype(host)
 	host.node = CreateNode(host.iso)
 	host.eventTarget = CreateEventTarget(host)
+	host.element = CreateElement(host)
+	host.htmlElement = CreateHtmlElement(host)
 	host.window = CreateWindowTemplate(host)
 	host.window.Inherit(host.eventTarget)
 	host.windowTemplate = host.window.GetInstanceTemplate()
+	host.element.Inherit(host.node)
+	host.htmlElement.Inherit(host.element)
 	host.document.Inherit(host.node)
 	host.node.Inherit(host.eventTarget)
 	host.contexts = make(map[*v8.Context]*ScriptContext)

@@ -68,5 +68,21 @@ var _ = Describe("V8 Document", func() {
 			).Error().
 				ToNot(HaveOccurred())
 		})
+
+		It("Should have a documentElement when HTML is loaded", func() {
+			ctx.Window().LoadHTML(` <html> <body> </body> </html>`)
+			Expect(
+				ctx.RunTestScript(
+					"Object.getPrototypeOf(document.documentElement).constructor.name",
+				),
+			).To(Equal("HTMLElement"))
+		})
+
+		It("Should have a documentElement instance of HTMLElement", func() {
+			ctx.Window().LoadHTML(` <html> <body> </body> </html>`)
+			Expect(
+				ctx.RunTestScript("document.documentElement instanceof HTMLElement"),
+			).To(BeTrue())
+		})
 	})
 })
