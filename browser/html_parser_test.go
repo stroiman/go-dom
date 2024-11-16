@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/stroiman/go-dom/browser"
 	dom "github.com/stroiman/go-dom/browser"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gcustom"
+
 	"github.com/onsi/gomega/types"
 )
 
@@ -74,7 +77,28 @@ var _ = Describe("Parser", func() {
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
 	})
+
+	It("Should parse text nodes in body", func() {
+		result := dom.ParseHtmlString(`<html><body><div>
+  <h1>Hello</h1>
+  <p>Lorem Ipsum</p>
+</div></body></html>`)
+		Expect(result.Body()).To(MatchStructure("BODY", MatchStructure("DIV",
+			BeTextNode("\n  "),
+			MatchStructure("H1", BeTextNode("Hello")),
+			BeTextNode("\n  "),
+			MatchStructure("P", BeTextNode("Lorem Ipsum")),
+			BeTextNode("\n"),
+		)))
+	})
 })
+
+func BeTextNode(content string) types.GomegaMatcher {
+	return gcustom.MakeMatcher(func(actual interface{}) (bool, error) {
+		_, ok := actual.(browser.TextNode)
+		return ok, nil
+	})
+}
 
 func MatchStructure(name string, children ...types.GomegaMatcher) types.GomegaMatcher {
 	return WithTransform(func(node interface{}) (res struct {

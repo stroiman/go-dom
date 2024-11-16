@@ -166,7 +166,6 @@ Parsing CSS woule be nice, allowing test code to verify the resulting styles of
 an element; but having a working DOM with a JavaScript engine is higher
 priority.
 
-
 #### Mock external sites
 
 The system may depend on external sites in the browser, most notably identity

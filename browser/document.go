@@ -12,7 +12,6 @@ type Document interface {
 	createElement(*html.Node) Element
 	DocumentElement() Element
 	Append(Element) Element
-	SetBody(e Element)
 }
 type elementConstructor func(doc *document) Element
 
@@ -25,7 +24,6 @@ type document struct {
 	//
 	// ... unless internally there are two implementations of the interface.
 	documentElement Element
-	body            Element
 }
 
 func newDocument(node *html.Node) Document {
@@ -43,7 +41,17 @@ func NewDocument() Document {
 }
 
 func (d *document) Body() Element {
-	return d.body
+	root := d.DocumentElement()
+	if root != nil {
+		for _, child := range root.ChildNodes() {
+			if e, ok := child.(Element); ok {
+				if e.TagName() == "BODY" {
+					return e
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func (d *document) CreateElement(name string) Element {
@@ -58,10 +66,6 @@ func (d *document) CreateElement(name string) Element {
 
 func (d *document) createElement(node *html.Node) Element {
 	return NewHTMLElement(node)
-}
-
-func (d *document) SetBody(body Element) {
-	d.body = body
 }
 
 func (d *document) Append(element Element) Element {
