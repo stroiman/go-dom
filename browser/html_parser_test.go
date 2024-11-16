@@ -17,7 +17,6 @@ import (
 var _ = Describe("Parser", func() {
 	It("Should be able to parse an empty HTML document", func() {
 		result := dom.ParseHtmlString("<html><head></head><body></body></html>")
-		fmt.Printf("Document: %v\n", result)
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))

@@ -29,3 +29,7 @@ func newBase() base {
 }
 
 func (b base) ObjectId() ObjectId { return b.objectId }
+
+type Entity interface {
+	ObjectId() ObjectId
+}

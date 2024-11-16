@@ -1,20 +1,5 @@
 package browser
 
-type Event interface {
-	Type() string
-	Target() EventTarget
-}
-
-type CustomEvent interface{}
-
-type EventHandler interface {
-	HandleEvent(event Event)
-}
-
-type EventHandlerFunc func(Event)
-
-func (l EventHandlerFunc) HandleEvent(e Event) { l(e) }
-
 type EventTarget interface {
 	// ObjectId is used internally for the scripting engine to associate a v8
 	// object with the Go object it wraps.
@@ -26,12 +11,13 @@ type EventTarget interface {
 
 type eventTarget struct {
 	base
-	listeners []EventHandler
+	lmap map[string][]EventHandler
 }
 
 func newEventTarget() eventTarget {
 	return eventTarget{
 		base: newBase(),
+		lmap: make(map[string][]EventHandler),
 	}
 }
 
@@ -41,13 +27,101 @@ func NewEventTarget() EventTarget {
 }
 
 func (e *eventTarget) AddEventListener(eventType string, listener EventHandler) {
-	e.listeners = append(e.listeners, listener)
+	listeners := e.lmap[eventType]
+	for _, l := range listeners {
+		if l.Equals(listener) {
+			return
+		}
+	}
+	e.lmap[eventType] = append(listeners, listener)
 }
 
-func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandler) {}
+func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandler) {
+	listeners := e.lmap[eventType]
+	for i, l := range listeners {
+		if l.Equals(listener) {
+			e.lmap[eventType] = append(listeners[:i], listeners[i+1:]...)
+			return
+		}
+	}
+}
 
 func (e *eventTarget) DispatchEvent(event Event) {
-	for _, l := range e.listeners {
+	listeners := e.lmap[event.Type()]
+	for _, l := range listeners {
 		l.HandleEvent(event)
 	}
 }
+
+/* -------- Event & CustomEvent -------- */
+
+type Event interface {
+	Type() string
+}
+
+type CustomEvent interface {
+	Event
+}
+
+type event struct {
+	eventType string
+}
+
+func newEvent(eventType string) event {
+	return event{eventType}
+}
+
+func (e *event) Type() string { return e.eventType }
+
+type customEvent struct {
+	event
+}
+
+func NewCustomEvent(eventType string) CustomEvent {
+	e := &customEvent{newEvent(eventType)}
+	return e
+}
+
+/* -------- EventHandler -------- */
+
+// EventHandler is the interface for an event handler. In JavaScript; an event
+// handler can be a function; or an object with a `handleEvent` function.
+//
+// Duplicate detection during _add_, or removal is based on equality. JavaScript
+// equality does not translate natively to Go, so a handler must be able to
+// detect equality by itself
+type EventHandler interface {
+	HandleEvent(event Event)
+	// The interface for removing event handlers requires the caller to pass in
+	// the same handler to `RemoveEventListener`. In Go; functions cannot be
+	// compared for equality; so we need to have some kind of mechanism to
+	// identify if two handlers are identical.
+	Equals(other EventHandler) bool
+}
+
+type HandlerFunc = func(Event)
+
+type eventHandlerFunc struct {
+	handlerFunc func(Event)
+	id          ObjectId
+}
+
+// NewEventHandlerFunc creates an EventHandler wrapping a function with the
+// right signature.
+// Calling this twice for the same Go-function will be treated as different
+// event handlers; as Go functions do not support equality.
+func NewEventHandlerFunc(handler HandlerFunc) EventHandler {
+	return eventHandlerFunc{handler, NewObjectId()}
+}
+
+func (e eventHandlerFunc) HandleEvent(event Event) { e.handlerFunc(event) }
+
+func (e eventHandlerFunc) Equals(handler EventHandler) bool {
+	x, ok := handler.(Entity)
+	return ok && x.ObjectId() == e.id
+}
+
+// ObjectId makes the eventHandlerFunc type implement the Entity interface.
+// While the code will still compile without this function; equality check will
+// fail. This will be caught by tests verifying EventTarget behaviour.
+func (e eventHandlerFunc) ObjectId() ObjectId { return e.id }
