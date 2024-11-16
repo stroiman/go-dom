@@ -34,6 +34,7 @@ func CreateWindowTemplate(host *ScriptHost) *v8.FunctionTemplate {
 		nil, v8.ReadOnly)
 	windowTemplate.Set("Document", host.document)
 	windowTemplate.Set("Node", host.node)
+	windowTemplate.Set("CustomEvent", host.customEvent)
 	windowTemplate.Set("EventTarget", host.eventTarget)
 	windowTemplate.Set("Window", windowTemplateFn)
 	windowTemplate.Set("HTMLElement", host.htmlElement)

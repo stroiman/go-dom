@@ -16,6 +16,7 @@ type ScriptHost struct {
 	node           *v8.FunctionTemplate
 	element        *v8.FunctionTemplate
 	htmlElement    *v8.FunctionTemplate
+	customEvent    *v8.FunctionTemplate
 	eventTarget    *v8.FunctionTemplate
 	contexts       map[*v8.Context]*ScriptContext
 }
@@ -38,10 +39,10 @@ type ScriptContext struct {
 	window   Window
 	pinner   runtime.Pinner
 	v8nodes  map[ObjectId]*v8.Value
-	domNodes map[ObjectId]Node
+	domNodes map[ObjectId]Entity
 }
 
-func (c *ScriptContext) CacheNode(obj *v8.Object, node Node) (*v8.Value, error) {
+func (c *ScriptContext) CacheNode(obj *v8.Object, node Entity) (*v8.Value, error) {
 	val := obj.Value
 	objectId := node.ObjectId()
 	c.v8nodes[objectId] = val
@@ -77,6 +78,7 @@ func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
 	host.document = CreateDocumentPrototype(host)
 	host.node = CreateNode(host.iso)
+	host.customEvent = CreateCustomEvent(host)
 	host.eventTarget = CreateEventTarget(host)
 	host.element = CreateElement(host)
 	host.htmlElement = CreateHtmlElement(host)
@@ -104,10 +106,11 @@ func (host *ScriptHost) NewContext() *ScriptContext {
 		v8ctx:    v8.NewContext(host.iso, host.windowTemplate),
 		window:   window,
 		v8nodes:  make(map[ObjectId]*v8.Value),
-		domNodes: make(map[ObjectId]Node),
+		domNodes: make(map[ObjectId]Entity),
 	}
 	global = context.v8ctx.Global()
 	host.contexts[context.v8ctx] = context
+	context.CacheNode(global, window)
 
 	return context
 }
