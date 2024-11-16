@@ -6,8 +6,6 @@ import (
 
 type Node interface {
 	EventTarget
-	// ObjectId is used internally to use nodes as keys in a map without keeping
-	// the objects reachable.
 	NodeName() string
 	AppendChild(node Node) Node
 	ChildNodes() []Node
