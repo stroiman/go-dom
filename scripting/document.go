@@ -23,8 +23,8 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			return v8.Undefined(iso)
 		}))
 
-	proto.SetAccessorPropertyWithError("documentElement", v8.AccessPropWithError{
-		Get: func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	proto.SetAccessorPropertyCallback("documentElement",
+		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(arg.Context())
 			this, ok := ctx.domNodes[arg.This().GetInternalField(0).Int32()]
 			if e, e_ok := this.(Document); ok && e_ok {
@@ -32,7 +32,8 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			}
 			return nil, v8.NewTypeError(iso, "Object not a Document")
 		},
-		Attributes: v8.ReadOnly,
-	})
+		nil,
+		v8.ReadOnly,
+	)
 	return res
 }

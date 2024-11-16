@@ -16,25 +16,22 @@ func CreateWindowTemplate(host *ScriptHost) *v8.FunctionTemplate {
 	)
 	windowTemplate := windowTemplateFn.GetInstanceTemplate()
 	windowTemplate.SetInternalFieldCount(1)
-	windowTemplate.SetAccessorProperty(
+	windowTemplate.SetAccessorPropertyCallback(
 		"window",
-		v8.AccessProp{
-			Get: func(i *v8.FunctionCallbackInfo) *v8.Value {
-				return i.This().Value
-			},
-			Attributes: v8.ReadOnly,
+		func(i *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			return i.This().Value, nil
 		},
+		nil, v8.ReadOnly,
 	)
-	windowTemplate.SetAccessorPropertyWithError(
+	windowTemplate.SetAccessorPropertyCallback(
 		"document",
-		v8.AccessPropWithError{
-			Get: func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				if ctx, ok := host.GetContext(info.Context()); ok {
-					return ctx.GetInstanceForNode(host.document, ctx.window.Document())
-				}
-				return nil, errors.New("Must have a context")
-			},
-		})
+		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			if ctx, ok := host.GetContext(info.Context()); ok {
+				return ctx.GetInstanceForNode(host.document, ctx.window.Document())
+			}
+			return nil, errors.New("Must have a context")
+		},
+		nil, v8.ReadOnly)
 	windowTemplate.Set("Document", host.document)
 	windowTemplate.Set("Node", host.node)
 	windowTemplate.Set("EventTarget", host.eventTarget)
