@@ -34,6 +34,10 @@ func (w *window) Document() Document {
 
 func (w *window) LoadHTML(html string) {
 	parseStream(w, strings.NewReader(html))
+	w.DispatchEvent(NewCustomEvent("DOMContentLoaded"))
+	// 'load' is emitted when css and images are loaded, not relevant yet, so
+	// just emit it right await
+	w.DispatchEvent(NewCustomEvent("load"))
 }
 
 func (w *window) Eval(script string) (any, error) {

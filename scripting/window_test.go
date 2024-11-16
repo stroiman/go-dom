@@ -27,4 +27,24 @@ var _ = Describe("Window", func() {
 			Expect(ctx.MustRunTestScript("window instanceof EventTarget")).To(BeTrue())
 		})
 	})
+
+	Describe("Window Events", func() {
+		Describe("DOMContentLoaded", func() {
+			It("Should be fired _after_ script has executed", func() {
+				ctx.Window().SetScriptRunner(ctx.ScriptContext)
+				ctx.Window().LoadHTML(`<body><script>
+  scripts = []
+  function listener1() {
+    scripts.push("DOMContentLoaded")
+  }
+  function listener2() {
+    scripts.push("load")
+  }
+  window.addEventListener("DOMContentLoaded", listener1);
+  window.addEventListener("load", listener2);
+</script></body>`)
+				Expect(ctx.RunTestScript("scripts.join(',')")).To(Equal("DOMContentLoaded,load"))
+			})
+		})
+	})
 })
