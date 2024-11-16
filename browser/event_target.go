@@ -27,6 +27,16 @@ func NewEventTarget() EventTarget {
 }
 
 func (e *eventTarget) AddEventListener(eventType string, listener EventHandler) {
+	// TODO: Handle options
+	// - capture
+	// - once
+	// - passive. Defaults to false,
+	// - signal - TODO: Implement AbortSignal
+	// Browser specific
+	// - Safari
+	//   - passive defaults to true for `wheel`, `mousewheel` `touchstart`, `tourchmove` events
+	// - Firefox (Gecko), receives an extra boolean argument, `wantsUntrusted`
+	//   - https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#wantsuntrusted
 	listeners := e.lmap[eventType]
 	for _, l := range listeners {
 		if l.Equals(listener) {
