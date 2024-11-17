@@ -15,19 +15,30 @@ import (
 // readystatechange
 // timeout
 
+type XHREvent = string
+
+const (
+	XHREventLoad      XHREvent = "load"
+	XHREventLoadstart XHREvent = "loadstart"
+	XHREventLoadend   XHREvent = "loadend"
+)
+
 // TODO: Type URL (or is it in v8 already?)
 
 type XmlHttpRequest struct {
+	eventTarget
 	client   http.Client
 	async    bool
 	status   int
+	method   string
 	url      string
 	response []byte
 }
 
 func NewXmlHttpRequest(client http.Client) *XmlHttpRequest {
 	return &XmlHttpRequest{
-		client: client,
+		eventTarget: newEventTarget(),
+		client:      client,
 	}
 }
 
@@ -40,10 +51,16 @@ func (req *XmlHttpRequest) Open(
 	// binding layer? Or different methods?
 	url string,
 	options ...RequestOption) {
+
+	req.method = method
+	req.url = url
+	for _, o := range options {
+		o(req)
+	}
 	// TODO: if (req.open) { req.Abort() }
 }
 
-func (req *XmlHttpRequest) Send() error {
+func (req *XmlHttpRequest) send() error {
 	res, err := req.client.Get(req.url)
 	if err != nil {
 		return err
@@ -52,7 +69,17 @@ func (req *XmlHttpRequest) Send() error {
 	b := new(bytes.Buffer) // TODO, branch out depending on content-type
 	_, err = b.ReadFrom(res.Body)
 	req.response = b.Bytes()
+	req.DispatchEvent(NewCustomEvent(XHREventLoad))
 	return err
+}
+
+func (req *XmlHttpRequest) Send() error {
+	if req.async {
+		req.DispatchEvent(NewCustomEvent((XHREventLoadstart)))
+		go req.send()
+		return nil
+	}
+	return req.send()
 }
 
 func (req *XmlHttpRequest) Status() int { return req.status }
