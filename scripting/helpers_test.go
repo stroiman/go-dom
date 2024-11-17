@@ -42,6 +42,9 @@ func (c TestScriptContext) MustRunTestScript(script string) any {
 }
 
 func v8ValueToGoValue(result *v8go.Value) interface{} {
+	if result == nil {
+		return nil
+	}
 	if result.IsBoolean() {
 		return result.Boolean()
 	}

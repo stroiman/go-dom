@@ -7,6 +7,7 @@ import (
 type Node interface {
 	EventTarget
 	NodeName() string
+	GetAttribute(name string) string
 	AppendChild(node Node) Node
 	ChildNodes() []Node
 	Parent() Node
@@ -52,4 +53,13 @@ func (n *node) wrappedNode() *html.Node {
 
 func (n *node) NodeName() string {
 	return "#node"
+}
+
+func (n *node) GetAttribute(name string) string {
+	for _, a := range n.htmlNode.Attr {
+		if a.Key == name {
+			return a.Val
+		}
+	}
+	return ""
 }

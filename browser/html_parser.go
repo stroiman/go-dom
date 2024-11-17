@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"bytes"
 	"io"
 	"strings"
 
@@ -15,13 +16,32 @@ type ElementSteps interface {
 type ScriptElementRules struct{}
 
 func (r ScriptElementRules) Connected(win Window, node Node) {
-	b := strings.Builder{}
-	for child := range node.wrappedNode().ChildNodes() {
-		if child.Type == html.TextNode {
-			b.WriteString(child.Data)
+	var script string
+	src := node.GetAttribute("src")
+	if src == "" {
+		b := strings.Builder{}
+		for child := range node.wrappedNode().ChildNodes() {
+			if child.Type == html.TextNode {
+				b.WriteString(child.Data)
+			}
 		}
+		script = b.String()
+	} else {
+		window := win.(*window)
+		resp, err := window.httpClient.Get(src)
+		if err != nil {
+			panic(err)
+		}
+		if resp.StatusCode != 200 {
+			panic("Bad response")
+		}
+
+		buf := bytes.NewBuffer([]byte{})
+		buf.ReadFrom(resp.Body)
+		script = string(buf.Bytes())
+
 	}
-	win.Eval(b.String())
+	win.Eval(script)
 }
 
 var ElementMap = map[atom.Atom]ElementSteps{
