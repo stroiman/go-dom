@@ -14,7 +14,8 @@ type ScriptEngineFactory interface {
 }
 
 // Pretty stupid right now, but should _probably_ allow handling multiple
-// windows/tabs. Particularly if testing login flow; where the login
+// windows/tabs. This used to be the case for _some_ identity providers, but I'm
+// not sure if that even work anymore because of browser sercurity.
 type Browser struct {
 	Client              http.Client
 	ScriptEngineFactory ScriptEngineFactory
@@ -55,9 +56,11 @@ func (b *Browser) Open(url string) Document {
 	return ParseHtmlStream(resp.Body)
 }
 
-type HandlerRoundTripper struct{ http.Handler }
+// A TestRoundTripper is an implementation of the [http.RoundTripper] interface
+// that communicates directly with an [http.Handler] instance.
+type TestRoundTripper struct{ http.Handler }
 
-func (h HandlerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+func (h TestRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	// if req.Host != "" {
 	// 	// TODO: Not tested, nowhere near the case where we can test this yet, but
 	// 	// the idea is if we are serving content directly from an http.Handler, any
@@ -77,7 +80,7 @@ func NewBrowserFromHandler(handler http.Handler) *Browser {
 	}
 
 	client := http.Client{
-		Transport: HandlerRoundTripper{handler},
+		Transport: TestRoundTripper{handler},
 		Jar:       cookiejar,
 	}
 	return &Browser{
