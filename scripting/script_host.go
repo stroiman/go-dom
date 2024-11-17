@@ -74,6 +74,11 @@ func (c *ScriptContext) GetInstanceForNode(
 	return nil, err
 }
 
+func (c *ScriptContext) GetCachedNode(this *v8.Object) (Entity, bool) {
+	result, ok := c.domNodes[this.GetInternalField(0).Int32()]
+	return result, ok
+}
+
 func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
 	host.document = CreateDocumentPrototype(host)

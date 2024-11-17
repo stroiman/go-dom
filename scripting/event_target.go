@@ -39,6 +39,7 @@ func CreateCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
 				return nil, v8.NewTypeError(iso, "Must have at least one constructor argument")
 			}
 			e := browser.NewCustomEvent(args[0].String())
+			// TODO: get rid of pinner; or unpin when ready
 			t := runtime.Pinner{}
 			t.Pin(e)
 			info.This().SetInternalField(0, v8.NewExternalFromInterface(iso, e))
@@ -79,19 +80,19 @@ func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 				ctx := host.MustGetContext(info.Context())
-				if target, ok := ctx.domNodes[info.This().GetInternalField(0).Int32()].(browser.EventTarget); ok {
-					e := info.Args()[0]
-					intf := e.Object().GetInternalField(0).ExternalInterface()
-					evt, ok := intf.(browser.Event)
-					if !ok {
-						panic("Not an event")
-					}
-					target.DispatchEvent(evt)
-					//target.DispatchEvent(browser.NewCustomEvent("custom"))
-					return v8.Undefined(iso), nil
-				} else {
-					return nil, v8.NewTypeError(iso, "What the dispatch?")
+				this, _ := ctx.GetCachedNode(info.This())
+				target, ok := this.(browser.EventTarget)
+				if !ok {
+					return nil, v8.NewTypeError(iso, "Object not an EventTarget")
 				}
+				e := info.Args()[0]
+				intf := e.Object().GetInternalField(0).ExternalInterface()
+				if evt, ok := intf.(browser.Event); ok {
+					target.DispatchEvent(evt)
+				} else {
+					return nil, v8.NewTypeError(iso, "Not an Event")
+				}
+				return v8.Undefined(iso), nil
 			}), v8.ReadOnly)
 	instanceTemplate := res.GetInstanceTemplate()
 	instanceTemplate.SetInternalFieldCount(1)

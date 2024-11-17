@@ -26,7 +26,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	proto.SetAccessorPropertyCallback("documentElement",
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(arg.Context())
-			this, ok := ctx.domNodes[arg.This().GetInternalField(0).Int32()]
+			this, ok := ctx.GetCachedNode(arg.This())
 			if e, e_ok := this.(Document); ok && e_ok {
 				return ctx.GetInstanceForNode(host.htmlElement, e.DocumentElement())
 			}

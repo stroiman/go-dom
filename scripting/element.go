@@ -18,7 +18,7 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	proto.SetAccessorPropertyCallback("outerHTML",
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(info.Context())
-			this, ok := ctx.domNodes[info.This().GetInternalField(0).Int32()]
+			this, ok := ctx.GetCachedNode(info.This())
 			if e, e_ok := this.(Element); e_ok && ok {
 				return v8.NewValue(iso, e.OuterHTML())
 			} else {
