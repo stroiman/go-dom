@@ -2,6 +2,13 @@ package browser
 
 import "strings"
 
+type WindowEvent = string
+
+const (
+	WindowEventDOMContentLoaded WindowEvent = "DOMContentLoaded"
+	WindowEventLoad             WindowEvent = "load"
+)
+
 type Window interface {
 	EventTarget
 	Document() Document
@@ -34,10 +41,10 @@ func (w *window) Document() Document {
 
 func (w *window) LoadHTML(html string) {
 	parseStream(w, strings.NewReader(html))
-	w.DispatchEvent(NewCustomEvent("DOMContentLoaded"))
+	w.DispatchEvent(NewCustomEvent(WindowEventDOMContentLoaded))
 	// 'load' is emitted when css and images are loaded, not relevant yet, so
 	// just emit it right await
-	w.DispatchEvent(NewCustomEvent("load"))
+	w.DispatchEvent(NewCustomEvent(WindowEventLoad))
 }
 
 func (w *window) Eval(script string) (any, error) {
