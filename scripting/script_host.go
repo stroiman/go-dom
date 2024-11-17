@@ -1,6 +1,7 @@
 package scripting
 
 import (
+	"net/http"
 	"runtime"
 
 	. "github.com/stroiman/go-dom/browser"
@@ -145,4 +146,11 @@ func (ctx *ScriptContext) Run(script string) (interface{}, error) {
 
 func (ctx *ScriptContext) Window() Window {
 	return ctx.window
+}
+
+// TODO: Refactor, deps are totally the wrong way around
+func (ctx *ScriptContext) NewBrowserFromHandler(handler http.Handler) Browser {
+	browser := NewBrowserFromHandler(handler)
+	browser.ScriptEngine = ctx
+	return browser
 }

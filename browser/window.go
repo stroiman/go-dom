@@ -1,6 +1,10 @@
 package browser
 
-import "strings"
+import (
+	"io"
+	"net/http"
+	"strings"
+)
 
 type WindowEvent = string
 
@@ -26,6 +30,7 @@ type window struct {
 	eventTarget
 	document     Document
 	scriptEngine ScriptEngine
+	httpClient   http.Client
 }
 
 func NewWindow() Window {
@@ -35,16 +40,29 @@ func NewWindow() Window {
 	}
 }
 
+func newWindow(httpClient http.Client) *window {
+	return &window{
+		eventTarget: newEventTarget(),
+		document:    NewDocument(),
+		httpClient:  httpClient,
+	}
+}
+
 func (w *window) Document() Document {
 	return w.document
 }
 
 func (w *window) LoadHTML(html string) {
-	parseStream(w, strings.NewReader(html))
+	w.loadReader(strings.NewReader(html))
+}
+
+func (w *window) loadReader(r io.Reader) error {
+	parseStream(w, r)
 	w.DispatchEvent(NewCustomEvent(WindowEventDOMContentLoaded))
 	// 'load' is emitted when css and images are loaded, not relevant yet, so
 	// just emit it right await
 	w.DispatchEvent(NewCustomEvent(WindowEventLoad))
+	return nil
 }
 
 func (w *window) Eval(script string) (any, error) {

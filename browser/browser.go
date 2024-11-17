@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"errors"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -9,9 +10,26 @@ import (
 // Pretty stupid right now, but should _probably_ allow handling multiple
 // windows/tabs. Particularly if testing login flow; where the login
 type Browser struct {
-	Client http.Client
+	Client       http.Client
+	ScriptEngine ScriptEngine
 }
 
+// TODO: Rename to Open
+func (b Browser) OpenWindow(url string) (Window, error) {
+	resp, err := b.Client.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New("Non-ok Response")
+	}
+	window := newWindow(b.Client)
+	window.SetScriptRunner(b.ScriptEngine)
+	window.loadReader(resp.Body)
+	return window, nil
+}
+
+// TODO: Delete
 func (b Browser) Open(url string) Document {
 	resp, err := b.Client.Get(url)
 	if err != nil {
@@ -45,5 +63,5 @@ func NewBrowserFromHandler(handler http.Handler) Browser {
 		Transport: HandlerRoundTripper{handler},
 		Jar:       cookiejar,
 	}
-	return Browser{client}
+	return Browser{client, nil}
 }
