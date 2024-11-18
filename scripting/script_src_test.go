@@ -38,17 +38,17 @@ var _ = Describe("Load from server", func() {
 		Expect(browser.OpenWindow("/not-found.html")).Error().To(HaveOccurred())
 	})
 
-	It("Executes script from script tags", func() {
+	It("Should download and execute script from script tags", func() {
 		server := http.NewServeMux()
-		server.Handle(
+		server.HandleFunc(
 			"GET /index.html",
-			http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			func(res http.ResponseWriter, req *http.Request) {
 				res.Write(
 					[]byte(
 						`<html><head><script src="/js/script.js"></script></head><body>Hello, World!</body>`,
 					),
 				)
-			}),
+			},
 		)
 		server.HandleFunc(
 			"GET /js/script.js",
