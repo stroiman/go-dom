@@ -5,6 +5,13 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
+type DocumentEvent = string
+
+const (
+	DocumentEventDOMContentLoaded DocumentEvent = "DOMContentLoaded"
+	DocumentEventLoad             DocumentEvent = "load"
+)
+
 type Document interface {
 	Node
 	Body() Element

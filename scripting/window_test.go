@@ -40,8 +40,8 @@ var _ = Describe("Window", func() {
   function listener2() {
     scripts.push("load")
   }
-  window.addEventListener("DOMContentLoaded", listener1);
-  window.addEventListener("load", listener2);
+  window.document.addEventListener("DOMContentLoaded", listener1);
+  window.document.addEventListener("load", listener2);
 </script></body>`)
 				Expect(ctx.RunTestScript("scripts.join(',')")).To(Equal("DOMContentLoaded,load"))
 			})

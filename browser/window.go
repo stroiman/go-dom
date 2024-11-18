@@ -6,13 +6,6 @@ import (
 	"strings"
 )
 
-type WindowEvent = string
-
-const (
-	WindowEventDOMContentLoaded WindowEvent = "DOMContentLoaded"
-	WindowEventLoad             WindowEvent = "load"
-)
-
 type Window interface {
 	EventTarget
 	Document() Document
@@ -58,10 +51,10 @@ func (w *window) LoadHTML(html string) {
 
 func (w *window) loadReader(r io.Reader) error {
 	parseStream(w, r)
-	w.DispatchEvent(NewCustomEvent(WindowEventDOMContentLoaded))
+	w.Document().DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
 	// 'load' is emitted when css and images are loaded, not relevant yet, so
 	// just emit it right await
-	w.DispatchEvent(NewCustomEvent(WindowEventLoad))
+	w.Document().DispatchEvent(NewCustomEvent(DocumentEventLoad))
 	return nil
 }
 
