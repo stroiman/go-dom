@@ -63,7 +63,8 @@ var _ = Describe("Load from server", func() {
 		// Verify, create a browser communicating with this. Open the HTML file, and
 		// verify the side effect by inspecting global JS scope.
 		browser := ctx.NewBrowserFromHandler(server)
-		Expect(browser.OpenWindow("/index.html")).Error().ToNot(HaveOccurred())
-		Expect(ctx.RunTestScript("window.scriptLoaded")).To(BeTrue())
+		win, err := browser.OpenWindow("/index.html")
+		Expect(err).ToNot(HaveOccurred())
+		Expect(win.Eval("window.scriptLoaded")).To(BeTrue())
 	})
 })
