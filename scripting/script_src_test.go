@@ -39,6 +39,7 @@ var _ = Describe("Load from server", func() {
 	})
 
 	It("Should download and execute script from script tags", func() {
+		// Create a simple server, serving an HTML file and JS
 		server := http.NewServeMux()
 		server.HandleFunc(
 			"GET /index.html",
@@ -50,6 +51,8 @@ var _ = Describe("Load from server", func() {
 				)
 			},
 		)
+		// The script is pretty basic. In order to verify it has been executed, it
+		// produces an observable side effect; setting a variable in global scope
 		server.HandleFunc(
 			"GET /js/script.js",
 			func(res http.ResponseWriter, req *http.Request) {
@@ -57,6 +60,8 @@ var _ = Describe("Load from server", func() {
 				res.Write([]byte(`var scriptLoaded = true`))
 			},
 		)
+		// Verify, create a browser communicating with this. Open the HTML file, and
+		// verify the side effect by inspecting global JS scope.
 		browser := ctx.NewBrowserFromHandler(server)
 		Expect(browser.OpenWindow("/index.html")).Error().ToNot(HaveOccurred())
 		Expect(ctx.RunTestScript("window.scriptLoaded")).To(BeTrue())
