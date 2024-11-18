@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log/slog"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -19,6 +20,7 @@ type ScriptElementRules struct{}
 func (r ScriptElementRules) Connected(win Window, node Element) {
 	var script string
 	src := node.GetAttribute("src")
+	slog.Debug("Process script tag")
 	if src == "" {
 		b := strings.Builder{}
 		for _, child := range node.ChildNodes().All() {
@@ -46,11 +48,10 @@ func (r ScriptElementRules) Connected(win Window, node Element) {
 	// TODO: Propagate error for better error handling
 	err := win.Run(script)
 	if err != nil {
-		fmt.Println("Error loading script", src, err)
+		slog.Error("Error loading script")
 	} else {
-		fmt.Println("Script loaded/executed")
+		slog.Debug("Script loaded/executed")
 	}
-
 }
 
 var ElementMap = map[atom.Atom]ElementSteps{
