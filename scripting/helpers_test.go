@@ -2,6 +2,7 @@ package scripting_test
 
 import (
 	"fmt"
+	"net/url"
 
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/stroiman/go-dom/browser"
@@ -42,7 +43,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 	ctx := TestScriptContext{}
 
 	BeforeEach(func() {
-		window := browser.NewWindow()
+		window := browser.NewWindow(new(url.URL))
 		ctx.ScriptContext = host.NewContext(window)
 		for _, hook := range hooks {
 			hook(ctx.ScriptContext)

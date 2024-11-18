@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -14,6 +15,7 @@ type Window interface {
 	LoadHTML(string)
 	Eval(string) (any, error)
 	SetScriptRunner(ScriptEngine)
+	Location() Location
 }
 
 type ScriptEngine interface {
@@ -25,20 +27,23 @@ type window struct {
 	document     Document
 	scriptEngine ScriptEngine
 	httpClient   http.Client
+	url          *url.URL
 }
 
-func NewWindow() Window {
+func NewWindow(url *url.URL) Window {
 	return &window{
 		eventTarget: newEventTarget(),
 		document:    NewDocument(),
+		url:         url,
 	}
 }
 
-func newWindow(httpClient http.Client) *window {
+func newWindow(httpClient http.Client, url *url.URL) *window {
 	return &window{
 		eventTarget: newEventTarget(),
 		document:    NewDocument(),
 		httpClient:  httpClient,
+		url:         url,
 	}
 }
 
@@ -68,4 +73,12 @@ func (w *window) Eval(script string) (any, error) {
 
 func (w *window) SetScriptRunner(r ScriptEngine) {
 	w.scriptEngine = r
+}
+
+func (w *window) Location() Location {
+	u := w.url
+	if u == nil {
+		u = new(url.URL)
+	}
+	return NewLocation(u)
 }
