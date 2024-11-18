@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/stroiman/go-dom/browser"
 	. "github.com/stroiman/go-dom/scripting"
 	"github.com/tommie/v8go"
 )
@@ -69,7 +70,8 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 	ctx := TestScriptContext{}
 
 	BeforeEach(func() {
-		ctx.ScriptContext = host.NewContext()
+		window := browser.NewWindow()
+		ctx.ScriptContext = host.NewContext(window)
 		for _, hook := range hooks {
 			hook(ctx.ScriptContext)
 		}

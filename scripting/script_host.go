@@ -105,8 +105,7 @@ func (host *ScriptHost) Dispose() {
 
 var global *v8.Object
 
-func (host *ScriptHost) NewContext() *ScriptContext {
-	window := NewWindow()
+func (host *ScriptHost) NewContext(window Window) *ScriptContext {
 	context := &ScriptContext{
 		host:     host,
 		v8ctx:    v8.NewContext(host.iso, host.windowTemplate),
