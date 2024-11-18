@@ -63,22 +63,51 @@ isolated test, e.g. mocking out part of the behaviour; but
 
 ## Project status
 
-This is still very early in the project. Currently, I have
+The current state of the project is, you can start a "browser" connected to a Go
+`http.Handler` (the intention is to use the root handler, that you normally
+expose on a TCP port; not a route, but feel free to do whatever you want).
 
-- Parsing of HTML using [x/net/html](https://pkg.go.dev/golang.org/x/net/html)
-  - Using `x/net/html` gives HTML rendering (i.e., support for `outerHTML`) out
-    of the box.
-  - Libraries exist implementing XPath on top of this.
-- 2nd pass into my own structure
-  - `x/net/html` does not have the interface that a Browser wants, so I wrap
-  this to provide the browser DOM both to JavaScript and Go.
-  - The library doesn't support the insertion steps, e.g., when a `<script>` is
-    connected to the DOM, it should be executed (simplified).
+The browser can open an HTML file, execute included scripts (remote scripts are
+downloaded). The DOM is exposed as native Go objects, allowing the test code to
+inspect or modify them, and JavaScript can also be executed from Go code.
+
+Only a very minimal subset of the DOM specification is implemented.
+
+
+
+- HTML parsing is done in 2 steps
+  - Step 1 parsing of HTML using [x/net/html](https://pkg.go.dev/golang.org/x/net/html)
+      - Using `x/net/html` gives HTML rendering (i.e., support for `outerHTML`) out
+        of the box.
+      - Libraries exist implementing XPath on top of this.
+  - 2nd pass into my own structure
+    - `x/net/html` does not have the interface that a Browser wants, so I wrap
+    this to provide the browser DOM both to JavaScript and Go.
+    - The library doesn't support the insertion steps, e.g., when a `<script>` is
+      connected to the DOM, it should be executed (simplified).
 - Embedding of v8 engine.[^4]
-  - This currently only exposes a subset of the DOM functions, but is enough to
-    identify the issues 
-- Ability to connect directly to an `http.Handler`
+  - Expose the navite Go objects to JavaScript
 
+### Memory Leaks
+
+The current implementation is leaking memory for the scope of a "Browser". I.e.,
+all DOM nodes created and deleted for the lifetime of the browser will stay in
+memory until the browser is ready for garbage collection.
+
+The problem here is that this is a marriage between two garbage collected
+systems, and what is conceptually _one object_ is split into two, a Go object
+and a JavaScript wrapper. As long of them is reachable; so must the other be.
+
+I could join them into one; but that would result in an undesired coupling; the
+DOM implementation being coupled to the JavaScript execution engine.
+
+Another solution to this problem involves the use of weak references. This
+exists as an `internal` but [was
+accepted](https://github.com/golang/go/issues/67552) as a feature.
+
+Because of that, and because the browser is only intended to be kept alive for
+the scope of a single short lived test, I have postponed dealing with memory
+management.
 
 ### Demonstration
 
@@ -194,10 +223,13 @@ would welcome contributions. Particularly if:
 
 - ~~You have experience building tokenisers and parsers, especially HTML.~~
   - After first building my own parser, I moved to `x/net/html`, which seems
-    like the right choice.
+    like the right choice; at least for now.
 - You have intimate knowledge of Go's garbage collection mechanics.
-  - If you don't have the time or desire to help _code_ on this project, I would
-    appreciate peer reviews on those parts of the code.
+  - If you don't have the time or desire to help _code_ on this project, ~~I would
+    appreciate peer reviews on those parts of the code.~~
+    - I have postponed solving that problem until Go gets weak references.
+    - However, if you do see another solution to the leaking problem, let me
+      know.
 - You have _intimate knowledge_ of how the DOM works in the browser, and can 
   help detect poor design decisions early. For example:
   - should the internal implementation use `document.CreateElement()`
@@ -208,6 +240,8 @@ would welcome contributions. Particularly if:
   - Which "objects" should I expose from Go to v8? and where should the
     functions live? The objects themselves, or should I create prototype
     in Go code? (I think I _should_ make prototype objects)
+- You have knowledge of the whatwg IDL, and what kind of code could be
+  auto-generated from the IDL
 - You have experience working with the v8 engine, particularly exposing internal
   objects to JavaScript (which is then External to JavaScript).
   - In particular, if you've done this from Go.
