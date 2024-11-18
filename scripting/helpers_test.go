@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/stroiman/go-dom/browser"
 	. "github.com/stroiman/go-dom/scripting"
-	"github.com/tommie/v8go"
 )
 
 type TestScriptContext struct {
@@ -20,12 +19,7 @@ type TestScriptContext struct {
 //
 // Note: This conversion is incomplete.
 func (c TestScriptContext) RunTestScript(script string) (any, error) {
-	result, err := c.RunScript(script)
-	if err == nil {
-		return v8ValueToGoValue(result), nil
-	} else {
-		return nil, err
-	}
+	return c.Run(script)
 }
 
 func (c TestScriptContext) MustRunTestScript(script string) any {
@@ -40,28 +34,6 @@ func (c TestScriptContext) MustRunTestScript(script string) any {
 		)
 	}
 	return result
-}
-
-func v8ValueToGoValue(result *v8go.Value) interface{} {
-	if result == nil {
-		return nil
-	}
-	if result.IsBoolean() {
-		return result.Boolean()
-	}
-	if result.IsInt32() {
-		return result.Int32()
-	}
-	if result.IsString() {
-		return result.String()
-	}
-	if result.IsNull() {
-		return nil
-	}
-	if result.IsUndefined() {
-		return nil
-	}
-	panic(fmt.Sprintf("Value not yet supported: %v", *result))
 }
 
 type CreateHook func(ctx *ScriptContext)

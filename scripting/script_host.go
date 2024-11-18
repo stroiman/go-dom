@@ -1,11 +1,13 @@
 package scripting
 
 import (
+	"fmt"
 	"net/http"
 	"runtime"
 
 	. "github.com/stroiman/go-dom/browser"
 
+	"github.com/tommie/v8go"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -140,7 +142,11 @@ func (ctx *ScriptContext) RunScript(script string) (*v8.Value, error) {
 }
 
 func (ctx *ScriptContext) Run(script string) (interface{}, error) {
-	return ctx.v8ctx.RunScript(script, "")
+	result, err := ctx.RunScript(script)
+	if err == nil {
+		return v8ValueToGoValue(result)
+	}
+	return nil, err
 }
 
 func (ctx *ScriptContext) Window() Window {
@@ -152,4 +158,26 @@ func (ctx *ScriptContext) NewBrowserFromHandler(handler http.Handler) Browser {
 	browser := NewBrowserFromHandler(handler)
 	browser.ScriptEngine = ctx
 	return browser
+}
+
+func v8ValueToGoValue(result *v8go.Value) (interface{}, error) {
+	if result == nil {
+		return nil, nil
+	}
+	if result.IsBoolean() {
+		return result.Boolean(), nil
+	}
+	if result.IsInt32() {
+		return result.Int32(), nil
+	}
+	if result.IsString() {
+		return result.String(), nil
+	}
+	if result.IsNull() {
+		return nil, nil
+	}
+	if result.IsUndefined() {
+		return nil, nil
+	}
+	return nil, fmt.Errorf("Value not yet supported: %v", *result)
 }
