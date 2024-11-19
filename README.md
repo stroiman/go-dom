@@ -31,7 +31,7 @@ the necessity of launching your server.
 This overhead discourages a TDD loop.
 
 The purpose of this project is to support a TDD feedback loop for code
-delivering HTML, and where merely veryifying the HTTP response isn't enough, but
+delivering HTML, and where merely verifying the HTTP response isn't enough, but
 you want to verify:
 
 - JavaScript code has the desired behaviour
