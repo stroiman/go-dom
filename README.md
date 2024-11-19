@@ -133,7 +133,7 @@ It("Runs the script when connected to DOM", func() {
 `,
     )
     Expect(
-        ctx.MustRunTestScript("window.sut"),
+        ctx.RunTestScript("window.sut"),
     ).To(Equal(`<html><head></head><body>
     <script>window.sut = document.documentElement.outerHTML</script></body></html>`))
 })

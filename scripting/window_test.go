@@ -24,7 +24,7 @@ var _ = Describe("Window", func() {
 
 	Describe("Inheritance", func() {
 		It("Should be an EventTarget", func() {
-			Expect(ctx.MustRunTestScript("window instanceof EventTarget")).To(BeTrue())
+			Expect(ctx.RunTestScript("window instanceof EventTarget")).To(BeTrue())
 		})
 	})
 
