@@ -2,10 +2,7 @@
 
 > [!NOTE] 
 >
-> This is only a POC
->
-> Much of this readme file was written before any code was added, and describes
-> the intent of the project, and the benefits that it brings.
+> This is only a POC. There is a lot to do before reaching a level of usability.
 >
 > This starts as a hobby project for learning; there is no guarantee that it
 > will ever become a useful tool; unless it will gain traction and support of
@@ -59,7 +56,7 @@ Some disadvantages compared to e.g. Selenium.
 
 This isn't intended as a replacement for the cases where an end-2-end test is
 the right choice. It is intended as a tool to help when you want a smaller
-isolated test, e.g. mocking out part of the behaviour; but 
+isolated test, e.g. mocking out part of the behaviour;
 
 ## Project status
 
@@ -86,7 +83,7 @@ Only a very minimal subset of the DOM specification is implemented.
     - The library doesn't support the insertion steps, e.g., when a `<script>` is
       connected to the DOM, it should be executed (simplified).
 - Embedding of v8 engine.[^4]
-  - Expose the navite Go objects to JavaScript
+  - Expose the native Go objects to JavaScript
 
 ### Memory Leaks
 
