@@ -71,7 +71,6 @@ inspect or modify them, and JavaScript can also be executed from Go code.
 Only a very minimal subset of the DOM specification is implemented.
 
 
-
 - HTML parsing is done in 2 steps
   - Step 1 parsing of HTML using [x/net/html](https://pkg.go.dev/golang.org/x/net/html)
       - Using `x/net/html` gives HTML rendering (i.e., support for `outerHTML`) out
@@ -136,37 +135,24 @@ It("Runs the script when connected to DOM", func() {
 })
 ```
 
-### Next up
+### Next up - HTMX
 
+The next milestone being worked towards is to have the simplest HTMX application
+running. One that has a button and a counter displayed; which increments
+whenever the user clicks the button.
 
-#### Cleanup
+This drives the need for (not necessarily a complete list, just the parts I know
+that HTMX _does_ depend on)
 
-First a bit of cleanup. Necessary dependencies was identified in order to
-execute scripts during parsing. Minimal code was written to get the test to
-pass; but a bit messy.
+- `location` API - at least in a read-only version.
+- `XMLHttpRequest` - work is underway.
+- `XPathEvaluator` - I have that in a branch using a polyfill. BUT the necessary
+  DOM methods lack implementation.
 
-#### Memory Management
+Following the simple case, the plan is to have more complex cases, e.g. form
+handling with redirection.
 
-This is an integration between two languages both with their own Garbage
-collector; The same object lives in two worlds; but can at any time be reachable
-in both; or just one. In the latter case, the object must be kept alive in the
-other. When not reachable in either world, it should be ready for garbage
-collection in both.
-
-##### Keep JavaScript objects alive
-
-JavaScript objects are created to wrap Go objects. Two JavaScript
-values representing the same DOM object must always be equal. Therefore the Go
-code needs to keep JavaScript objects alive, even when they are out of scope in
-JavaScript. V8 has mechanisms for controlling this.
-
-##### Keep Go objects alive
-
-But also, A Go object may have run out of scope, e.g. an element was
-disconnected from the DOM. But a JavaScript object may still have a reference to
-this object. So JavaScript code needs to keep Go objects alive; but when the
-JavaScript object goes out of scope, the Go object should be ready for garbage
-collection. V8 also has some support for this.
+... and eventually websocket and server event support.
 
 ### Future goals
 
@@ -206,7 +192,7 @@ benefits:
 - Avoid tests breaking because of changes to the external system.
 - For an identity provider
   - Avoid pollution of dummy accounts to run your test suite.
-  - Avoid the locking the account due to _suspiscious activity_.
+  - Avoid locking out test accounts due to _"suspiscious activity"_.
   - The IDP may use a Captcha or 2FA that can be impossible; or difficult to
     control from tests, and would cause a significant slowdown to the test
     suite.
