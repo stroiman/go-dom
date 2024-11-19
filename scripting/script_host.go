@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"runtime"
 
+	"github.com/stroiman/go-dom/browser"
 	. "github.com/stroiman/go-dom/browser"
 
 	"github.com/tommie/v8go"
@@ -120,6 +121,13 @@ func (host *ScriptHost) NewContext(window Window) *ScriptContext {
 	context.CacheNode(global, window)
 
 	return context
+}
+
+type Wrapper ScriptHost
+
+func (w *Wrapper) NewScriptEngine(window Window) browser.ScriptEngine {
+	host := (*ScriptHost)(w)
+	return host.NewContext(window)
 }
 
 func must(err error) {

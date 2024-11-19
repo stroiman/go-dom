@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -62,7 +63,7 @@ func (w *window) Eval(script string) (any, error) {
 	if w.scriptEngine != nil {
 		return w.scriptEngine.Run(script)
 	}
-	return nil, nil // or ErrNo
+	return nil, errors.New("Script engine not initialised")
 }
 
 func (w *window) SetScriptRunner(r ScriptEngine) {

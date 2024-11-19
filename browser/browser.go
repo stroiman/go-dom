@@ -7,11 +7,16 @@ import (
 	"net/http/httptest"
 )
 
+type ScriptEngineFactory interface {
+	NewScriptEngine(window Window) ScriptEngine
+}
+
 // Pretty stupid right now, but should _probably_ allow handling multiple
 // windows/tabs. Particularly if testing login flow; where the login
 type Browser struct {
-	Client       http.Client
-	ScriptEngine ScriptEngine
+	Client              http.Client
+	ScriptEngine        ScriptEngine
+	ScriptEngineFactory ScriptEngineFactory
 }
 
 // TODO: Rename to Open
@@ -24,7 +29,11 @@ func (b Browser) OpenWindow(url string) (Window, error) {
 		return nil, errors.New("Non-ok Response")
 	}
 	window := newWindow(b.Client)
-	window.SetScriptRunner(b.ScriptEngine)
+	scriptEngine := b.ScriptEngine
+	if b.ScriptEngineFactory != nil {
+		scriptEngine = b.ScriptEngineFactory.NewScriptEngine(window)
+	}
+	window.SetScriptRunner(scriptEngine)
 	window.loadReader(resp.Body)
 	return window, nil
 }
@@ -63,5 +72,7 @@ func NewBrowserFromHandler(handler http.Handler) Browser {
 		Transport: HandlerRoundTripper{handler},
 		Jar:       cookiejar,
 	}
-	return Browser{client, nil}
+	return Browser{
+		Client: client,
+	}
 }
