@@ -8,7 +8,7 @@ import (
 )
 
 type Element interface {
-	Node
+	ElementContainer
 	// Children() []Element
 	Append(Element) Element
 	GetAttribute(name string) string
@@ -67,4 +67,12 @@ func (e *element) createHtmlNode() *html.Node {
 		Namespace: e.namespace,
 		Attr:      e.attributes,
 	}
+}
+
+func (e *element) QuerySelector(pattern string) (Node, error) {
+	return CSSHelper{e}.QuerySelector(pattern)
+}
+
+func (e *element) QuerySelectorAll(pattern string) (StaticNodeList, error) {
+	return CSSHelper{e}.QuerySelectorAll(pattern)
 }

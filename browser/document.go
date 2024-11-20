@@ -15,25 +15,21 @@ const (
 )
 
 type Document interface {
-	Node
-	Append(Element) Element
+	RootNode
 	Body() Element
 	CreateElement(string) Element
 	DocumentElement() Element
-	GetElementById(string) Element
-	QuerySelector(string) (Node, error)
-	QuerySelectorAll(string) (StaticNodeList, error)
 	// unexported
 	createElement(*html.Node) Element
 }
 type elementConstructor func(doc *document) Element
 
 type document struct {
-	node
+	rootNode
 }
 
 func NewDocument() Document {
-	return &document{node: newNode()}
+	return &document{rootNode{node: newNode()}}
 }
 
 func (d *document) Body() Element {
