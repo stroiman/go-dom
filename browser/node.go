@@ -15,7 +15,6 @@ type Node interface {
 	Parent() Node
 	// unexported
 	createHtmlNode() *html.Node
-	// toHtmlNode(Node, map[*html.Node]Node) *html.Node
 	setParent(node Node)
 }
 
@@ -39,11 +38,8 @@ func (n NodeHelper) AppendChild(child Node) Node {
 
 func (parent *node) appendChild(child Node) Node {
 	parent.childNodes = append(parent.childNodes, child)
-	child.setParent(parent)
 	return child
 }
-
-func (n *node) createHtmlNode() *html.Node { panic("Implement this in specific nodes") }
 
 func (n *node) ChildNodes() []Node { return n.childNodes }
 
