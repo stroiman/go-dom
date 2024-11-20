@@ -7,23 +7,12 @@ import (
 )
 
 func CreateLocationPrototype(host *ScriptHost) *v8.FunctionTemplate {
-	iso := host.iso
-	templateFn := v8.NewFunctionTemplateWithError(
-		iso,
-		func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			return nil, v8.NewTypeError(iso, "Illegal Constructor")
-		},
-	)
-	template := templateFn.GetInstanceTemplate()
-	template.SetInternalFieldCount(1)
-	helper := PrototypeBuilder[Location]{
-		host,
-		templateFn.PrototypeTemplate(),
-		func(ctx *ScriptContext) (Location, error) {
-			location := ctx.Window().Location()
-			return location, nil
-		},
+	builder := NewIllegalConstructorBuilder[Location](host)
+	builder.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (Location, error) {
+		location := ctx.Window().Location()
+		return location, nil
 	}
+	helper := builder.NewPrototypeBuilder()
 	helper.CreateReadonlyProp("hash", Location.GetHash)
 	helper.CreateReadonlyProp("host", Location.GetHost)
 	helper.CreateReadonlyProp("hostname", Location.GetHostname)
@@ -33,5 +22,5 @@ func CreateLocationPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	helper.CreateReadonlyProp("port", Location.GetPort)
 	helper.CreateReadonlyProp("protocol", Location.GetProtocol)
 	helper.CreateReadonlyProp("search", Location.GetSearch)
-	return templateFn
+	return builder.constructor
 }
