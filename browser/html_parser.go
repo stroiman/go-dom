@@ -62,7 +62,7 @@ func parseStream(w *window, r io.Reader) Document {
 	if err != nil {
 		panic(err)
 	}
-	doc := newDocument(cloneNode(node))
+	doc := NewDocument()
 	if w != nil {
 		w.document = doc
 	}

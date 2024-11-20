@@ -13,7 +13,7 @@ type textNode struct {
 }
 
 func NewTextNode(node *html.Node, text string) Node {
-	return &textNode{newNode(node), text}
+	return &textNode{newNode(), text}
 }
 
 func (n *textNode) Text() string { return n.text }

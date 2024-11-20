@@ -1,8 +1,6 @@
 package browser
 
 import (
-	"fmt"
-
 	"golang.org/x/net/html"
 )
 
@@ -22,13 +20,11 @@ type Node interface {
 type node struct {
 	eventTarget
 	childNodes []Node
-	name       string
-	htmlNode   *html.Node
 	parent     Node
 }
 
-func newNode(htmlNode *html.Node) node {
-	return node{newEventTarget(), []Node{}, htmlNode.Data, htmlNode, nil}
+func newNode() node {
+	return node{newEventTarget(), []Node{}, nil}
 }
 
 func (parent *node) AppendChild(child Node) Node {
@@ -49,16 +45,8 @@ func (n *node) Connected() (result bool) {
 	return
 }
 
-func (n *node) wrappedNode() *html.Node {
-	return n.htmlNode
-}
-
 func (n *node) NodeName() string {
 	return "#node"
-}
-
-func (n *node) createHtmlNode() *html.Node {
-	panic(fmt.Sprintf("You must implement this on the specialised node: %v %v", n.htmlNode.Type, n))
 }
 
 type NodeIterator struct{ Node }

@@ -29,7 +29,7 @@ type element struct {
 }
 
 func NewElement(tagName string, node *html.Node) Element {
-	return &element{newNode(node), tagName, false, node.Namespace, node.Attr}
+	return &element{newNode(), tagName, false, node.Namespace, node.Attr}
 }
 
 func (e *element) NodeName() string {
@@ -53,8 +53,8 @@ func (e *element) OuterHTML() string {
 	return string(writer.String())
 }
 
-func (n *node) GetAttribute(name string) string {
-	for _, a := range n.htmlNode.Attr {
+func (n *element) GetAttribute(name string) string {
+	for _, a := range n.attributes {
 		if a.Key == name {
 			return a.Val
 		}
