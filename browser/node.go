@@ -1,19 +1,24 @@
 package browser
 
 import (
+	"fmt"
+
 	"golang.org/x/net/html"
 )
 
 type Node interface {
 	EventTarget
-	NodeName() string
 	AppendChild(node Node) Node
 	ChildNodes() []Node
-	Parent() Node
 	Connected() bool
+	NodeName() string
+	Parent() Node
+	// unexported
+	createHtmlNode() *html.Node
+	// toHtmlNode(Node, map[*html.Node]Node) *html.Node
+	populateNodeMap(map[*html.Node]Node)
 	setParent(node Node)
 	wrappedNode() *html.Node
-	populateNodeMap(map[*html.Node]Node)
 }
 
 type node struct {
@@ -69,3 +74,30 @@ func (n *node) populateNodeMap(m map[*html.Node]Node) {
 		c.populateNodeMap(m)
 	}
 }
+
+func (n *node) createHtmlNode() *html.Node {
+	panic(fmt.Sprintf("You must implement this on the specialised node: %v %v", n.htmlNode.Type, n))
+}
+
+type NodeIterator struct{ Node }
+
+func (n NodeIterator) toHtmlNode(m map[*html.Node]Node) *html.Node {
+	htmlNode := n.Node.createHtmlNode()
+	if m != nil {
+		m[htmlNode] = n.Node
+	}
+	for _, child := range n.ChildNodes() {
+		htmlNode.AppendChild(NodeIterator{child}.toHtmlNode(m))
+	}
+	return htmlNode
+}
+
+// func (n *node) toHtmlNode(node Node, m map[*html.Node]Node) *html.Node {
+// 	// var node = Node(n)
+// 	htmlNode := node.createHtmlNode()
+// 	m[htmlNode] = node
+// 	for _, child := range n.childNodes {
+// 		htmlNode.AppendChild(child.toHtmlNode(child, m))
+// 	}
+// 	return htmlNode
+// }

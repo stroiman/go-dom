@@ -136,13 +136,18 @@ func (d *document) QuerySelectorAll(pattern string) (StaticNodeList, error) {
 		return nil, err
 	}
 	m := make(map[*html.Node]Node)
-	d.populateNodeMap(m)
-	nodes := sel.Select(d.htmlNode)
+	htmlNode := NodeIterator{d}.toHtmlNode(m)
+	nodes := sel.Select(htmlNode)
 	result := make(StaticNodeList, len(nodes))
 	for i, node := range nodes {
 		resultNode := m[node]
-		// fmt.Println("ReSULT NODE", resultNode)
 		result[i] = resultNode
 	}
 	return result, nil
+}
+
+func (d *document) createHtmlNode() *html.Node {
+	return &html.Node{
+		Type: html.DocumentNode,
+	}
 }

@@ -98,8 +98,9 @@ func iterate(w Window, d Document, dest Node, source *html.Node) {
 		case html.TextNode:
 			dest.AppendChild(NewTextNode(cloneNode(child), child.Data))
 		default:
-			clone := newNode(cloneNode(child))
-			dest.AppendChild(&clone)
+			panic(fmt.Sprintf("Node not yet supported: %v", child))
+			// clone := newNode(cloneNode(child))
+			// dest.AppendChild(&clone)
 		}
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 type Element interface {
@@ -20,13 +21,15 @@ type element struct {
 	node
 	tagName     string
 	isConnected bool
+	namespace   string
+	attributes  []html.Attribute
 	// We might want a "prototype" as a value, rather than a Go type, as new types
 	// can be created at runtime. But if so, we probably want them on the node
 	// type.
 }
 
 func NewElement(tagName string, node *html.Node) Element {
-	return &element{newNode(node), tagName, false}
+	return &element{newNode(node), tagName, false, node.Namespace, node.Attr}
 }
 
 func (e *element) NodeName() string {
@@ -46,7 +49,7 @@ func (parent *element) Append(child Element) Element {
 
 func (e *element) OuterHTML() string {
 	writer := &strings.Builder{}
-	html.Render(writer, e.htmlNode)
+	html.Render(writer, NodeIterator{e}.toHtmlNode(nil))
 	return string(writer.String())
 }
 
@@ -63,4 +66,15 @@ func (n *node) GetAttribute(name string) string {
 		}
 	}
 	return ""
+}
+
+func (e *element) createHtmlNode() *html.Node {
+	tag := strings.ToLower(e.tagName)
+	return &html.Node{
+		Type:      html.ElementNode,
+		Data:      tag,
+		DataAtom:  atom.Lookup([]byte(tag)),
+		Namespace: e.namespace,
+		Attr:      e.attributes,
+	}
 }
