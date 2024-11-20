@@ -12,7 +12,7 @@ type Window interface {
 	EventTarget
 	Document() Document
 	// TODO: Remove, for testing
-	LoadHTML(string)
+	LoadHTML(string) error
 	Eval(string) (any, error)
 	Run(string) error
 	SetScriptRunner(ScriptEngine)
@@ -56,17 +56,19 @@ func (w *window) Document() Document {
 	return w.document
 }
 
-func (w *window) LoadHTML(html string) {
-	w.loadReader(strings.NewReader(html))
+func (w *window) LoadHTML(html string) error {
+	return w.loadReader(strings.NewReader(html))
 }
 
 func (w *window) loadReader(r io.Reader) error {
-	parseStream(w, r)
-	w.Document().DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
+	w.document = parseStream(w, r)
+	err := w.Document().DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
 	// 'load' is emitted when css and images are loaded, not relevant yet, so
 	// just emit it right await
-	w.Document().DispatchEvent(NewCustomEvent(DocumentEventLoad))
-	return nil
+	if err == nil {
+		w.Document().DispatchEvent(NewCustomEvent(DocumentEventLoad))
+	}
+	return err
 }
 
 func (w *window) Run(script string) error {

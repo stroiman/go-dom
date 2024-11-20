@@ -10,7 +10,7 @@ import (
 var _ = Describe("EventTarget", func() {
 	It("Should call a handler of the right type", func() {
 		callCount := 0
-		handler := NewEventHandlerFunc(func(e Event) { callCount++ })
+		handler := NewEventHandlerFuncWithoutError(func(e Event) { callCount++ })
 		target := NewEventTarget()
 		target.AddEventListener("click", handler)
 		target.DispatchEvent(NewCustomEvent("click"))
@@ -19,7 +19,7 @@ var _ = Describe("EventTarget", func() {
 
 	It("Should not call a handler of a different type", func() {
 		callCount := 0
-		handler := NewEventHandlerFunc(func(e Event) { callCount++ })
+		handler := NewEventHandlerFuncWithoutError(func(e Event) { callCount++ })
 		target := NewEventTarget()
 		target.AddEventListener("click", handler)
 		target.DispatchEvent(NewCustomEvent("keyDown"))
@@ -28,7 +28,7 @@ var _ = Describe("EventTarget", func() {
 
 	It("Should not call a handler that was removed type", func() {
 		callCount := 0
-		handler := NewEventHandlerFunc(func(e Event) { callCount++ })
+		handler := NewEventHandlerFuncWithoutError(func(e Event) { callCount++ })
 		target := NewEventTarget()
 		target.AddEventListener("click", handler)
 		target.RemoveEventListener("click", handler)
@@ -38,7 +38,7 @@ var _ = Describe("EventTarget", func() {
 
 	It("Should only call a handler once, even if added twice", func() {
 		callCount := 0
-		handler := NewEventHandlerFunc(func(e Event) { callCount++ })
+		handler := NewEventHandlerFuncWithoutError(func(e Event) { callCount++ })
 		target := NewEventTarget()
 		target.AddEventListener("click", handler)
 		target.AddEventListener("click", handler)
@@ -53,12 +53,12 @@ var _ = Describe("EventTarget", func() {
 		callCount := 0
 		eventHandler := func(e Event) { callCount++ }
 		target := NewEventTarget()
-		NewEventHandlerFunc(eventHandler)
-		target.AddEventListener("click", NewEventHandlerFunc(func(e Event) {
+		NewEventHandlerFuncWithoutError(eventHandler)
+		target.AddEventListener("click", NewEventHandlerFuncWithoutError(func(e Event) {
 			Expect(callCount).To(Equal(0), "First handler")
 			callCount++
 		}))
-		target.AddEventListener("click", NewEventHandlerFunc(func(e Event) {
+		target.AddEventListener("click", NewEventHandlerFuncWithoutError(func(e Event) {
 			Expect(callCount).To(Equal(1), "Second handler")
 			callCount++
 		}))

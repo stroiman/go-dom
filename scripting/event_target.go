@@ -14,12 +14,12 @@ func NewV8EventListener(iso *v8.Isolate, val *v8.Value) browser.EventHandler {
 	return v8EventListener{iso, val}
 }
 
-func (l v8EventListener) HandleEvent(e browser.Event) {
+func (l v8EventListener) HandleEvent(e browser.Event) error {
 	f, err := l.val.AsFunction()
-	if err != nil {
-		panic(err)
+	if err == nil {
+		_, err = f.Call(l.val, v8.Undefined(l.iso))
 	}
-	f.Call(l.val, v8.Undefined(l.iso))
+	return err
 }
 
 func (l v8EventListener) Equals(other browser.EventHandler) bool {

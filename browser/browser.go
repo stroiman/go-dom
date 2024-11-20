@@ -39,8 +39,8 @@ func (b Browser) OpenWindow(location string) (Window, error) {
 		scriptEngine = b.ScriptEngineFactory.NewScriptEngine(window)
 	}
 	window.SetScriptRunner(scriptEngine)
-	window.loadReader(resp.Body)
-	return window, nil
+	err = window.loadReader(resp.Body)
+	return window, err
 }
 
 // TODO: Delete

@@ -6,7 +6,7 @@ type EventTarget interface {
 	ObjectId() ObjectId
 	AddEventListener(eventType string, listener EventHandler /* TODO: options */)
 	RemoveEventListener(eventType string, listener EventHandler)
-	DispatchEvent(event Event)
+	DispatchEvent(event Event) error
 }
 
 type eventTarget struct {
@@ -56,11 +56,16 @@ func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandle
 	}
 }
 
-func (e *eventTarget) DispatchEvent(event Event) {
+func (e *eventTarget) DispatchEvent(event Event) error {
 	listeners := e.lmap[event.Type()]
 	for _, l := range listeners {
-		l.HandleEvent(event)
+		err := l.HandleEvent(event)
+		// TODO: Aggregate errors
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 /* -------- Event & CustomEvent -------- */
@@ -101,7 +106,7 @@ func NewCustomEvent(eventType string) CustomEvent {
 // equality does not translate natively to Go, so a handler must be able to
 // detect equality by itself
 type EventHandler interface {
-	HandleEvent(event Event)
+	HandleEvent(event Event) error
 	// The interface for removing event handlers requires the caller to pass in
 	// the same handler to `RemoveEventListener`. In Go; functions cannot be
 	// compared for equality; so we need to have some kind of mechanism to
@@ -109,10 +114,11 @@ type EventHandler interface {
 	Equals(other EventHandler) bool
 }
 
-type HandlerFunc = func(Event)
+type HandlerFuncWithoutError = func(Event)
+type HandlerFunc = func(Event) error
 
 type eventHandlerFunc struct {
-	handlerFunc func(Event)
+	handlerFunc func(Event) error
 	id          ObjectId
 }
 
@@ -124,7 +130,16 @@ func NewEventHandlerFunc(handler HandlerFunc) EventHandler {
 	return eventHandlerFunc{handler, NewObjectId()}
 }
 
-func (e eventHandlerFunc) HandleEvent(event Event) { e.handlerFunc(event) }
+func NewEventHandlerFuncWithoutError(handler HandlerFuncWithoutError) EventHandler {
+	return eventHandlerFunc{func(event Event) error {
+		handler(event)
+		return nil
+	}, NewObjectId()}
+}
+
+func (e eventHandlerFunc) HandleEvent(event Event) error {
+	return e.handlerFunc(event)
+}
 
 func (e eventHandlerFunc) Equals(handler EventHandler) bool {
 	x, ok := handler.(Entity)

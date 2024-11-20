@@ -32,7 +32,7 @@ var _ = Describe("Window", func() {
 		Describe("DOMContentLoaded", func() {
 			It("Should be fired _after_ script has executed", func() {
 				ctx.Window().SetScriptRunner(ctx.ScriptContext)
-				ctx.Window().LoadHTML(`<body><script>
+				Expect(ctx.Window().LoadHTML(`<body><script>
   scripts = []
   function listener1() {
     scripts.push("DOMContentLoaded")
@@ -42,7 +42,7 @@ var _ = Describe("Window", func() {
   }
   window.document.addEventListener("DOMContentLoaded", listener1);
   window.document.addEventListener("load", listener2);
-</script></body>`)
+</script></body>`)).To(Succeed())
 				Expect(ctx.RunTestScript("scripts.join(',')")).To(Equal("DOMContentLoaded,load"))
 			})
 		})
