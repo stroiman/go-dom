@@ -31,13 +31,6 @@ type elementConstructor func(doc *document) Element
 
 type document struct {
 	node
-	// For HTML, it's an HTML element, for XML, it's an XML document.
-	// While HTMLDocument doesn't exist as a separate type; it's an alias for
-	// Document, XMLDocument inherits from Document; whish is why we can't be more
-	// explicit in the type
-	//
-	// ... unless internally there are two implementations of the interface.
-	documentElement Element
 }
 
 func NewDocument() Document {
@@ -73,27 +66,24 @@ func (d *document) createElement(node *html.Node) Element {
 }
 
 func (d *document) Append(element Element) Element {
-	d.node.AppendChild(element)
-	d.documentElement = element
-	d.childNodes = []Node{element}
+	NodeHelper{d}.AppendChild(element)
 	return element
 }
 
-func (d *document) AppendChild(node Node) Node {
-	if elm, ok := node.(Element); ok {
-		return d.Append(elm)
-	} else {
-		return d.node.AppendChild(node)
-	}
-}
-
 func (d *document) DocumentElement() Element {
-	return d.documentElement
+	for _, c := range d.ChildNodes() {
+		if e, ok := c.(Element); ok {
+			return e
+		}
+	}
+	return nil
 }
 
 func (d *document) NodeName() string { return "#document" }
 
-func (d *document) Connected() bool { return true }
+func (d *document) Connected() bool {
+	return true
+}
 
 func (d *document) GetElementById(id string) Element {
 	var search func(node Node) Element
@@ -125,8 +115,7 @@ func (d *document) QuerySelectorAll(pattern string) (StaticNodeList, error) {
 	if err != nil {
 		return nil, err
 	}
-	m := make(map[*html.Node]Node)
-	htmlNode := NodeIterator{d}.toHtmlNode(m)
+	htmlNode, m := toHtmlNodeAndMap(d)
 	nodes := sel.Select(htmlNode)
 	result := make(StaticNodeList, len(nodes))
 	for i, node := range nodes {

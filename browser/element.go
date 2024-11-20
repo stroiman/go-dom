@@ -39,13 +39,13 @@ func (e *element) TagName() string {
 }
 
 func (parent *element) Append(child Element) Element {
-	parent.AppendChild(child)
+	NodeHelper{parent}.AppendChild(child)
 	return child
 }
 
 func (e *element) OuterHTML() string {
 	writer := &strings.Builder{}
-	html.Render(writer, NodeIterator{e}.toHtmlNode(nil))
+	html.Render(writer, toHtmlNode(e))
 	return string(writer.String())
 }
 

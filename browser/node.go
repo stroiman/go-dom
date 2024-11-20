@@ -1,12 +1,14 @@
 package browser
 
 import (
+	"fmt"
+
 	"golang.org/x/net/html"
 )
 
 type Node interface {
 	EventTarget
-	AppendChild(node Node) Node
+	appendChild(node Node) Node
 	ChildNodes() []Node
 	Connected() bool
 	NodeName() string
@@ -27,10 +29,21 @@ func newNode() node {
 	return node{newEventTarget(), []Node{}, nil}
 }
 
-func (parent *node) AppendChild(child Node) Node {
-	parent.childNodes = append(parent.childNodes, child)
+type NodeHelper struct{ Node }
+
+func (n NodeHelper) AppendChild(child Node) Node {
+	n.appendChild(child)
+	child.setParent(n.Node)
 	return child
 }
+
+func (parent *node) appendChild(child Node) Node {
+	parent.childNodes = append(parent.childNodes, child)
+	child.setParent(parent)
+	return child
+}
+
+func (n *node) createHtmlNode() *html.Node { panic("Implement this in specific nodes") }
 
 func (n *node) ChildNodes() []Node { return n.childNodes }
 
@@ -39,6 +52,7 @@ func (n *node) Parent() Node { return n.parent }
 func (n *node) setParent(parent Node) { n.parent = parent }
 
 func (n *node) Connected() (result bool) {
+	fmt.Printf("Check parent on node, %v\n", n)
 	if n.parent != nil {
 		result = n.parent.Connected()
 	}
@@ -50,6 +64,15 @@ func (n *node) NodeName() string {
 }
 
 type NodeIterator struct{ Node }
+
+func toHtmlNode(node Node) *html.Node {
+	return NodeIterator{node}.toHtmlNode(nil)
+}
+func toHtmlNodeAndMap(node Node) (*html.Node, map[*html.Node]Node) {
+	m := make(map[*html.Node]Node)
+	result := NodeIterator{node}.toHtmlNode(m)
+	return result, m
+}
 
 func (n NodeIterator) toHtmlNode(m map[*html.Node]Node) *html.Node {
 	htmlNode := n.Node.createHtmlNode()

@@ -86,22 +86,20 @@ func iterate(w Window, d Document, dest Node, source *html.Node) {
 		case html.ElementNode:
 			rules := ElementMap[child.DataAtom]
 			newElm := d.createElement(cloneNode(child))
-			dest.AppendChild(newElm)
+			NodeHelper{dest}.AppendChild(newElm)
 			iterate(w, d, newElm, child)
 			// ?
-			// if newElm.Connected() {
 			if rules != nil {
-				if w != nil {
-					rules.Connected(w, newElm)
+				if newElm.Connected() {
+					if w != nil {
+						rules.Connected(w, newElm)
+					}
 				}
 			}
-			// }
 		case html.TextNode:
-			dest.AppendChild(NewTextNode(cloneNode(child), child.Data))
+			NodeHelper{dest}.AppendChild(NewTextNode(cloneNode(child), child.Data))
 		default:
 			panic(fmt.Sprintf("Node not yet supported: %v", child))
-			// clone := newNode(cloneNode(child))
-			// dest.AppendChild(&clone)
 		}
 	}
 }
