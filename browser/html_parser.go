@@ -42,6 +42,7 @@ func (r ScriptElementRules) Connected(win Window, node Node) {
 		script = string(buf.Bytes())
 
 	}
+	// TODO: Propagate error for better error handling
 	err := win.Run(script)
 	if err != nil {
 		fmt.Println("Error loading script", src, err)

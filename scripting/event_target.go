@@ -1,8 +1,6 @@
 package scripting
 
 import (
-	"runtime"
-
 	"github.com/stroiman/go-dom/browser"
 	v8 "github.com/tommie/v8go"
 )
@@ -34,14 +32,14 @@ func CreateCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
 	res := v8.NewFunctionTemplateWithError(
 		iso,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			ctx := host.MustGetContext(info.Context())
 			args := info.Args()
 			if len(args) < 1 {
 				return nil, v8.NewTypeError(iso, "Must have at least one constructor argument")
 			}
 			e := browser.NewCustomEvent(args[0].String())
-			// TODO: get rid of pinner; or unpin when ready
-			t := runtime.Pinner{}
-			t.Pin(e)
+			// TODO: Better memory management
+			ctx.pinner.Pin(e)
 			info.This().SetInternalField(0, v8.NewExternalFromInterface(iso, e))
 			return v8.Undefined(iso), nil
 		},
