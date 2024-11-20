@@ -1,7 +1,6 @@
 package browser
 
 import (
-	"github.com/ericchiang/css"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -101,32 +100,16 @@ func (d *document) GetElementById(id string) Element {
 	return search(d)
 }
 
-func (d *document) QuerySelector(pattern string) (Node, error) {
-	nodes, err := d.QuerySelectorAll(pattern)
-	var result Node
-	if len(nodes) > 0 {
-		result = nodes[0]
-	}
-	return result, err
-}
-
-func (d *document) QuerySelectorAll(pattern string) (StaticNodeList, error) {
-	sel, err := css.Parse(pattern)
-	if err != nil {
-		return nil, err
-	}
-	htmlNode, m := toHtmlNodeAndMap(d)
-	nodes := sel.Select(htmlNode)
-	result := make(StaticNodeList, len(nodes))
-	for i, node := range nodes {
-		resultNode := m[node]
-		result[i] = resultNode
-	}
-	return result, nil
-}
-
 func (d *document) createHtmlNode() *html.Node {
 	return &html.Node{
 		Type: html.DocumentNode,
 	}
+}
+
+func (d *document) QuerySelector(pattern string) (Node, error) {
+	return CSSHelper{d}.QuerySelector(pattern)
+}
+
+func (d *document) QuerySelectorAll(pattern string) (StaticNodeList, error) {
+	return CSSHelper{d}.QuerySelectorAll(pattern)
 }
