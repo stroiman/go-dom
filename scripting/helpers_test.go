@@ -63,3 +63,25 @@ func InitializeContextWithEmptyHtml() *TestScriptContext {
 			ctx.Window().LoadHTML("<html></html>") // Still creates head and body element
 		})
 }
+
+type TestBrowserWrapper struct {
+	*browser.Browser
+	*ScriptContext
+	url string
+}
+
+func CreateTestBrowser() *TestBrowserWrapper {
+	result := new(TestBrowserWrapper)
+
+	BeforeEach(func() {
+
+	})
+
+	AfterEach(func() {
+		result.ScriptContext.Dispose()
+		// Ready for GC
+		result.ScriptContext = nil
+		result.Browser = nil
+	})
+	return result
+}
