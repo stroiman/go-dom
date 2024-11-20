@@ -21,9 +21,10 @@ func (r ScriptElementRules) Connected(win Window, node Element) {
 	src := node.GetAttribute("src")
 	if src == "" {
 		b := strings.Builder{}
-		for child := range node.wrappedNode().ChildNodes() {
-			if child.Type == html.TextNode {
-				b.WriteString(child.Data)
+		for _, child := range node.ChildNodes() {
+			switch n := child.(type) {
+			case TextNode:
+				b.WriteString(n.Text())
 			}
 		}
 		script = b.String()

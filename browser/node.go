@@ -91,13 +91,3 @@ func (n NodeIterator) toHtmlNode(m map[*html.Node]Node) *html.Node {
 	}
 	return htmlNode
 }
-
-// func (n *node) toHtmlNode(node Node, m map[*html.Node]Node) *html.Node {
-// 	// var node = Node(n)
-// 	htmlNode := node.createHtmlNode()
-// 	m[htmlNode] = node
-// 	for _, child := range n.childNodes {
-// 		htmlNode.AppendChild(child.toHtmlNode(child, m))
-// 	}
-// 	return htmlNode
-// }
