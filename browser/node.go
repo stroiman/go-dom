@@ -1,7 +1,9 @@
 package browser
 
 import (
+	"errors"
 	"fmt"
+	"slices"
 
 	"golang.org/x/net/html"
 )
@@ -11,6 +13,7 @@ type Node interface {
 	appendChild(node Node) Node
 	ChildNodes() []Node
 	Connected() bool
+	InsertBefore(newNode Node, referenceNode Node) error
 	NodeName() string
 	Parent() Node
 	// unexported
@@ -57,6 +60,17 @@ func (n *node) Connected() (result bool) {
 
 func (n *node) NodeName() string {
 	return "#node"
+}
+
+func (n *node) InsertBefore(newNode Node, referenceNode Node) error {
+	i := slices.Index(n.childNodes, referenceNode)
+	if i == -1 {
+		return errors.New("Reference node not found")
+	}
+
+	n.childNodes = slices.Insert(n.childNodes, i, newNode)
+	newNode.setParent(referenceNode.Parent())
+	return nil
 }
 
 type NodeIterator struct{ Node }

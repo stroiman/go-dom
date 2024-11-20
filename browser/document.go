@@ -29,7 +29,7 @@ type document struct {
 }
 
 func NewDocument() Document {
-	return &document{rootNode{node: newNode()}}
+	return &document{newRootNode()}
 }
 
 func (d *document) Body() Element {
