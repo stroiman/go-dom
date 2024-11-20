@@ -1,5 +1,9 @@
 package browser
 
+import (
+	"log/slog"
+)
+
 type EventTarget interface {
 	// ObjectId is used internally for the scripting engine to associate a v8
 	// object with the Go object it wraps.
@@ -28,6 +32,7 @@ func NewEventTarget() EventTarget {
 }
 
 func (e *eventTarget) AddEventListener(eventType string, listener EventHandler) {
+	slog.Debug("AddEventListener", "EventType", eventType)
 	// TODO: Handle options
 	// - capture
 	// - once
@@ -58,6 +63,7 @@ func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandle
 }
 
 func (e *eventTarget) DispatchEvent(event Event) error {
+	slog.Debug("Dispatch event", "EventType", event.Type())
 	listeners := e.lmap[event.Type()]
 
 	for _, l := range listeners {
