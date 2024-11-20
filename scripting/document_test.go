@@ -85,4 +85,22 @@ var _ = Describe("V8 Document", func() {
 			).To(BeTrue())
 		})
 	})
+
+	Describe("querySelector", func() {
+		It("can find the right element", func() {
+			Expect(
+				ctx.Window().
+					LoadHTML(`<body><div>0</div><div data-key="1">1</div><div data-key="2">2</div><body>`),
+			).To(Succeed())
+			Expect(
+				ctx.RunTestScript("document.querySelector('[data-key]').outerHTML"),
+			).To(Equal(`<div data-key="1">1</div>`))
+			Expect(
+				ctx.RunTestScript(`document.querySelector('[data-key="2"]').outerHTML`),
+			).To(Equal(`<div data-key="2">2</div>`))
+			Expect(
+				ctx.RunTestScript(`document.querySelector('script')`),
+			).To(BeNil())
+		})
+	})
 })

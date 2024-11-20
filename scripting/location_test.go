@@ -1,7 +1,6 @@
 package scripting_test
 
 import (
-	"fmt"
 	"net/url"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -17,7 +16,6 @@ var _ = Describe("window.location", func() {
 		window := browser.NewWindow(url)
 		ctx := host.NewContext(window)
 		DeferCleanup(func() {
-			fmt.Println("Disposing context")
 			ctx.Dispose()
 		})
 		Expect(ctx.Eval("location.href")).To(Equal("http://example.com/foo"))
