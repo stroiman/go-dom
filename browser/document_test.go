@@ -20,6 +20,21 @@ var _ = Describe("Document", func() {
 			doc.DocumentElement().OuterHTML(),
 		).To(Equal("<html><head></head><body></body></html>"))
 	})
+
+	Describe("FindElementById", func() {
+		It("Should return the right element", func() {
+			doc := ParseHtmlString(`<body>
+  <div id="uncle></div>
+  <div id="parent">
+    <div id="child">
+      <div id="dummy"></div>
+      <div id="grand-child"></div>
+    </div>
+  </div></body>`)
+			elm := doc.GetElementById("grand-child")
+			Expect(elm).To(HaveOuterHTML(`<div id="grand-child"></div>`))
+		})
+	})
 })
 
 func BeHTMLElement() OmegaMatcher { return HtmlElementMatcher{} }

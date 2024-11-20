@@ -17,13 +17,15 @@ const (
 
 type Document interface {
 	Node
+	Append(Element) Element
 	Body() Element
 	CreateElement(string) Element
-	createElement(*html.Node) Element
 	DocumentElement() Element
-	Append(Element) Element
+	GetElementById(string) Element
 	QuerySelector(string) (Node, error)
 	QuerySelectorAll(string) (StaticNodeList, error)
+	// unexported
+	createElement(*html.Node) Element
 }
 type elementConstructor func(doc *document) Element
 
@@ -102,6 +104,22 @@ func (d *document) DocumentElement() Element {
 func (d *document) NodeName() string { return "#document" }
 
 func (d *document) Connected() bool { return true }
+
+func (d *document) GetElementById(id string) Element {
+	var search func(node Node) Element
+	search = func(node Node) Element {
+		if elm, ok := node.(Element); ok && elm.GetAttribute("id") == id {
+			return elm
+		}
+		for _, child := range node.ChildNodes() {
+			if found := search(child); found != nil {
+				return found
+			}
+		}
+		return nil
+	}
+	return search(d)
+}
 
 func (d *document) QuerySelector(pattern string) (Node, error) {
 	nodes, err := d.QuerySelectorAll(pattern)
