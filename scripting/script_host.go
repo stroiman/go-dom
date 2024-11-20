@@ -22,6 +22,7 @@ type ScriptHost struct {
 	htmlElement    *v8.FunctionTemplate
 	customEvent    *v8.FunctionTemplate
 	eventTarget    *v8.FunctionTemplate
+	location       *v8.FunctionTemplate
 	contexts       map[*v8.Context]*ScriptContext
 }
 
@@ -91,6 +92,7 @@ func NewScriptHost() *ScriptHost {
 	host.eventTarget = CreateEventTarget(host)
 	host.element = CreateElement(host)
 	host.htmlElement = CreateHtmlElement(host)
+	host.location = CreateLocationPrototype(host)
 	host.window = CreateWindowTemplate(host)
 	host.window.Inherit(host.eventTarget)
 	host.windowTemplate = host.window.GetInstanceTemplate()

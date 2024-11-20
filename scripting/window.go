@@ -38,5 +38,7 @@ func CreateWindowTemplate(host *ScriptHost) *v8.FunctionTemplate {
 	windowTemplate.Set("EventTarget", host.eventTarget)
 	windowTemplate.Set("Window", windowTemplateFn)
 	windowTemplate.Set("HTMLElement", host.htmlElement)
+	windowTemplate.Set("Location", host.location)
+	windowTemplate.Set("location", host.location.GetInstanceTemplate())
 	return windowTemplateFn
 }
