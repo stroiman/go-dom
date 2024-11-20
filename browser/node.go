@@ -18,7 +18,6 @@ type Node interface {
 	// toHtmlNode(Node, map[*html.Node]Node) *html.Node
 	populateNodeMap(map[*html.Node]Node)
 	setParent(node Node)
-	wrappedNode() *html.Node
 }
 
 type node struct {
@@ -34,7 +33,6 @@ func newNode(htmlNode *html.Node) node {
 }
 
 func (parent *node) AppendChild(child Node) Node {
-	parent.htmlNode.AppendChild(child.wrappedNode())
 	parent.childNodes = append(parent.childNodes, child)
 	return child
 }
