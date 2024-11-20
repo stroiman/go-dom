@@ -143,6 +143,7 @@ func (host *ScriptHost) createPrototypeChains() {
 }
 
 func (ctx *ScriptContext) Dispose() {
+	ctx.pinner.Unpin()
 	delete(ctx.host.contexts, ctx.v8ctx)
 	ctx.v8ctx.Close()
 }
