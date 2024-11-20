@@ -12,24 +12,22 @@ type Element interface {
 	// Children() []Element
 	Append(Element) Element
 	GetAttribute(name string) string
-	IsConnected() bool
 	OuterHTML() string
 	TagName() string
 }
 
 type element struct {
 	node
-	tagName     string
-	isConnected bool
-	namespace   string
-	attributes  []html.Attribute
+	tagName    string
+	namespace  string
+	attributes []html.Attribute
 	// We might want a "prototype" as a value, rather than a Go type, as new types
 	// can be created at runtime. But if so, we probably want them on the node
 	// type.
 }
 
 func NewElement(tagName string, node *html.Node) Element {
-	return &element{newNode(), tagName, false, node.Namespace, node.Attr}
+	return &element{newNode(), tagName, node.Namespace, node.Attr}
 }
 
 func (e *element) NodeName() string {
@@ -39,8 +37,6 @@ func (e *element) NodeName() string {
 func (e *element) TagName() string {
 	return strings.ToUpper(e.tagName)
 }
-
-func (e *element) IsConnected() bool { return e.isConnected }
 
 func (parent *element) Append(child Element) Element {
 	parent.AppendChild(child)
