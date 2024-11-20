@@ -148,6 +148,12 @@ that HTMX _does_ depend on)
 - `XMLHttpRequest` - work is underway.
 - `XPathEvaluator` - I have that in a branch using a polyfill. BUT the necessary
   DOM methods lack implementation.
+- `setTimeout`, `setInterval`, and friends.
+  - This did surprise me a bit that it's not part of v8. But they're not part of
+    ECMAScript specification (surprise to me). Fortunately Go has excellent
+    concurrency and synchronization mechanisms.
+  - I'm not sure if they are actually necessary for this case, but they
+    represent an uncertainty I need to cover quickly.
 
 Following the simple case, the plan is to have more complex cases, e.g. form
 handling with redirection.
