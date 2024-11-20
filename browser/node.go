@@ -14,6 +14,7 @@ type Node interface {
 	Connected() bool
 	setParent(node Node)
 	wrappedNode() *html.Node
+	populateNodeMap(map[*html.Node]Node)
 }
 
 type node struct {
@@ -62,4 +63,19 @@ func (n *node) GetAttribute(name string) string {
 		}
 	}
 	return ""
+}
+
+// Temporary hack while the code depends on the html.Node data for e.g., CSS
+// selectors.
+//
+// NOTE: Because Go doesn't have "virtual functions", if you need to be able to
+// interact with the element of the correct subtype, that subtype needs to
+// implement this function as well. E.g., it's implemented on the Element type
+// too, as we need to have Element properties. If not, only the embedded value
+// of the Element is stored in the map
+func (n *node) populateNodeMap(m map[*html.Node]Node) {
+	m[n.htmlNode] = n
+	for _, c := range n.childNodes {
+		c.populateNodeMap(m)
+	}
 }

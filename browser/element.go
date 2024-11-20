@@ -48,3 +48,10 @@ func (e *element) OuterHTML() string {
 	html.Render(writer, e.htmlNode)
 	return string(writer.String())
 }
+
+func (n *element) populateNodeMap(m map[*html.Node]Node) {
+	m[n.htmlNode] = n
+	for _, c := range n.childNodes {
+		c.populateNodeMap(m)
+	}
+}

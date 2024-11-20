@@ -1,11 +1,14 @@
 package browser
 
 import (
+	"github.com/ericchiang/css"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
 
 type DocumentEvent = string
+
+type StaticNodeList []Node
 
 const (
 	DocumentEventDOMContentLoaded DocumentEvent = "DOMContentLoaded"
@@ -19,6 +22,8 @@ type Document interface {
 	createElement(*html.Node) Element
 	DocumentElement() Element
 	Append(Element) Element
+	QuerySelector(string) (Node, error)
+	QuerySelectorAll(string) (StaticNodeList, error)
 }
 type elementConstructor func(doc *document) Element
 
@@ -76,15 +81,18 @@ func (d *document) createElement(node *html.Node) Element {
 }
 
 func (d *document) Append(element Element) Element {
+	d.node.AppendChild(element)
 	d.documentElement = element
+	d.childNodes = []Node{element}
 	return element
 }
 
 func (d *document) AppendChild(node Node) Node {
 	if elm, ok := node.(Element); ok {
 		return d.Append(elm)
+	} else {
+		return d.node.AppendChild(node)
 	}
-	return node
 }
 
 func (d *document) DocumentElement() Element {
@@ -94,3 +102,29 @@ func (d *document) DocumentElement() Element {
 func (d *document) NodeName() string { return "#document" }
 
 func (d *document) Connected() bool { return true }
+
+func (d *document) QuerySelector(pattern string) (Node, error) {
+	nodes, err := d.QuerySelectorAll(pattern)
+	var result Node
+	if len(nodes) > 0 {
+		result = nodes[0]
+	}
+	return result, err
+}
+
+func (d *document) QuerySelectorAll(pattern string) (StaticNodeList, error) {
+	sel, err := css.Parse(pattern)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[*html.Node]Node)
+	d.populateNodeMap(m)
+	nodes := sel.Select(d.htmlNode)
+	result := make(StaticNodeList, len(nodes))
+	for i, node := range nodes {
+		resultNode := m[node]
+		// fmt.Println("ReSULT NODE", resultNode)
+		result[i] = resultNode
+	}
+	return result, nil
+}
