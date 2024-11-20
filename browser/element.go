@@ -53,12 +53,6 @@ func (e *element) OuterHTML() string {
 	return string(writer.String())
 }
 
-func (n *element) populateNodeMap(m map[*html.Node]Node) {
-	m[n.htmlNode] = n
-	for _, c := range n.childNodes {
-		c.populateNodeMap(m)
-	}
-}
 func (n *node) GetAttribute(name string) string {
 	for _, a := range n.htmlNode.Attr {
 		if a.Key == name {

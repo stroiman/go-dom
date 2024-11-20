@@ -16,7 +16,6 @@ type Node interface {
 	// unexported
 	createHtmlNode() *html.Node
 	// toHtmlNode(Node, map[*html.Node]Node) *html.Node
-	populateNodeMap(map[*html.Node]Node)
 	setParent(node Node)
 }
 
@@ -56,21 +55,6 @@ func (n *node) wrappedNode() *html.Node {
 
 func (n *node) NodeName() string {
 	return "#node"
-}
-
-// Temporary hack while the code depends on the html.Node data for e.g., CSS
-// selectors.
-//
-// NOTE: Because Go doesn't have "virtual functions", if you need to be able to
-// interact with the element of the correct subtype, that subtype needs to
-// implement this function as well. E.g., it's implemented on the Element type
-// too, as we need to have Element properties. If not, only the embedded value
-// of the Element is stored in the map
-func (n *node) populateNodeMap(m map[*html.Node]Node) {
-	m[n.htmlNode] = n
-	for _, c := range n.childNodes {
-		c.populateNodeMap(m)
-	}
 }
 
 func (n *node) createHtmlNode() *html.Node {
