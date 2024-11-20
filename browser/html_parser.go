@@ -2,6 +2,7 @@ package browser
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"strings"
 
@@ -41,7 +42,13 @@ func (r ScriptElementRules) Connected(win Window, node Node) {
 		script = string(buf.Bytes())
 
 	}
-	win.Eval(script)
+	err := win.Run(script)
+	if err != nil {
+		fmt.Println("Error loading script", src, err)
+	} else {
+		fmt.Println("Script loaded/executed")
+	}
+
 }
 
 var ElementMap = map[atom.Atom]ElementSteps{

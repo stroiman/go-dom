@@ -14,12 +14,17 @@ type Window interface {
 	// TODO: Remove, for testing
 	LoadHTML(string)
 	Eval(string) (any, error)
+	Run(string) error
 	SetScriptRunner(ScriptEngine)
 	Location() Location
 }
 
 type ScriptEngine interface {
-	Run(script string) (any, error)
+	// Run a script, and convert the result to a Go type. This will result in an
+	// error if the returned value cannot be represented as a Go type.
+	Eval(script string) (any, error)
+	// Run a script, ignoring any returned value
+	Run(script string) error
 }
 
 type window struct {
@@ -64,9 +69,16 @@ func (w *window) loadReader(r io.Reader) error {
 	return nil
 }
 
-func (w *window) Eval(script string) (any, error) {
+func (w *window) Run(script string) error {
 	if w.scriptEngine != nil {
 		return w.scriptEngine.Run(script)
+	}
+	return errors.New("Script engine not initialised")
+}
+
+func (w *window) Eval(script string) (any, error) {
+	if w.scriptEngine != nil {
+		return w.scriptEngine.Eval(script)
 	}
 	return nil, errors.New("Script engine not initialised")
 }

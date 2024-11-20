@@ -20,7 +20,7 @@ type TestScriptContext struct {
 //
 // Note: This conversion is incomplete.
 func (c TestScriptContext) RunTestScript(script string) (any, error) {
-	return c.Run(script)
+	return c.Eval(script)
 }
 
 func (c TestScriptContext) MustRunTestScript(script string) any {

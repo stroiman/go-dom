@@ -20,6 +20,6 @@ var _ = Describe("window.location", func() {
 			fmt.Println("Disposing context")
 			ctx.Dispose()
 		})
-		Expect(ctx.Run("location.href")).To(Equal("http://example.com/foo"))
+		Expect(ctx.Eval("location.href")).To(Equal("http://example.com/foo"))
 	})
 })

@@ -151,7 +151,12 @@ func (ctx *ScriptContext) RunScript(script string) (*v8.Value, error) {
 	return ctx.v8ctx.RunScript(script, "")
 }
 
-func (ctx *ScriptContext) Run(script string) (interface{}, error) {
+func (ctx *ScriptContext) Run(script string) error {
+	_, err := ctx.RunScript(script)
+	return err
+}
+
+func (ctx *ScriptContext) Eval(script string) (interface{}, error) {
 	result, err := ctx.RunScript(script)
 	if err == nil {
 		return v8ValueToGoValue(result)
