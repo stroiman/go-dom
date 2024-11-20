@@ -11,12 +11,12 @@ import (
 )
 
 type ElementSteps interface {
-	Connected(w Window, n Node)
+	Connected(w Window, n Element)
 }
 
 type ScriptElementRules struct{}
 
-func (r ScriptElementRules) Connected(win Window, node Node) {
+func (r ScriptElementRules) Connected(win Window, node Element) {
 	var script string
 	src := node.GetAttribute("src")
 	if src == "" {

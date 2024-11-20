@@ -9,10 +9,11 @@ import (
 type Element interface {
 	Node
 	// Children() []Element
-	IsConnected() bool
-	TagName() string
 	Append(Element) Element
+	GetAttribute(name string) string
+	IsConnected() bool
 	OuterHTML() string
+	TagName() string
 }
 
 type element struct {
@@ -54,4 +55,12 @@ func (n *element) populateNodeMap(m map[*html.Node]Node) {
 	for _, c := range n.childNodes {
 		c.populateNodeMap(m)
 	}
+}
+func (n *node) GetAttribute(name string) string {
+	for _, a := range n.htmlNode.Attr {
+		if a.Key == name {
+			return a.Val
+		}
+	}
+	return ""
 }
