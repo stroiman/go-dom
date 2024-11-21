@@ -14,11 +14,22 @@ var _ = Describe("Node", func() {
 			div := doc.GetElementById("1")
 			Expect(div).ToNot(BeNil())
 			newElm := doc.CreateElement("p")
-			Expect(doc.Body().InsertBefore(newElm, div)).To(Succeed())
+			Expect(doc.Body().InsertBefore(newElm, div)).Error().To(Succeed())
 			Expect(
 				doc.Body(),
 			).To(HaveOuterHTML(`<body><div>First</div><p></p><div id="1">1</div></body>`))
-			Expect(newElm.Parent()).To(Equal(div.Parent()))
+			Expect(newElm.Parent()).To(Equal(doc.Body()))
+		})
+
+		It("Should append the element if the reference is nil", func() {
+			Skip("TODO")
+			doc := ParseHtmlString(`<body><div>First</div><div id="1">1</div></body>`)
+			newElm := doc.CreateElement("p")
+			Expect(doc.Body().InsertBefore(newElm, nil)).To(Succeed())
+			Expect(
+				doc.Body(),
+			).To(HaveOuterHTML(`<body><div>First</div><div id="1">1</div><p></p></body>`))
+			Expect(newElm.Parent()).To(Equal(doc.Body()))
 		})
 	})
 })

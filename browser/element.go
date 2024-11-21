@@ -9,7 +9,6 @@ import (
 
 type Element interface {
 	ElementContainer
-	// Children() []Element
 	Append(Element) Element
 	GetAttribute(name string) string
 	OuterHTML() string
@@ -45,6 +44,10 @@ func (parent *element) Append(child Element) Element {
 
 func (parent *element) AppendChild(child Node) Node {
 	return NodeHelper{parent}.AppendChild(child)
+}
+
+func (e *element) InsertBefore(newChild Node, reference Node) (Node, error) {
+	return NodeHelper{e}.InsertBefore(newChild, reference)
 }
 
 func (e *element) OuterHTML() string {

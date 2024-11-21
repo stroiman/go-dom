@@ -13,12 +13,13 @@ type Node interface {
 	AppendChild(node Node) Node
 	ChildNodes() []Node
 	Connected() bool
-	InsertBefore(newNode Node, referenceNode Node) error
+	InsertBefore(newNode Node, referenceNode Node) (Node, error)
 	NodeName() string
 	Parent() Node
 	// unexported
 	appendChild(node Node) Node
 	createHtmlNode() *html.Node
+	insertBefore(newNode Node, referenceNode Node) (Node, error)
 	setParent(node Node)
 }
 
@@ -38,6 +39,14 @@ func (n NodeHelper) AppendChild(child Node) Node {
 	n.appendChild(child)
 	child.setParent(n)
 	return child
+}
+
+func (n NodeHelper) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
+	result, err := n.insertBefore(newChild, referenceNode)
+	if err == nil {
+		newChild.setParent(n.Node)
+	}
+	return result, err
 }
 
 func (parent *node) appendChild(child Node) Node {
@@ -63,15 +72,16 @@ func (n *node) NodeName() string {
 	return "#node"
 }
 
-func (n *node) InsertBefore(newNode Node, referenceNode Node) error {
+func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
+	// TODO, Handle a fragment. Also returns nil
 	i := slices.Index(n.childNodes, referenceNode)
 	if i == -1 {
-		return errors.New("Reference node not found")
+		return nil, errors.New("Reference node not found")
 	}
 
 	n.childNodes = slices.Insert(n.childNodes, i, newNode)
 	newNode.setParent(referenceNode.Parent())
-	return nil
+	return newNode, nil
 }
 
 type NodeIterator struct{ Node }

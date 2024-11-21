@@ -20,6 +20,10 @@ func (n *textNode) AppendChild(newChild Node) Node {
 	return NodeHelper{n}.AppendChild(newChild)
 }
 
+func (n *textNode) InsertBefore(newChild Node, reference Node) (Node, error) {
+	return NodeHelper{n}.InsertBefore(newChild, reference)
+}
+
 func (n *textNode) Text() string { return n.text }
 
 func (n *textNode) createHtmlNode() *html.Node {
