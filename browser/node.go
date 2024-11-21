@@ -10,13 +10,14 @@ import (
 
 type Node interface {
 	EventTarget
-	appendChild(node Node) Node
+	AppendChild(node Node) Node
 	ChildNodes() []Node
 	Connected() bool
 	InsertBefore(newNode Node, referenceNode Node) error
 	NodeName() string
 	Parent() Node
 	// unexported
+	appendChild(node Node) Node
 	createHtmlNode() *html.Node
 	setParent(node Node)
 }
@@ -35,7 +36,7 @@ type NodeHelper struct{ Node }
 
 func (n NodeHelper) AppendChild(child Node) Node {
 	n.appendChild(child)
-	child.setParent(n.Node)
+	child.setParent(n)
 	return child
 }
 

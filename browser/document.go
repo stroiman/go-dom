@@ -65,6 +65,10 @@ func (d *document) Append(element Element) Element {
 	return element
 }
 
+func (d *document) AppendChild(newChild Node) Node {
+	return NodeHelper{d}.AppendChild(newChild)
+}
+
 func (d *document) DocumentElement() Element {
 	for _, c := range d.ChildNodes() {
 		if e, ok := c.(Element); ok {

@@ -43,6 +43,10 @@ func (parent *element) Append(child Element) Element {
 	return child
 }
 
+func (parent *element) AppendChild(child Node) Node {
+	return NodeHelper{parent}.AppendChild(child)
+}
+
 func (e *element) OuterHTML() string {
 	writer := &strings.Builder{}
 	html.Render(writer, toHtmlNode(e))
