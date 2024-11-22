@@ -17,6 +17,7 @@ const (
 type Document interface {
 	RootNode
 	Body() Element
+	Head() Element
 	CreateElement(string) Element
 	DocumentElement() Element
 	// unexported
@@ -38,6 +39,20 @@ func (d *document) Body() Element {
 		for _, child := range root.ChildNodes() {
 			if e, ok := child.(Element); ok {
 				if e.TagName() == "BODY" {
+					return e
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (d *document) Head() Element {
+	root := d.DocumentElement()
+	if root != nil {
+		for _, child := range root.ChildNodes() {
+			if e, ok := child.(Element); ok {
+				if e.TagName() == "HEAD" {
 					return e
 				}
 			}
