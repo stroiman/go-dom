@@ -1,16 +1,26 @@
 package browser
 
 import (
+	"slices"
 	"strings"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
 
+// TODO: In the DOM, this is a `NamedNodeMap`. Is that useful in Go?
+type Attributes []html.Attribute
+
+func (attrs Attributes) Length() int {
+	return len(attrs)
+}
+
 type Element interface {
 	ElementContainer
 	Append(Element) Element
 	GetAttribute(name string) string
+	SetAttribute(name string, value string)
+	GetAttributes() Attributes
 	OuterHTML() string
 	TagName() string
 }
@@ -19,7 +29,7 @@ type element struct {
 	node
 	tagName    string
 	namespace  string
-	attributes []html.Attribute
+	attributes Attributes
 	// We might want a "prototype" as a value, rather than a Go type, as new types
 	// can be created at runtime. But if so, we probably want them on the node
 	// type.
@@ -27,7 +37,7 @@ type element struct {
 
 func NewElement(tagName string) Element {
 	// TODO: handle namespace
-	return &element{newNode(), tagName, "", nil}
+	return &element{newNode(), tagName, "", Attributes(nil)}
 }
 
 func newElementFromNode(node *html.Node) Element {
@@ -61,8 +71,8 @@ func (e *element) OuterHTML() string {
 	return string(writer.String())
 }
 
-func (n *element) GetAttribute(name string) string {
-	for _, a := range n.attributes {
+func (e *element) GetAttribute(name string) string {
+	for _, a := range e.attributes {
 		if a.Key == name {
 			return a.Val
 		}
@@ -70,6 +80,21 @@ func (n *element) GetAttribute(name string) string {
 	return ""
 }
 
+func (e *element) GetAttributes() Attributes { return e.attributes }
+
+func (e *element) SetAttribute(name string, value string) {
+	idx := slices.IndexFunc(e.attributes, func(a html.Attribute) bool {
+		return a.Key == name && a.Namespace == e.namespace
+	})
+	if idx == -1 {
+		e.attributes = append(e.attributes, html.Attribute{
+			Key:       name,
+			Val:       value,
+			Namespace: e.namespace})
+	} else {
+		e.attributes[idx].Val = value
+	}
+}
 func (e *element) createHtmlNode() *html.Node {
 	tag := strings.ToLower(e.tagName)
 	return &html.Node{
