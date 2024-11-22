@@ -22,10 +22,9 @@ var _ = Describe("Node", func() {
 		})
 
 		It("Should append the element if the reference is nil", func() {
-			Skip("TODO")
 			doc := ParseHtmlString(`<body><div>First</div><div id="1">1</div></body>`)
 			newElm := doc.CreateElement("p")
-			Expect(doc.Body().InsertBefore(newElm, nil)).To(Succeed())
+			Expect(doc.Body().InsertBefore(newElm, nil)).Error().ToNot(HaveOccurred())
 			Expect(
 				doc.Body(),
 			).To(HaveOuterHTML(`<body><div>First</div><div id="1">1</div><p></p></body>`))
