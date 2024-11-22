@@ -57,7 +57,7 @@ func (d *document) CreateElement(name string) Element {
 }
 
 func (d *document) createElement(node *html.Node) Element {
-	return NewHTMLElement(node)
+	return NewHTMLElement(node, d)
 }
 func (d *document) Append(element Element) Element {
 	NodeHelper{d}.AppendChild(element)

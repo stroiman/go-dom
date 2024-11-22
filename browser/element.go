@@ -27,21 +27,22 @@ type Element interface {
 
 type element struct {
 	node
-	tagName    string
-	namespace  string
-	attributes Attributes
+	tagName       string
+	namespace     string
+	attributes    Attributes
+	ownerDocument Document
 	// We might want a "prototype" as a value, rather than a Go type, as new types
 	// can be created at runtime. But if so, we probably want them on the node
 	// type.
 }
 
-func NewElement(tagName string) Element {
+func NewElement(tagName string, ownerDocument Document) Element {
 	// TODO: handle namespace
-	return &element{newNode(), tagName, "", Attributes(nil)}
+	return &element{newNode(), tagName, "", Attributes(nil), ownerDocument}
 }
 
-func newElementFromNode(node *html.Node) Element {
-	return &element{newNode(), node.Data, node.Namespace, node.Attr}
+func newElementFromNode(node *html.Node, ownerDocument Document) Element {
+	return &element{newNode(), node.Data, node.Namespace, node.Attr, ownerDocument}
 }
 
 func (e *element) NodeName() string {
