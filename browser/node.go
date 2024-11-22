@@ -18,7 +18,6 @@ type Node interface {
 	Parent() Node
 	RemoveChild(node Node) error
 	// unexported
-	appendChild(node Node) Node
 	createHtmlNode() *html.Node
 	insertBefore(newNode Node, referenceNode Node) (Node, error)
 	setParent(node Node)
@@ -37,7 +36,7 @@ func newNode() node {
 type NodeHelper struct{ Node }
 
 func (n NodeHelper) AppendChild(child Node) Node {
-	n.appendChild(child)
+	n.insertBefore(child, nil)
 	child.setParent(n)
 	return child
 }
@@ -48,12 +47,6 @@ func (n NodeHelper) InsertBefore(newChild Node, referenceNode Node) (Node, error
 		newChild.setParent(n.Node)
 	}
 	return result, err
-}
-
-func (parent *node) appendChild(child Node) Node {
-	removeNodeFromParent(child)
-	parent.childNodes = append(parent.childNodes, child)
-	return child
 }
 
 func (n *node) ChildNodes() []Node { return n.childNodes }
@@ -93,14 +86,18 @@ func (n *node) RemoveChild(node Node) error {
 }
 
 func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
+	// TODO, Don't allow newNode to be inserted in it's own branch (circular tree)
 	// TODO, Handle a fragment. Also returns nil
-	i := slices.Index(n.childNodes, referenceNode)
-	if i == -1 {
-		return nil, errors.New("Reference node not found")
+	if referenceNode == nil {
+		n.childNodes = append(n.childNodes, newNode)
+	} else {
+		i := slices.Index(n.childNodes, referenceNode)
+		if i == -1 {
+			return nil, errors.New("Reference node not found")
+		}
+		n.childNodes = slices.Insert(n.childNodes, i, newNode)
 	}
 	removeNodeFromParent(newNode)
-	n.childNodes = slices.Insert(n.childNodes, i, newNode)
-	newNode.setParent(referenceNode.Parent())
 	return newNode, nil
 }
 
