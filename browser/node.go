@@ -36,12 +36,17 @@ func newNode() node {
 type NodeHelper struct{ Node }
 
 func (n NodeHelper) AppendChild(child Node) Node {
-	n.insertBefore(child, nil)
-	child.setParent(n)
+	n.InsertBefore(child, nil)
 	return child
 }
 
 func (n NodeHelper) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
+	if fragment, ok := newChild.(DocumentFragment); ok {
+		for len(fragment.ChildNodes()) > 0 {
+			n.InsertBefore(fragment.ChildNodes()[0], referenceNode)
+		}
+		return fragment, nil
+	}
 	result, err := n.insertBefore(newChild, referenceNode)
 	if err == nil {
 		newChild.setParent(n.Node)

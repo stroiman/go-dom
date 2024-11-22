@@ -31,6 +31,27 @@ var _ = Describe("Node", func() {
 			Expect(newElm.Parent()).To(Equal(doc.Body()))
 		})
 
+		Describe("Inserting a documentFragment", func() {
+			It("Inserts the nodes in the right order", func() {
+				doc := ParseHtmlString(`<body><div>First</div><div id="1">1</div></body>`)
+				fragment := NewDocumentFragment()
+				d1 := NewElement("div")
+				d2 := NewElement("div")
+				d1.SetAttribute("id", "c-1")
+				d2.SetAttribute("id", "c-2")
+				fragment.Append(d1)
+				fragment.Append(d2)
+				ref := doc.GetElementById("1")
+
+				result, err := doc.Body().InsertBefore(fragment, ref)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(
+					doc.Body(),
+				).To(HaveOuterHTML(`<body><div>First</div><div id="c-1"></div><div id="c-2"></div><div id="1">1</div></body>`))
+				Expect(result.ChildNodes()).To(BeEmpty())
+			})
+		})
+
 		Describe("Moving an existing node", func() {
 			var doc Document
 
