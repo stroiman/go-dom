@@ -59,7 +59,6 @@ func (d *document) CreateElement(name string) Element {
 func (d *document) createElement(node *html.Node) Element {
 	return NewHTMLElement(node)
 }
-
 func (d *document) Append(element Element) Element {
 	NodeHelper{d}.AppendChild(element)
 	return element
@@ -89,19 +88,7 @@ func (d *document) Connected() bool {
 }
 
 func (d *document) GetElementById(id string) Element {
-	var search func(node Node) Element
-	search = func(node Node) Element {
-		if elm, ok := node.(Element); ok && elm.GetAttribute("id") == id {
-			return elm
-		}
-		for _, child := range node.ChildNodes() {
-			if found := search(child); found != nil {
-				return found
-			}
-		}
-		return nil
-	}
-	return search(d)
+	return RootNodeHelper{d}.GetElementById(id)
 }
 
 func (d *document) createHtmlNode() *html.Node {

@@ -26,3 +26,21 @@ type rootNode struct {
 func newRootNode() rootNode {
 	return rootNode{newNode()}
 }
+
+type RootNodeHelper struct{ RootNode }
+
+func (d RootNodeHelper) GetElementById(id string) Element {
+	var search func(node Node) Element
+	search = func(node Node) Element {
+		if elm, ok := node.(Element); ok && elm.GetAttribute("id") == id {
+			return elm
+		}
+		for _, child := range node.ChildNodes() {
+			if found := search(child); found != nil {
+				return found
+			}
+		}
+		return nil
+	}
+	return search(d)
+}
