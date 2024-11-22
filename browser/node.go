@@ -51,6 +51,7 @@ func (n NodeHelper) InsertBefore(newChild Node, referenceNode Node) (Node, error
 }
 
 func (parent *node) appendChild(child Node) Node {
+	removeNodeFromParent(child)
 	parent.childNodes = append(parent.childNodes, child)
 	return child
 }
