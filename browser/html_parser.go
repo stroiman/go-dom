@@ -80,22 +80,29 @@ func cloneNode(n *html.Node) *html.Node {
 	}
 }
 
+func createElementFromNode(w Window, d Document, parent Node, source *html.Node) Element {
+	rules := ElementMap[source.DataAtom]
+	newElm := d.createElement(cloneNode(source))
+	if parent != nil {
+		parent.AppendChild(newElm)
+	}
+	iterate(w, d, newElm, source)
+	// ?
+	if rules != nil {
+		if newElm.Connected() {
+			if w != nil {
+				rules.Connected(w, newElm)
+			}
+		}
+	}
+	return newElm
+}
+
 func iterate(w Window, d Document, dest Node, source *html.Node) {
 	for child := range source.ChildNodes() {
 		switch child.Type {
 		case html.ElementNode:
-			rules := ElementMap[child.DataAtom]
-			newElm := d.createElement(cloneNode(child))
-			NodeHelper{dest}.AppendChild(newElm)
-			iterate(w, d, newElm, child)
-			// ?
-			if rules != nil {
-				if newElm.Connected() {
-					if w != nil {
-						rules.Connected(w, newElm)
-					}
-				}
-			}
+			createElementFromNode(w, d, dest, child)
 		case html.TextNode:
 			NodeHelper{dest}.AppendChild(NewTextNode(cloneNode(child), child.Data))
 		default:

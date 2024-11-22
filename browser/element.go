@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"errors"
 	"slices"
 	"strings"
 
@@ -15,12 +16,14 @@ func (attrs Attributes) Length() int {
 	return len(attrs)
 }
 
+// An Element in the document. Can be either an [HTMLElement] or an [XMLElement]
 type Element interface {
 	ElementContainer
 	Append(Element) Element
 	GetAttribute(name string) string
 	SetAttribute(name string, value string)
 	GetAttributes() Attributes
+	InsertAdjacentHTML(position string, text string) error
 	OuterHTML() string
 	TagName() string
 }
@@ -113,4 +116,39 @@ func (e *element) QuerySelector(pattern string) (Node, error) {
 
 func (e *element) QuerySelectorAll(pattern string) (StaticNodeList, error) {
 	return CSSHelper{e}.QuerySelectorAll(pattern)
+}
+
+func (n *element) InsertAdjacentHTML(position string, text string) error {
+	var (
+		parent    Node
+		reference Node
+	)
+	switch position {
+	case "beforebegin":
+		parent = n.Parent()
+		reference = n // NOTE This will not work for subclasses
+	case "afterbegin":
+		parent = n
+		reference = n.ChildNodes()[0]
+	case "beforeend":
+		parent = n
+		reference = nil
+	case "afterend":
+		parent = n.Parent()
+		reference = n.NextSibling()
+	default:
+		return errors.New("Invalid position")
+	}
+	nodes, err := html.ParseFragment(strings.NewReader(text), &html.Node{
+		Type:     html.ElementNode,
+		Data:     "body",
+		DataAtom: atom.Body,
+	})
+	if err == nil {
+		for _, child := range nodes {
+			element := createElementFromNode(nil, n.OwnerDocument(), nil, child)
+			parent.InsertBefore(element, reference)
+		}
+	}
+	return err
 }

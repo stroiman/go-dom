@@ -15,8 +15,10 @@ type Node interface {
 	Connected() bool
 	InsertBefore(newNode Node, referenceNode Node) (Node, error)
 	NodeName() string
+	OwnerDocument() Document // TODO: Element, not Node
 	Parent() Node
 	RemoveChild(node Node) error
+	NextSibling() Node
 	// unexported
 	createHtmlNode() *html.Node
 	insertBefore(newNode Node, referenceNode Node) (Node, error)
@@ -126,4 +128,27 @@ func (n NodeIterator) toHtmlNode(m map[*html.Node]Node) *html.Node {
 		htmlNode.AppendChild(NodeIterator{child}.toHtmlNode(m))
 	}
 	return htmlNode
+}
+
+func (n *node) OwnerDocument() Document {
+	parent := n.Parent()
+	if parent != nil {
+		return parent.OwnerDocument()
+	}
+	return nil
+}
+
+func (n *node) NextSibling() Node {
+	children := n.Parent().ChildNodes()
+	idx := slices.IndexFunc(
+		children,
+		func(child Node) bool { return n.ObjectId() == child.ObjectId() },
+	) + 1
+	if idx == 0 {
+		panic("We should exist in our parent's collection")
+	}
+	if idx >= len(children) {
+		return nil
+	}
+	return children[idx]
 }

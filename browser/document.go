@@ -104,3 +104,5 @@ func (d *document) QuerySelector(pattern string) (Node, error) {
 func (d *document) QuerySelectorAll(pattern string) (StaticNodeList, error) {
 	return CSSHelper{d}.QuerySelectorAll(pattern)
 }
+
+func (d *document) OwnerDocument() Document { return d }
