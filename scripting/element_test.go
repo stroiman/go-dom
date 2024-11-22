@@ -15,12 +15,20 @@ var _ = Describe("V8 Element", func() {
 		).To(BeTrue())
 	})
 
-	Describe("GetAttribute", func() {
-		It("Should return the right value", func() {
-			ctx.Window().LoadHTML(`<div id="1" class="foo"></div>`)
-			Expect(ctx.RunTestScript(
-				`document.getElementById("1").getAttribute("class")`,
-			)).To(Equal("foo"))
-		})
+	It("Should support getAtribute", func() {
+		ctx.Window().LoadHTML(`<div id="1" class="foo"></div>`)
+		Expect(ctx.RunTestScript(
+			`document.getElementById("1").getAttribute("class")`,
+		)).To(Equal("foo"))
+	})
+
+	It("Should support insertAdjacentHTML", func() {
+		ctx.Window().LoadHTML(`<div id="1" class="foo"></div>`)
+		Expect(ctx.RunTestScript(
+			`document.getElementById("1").insertAdjacentHTML("beforebegin", "<p>foo</p>")`,
+		)).Error().ToNot(HaveOccurred())
+		Expect(
+			ctx.Window().Document().Body().OuterHTML(),
+		).To(Equal(`<body><p>foo</p><div id="1" class="foo"></div></body>`))
 	})
 })
