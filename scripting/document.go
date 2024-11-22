@@ -37,6 +37,30 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		nil,
 		v8.ReadOnly,
 	)
+	proto.SetAccessorPropertyCallback("head",
+		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			ctx := host.MustGetContext(arg.Context())
+			this, ok := ctx.GetCachedNode(arg.This())
+			if e, e_ok := this.(Document); ok && e_ok {
+				return ctx.GetInstanceForNode(host.htmlElement, e.Head())
+			}
+			return nil, v8.NewTypeError(iso, "Object not a Document")
+		},
+		nil,
+		v8.ReadOnly,
+	)
+	proto.SetAccessorPropertyCallback("body",
+		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			ctx := host.MustGetContext(arg.Context())
+			this, ok := ctx.GetCachedNode(arg.This())
+			if e, e_ok := this.(Document); ok && e_ok {
+				return ctx.GetInstanceForNode(host.htmlElement, e.Body())
+			}
+			return nil, v8.NewTypeError(iso, "Object not a Document")
+		},
+		nil,
+		v8.ReadOnly,
+	)
 	proto.Set(
 		"querySelector",
 		v8.NewFunctionTemplateWithError(iso,

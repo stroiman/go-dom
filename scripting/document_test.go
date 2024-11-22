@@ -86,6 +86,17 @@ var _ = Describe("V8 Document", func() {
 		})
 	})
 
+	Describe("body and Body", func() {
+		It("document.body Should return a <body>", func() {
+			ctx.Window().LoadHTML(`<html><body></body></html>`)
+			Expect(ctx.RunTestScript("document.body.tagName")).To(Equal("BODY"))
+		})
+		It("document.head Should return a <head>", func() {
+			ctx.Window().LoadHTML(`<html><body></body></html>`)
+			Expect(ctx.RunTestScript("document.head.tagName")).To(Equal("HEAD"))
+		})
+	})
+
 	Describe("querySelector", func() {
 		It("can find the right element", func() {
 			Expect(
