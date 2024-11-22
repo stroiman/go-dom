@@ -31,5 +31,28 @@ var _ = Describe("Node", func() {
 			).To(HaveOuterHTML(`<body><div>First</div><div id="1">1</div><p></p></body>`))
 			Expect(newElm.Parent()).To(Equal(doc.Body()))
 		})
+
+		It("Should remove the element from it's previous parent", func() {
+			doc := ParseHtmlString(
+				`<body>
+  <div id="parent-1"><div id="1">1</div><div id="2">2</div><div id="3">3</div></div>
+  <div id="parent-2"><div id="ref"></div></div>
+</body>`,
+			)
+			elm := doc.GetElementById("2")
+			ref := doc.GetElementById("ref")
+			oldParent := doc.GetElementById("parent-1")
+			newParent := doc.GetElementById("parent-2")
+			Expect(
+				oldParent,
+			).To(HaveOuterHTML(`<div id="parent-1"><div id="1">1</div><div id="2">2</div><div id="3">3</div></div>`))
+			Expect(newParent.InsertBefore(elm, ref)).Error().ToNot(HaveOccurred())
+			Expect(
+				oldParent,
+			).To(HaveOuterHTML(`<div id="parent-1"><div id="1">1</div><div id="3">3</div></div>`))
+			Expect(
+				newParent,
+			).To(HaveOuterHTML(`<div id="parent-2"><div id="2">2</div><div id="ref"></div></div>`))
+		})
 	})
 })

@@ -16,6 +16,7 @@ type Node interface {
 	InsertBefore(newNode Node, referenceNode Node) (Node, error)
 	NodeName() string
 	Parent() Node
+	RemoveChild(node Node) error
 	// unexported
 	appendChild(node Node) Node
 	createHtmlNode() *html.Node
@@ -72,13 +73,31 @@ func (n *node) NodeName() string {
 	return "#node"
 }
 
+// removeNodeFromParent removes the node from the current parent, _if_ it has
+// one. Does nothing for disconnected nodes.
+func removeNodeFromParent(node Node) {
+	parent := node.Parent()
+	if parent != nil {
+		parent.RemoveChild(node)
+	}
+}
+
+func (n *node) RemoveChild(node Node) error {
+	idx := slices.Index(n.childNodes, node)
+	if idx == -1 {
+		return errors.New("Not found")
+	}
+	n.childNodes = slices.Delete(n.childNodes, idx, idx+1)
+	return nil
+}
+
 func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
 	// TODO, Handle a fragment. Also returns nil
 	i := slices.Index(n.childNodes, referenceNode)
 	if i == -1 {
 		return nil, errors.New("Reference node not found")
 	}
-
+	removeNodeFromParent(newNode)
 	n.childNodes = slices.Insert(n.childNodes, i, newNode)
 	newNode.setParent(referenceNode.Parent())
 	return newNode, nil
