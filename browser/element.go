@@ -25,8 +25,13 @@ type element struct {
 	// type.
 }
 
-func NewElement(tagName string, node *html.Node) Element {
-	return &element{newNode(), tagName, node.Namespace, node.Attr}
+func NewElement(tagName string) Element {
+	// TODO: handle namespace
+	return &element{newNode(), tagName, "", nil}
+}
+
+func newElementFromNode(node *html.Node) Element {
+	return &element{newNode(), node.Data, node.Namespace, node.Attr}
 }
 
 func (e *element) NodeName() string {

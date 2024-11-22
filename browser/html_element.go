@@ -9,7 +9,7 @@ type HTMLElement interface {
 }
 
 func NewHTMLElement(node *html.Node) Element {
-	return NewElement(node.Data, node)
+	return newElementFromNode(node)
 }
 
 func NewHTMLUnknownElement(node *html.Node) Element {
