@@ -10,7 +10,7 @@ import (
 )
 
 // TODO: In the DOM, this is a `NamedNodeMap`. Is that useful in Go?
-type Attributes []html.Attribute
+type Attributes []*html.Attribute
 
 func (attrs Attributes) Length() int {
 	return len(attrs)
@@ -22,10 +22,12 @@ type Element interface {
 	Append(Element) Element
 	GetAttribute(name string) string
 	SetAttribute(name string, value string)
-	GetAttributes() Attributes
+	GetAttributes() NamedNodeMap
 	InsertAdjacentHTML(position string, text string) error
 	OuterHTML() string
 	TagName() string
+	// unexported
+	getAttributes() Attributes
 }
 
 type element struct {
@@ -45,7 +47,12 @@ func NewElement(tagName string, ownerDocument Document) Element {
 }
 
 func newElementFromNode(node *html.Node, ownerDocument Document) Element {
-	return &element{newNode(), node.Data, node.Namespace, node.Attr, ownerDocument}
+	attributes := make([]*html.Attribute, len(node.Attr))
+	for i, a := range node.Attr {
+		attributes[i] = new(html.Attribute)
+		*attributes[i] = a
+	}
+	return &element{newNode(), node.Data, node.Namespace, attributes, ownerDocument}
 }
 
 func (e *element) NodeName() string {
@@ -84,14 +91,20 @@ func (e *element) GetAttribute(name string) string {
 	return ""
 }
 
-func (e *element) GetAttributes() Attributes { return e.attributes }
+func (e *element) getAttributes() Attributes {
+	return e.attributes
+}
+
+func (e *element) GetAttributes() NamedNodeMap {
+	return NewNamedNodeMapForElement(e)
+}
 
 func (e *element) SetAttribute(name string, value string) {
-	idx := slices.IndexFunc(e.attributes, func(a html.Attribute) bool {
+	idx := slices.IndexFunc(e.attributes, func(a *html.Attribute) bool {
 		return a.Key == name && a.Namespace == e.namespace
 	})
 	if idx == -1 {
-		e.attributes = append(e.attributes, html.Attribute{
+		e.attributes = append(e.attributes, &html.Attribute{
 			Key:       name,
 			Val:       value,
 			Namespace: e.namespace})
@@ -101,12 +114,16 @@ func (e *element) SetAttribute(name string, value string) {
 }
 func (e *element) createHtmlNode() *html.Node {
 	tag := strings.ToLower(e.tagName)
+	attrs := make([]html.Attribute, len(e.attributes))
+	for i, a := range e.attributes {
+		attrs[i] = *a
+	}
 	return &html.Node{
 		Type:      html.ElementNode,
 		Data:      tag,
 		DataAtom:  atom.Lookup([]byte(tag)),
 		Namespace: e.namespace,
-		Attr:      e.attributes,
+		Attr:      attrs,
 	}
 }
 
