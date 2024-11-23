@@ -20,28 +20,20 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	helper := builder.NewPrototypeBuilder()
 	helper.CreateReadonlyProp("outerHTML", Element.OuterHTML)
 	helper.CreateReadonlyProp("tagName", Element.TagName)
-	helper.CreateFunction("getAttribute", Element.GetAttribute)
-	helper.proto.Set(
+	helper.CreateFunctionStringToString("getAttribute", Element.GetAttribute)
+
+	helper.CreateFunction(
 		"insertAdjacentHTML",
-		v8.NewFunctionTemplateWithError(
-			iso,
-			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := host.MustGetContext(info.Context())
-				this, ok := ctx.GetCachedNode(info.This())
-				if e, e_ok := this.(Element); e_ok && ok {
-					args := info.Args()
-					if len(args) < 2 {
-						return nil, v8.NewTypeError(iso, "Not enough argument")
-					}
-					position := args[0].String()
-					html := args[1].String()
-					e.InsertAdjacentHTML(position, html)
-					return v8.NewValue(iso, e.OuterHTML())
-				} else {
-					return nil, v8.NewTypeError(iso, "Not an instance of Element")
-				}
-			},
-		),
+		func(element Element, info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			args := info.Args()
+			if len(args) < 2 {
+				return nil, v8.NewTypeError(iso, "Not enough argument")
+			}
+			position := args[0].String()
+			html := args[1].String()
+			element.InsertAdjacentHTML(position, html)
+			return v8.NewValue(iso, element.OuterHTML())
+		},
 	)
 	return builder.constructor
 }

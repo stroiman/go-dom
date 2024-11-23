@@ -55,21 +55,31 @@ func (h PrototypeBuilder[T]) CreateReadonlyProp(name string, fn func(T) string) 
 		}, nil, v8.ReadOnly)
 }
 
-func (h PrototypeBuilder[T]) CreateFunction(name string, fn func(T, string) string) {
+func (h PrototypeBuilder[T]) CreateFunction(
+	name string,
+	fn func(T, *v8.FunctionCallbackInfo) (*v8.Value, error),
+) {
 	h.proto.Set(
 		name,
 		v8.NewFunctionTemplateWithError(
 			h.host.iso,
-			func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := h.host.MustGetContext(arg.Context())
-				instance, err := h.lookup(ctx, arg.This())
+			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				ctx := h.host.MustGetContext(info.Context())
+				instance, err := h.lookup(ctx, info.This())
 				if err != nil {
 					return nil, err
 				}
-				value := fn(instance, arg.Args()[0].String())
-				return v8.NewValue(h.host.iso, value)
+				return fn(instance, info)
+				// return v8.NewValue(h.host.iso, value)
 			},
 		),
 		v8.ReadOnly,
 	)
+}
+
+func (h PrototypeBuilder[T]) CreateFunctionStringToString(name string, fn func(T, string) string) {
+	h.CreateFunction(name, func(instance T, info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+		value := fn(instance, info.Args()[0].String())
+		return v8.NewValue(h.host.iso, value)
+	})
 }
