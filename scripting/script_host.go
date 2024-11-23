@@ -139,6 +139,7 @@ func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
 	classes := []class{
 		{"CustomEvent", CreateCustomEvent, nil},
+		{"NamedNodeMap", CreateNamedNodeMap, nil},
 		{"Location", CreateLocationPrototype, nil},
 		{"EventTarget", CreateEventTarget, []class{
 			{"Window", CreateWindowTemplate, nil},
