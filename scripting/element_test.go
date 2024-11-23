@@ -14,4 +14,13 @@ var _ = Describe("V8 Element", func() {
 			ctx.RunTestScript("Object.getPrototypeOf(Element.prototype) === Node.prototype"),
 		).To(BeTrue())
 	})
+
+	Describe("GetAttribute", func() {
+		It("Should return the right value", func() {
+			ctx.Window().LoadHTML(`<div id="1" class="foo"></div>`)
+			Expect(ctx.RunTestScript(
+				`document.getElementById("1").getAttribute("class")`,
+			)).To(Equal("foo"))
+		})
+	})
 })

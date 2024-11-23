@@ -20,5 +20,6 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	helper := builder.NewPrototypeBuilder()
 	helper.CreateReadonlyProp("outerHTML", Element.OuterHTML)
 	helper.CreateReadonlyProp("tagName", Element.TagName)
+	helper.CreateFunction("getAttribute", Element.GetAttribute)
 	return builder.constructor
 }

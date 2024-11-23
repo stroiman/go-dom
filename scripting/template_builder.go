@@ -54,3 +54,22 @@ func (h PrototypeBuilder[T]) CreateReadonlyProp(name string, fn func(T) string) 
 			return v8.NewValue(h.host.iso, value)
 		}, nil, v8.ReadOnly)
 }
+
+func (h PrototypeBuilder[T]) CreateFunction(name string, fn func(T, string) string) {
+	h.proto.Set(
+		name,
+		v8.NewFunctionTemplateWithError(
+			h.host.iso,
+			func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				ctx := h.host.MustGetContext(arg.Context())
+				instance, err := h.lookup(ctx, arg.This())
+				if err != nil {
+					return nil, err
+				}
+				value := fn(instance, arg.Args()[0].String())
+				return v8.NewValue(h.host.iso, value)
+			},
+		),
+		v8.ReadOnly,
+	)
+}

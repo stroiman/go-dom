@@ -87,5 +87,18 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 				return nil, v8.NewTypeError(iso, "Object not a Document")
 			}),
 	)
+	proto.Set(
+		"getElementById",
+		v8.NewFunctionTemplateWithError(iso,
+			func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				ctx := host.MustGetContext(args.Context())
+				this, ok := ctx.GetCachedNode(args.This())
+				if doc, e_ok := this.(Document); ok && e_ok {
+					element := doc.GetElementById(args.Args()[0].String())
+					return ctx.GetInstanceForNode(host.element, element)
+				}
+				return nil, v8.NewTypeError(iso, "Object not a Document")
+			}),
+	)
 	return res
 }
