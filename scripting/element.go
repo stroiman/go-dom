@@ -23,6 +23,12 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	helper.CreateReadonlyProp("outerHTML", Element.OuterHTML)
 	helper.CreateReadonlyProp("tagName", Element.TagName)
 	helper.CreateFunctionStringToString("getAttribute", Element.GetAttribute)
+	helper.CreateReadonlyProp2(
+		"attributes",
+		func(element Element, ctx *ScriptContext) (*v8.Value, error) {
+			return ctx.GetInstanceForNodeByName("NamedNodeMap", element.GetAttributes())
+		},
+	)
 
 	helper.CreateFunction(
 		"insertAdjacentHTML",
@@ -42,8 +48,20 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 
 type argumentHelper struct {
 	*v8.FunctionCallbackInfo
+	ctx *ScriptContext
 }
 
+func (h argumentHelper) GetInt32Arg(index int) (int32, error) {
+	args := h.Args()
+	if index >= len(args) {
+		return 0, ErrWrongNoOfArguments
+	}
+	arg := args[index]
+	if arg.IsNumber() {
+		return arg.Int32(), nil
+	}
+	return 0, ErrIncompatibleType
+}
 func (h argumentHelper) GetStringArg(index int) (string, error) {
 	args := h.Args()
 	if index >= len(args) {

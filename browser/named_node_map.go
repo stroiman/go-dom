@@ -3,6 +3,7 @@ package browser
 import "golang.org/x/net/html"
 
 type NamedNodeMap interface {
+	Entity
 	Length() int
 	Item(index int) Attr
 }
@@ -19,6 +20,7 @@ type Attr interface {
 }
 
 type namedNodeMap struct {
+	base
 	ownerElement Element
 }
 
@@ -29,7 +31,7 @@ type attr struct {
 }
 
 func NewNamedNodeMapForElement(ownerElement Element) NamedNodeMap {
-	return &namedNodeMap{ownerElement}
+	return &namedNodeMap{newBase(), ownerElement}
 }
 
 func (m *namedNodeMap) Length() int {

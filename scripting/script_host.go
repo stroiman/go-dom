@@ -83,7 +83,7 @@ func (c *ScriptContext) GetInstanceForNode(
 
 func (c *ScriptContext) GetInstanceForNodeByName(
 	constructor string,
-	node Node,
+	node Entity,
 ) (*v8.Value, error) {
 	iso := c.host.iso
 	if node == nil {
@@ -151,6 +151,7 @@ func NewScriptHost() *ScriptHost {
 				{"Element", CreateElement, []class{
 					{"HTMLElement", CreateHtmlElement, nil},
 				}},
+				{"Attr", CreateAttr, nil},
 			}},
 		}},
 	}

@@ -14,4 +14,21 @@ var _ = Describe("V8 NamedNodeMap", func() {
 			ctx.RunTestScript("Object.getPrototypeOf(NamedNodeMap.prototype) === Object.prototype"),
 		).To(BeTrue())
 	})
+
+	It("Should allow iterating attributes", func() {
+		ctx.Window().LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`)
+		Expect(ctx.RunTestScript(`
+const elm = document.getElementById("foo");
+const attributes = elm.attributes;
+let idAttribute;
+for (let i = 0; i < attributes.length; i++) {
+  const attr = attributes.item(i)
+  if (attr.name === "id") { idAttribute = attr }
+}`)).Error().ToNot(HaveOccurred())
+		Expect(ctx.RunTestScript("attributes.length")).To(BeEquivalentTo(3))
+		Expect(ctx.RunTestScript("idAttribute.value")).To(Equal("foo"))
+		ctx.MustRunTestScript("idAttribute.value = 'bar'")
+		Expect(ctx.RunTestScript("idAttribute.value")).To(Equal("bar"))
+
+	})
 })

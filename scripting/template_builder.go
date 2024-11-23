@@ -42,6 +42,26 @@ type PrototypeBuilder[T any] struct {
 	lookup func(*ScriptContext, *v8.Object) (T, error)
 }
 
+type FunctionInfo[T any] struct {
+	instance T
+	ctx      *ScriptContext
+}
+
+func (h PrototypeBuilder[T]) CreateReadonlyProp2(
+	name string,
+	fn func(T, *ScriptContext) (*v8.Value, error),
+) {
+	h.proto.SetAccessorPropertyCallback(name,
+		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			ctx := h.host.MustGetContext(info.Context())
+			instance, err := h.lookup(ctx, info.This())
+			if err != nil {
+				return nil, err
+			}
+			return fn(instance, ctx)
+		}, nil, v8.ReadOnly)
+}
+
 func (h PrototypeBuilder[T]) CreateReadonlyProp(name string, fn func(T) string) {
 	h.proto.SetAccessorPropertyCallback(name,
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -53,6 +73,33 @@ func (h PrototypeBuilder[T]) CreateReadonlyProp(name string, fn func(T) string) 
 			value := fn(instance)
 			return v8.NewValue(h.host.iso, value)
 		}, nil, v8.ReadOnly)
+}
+
+func (h PrototypeBuilder[T]) CreateReadWriteProp(
+	name string,
+	get func(T) string,
+	set func(T, string),
+) {
+	h.proto.SetAccessorPropertyCallback(name,
+		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			ctx := h.host.MustGetContext(arg.Context())
+			instance, err := h.lookup(ctx, arg.This())
+			if err != nil {
+				return nil, err
+			}
+			value := get(instance)
+			return v8.NewValue(h.host.iso, value)
+		},
+		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			ctx := h.host.MustGetContext(info.Context())
+			instance, err := h.lookup(ctx, info.This())
+			if err != nil {
+				return nil, err
+			}
+			newVal := info.Args()[0].String()
+			set(instance, newVal)
+			return nil, nil
+		}, v8.None)
 }
 
 func (h PrototypeBuilder[T]) CreateFunction(
@@ -69,7 +116,7 @@ func (h PrototypeBuilder[T]) CreateFunction(
 				if err != nil {
 					return nil, err
 				}
-				return fn(instance, argumentHelper{info})
+				return fn(instance, argumentHelper{info, ctx})
 				// return v8.NewValue(h.host.iso, value)
 			},
 		),
