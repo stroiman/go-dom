@@ -40,6 +40,7 @@ func CreateWindowTemplate(host *ScriptHost) *v8.FunctionTemplate {
 	windowTemplate.Set("Window", windowTemplateFn)
 	windowTemplate.Set("HTMLElement", host.htmlElement)
 	windowTemplate.Set("Location", host.location)
+	windowTemplate.Set("ShadowRoot", host.shadowRoot)
 	windowTemplate.Set("location", host.location.GetInstanceTemplate())
 	return windowTemplateFn
 }
