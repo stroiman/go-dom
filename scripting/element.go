@@ -1,6 +1,8 @@
 package scripting
 
 import (
+	"errors"
+
 	. "github.com/stroiman/go-dom/browser"
 
 	v8 "github.com/tommie/v8go"
@@ -24,16 +26,37 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 
 	helper.CreateFunction(
 		"insertAdjacentHTML",
-		func(element Element, info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			args := info.Args()
-			if len(args) < 2 {
-				return nil, v8.NewTypeError(iso, "Not enough argument")
+		func(element Element, info argumentHelper) (val *v8.Value, err error) {
+			position, e1 := info.GetStringArg(0)
+			html, e2 := info.GetStringArg(1)
+			err = errors.Join(e1, e2)
+			if err == nil {
+				element.InsertAdjacentHTML(position, html)
+				val, err = v8.NewValue(iso, element.OuterHTML())
 			}
-			position := args[0].String()
-			html := args[1].String()
-			element.InsertAdjacentHTML(position, html)
-			return v8.NewValue(iso, element.OuterHTML())
+			return
 		},
 	)
 	return builder.constructor
 }
+
+type argumentHelper struct {
+	*v8.FunctionCallbackInfo
+}
+
+func (h argumentHelper) GetStringArg(index int) (string, error) {
+	args := h.Args()
+	if index >= len(args) {
+		return "", ErrWrongNoOfArguments
+	}
+	arg := args[index]
+	if arg.IsString() {
+		return arg.String(), nil
+	}
+	return "", ErrIncompatibleType
+}
+
+var (
+	ErrIncompatibleType   = errors.New("Incompatible type")
+	ErrWrongNoOfArguments = errors.New("Not enough arguments passed")
+)

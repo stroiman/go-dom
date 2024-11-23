@@ -4,7 +4,8 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-func CreateNode(iso *v8.Isolate) *v8.FunctionTemplate {
+func CreateNode(host *ScriptHost) *v8.FunctionTemplate {
+	iso := host.iso
 	res := v8.NewFunctionTemplate(
 		iso,
 		func(args *v8.FunctionCallbackInfo) *v8.Value {

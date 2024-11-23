@@ -27,21 +27,23 @@ func CreateWindowTemplate(host *ScriptHost) *v8.FunctionTemplate {
 		"document",
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			if ctx, ok := host.GetContext(info.Context()); ok {
-				return ctx.GetInstanceForNode(host.document, ctx.window.Document())
+				return ctx.GetInstanceForNodeByName("Document", ctx.window.Document())
 			}
 			return nil, errors.New("Must have a context")
 		},
 		nil, v8.ReadOnly)
-	windowTemplate.Set("Document", host.document)
-	windowTemplate.Set("DocumentFragment", host.documentFragment)
-	windowTemplate.Set("Node", host.node)
-	windowTemplate.Set("CustomEvent", host.customEvent)
-	windowTemplate.Set("EventTarget", host.eventTarget)
-	windowTemplate.Set("Window", windowTemplateFn)
-	windowTemplate.Set("Element", host.element)
-	windowTemplate.Set("HTMLElement", host.htmlElement)
-	windowTemplate.Set("Location", host.location)
-	windowTemplate.Set("ShadowRoot", host.shadowRoot)
-	windowTemplate.Set("location", host.location.GetInstanceTemplate())
 	return windowTemplateFn
+}
+
+func installGlobals(
+	windowFnTemplate *v8.FunctionTemplate,
+	host *ScriptHost,
+	globalInstalls []globalInstall,
+) {
+	windowTemplate := windowFnTemplate.GetInstanceTemplate()
+	for _, globalInstall := range globalInstalls {
+		windowTemplate.Set(globalInstall.name, globalInstall.constructor)
+	}
+	location := host.globals.namedGlobals["Location"]
+	windowTemplate.Set("location", location.GetInstanceTemplate())
 }

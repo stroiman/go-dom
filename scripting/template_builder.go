@@ -57,7 +57,7 @@ func (h PrototypeBuilder[T]) CreateReadonlyProp(name string, fn func(T) string) 
 
 func (h PrototypeBuilder[T]) CreateFunction(
 	name string,
-	fn func(T, *v8.FunctionCallbackInfo) (*v8.Value, error),
+	fn func(T, argumentHelper) (*v8.Value, error),
 ) {
 	h.proto.Set(
 		name,
@@ -69,7 +69,7 @@ func (h PrototypeBuilder[T]) CreateFunction(
 				if err != nil {
 					return nil, err
 				}
-				return fn(instance, info)
+				return fn(instance, argumentHelper{info})
 				// return v8.NewValue(h.host.iso, value)
 			},
 		),
@@ -78,7 +78,7 @@ func (h PrototypeBuilder[T]) CreateFunction(
 }
 
 func (h PrototypeBuilder[T]) CreateFunctionStringToString(name string, fn func(T, string) string) {
-	h.CreateFunction(name, func(instance T, info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	h.CreateFunction(name, func(instance T, info argumentHelper) (*v8.Value, error) {
 		value := fn(instance, info.Args()[0].String())
 		return v8.NewValue(h.host.iso, value)
 	})

@@ -12,20 +12,20 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+type globalInstall struct {
+	name        string
+	constructor *v8.FunctionTemplate
+}
+
+type globals struct {
+	namedGlobals map[string]*v8.FunctionTemplate
+}
+
 type ScriptHost struct {
-	iso              *v8.Isolate
-	window           *v8.FunctionTemplate
-	windowTemplate   *v8.ObjectTemplate
-	document         *v8.FunctionTemplate
-	documentFragment *v8.FunctionTemplate
-	node             *v8.FunctionTemplate
-	element          *v8.FunctionTemplate
-	htmlElement      *v8.FunctionTemplate
-	customEvent      *v8.FunctionTemplate
-	eventTarget      *v8.FunctionTemplate
-	location         *v8.FunctionTemplate
-	shadowRoot       *v8.FunctionTemplate
-	contexts         map[*v8.Context]*ScriptContext
+	iso            *v8.Isolate
+	windowTemplate *v8.ObjectTemplate
+	globals        globals
+	contexts       map[*v8.Context]*ScriptContext
 }
 
 func (h *ScriptHost) GetContext(v8ctx *v8.Context) (*ScriptContext, bool) {
@@ -81,32 +81,89 @@ func (c *ScriptContext) GetInstanceForNode(
 	return nil, err
 }
 
+func (c *ScriptContext) GetInstanceForNodeByName(
+	constructor string,
+	node Node,
+) (*v8.Value, error) {
+	iso := c.host.iso
+	if node == nil {
+		return v8.Null(iso), nil
+	}
+	prototype, ok := c.host.globals.namedGlobals[constructor]
+	if !ok {
+		panic("Bad constructor name")
+	}
+	value, err := prototype.GetInstanceTemplate().NewInstance(c.v8ctx)
+	if err == nil {
+		objectId := node.ObjectId()
+		if cached, ok := c.v8nodes[objectId]; ok {
+			return cached, nil
+		}
+		return c.CacheNode(value, node)
+	}
+	return nil, err
+}
+
 func (c *ScriptContext) GetCachedNode(this *v8.Object) (Entity, bool) {
 	result, ok := c.domNodes[this.GetInternalField(0).Int32()]
 	return result, ok
 }
 
+type class struct {
+	globalIdentifier string
+	constructor      func(*ScriptHost) *v8.FunctionTemplate
+	subClasses       []class
+}
+
+// createGlobals returns an ordered list of constructors to be created in global
+// scope. They must be installed in "order", as base classes must be installed
+// before subclasses
+func createGlobals(host *ScriptHost, classes []class) []globalInstall {
+	result := make([]globalInstall, 0)
+	var iter func(*v8.FunctionTemplate, []class)
+	iter = func(superClass *v8.FunctionTemplate, classes []class) {
+		for _, class := range classes {
+			constructor := class.constructor(host)
+			result = append(result, globalInstall{class.globalIdentifier, constructor})
+			if superClass != nil {
+				constructor.Inherit(superClass)
+			}
+			iter(constructor, class.subClasses)
+		}
+	}
+	iter(nil, classes)
+	return result
+}
+
 func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
-	host.document = CreateDocumentPrototype(host)
-	host.documentFragment = CreateDocumentFragmentPrototype(host)
-	host.node = CreateNode(host.iso)
-	host.customEvent = CreateCustomEvent(host)
-	host.eventTarget = CreateEventTarget(host)
-	host.element = CreateElement(host)
-	host.htmlElement = CreateHtmlElement(host)
-	host.location = CreateLocationPrototype(host)
-	host.shadowRoot = CreateShadowRootPrototype(host)
-	host.window = CreateWindowTemplate(host)
-	host.window.Inherit(host.eventTarget)
-	host.element.Inherit(host.node)
-	host.htmlElement.Inherit(host.element)
-	host.document.Inherit(host.node)
-	host.documentFragment.Inherit(host.node)
-	host.shadowRoot.Inherit(host.documentFragment)
-	host.node.Inherit(host.eventTarget)
-	host.windowTemplate = host.window.GetInstanceTemplate()
+	classes := []class{
+		{"CustomEvent", CreateCustomEvent, nil},
+		{"Location", CreateLocationPrototype, nil},
+		{"EventTarget", CreateEventTarget, []class{
+			{"Window", CreateWindowTemplate, nil},
+			{"Node", CreateNode, []class{
+				{"Document", CreateDocumentPrototype, nil},
+				{"DocumentFragment", CreateDocumentFragmentPrototype, []class{
+					{"ShadowRoot", CreateShadowRootPrototype, nil},
+				}},
+				{"Element", CreateElement, []class{
+					{"HTMLElement", CreateHtmlElement, nil},
+				}},
+			}},
+		}},
+	}
+
+	globalInstalls := createGlobals(host, classes)
+	host.globals = globals{make(map[string]*v8.FunctionTemplate)}
+	for _, globalInstall := range globalInstalls {
+		host.globals.namedGlobals[globalInstall.name] = globalInstall.constructor
+	}
+	constructors := host.globals.namedGlobals
+	window := constructors["Window"]
+	host.windowTemplate = window.GetInstanceTemplate()
 	host.contexts = make(map[*v8.Context]*ScriptContext)
+	installGlobals(window, host, globalInstalls)
 	return host
 }
 

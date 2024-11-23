@@ -30,7 +30,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			ctx := host.MustGetContext(arg.Context())
 			this, ok := ctx.GetCachedNode(arg.This())
 			if e, e_ok := this.(Document); ok && e_ok {
-				return ctx.GetInstanceForNode(host.htmlElement, e.DocumentElement())
+				return ctx.GetInstanceForNodeByName("HTMLElement", e.DocumentElement())
 			}
 			return nil, v8.NewTypeError(iso, "Object not a Document")
 		},
@@ -42,7 +42,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			ctx := host.MustGetContext(arg.Context())
 			this, ok := ctx.GetCachedNode(arg.This())
 			if e, e_ok := this.(Document); ok && e_ok {
-				return ctx.GetInstanceForNode(host.htmlElement, e.Head())
+				return ctx.GetInstanceForNodeByName("HTMLElement", e.Head())
 			}
 			return nil, v8.NewTypeError(iso, "Object not a Document")
 		},
@@ -54,7 +54,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			ctx := host.MustGetContext(arg.Context())
 			this, ok := ctx.GetCachedNode(arg.This())
 			if e, e_ok := this.(Document); ok && e_ok {
-				return ctx.GetInstanceForNode(host.htmlElement, e.Body())
+				return ctx.GetInstanceForNodeByName("HTMLElement", e.Body())
 			}
 			return nil, v8.NewTypeError(iso, "Object not a Document")
 		},
@@ -77,9 +77,9 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 					}
 					switch t := node.(type) {
 					case Element:
-						return ctx.GetInstanceForNode(host.element, t)
+						return ctx.GetInstanceForNodeByName("Element", t)
 					case Node:
-						return ctx.GetInstanceForNode(host.node, t)
+						return ctx.GetInstanceForNodeByName("Node", t)
 					default:
 						return nil, v8.NewError(iso, fmt.Sprintf("Couldn't detect type: %v", node))
 					}
@@ -95,7 +95,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 				this, ok := ctx.GetCachedNode(args.This())
 				if doc, e_ok := this.(Document); ok && e_ok {
 					element := doc.GetElementById(args.Args()[0].String())
-					return ctx.GetInstanceForNode(host.element, element)
+					return ctx.GetInstanceForNodeByName("Element", element)
 				}
 				return nil, v8.NewTypeError(iso, "Object not a Document")
 			}),
