@@ -141,10 +141,6 @@ func must(err error) {
 	}
 }
 
-func (host *ScriptHost) createPrototypeChains() {
-	host.document.Inherit(host.node)
-}
-
 func (ctx *ScriptContext) Dispose() {
 	ctx.pinner.Unpin()
 	delete(ctx.host.contexts, ctx.v8ctx)
