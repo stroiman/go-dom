@@ -13,17 +13,18 @@ import (
 )
 
 type ScriptHost struct {
-	iso            *v8.Isolate
-	window         *v8.FunctionTemplate
-	windowTemplate *v8.ObjectTemplate
-	document       *v8.FunctionTemplate
-	node           *v8.FunctionTemplate
-	element        *v8.FunctionTemplate
-	htmlElement    *v8.FunctionTemplate
-	customEvent    *v8.FunctionTemplate
-	eventTarget    *v8.FunctionTemplate
-	location       *v8.FunctionTemplate
-	contexts       map[*v8.Context]*ScriptContext
+	iso              *v8.Isolate
+	window           *v8.FunctionTemplate
+	windowTemplate   *v8.ObjectTemplate
+	document         *v8.FunctionTemplate
+	documentFragment *v8.FunctionTemplate
+	node             *v8.FunctionTemplate
+	element          *v8.FunctionTemplate
+	htmlElement      *v8.FunctionTemplate
+	customEvent      *v8.FunctionTemplate
+	eventTarget      *v8.FunctionTemplate
+	location         *v8.FunctionTemplate
+	contexts         map[*v8.Context]*ScriptContext
 }
 
 func (h *ScriptHost) GetContext(v8ctx *v8.Context) (*ScriptContext, bool) {
@@ -87,6 +88,7 @@ func (c *ScriptContext) GetCachedNode(this *v8.Object) (Entity, bool) {
 func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
 	host.document = CreateDocumentPrototype(host)
+	host.documentFragment = CreateDocumentFragmentPrototype(host)
 	host.node = CreateNode(host.iso)
 	host.customEvent = CreateCustomEvent(host)
 	host.eventTarget = CreateEventTarget(host)
@@ -99,6 +101,7 @@ func NewScriptHost() *ScriptHost {
 	host.element.Inherit(host.node)
 	host.htmlElement.Inherit(host.element)
 	host.document.Inherit(host.node)
+	host.documentFragment.Inherit(host.node)
 	host.node.Inherit(host.eventTarget)
 	host.contexts = make(map[*v8.Context]*ScriptContext)
 	return host

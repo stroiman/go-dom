@@ -33,6 +33,7 @@ func CreateWindowTemplate(host *ScriptHost) *v8.FunctionTemplate {
 		},
 		nil, v8.ReadOnly)
 	windowTemplate.Set("Document", host.document)
+	windowTemplate.Set("DocumentFragment", host.documentFragment)
 	windowTemplate.Set("Node", host.node)
 	windowTemplate.Set("CustomEvent", host.customEvent)
 	windowTemplate.Set("EventTarget", host.eventTarget)
