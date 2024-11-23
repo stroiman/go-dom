@@ -34,7 +34,7 @@ var _ = Describe("Node", func() {
 		Describe("Inserting a documentFragment", func() {
 			It("Inserts the nodes in the right order", func() {
 				doc := ParseHtmlString(`<body><div>First</div><div id="1">1</div></body>`)
-				fragment := NewDocumentFragment()
+				fragment := doc.CreateDocumentFragment()
 				d1 := doc.CreateElement("div")
 				d2 := doc.CreateElement("div")
 				d1.SetAttribute("id", "c-1")

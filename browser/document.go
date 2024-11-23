@@ -18,6 +18,7 @@ type Document interface {
 	RootNode
 	Body() Element
 	Head() Element
+	CreateDocumentFragment() DocumentFragment
 	CreateElement(string) Element
 	DocumentElement() Element
 	// unexported
@@ -74,6 +75,11 @@ func (d *document) CreateElement(name string) Element {
 func (d *document) createElement(node *html.Node) Element {
 	return NewHTMLElement(node, d)
 }
+
+func (d *document) CreateDocumentFragment() DocumentFragment {
+	return NewDocumentFragment(d)
+}
+
 func (d *document) Append(element Element) Element {
 	NodeHelper{d}.AppendChild(element)
 	return element

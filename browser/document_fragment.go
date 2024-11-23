@@ -8,10 +8,11 @@ type DocumentFragment interface {
 
 type documentFragment struct {
 	rootNode
+	ownerDocument Document
 }
 
-func NewDocumentFragment() DocumentFragment {
-	return &documentFragment{newRootNode()}
+func NewDocumentFragment(ownerDocument Document) DocumentFragment {
+	return &documentFragment{newRootNode(), ownerDocument}
 }
 
 func (d *documentFragment) Append(element Element) Element {
