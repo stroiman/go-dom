@@ -36,6 +36,17 @@ func (c ConstructorBuilder[T]) NewPrototypeBuilder() PrototypeBuilder[T] {
 	}
 }
 
+func (c ConstructorBuilder[T]) NewInstanceBuilder() PrototypeBuilder[T] {
+	if c.instanceLookup == nil {
+		panic("Cannot build prototype builder if instance lookup not specified")
+	}
+	return PrototypeBuilder[T]{
+		host:   c.host,
+		proto:  c.constructor.GetInstanceTemplate(),
+		lookup: c.instanceLookup,
+	}
+}
+
 type PrototypeBuilder[T any] struct {
 	host   *ScriptHost
 	proto  *v8.ObjectTemplate

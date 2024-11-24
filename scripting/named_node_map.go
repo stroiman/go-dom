@@ -53,6 +53,18 @@ func CreateNamedNodeMap(host *ScriptHost) *v8.FunctionTemplate {
 			return nil, err
 		},
 	)
+	instance := builder.NewInstanceBuilder()
+	instance.proto.SetIndexedHandler(func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+		ctx := host.MustGetContext(info.Context())
+		instance, ok := ctx.GetCachedNode(info.This())
+		nodemap, ok_2 := instance.(NamedNodeMap)
+		if ok && ok_2 {
+			index := int(info.Index())
+			item := nodemap.Item(index)
+			return ctx.GetInstanceForNodeByName("Attr", item)
+		}
+		return nil, v8.NewTypeError(iso, "dunno")
+	})
 
 	return builder.constructor
 }

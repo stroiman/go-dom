@@ -29,6 +29,25 @@ for (let i = 0; i < attributes.length; i++) {
 		Expect(ctx.RunTestScript("idAttribute.value")).To(Equal("foo"))
 		ctx.MustRunTestScript("idAttribute.value = 'bar'")
 		Expect(ctx.RunTestScript("idAttribute.value")).To(Equal("bar"))
+	})
 
+	It("Should allow indexing by number", func() {
+		ctx.Window().LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`)
+		Expect(ctx.RunTestScript(`
+const elm = document.getElementById("foo");
+const attributes = elm.attributes;
+attributes[0] instanceof Attr &&
+attributes[1] instanceof Attr &&
+attributes[2] instanceof Attr
+`)).To(BeTrue())
+	})
+
+	It("Should return `null` when indexing outside the elements", func() {
+		ctx.Window().LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`)
+		Expect(ctx.RunTestScript(`
+const elm = document.getElementById("foo");
+const attributes = elm.attributes;
+attributes[3]
+`)).To(BeNil())
 	})
 })

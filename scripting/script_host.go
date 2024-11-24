@@ -166,6 +166,7 @@ func NewScriptHost() *ScriptHost {
 	host.windowTemplate = window.GetInstanceTemplate()
 	host.contexts = make(map[*v8.Context]*ScriptContext)
 	installGlobals(window, host, globalInstalls)
+
 	return host
 }
 
