@@ -59,4 +59,16 @@ const attribute = elm.attributes.item(0);
 attribute.nodeType
 `)).To(BeEquivalentTo(2))
 	})
+
+	Describe("Retrieve bad index", func() {
+		It("Should return undefined when using attributes.[index]", func() {
+			ctx.Window().LoadHTML(`<body></body>`)
+			Expect(ctx.RunTestScript("document.body.attributes[42] === undefined")).To(BeTrue())
+		})
+
+		It("Should return null when using attributes.item(index)", func() {
+			ctx.Window().LoadHTML(`<body></body>`)
+			Expect(ctx.RunTestScript("document.body.attributes.item(42) === null")).To(BeTrue())
+		})
+	})
 })

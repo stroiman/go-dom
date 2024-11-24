@@ -50,7 +50,7 @@ func CreateNamedNodeMap(host *ScriptHost) *v8.FunctionTemplate {
 				val, err := info.ctx.GetInstanceForNodeByName("Attr", item)
 				return val, err
 			}
-			return nil, err
+			return v8.Null(iso), err
 		},
 	)
 	instance := builder.NewInstanceBuilder()
@@ -61,6 +61,9 @@ func CreateNamedNodeMap(host *ScriptHost) *v8.FunctionTemplate {
 		if ok && ok_2 {
 			index := int(info.Index())
 			item := nodemap.Item(index)
+			if item == nil {
+				return v8.Undefined(iso), nil
+			}
 			return ctx.GetInstanceForNodeByName("Attr", item)
 		}
 		return nil, v8.NewTypeError(iso, "dunno")
