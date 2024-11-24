@@ -141,6 +141,7 @@ func NewScriptHost() *ScriptHost {
 		{"CustomEvent", CreateCustomEvent, nil},
 		{"NamedNodeMap", CreateNamedNodeMap, nil},
 		{"Location", CreateLocationPrototype, nil},
+		{"NodeList", CreateNodeList, nil},
 		{"EventTarget", CreateEventTarget, []class{
 			{"Window", CreateWindowTemplate, nil},
 			{"Node", CreateNode, []class{
