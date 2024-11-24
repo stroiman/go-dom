@@ -15,6 +15,11 @@ var _ = Describe("V8 Element", func() {
 		).To(BeTrue())
 	})
 
+	It("Should have nodeType == 1", func() {
+		ctx.Window().LoadHTML(`<div id="1" class="foo"></div>`)
+		Expect(ctx.RunTestScript("document.body.nodeType")).To(BeEquivalentTo(1))
+	})
+
 	It("Should support getAtribute", func() {
 		ctx.Window().LoadHTML(`<div id="1" class="foo"></div>`)
 		Expect(ctx.RunTestScript(

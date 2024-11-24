@@ -50,4 +50,13 @@ const attributes = elm.attributes;
 attributes[3]
 `)).To(BeNil())
 	})
+
+	It("Should have nodeType 2 on attributes", func() {
+		ctx.Window().LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`)
+		Expect(ctx.RunTestScript(`
+const elm = document.getElementById("foo");
+const attribute = elm.attributes.item(0);
+attribute.nodeType
+`)).To(BeEquivalentTo(2))
+	})
 })

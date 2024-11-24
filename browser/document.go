@@ -127,3 +127,5 @@ func (d *document) QuerySelectorAll(pattern string) (StaticNodeList, error) {
 }
 
 func (d *document) OwnerDocument() Document { return d }
+
+func (d *document) NodeType() NodeType { return NodeTypeDocument }

@@ -26,6 +26,8 @@ func (n *textNode) InsertBefore(newChild Node, reference Node) (Node, error) {
 
 func (n *textNode) Text() string { return n.text }
 
+func (n *textNode) NodeType() NodeType { return NodeTypeText }
+
 func (n *textNode) createHtmlNode() *html.Node {
 	return &html.Node{
 		Type: html.TextNode,

@@ -10,6 +10,22 @@ type ConstructorBuilder[T any] struct {
 	instanceLookup func(*ScriptContext, *v8.Object) (T, error)
 }
 
+func NewConstructorBuilder[T any](
+	host *ScriptHost,
+	cb v8.FunctionCallbackWithError,
+) ConstructorBuilder[T] {
+	constructor := v8.NewFunctionTemplateWithError(
+		host.iso,
+		cb,
+	)
+	constructor.GetInstanceTemplate().SetInternalFieldCount(1)
+
+	builder := ConstructorBuilder[T]{host: host,
+		constructor: constructor,
+	}
+	return builder
+}
+
 func NewIllegalConstructorBuilder[T any](host *ScriptHost) ConstructorBuilder[T] {
 	constructor := v8.NewFunctionTemplateWithError(
 		host.iso,

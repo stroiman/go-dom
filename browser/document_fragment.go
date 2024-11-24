@@ -45,3 +45,5 @@ func (d *documentFragment) createHtmlNode() *html.Node {
 		Type: html.DocumentNode,
 	}
 }
+
+func (d *documentFragment) NodeType() NodeType { return NodeTypeDocumentFragment }

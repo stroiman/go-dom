@@ -13,6 +13,9 @@ var _ = Describe("V8 Document", func() {
 		It("Should be an instance of Document", func() {
 			Expect(ctx.RunTestScript("actual instanceof Document")).To(BeTrue())
 		})
+		It("Should have nodeType 9", func() {
+			Expect(ctx.RunTestScript("actual.nodeType")).To(BeEquivalentTo(9))
+		})
 		It("Should be an instance of Node", func() {
 			Expect(ctx.RunTestScript("actual instanceof Node")).To(BeTrue())
 		})

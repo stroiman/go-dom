@@ -16,4 +16,16 @@ var _ = Describe("V8 ShadowRoot", func() {
 			),
 		).To(Equal("DocumentFragment"))
 	})
+
+	It("Should have a nodeType of 11 ", func() {
+		Skip("ShadowRoot is defined as a type, but there isn't a way to construct one yet")
+		// It's not specified here: https://developer.mozilla.org/en-US/docs/Web/API/Node
+		// so I assume that it inherits from DocumentFragment as it inherits from it
+		// https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot
+		Expect(
+			ctx.RunTestScript(
+				`new ShadowRoot().nodeType`,
+			),
+		).To(BeEquivalentTo(11))
+	})
 })

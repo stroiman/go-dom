@@ -7,6 +7,20 @@ import (
 	"golang.org/x/net/html"
 )
 
+type NodeType int
+
+const (
+	NodeTypeElement               NodeType = 1
+	NodeTypeAttribute             NodeType = 2
+	NodeTypeText                  NodeType = 3
+	NodeTypeCDataSection          NodeType = 4
+	NodeTypeProcessingInstruction NodeType = 7
+	NodeTypeComment               NodeType = 8
+	NodeTypeDocument              NodeType = 9
+	NodeTypeDocumentType          NodeType = 10
+	NodeTypeDocumentFragment      NodeType = 11
+)
+
 type Node interface {
 	EventTarget
 	AppendChild(node Node) Node
@@ -14,6 +28,7 @@ type Node interface {
 	Connected() bool
 	InsertBefore(newNode Node, referenceNode Node) (Node, error)
 	NodeName() string
+	NodeType() NodeType
 	OwnerDocument() Document // TODO: Element, not Node
 	Parent() Node
 	RemoveChild(node Node) error

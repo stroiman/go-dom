@@ -1,18 +1,30 @@
 package scripting
 
 import (
+	"github.com/stroiman/go-dom/browser"
 	v8 "github.com/tommie/v8go"
 )
 
 func CreateNode(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	res := v8.NewFunctionTemplate(
-		iso,
-		func(args *v8.FunctionCallbackInfo) *v8.Value {
-			return v8.Undefined(iso)
+	builder := NewConstructorBuilder[browser.Node](
+		host,
+		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			return v8.Undefined(iso), nil
 		},
 	)
-	instanceTemplate := res.GetInstanceTemplate()
-	instanceTemplate.SetInternalFieldCount(1)
-	return res
+	builder.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (browser.Node, error) {
+		instance, ok := ctx.GetCachedNode(this)
+		if instance, e_ok := instance.(browser.Node); e_ok && ok {
+			return instance, nil
+		} else {
+			return nil, v8.NewTypeError(iso, "Not an instance of NamedNodeMap")
+		}
+	}
+	protoBuilder := builder.NewPrototypeBuilder()
+	protoBuilder.CreateReadonlyProp2("nodeType",
+		func(instance browser.Node, ctx *ScriptContext) (*v8.Value, error) {
+			return v8.NewValue(iso, int32(instance.NodeType()))
+		})
+	return builder.constructor
 }

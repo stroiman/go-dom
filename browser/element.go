@@ -169,3 +169,5 @@ func (n *element) InsertAdjacentHTML(position string, text string) error {
 	}
 	return err
 }
+
+func (n *element) NodeType() NodeType { return NodeTypeElement }
