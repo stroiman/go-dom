@@ -2,7 +2,6 @@ package browser
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 
 	"golang.org/x/net/html"
@@ -63,7 +62,6 @@ func (n *node) Parent() Node { return n.parent }
 func (n *node) setParent(parent Node) { n.parent = parent }
 
 func (n *node) Connected() (result bool) {
-	fmt.Printf("Check parent on node, %v\n", n)
 	if n.parent != nil {
 		result = n.parent.Connected()
 	}
