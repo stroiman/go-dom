@@ -1,8 +1,6 @@
 package scripting
 
 import (
-	"fmt"
-
 	. "github.com/stroiman/go-dom/browser"
 
 	v8 "github.com/tommie/v8go"
@@ -75,14 +73,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 					if node == nil {
 						return v8.Null(iso), nil
 					}
-					switch t := node.(type) {
-					case Element:
-						return ctx.GetInstanceForNodeByName("Element", t)
-					case Node:
-						return ctx.GetInstanceForNodeByName("Node", t)
-					default:
-						return nil, v8.NewError(iso, fmt.Sprintf("Couldn't detect type: %v", node))
-					}
+					return ctx.GetInstanceForNode(node)
 				}
 				return nil, v8.NewTypeError(iso, "Object not a Document")
 			}),
