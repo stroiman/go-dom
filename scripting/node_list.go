@@ -1,8 +1,6 @@
 package scripting
 
 import (
-	"fmt"
-
 	"github.com/stroiman/go-dom/browser"
 	v8 "github.com/tommie/v8go"
 )
@@ -53,6 +51,26 @@ thisArg Optional
 
 func CreateNodeList(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
+	iteratorResultTemplate := v8.NewObjectTemplate(iso)
+	iteratorTemplate := v8.NewObjectTemplate(iso)
+	iteratorTemplate.SetInternalFieldCount(2)
+	createDoneIteratorResult := func(ctx *v8.Context) (*v8.Value, error) {
+		result, err := iteratorResultTemplate.NewInstance(ctx)
+		if err != nil {
+			return nil, err
+		}
+		result.Set("done", true)
+		return result.Value, nil
+	}
+	createNotDoneIteratorResult := func(ctx *v8.Context, value interface{}) (*v8.Value, error) {
+		result, err := iteratorResultTemplate.NewInstance(ctx)
+		if err != nil {
+			return nil, err
+		}
+		result.Set("done", false)
+		result.Set("value", value)
+		return result.Value, nil
+	}
 	builder := NewIllegalConstructorBuilder[browser.NodeList](host)
 	builder.SetDefaultInstanceLookup()
 	proto := builder.NewPrototypeBuilder()
@@ -76,9 +94,45 @@ func CreateNodeList(host *ScriptHost) *v8.FunctionTemplate {
 			return info.ctx.GetInstanceForNodeByName("Element", result)
 		},
 	)
-	builder.NewInstanceBuilder().proto.SetIndexedHandler(
+	instanceTemplate := builder.NewInstanceBuilder().proto
+	instanceTemplate.SetSymbol(
+		v8.SymbolIterator(iso),
+		v8.NewFunctionTemplateWithError(
+			iso,
+			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				instance, err := iteratorTemplate.NewInstance(info.Context())
+				instance.SetInternalField(0, info.This().GetInternalField(0))
+				instance.Set(
+					"next",
+					*v8.NewFunctionTemplateWithError(iso,
+						func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+							ctx := host.MustGetContext(info.Context())
+							nodeList, err := getInstanceFromThis[browser.NodeList](ctx, info.This())
+							if err != nil {
+								return nil, err
+							}
+							index := (info.This().GetInternalField(1).Int32())
+							item := nodeList.Item(int(index))
+							if item == nil {
+								return createDoneIteratorResult(ctx.v8ctx)
+							} else {
+								item := nodeList.Item(int(index))
+								item_instance, err := ctx.GetInstanceForNode(item)
+								if err != nil {
+									return nil, err
+								}
+								result, err := createNotDoneIteratorResult(ctx.v8ctx, item_instance)
+								return result, info.This().SetInternalField(1, index+1)
+							}
+						},
+					).GetFunction(info.Context()),
+				)
+				return instance.Value, err
+			},
+		),
+	)
+	instanceTemplate.SetIndexedHandler(
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			fmt.Println("Indexed property handler!!!")
 			ctx := host.MustGetContext(info.Context())
 			instance, ok := ctx.GetCachedNode(info.This())
 			nodemap, ok_2 := instance.(browser.NodeList)

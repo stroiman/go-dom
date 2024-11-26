@@ -20,6 +20,14 @@ var _ = Describe("V8 NodeList", func() {
 			`<div id="1"></div><div id="2"></div><div id="3"></div>`,
 		))
 
+		It("Should be an iterable", func() {
+			Expect(
+				ctx.RunTestScript(`
+				  const a = Array.from(document.body.childNodes);
+				  a.map(x => x.getAttribute("id")).join(",")`),
+			).To(Equal("1,2,3"))
+		})
+
 		It("Should have a length property", func() {
 			Expect(ctx.RunTestScript("document.body.childNodes.length")).To(BeEquivalentTo(3))
 		})

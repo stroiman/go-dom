@@ -1,6 +1,8 @@
 package scripting
 
 import (
+	"errors"
+
 	v8 "github.com/tommie/v8go"
 )
 
@@ -39,6 +41,20 @@ func NewIllegalConstructorBuilder[T any](host *ScriptHost) ConstructorBuilder[T]
 		constructor: constructor,
 	}
 	return builder
+}
+
+func getInstanceFromThis[T any](ctx *ScriptContext, this *v8.Object) (instance T, err error) {
+	cachedEntity, ok := ctx.GetCachedNode(this)
+	if !ok {
+		err = errors.New("No cached entity could be found for `this`")
+		return
+	}
+	if i, e_ok := cachedEntity.(T); e_ok && ok {
+		return i, nil
+	} else {
+		err = v8.NewTypeError(ctx.host.iso, "Not an object of the correct type")
+		return
+	}
 }
 
 func (c *ConstructorBuilder[T]) SetDefaultInstanceLookup() {
