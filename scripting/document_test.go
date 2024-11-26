@@ -117,4 +117,18 @@ var _ = Describe("V8 Document", func() {
 			).To(BeNil())
 		})
 	})
+
+	Describe("querySelectorAll", func() {
+		It("can find the right element", func() {
+			Expect(
+				ctx.Window().
+					LoadHTML(`<body><div>0</div><div data-key="1">1</div><div data-key="2">2</div><body>`),
+			).To(Succeed())
+			Expect(
+				ctx.RunTestScript(
+					"Array.from(document.querySelectorAll('[data-key]')).map(x => x.outerHTML).join(',')",
+				),
+			).To(Equal(`<div data-key="1">1</div>,<div data-key="2">2</div>`))
+		})
+	})
 })

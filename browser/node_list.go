@@ -29,8 +29,8 @@ type StaticNodeSource []Node
 
 func (s StaticNodeSource) ChildNodes() []Node { return s }
 
-func NewNodeList() NodeList {
-	return &nodeList{newBase(), nil}
+func NewNodeList(nodes ...Node) NodeList {
+	return &nodeList{newBase(), nodes}
 }
 
 func (l *nodeList) Length() int { return len(l.nodes) }

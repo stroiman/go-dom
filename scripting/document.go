@@ -79,6 +79,22 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			}),
 	)
 	proto.Set(
+		"querySelectorAll",
+		v8.NewFunctionTemplateWithError(iso,
+			func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				ctx := host.MustGetContext(args.Context())
+				this, ok := ctx.GetCachedNode(args.This())
+				if doc, e_ok := this.(Document); ok && e_ok {
+					nodeList, err := doc.QuerySelectorAll(args.Args()[0].String())
+					if err != nil {
+						return nil, err
+					}
+					return ctx.GetInstanceForNodeByName("NodeList", nodeList)
+				}
+				return nil, v8.NewTypeError(iso, "Object not a Document")
+			}),
+	)
+	proto.Set(
 		"getElementById",
 		v8.NewFunctionTemplateWithError(iso,
 			func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {

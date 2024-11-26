@@ -91,7 +91,7 @@ func CreateNodeList(host *ScriptHost) *v8.FunctionTemplate {
 			if result == nil {
 				return v8.Null(iso), nil
 			}
-			return info.ctx.GetInstanceForNodeByName("Element", result)
+			return info.ctx.GetInstanceForNode(result)
 		},
 	)
 	instanceTemplate := builder.NewInstanceBuilder().proto

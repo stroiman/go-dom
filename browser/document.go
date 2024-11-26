@@ -7,7 +7,7 @@ import (
 
 type DocumentEvent = string
 
-type StaticNodeList []Node
+type StaticNodeList NodeList
 
 const (
 	DocumentEventDOMContentLoaded DocumentEvent = "DOMContentLoaded"
