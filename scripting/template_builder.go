@@ -103,9 +103,9 @@ func (h PrototypeBuilder[T]) CreateReadonlyProp2(
 
 func (h PrototypeBuilder[T]) CreateReadonlyProp(name string, fn func(T) string) {
 	h.proto.SetAccessorPropertyCallback(name,
-		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := h.host.MustGetContext(arg.Context())
-			instance, err := h.lookup(ctx, arg.This())
+		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			ctx := h.host.MustGetContext(info.Context())
+			instance, err := h.lookup(ctx, info.This())
 			if err != nil {
 				return nil, err
 			}
