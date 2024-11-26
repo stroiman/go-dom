@@ -37,7 +37,7 @@ func NewDocument() Document {
 func (d *document) Body() Element {
 	root := d.DocumentElement()
 	if root != nil {
-		for _, child := range root.ChildNodes() {
+		for _, child := range root.ChildNodes().All() {
 			if e, ok := child.(Element); ok {
 				if e.TagName() == "BODY" {
 					return e
@@ -51,7 +51,7 @@ func (d *document) Body() Element {
 func (d *document) Head() Element {
 	root := d.DocumentElement()
 	if root != nil {
-		for _, child := range root.ChildNodes() {
+		for _, child := range root.ChildNodes().All() {
 			if e, ok := child.(Element); ok {
 				if e.TagName() == "HEAD" {
 					return e
@@ -94,7 +94,7 @@ func (d *document) InsertBefore(newChild Node, reference Node) (Node, error) {
 }
 
 func (d *document) DocumentElement() Element {
-	for _, c := range d.ChildNodes() {
+	for _, c := range d.ChildNodes().All() {
 		if e, ok := c.(Element); ok {
 			return e
 		}

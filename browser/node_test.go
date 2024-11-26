@@ -48,7 +48,7 @@ var _ = Describe("Node", func() {
 				Expect(
 					doc.Body(),
 				).To(HaveOuterHTML(`<body><div>First</div><div id="c-1"></div><div id="c-2"></div><div id="1">1</div></body>`))
-				Expect(result.ChildNodes()).To(BeEmpty())
+				Expect(result.ChildNodes().All()).To(BeEmpty())
 			})
 		})
 

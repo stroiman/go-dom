@@ -41,6 +41,18 @@ func NewIllegalConstructorBuilder[T any](host *ScriptHost) ConstructorBuilder[T]
 	return builder
 }
 
+func (c *ConstructorBuilder[T]) SetDefaultInstanceLookup() {
+	c.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (val T, err error) {
+		instance, ok := ctx.GetCachedNode(this)
+		if instance, e_ok := instance.(T); e_ok && ok {
+			return instance, nil
+		} else {
+			err = v8.NewTypeError(ctx.host.iso, "Not an instance of NamedNodeMap")
+			return
+		}
+	}
+}
+
 func (c ConstructorBuilder[T]) NewPrototypeBuilder() PrototypeBuilder[T] {
 	if c.instanceLookup == nil {
 		panic("Cannot build prototype builder if instance lookup not specified")

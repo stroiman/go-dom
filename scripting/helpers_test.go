@@ -39,6 +39,35 @@ func (c TestScriptContext) MustRunTestScript(script string) any {
 
 type CreateHook func(ctx *ScriptContext)
 
+// NewTextContext loads HTML into a browser for a single Ginkgo test. It
+// installs the proper Ginkgo cleanup handler.
+func NewTestContext(hooks ...CreateHook) TestScriptContext {
+	ctx := TestScriptContext{}
+	window := browser.NewWindow(new(url.URL))
+	// window.LoadHTML(html)
+	ctx.ScriptContext = host.NewContext(window)
+	for _, hook := range hooks {
+		hook(ctx.ScriptContext)
+	}
+	DeferCleanup(ctx.Dispose)
+	return ctx
+}
+
+// InitializeContextWithEmptyHtml is useful when multiple tests need has the
+// same initial HTML. The html will be parsed by a normal HTML parser, which
+// automatically wraps content in <html> and <body> if those are missing. So you
+// So passing `<div>foo</div>` will be the same as
+// `<html><body><div>foo</div></body></html>`.
+//
+// Example:
+//
+//	Describe("Tests with shared setup", func () {
+//		ctx := InitializeContextWithEmptyHtml(
+//			"<body><div>Hello, world!</div></body>");
+//
+//		 It("Should should find Hello, world! in first div", func () { /*...*/ }
+//		It("Should should have one child of body", func () { /*...*/ }
+//	})
 func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 	ctx := TestScriptContext{}
 
@@ -57,11 +86,14 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 	return &ctx
 }
 
+func LoadHTML(html string) CreateHook {
+	return func(ctx *ScriptContext) {
+		ctx.Window().LoadHTML(html)
+	}
+}
+
 func InitializeContextWithEmptyHtml() *TestScriptContext {
-	return InitializeContext(
-		func(ctx *ScriptContext) {
-			ctx.Window().LoadHTML("<html></html>") // Still creates head and body element
-		})
+	return InitializeContext(LoadHTML("<html></html>"))
 }
 
 type TestBrowserWrapper struct {

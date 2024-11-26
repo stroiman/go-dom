@@ -26,5 +26,11 @@ func CreateNode(host *ScriptHost) *v8.FunctionTemplate {
 		func(instance browser.Node, ctx *ScriptContext) (*v8.Value, error) {
 			return v8.NewValue(iso, int32(instance.NodeType()))
 		})
+	protoBuilder.CreateReadonlyProp2(
+		"childNodes",
+		func(instance browser.Node, ctx *ScriptContext) (*v8.Value, error) {
+			return ctx.GetInstanceForNodeByName("NodeList", instance.ChildNodes())
+		},
+	)
 	return builder.constructor
 }

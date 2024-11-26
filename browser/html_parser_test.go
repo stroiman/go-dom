@@ -114,7 +114,7 @@ func MatchStructure(name string, children ...types.GomegaMatcher) types.GomegaMa
 			panic(fmt.Sprintf("Unknown type %T for element", elm))
 		}
 		res.Name = element.NodeName()
-		res.Children = element.ChildNodes()
+		res.Children = element.ChildNodes().All()
 		return
 	}, And(
 		HaveField("Name", Equal(name)),

@@ -24,7 +24,7 @@ const (
 type Node interface {
 	EventTarget
 	AppendChild(node Node) Node
-	ChildNodes() []Node
+	ChildNodes() NodeList
 	Connected() bool
 	InsertBefore(newNode Node, referenceNode Node) (Node, error)
 	NodeName() string
@@ -37,16 +37,17 @@ type Node interface {
 	createHtmlNode() *html.Node
 	insertBefore(newNode Node, referenceNode Node) (Node, error)
 	setParent(node Node)
+	nodes() []Node
 }
 
 type node struct {
 	eventTarget
-	childNodes []Node
+	childNodes NodeList
 	parent     Node
 }
 
 func newNode() node {
-	return node{newEventTarget(), []Node{}, nil}
+	return node{newEventTarget(), NewNodeList(), nil}
 }
 
 type NodeHelper struct{ Node }
@@ -58,8 +59,8 @@ func (n NodeHelper) AppendChild(child Node) Node {
 
 func (n NodeHelper) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
 	if fragment, ok := newChild.(DocumentFragment); ok {
-		for len(fragment.ChildNodes()) > 0 {
-			n.InsertBefore(fragment.ChildNodes()[0], referenceNode)
+		for fragment.ChildNodes().Length() > 0 {
+			n.InsertBefore(fragment.ChildNodes().Item(0), referenceNode)
 		}
 		return fragment, nil
 	}
@@ -70,7 +71,7 @@ func (n NodeHelper) InsertBefore(newChild Node, referenceNode Node) (Node, error
 	return result, err
 }
 
-func (n *node) ChildNodes() []Node { return n.childNodes }
+func (n *node) ChildNodes() NodeList { return n.childNodes }
 
 func (n *node) Parent() Node { return n.parent }
 
@@ -97,11 +98,11 @@ func removeNodeFromParent(node Node) {
 }
 
 func (n *node) RemoveChild(node Node) error {
-	idx := slices.Index(n.childNodes, node)
+	idx := slices.Index(n.childNodes.All(), node)
 	if idx == -1 {
 		return errors.New("Not found")
 	}
-	n.childNodes = slices.Delete(n.childNodes, idx, idx+1)
+	n.childNodes.setNodes(slices.Delete(n.childNodes.All(), idx, idx+1))
 	return nil
 }
 
@@ -109,13 +110,13 @@ func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
 	// TODO, Don't allow newNode to be inserted in it's own branch (circular tree)
 	// TODO, Handle a fragment. Also returns nil
 	if referenceNode == nil {
-		n.childNodes = append(n.childNodes, newNode)
+		n.childNodes.append(newNode)
 	} else {
-		i := slices.Index(n.childNodes, referenceNode)
+		i := slices.Index(n.childNodes.All(), referenceNode)
 		if i == -1 {
 			return nil, errors.New("Reference node not found")
 		}
-		n.childNodes = slices.Insert(n.childNodes, i, newNode)
+		n.childNodes.setNodes(slices.Insert(n.childNodes.All(), i, newNode))
 	}
 	removeNodeFromParent(newNode)
 	return newNode, nil
@@ -137,7 +138,7 @@ func (n NodeIterator) toHtmlNode(m map[*html.Node]Node) *html.Node {
 	if m != nil {
 		m[htmlNode] = n.Node
 	}
-	for _, child := range n.ChildNodes() {
+	for _, child := range n.nodes() {
 		htmlNode.AppendChild(NodeIterator{child}.toHtmlNode(m))
 	}
 	return htmlNode
@@ -152,7 +153,7 @@ func (n *node) OwnerDocument() Document {
 }
 
 func (n *node) NextSibling() Node {
-	children := n.Parent().ChildNodes()
+	children := n.Parent().nodes()
 	idx := slices.IndexFunc(
 		children,
 		func(child Node) bool { return n.ObjectId() == child.ObjectId() },
@@ -164,4 +165,8 @@ func (n *node) NextSibling() Node {
 		return nil
 	}
 	return children[idx]
+}
+
+func (n *node) nodes() []Node {
+	return n.childNodes.All()
 }

@@ -146,7 +146,7 @@ func (n *element) InsertAdjacentHTML(position string, text string) error {
 		reference = n // NOTE This will not work for subclasses
 	case "afterbegin":
 		parent = n
-		reference = n.ChildNodes()[0]
+		reference = n.ChildNodes().Item(0)
 	case "beforeend":
 		parent = n
 		reference = nil

@@ -63,22 +63,26 @@ func (c *ScriptContext) CacheNode(obj *v8.Object, node Entity) (*v8.Value, error
 }
 
 func (c *ScriptContext) GetInstanceForNode(
-	prototype *v8.FunctionTemplate,
 	node Node,
 ) (*v8.Value, error) {
 	iso := c.host.iso
 	if node == nil {
 		return v8.Null(iso), nil
 	}
-	value, err := prototype.GetInstanceTemplate().NewInstance(c.v8ctx)
-	if err == nil {
-		objectId := node.ObjectId()
-		if cached, ok := c.v8nodes[objectId]; ok {
-			return cached, nil
-		}
-		return c.CacheNode(value, node)
+	switch n := node.(type) {
+	case Element:
+		return c.GetInstanceForNodeByName("Element", n)
+	case Node:
+		return c.GetInstanceForNodeByName("Node", n)
+	case Document:
+		return c.GetInstanceForNodeByName("Document", n)
+	case DocumentFragment:
+		return c.GetInstanceForNodeByName("DocumentFragment", n)
+	case Attr:
+		return c.GetInstanceForNodeByName("Attr", n)
+	default:
+		panic("Cannot lookup node")
 	}
-	return nil, err
 }
 
 func (c *ScriptContext) GetInstanceForNodeByName(

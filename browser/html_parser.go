@@ -21,7 +21,7 @@ func (r ScriptElementRules) Connected(win Window, node Element) {
 	src := node.GetAttribute("src")
 	if src == "" {
 		b := strings.Builder{}
-		for _, child := range node.ChildNodes() {
+		for _, child := range node.ChildNodes().All() {
 			switch n := child.(type) {
 			case TextNode:
 				b.WriteString(n.Text())
