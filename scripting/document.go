@@ -12,7 +12,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		iso,
 		func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			scriptContext := host.MustGetContext(args.Context())
-			return scriptContext.CacheNode(args.This(), NewDocument())
+			return scriptContext.CacheNode(args.This(), NewDocument(nil))
 		},
 	)
 	instanceTemplate := res.GetInstanceTemplate()
