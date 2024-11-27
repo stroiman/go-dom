@@ -191,7 +191,10 @@ func (host *ScriptHost) NewContext(window Window) *ScriptContext {
 		domNodes: make(map[ObjectId]Entity),
 	}
 	global = context.v8ctx.Global()
-	context.eventLoop = NewEventLoop(global)
+	errorCallback := func(err error) {
+		window.DispatchEvent(NewCustomEvent("error"))
+	}
+	context.eventLoop = NewEventLoop(global, errorCallback)
 	host.contexts[context.v8ctx] = context
 	context.CacheNode(global, window)
 

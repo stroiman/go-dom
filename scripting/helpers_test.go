@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	"github.com/stroiman/go-dom/browser"
 	. "github.com/stroiman/go-dom/scripting"
 )
@@ -42,6 +43,7 @@ type CreateHook func(ctx *ScriptContext)
 // NewTextContext loads HTML into a browser for a single Ginkgo test. It
 // installs the proper Ginkgo cleanup handler.
 func NewTestContext(hooks ...CreateHook) TestScriptContext {
+	var unhandledErrors []any
 	ctx := TestScriptContext{}
 	window := browser.NewWindow(new(url.URL))
 	// window.LoadHTML(html)
@@ -50,6 +52,15 @@ func NewTestContext(hooks ...CreateHook) TestScriptContext {
 	for _, hook := range hooks {
 		hook(ctx.ScriptContext)
 	}
+	DeferCleanup(func() {
+		gomega.Expect(unhandledErrors).To(gomega.BeEmpty())
+	})
+	ctx.Window().
+		AddEventListener("error",
+			browser.NewEventHandlerFunc(func(e browser.Event) error {
+				unhandledErrors = append(unhandledErrors, e)
+				return nil
+			}))
 	return ctx
 }
 

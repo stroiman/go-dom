@@ -11,6 +11,7 @@ type workItem struct {
 type EventLoop struct {
 	workItems    chan workItem
 	globalObject *v8.Object
+	errorCb      func(error)
 }
 
 func newWorkItem(fn *v8.Function) workItem {
@@ -24,14 +25,17 @@ func (l *EventLoop) dispatch(w workItem) {
 	}()
 }
 
-func NewEventLoop(global *v8.Object) *EventLoop {
-	return &EventLoop{make(chan workItem), global}
+func NewEventLoop(global *v8.Object, cb func(error)) *EventLoop {
+	return &EventLoop{make(chan workItem), global, cb}
 }
 
 func (l *EventLoop) Start() {
 	go func() {
 		for i := range l.workItems {
-			i.fn.Call(l.globalObject)
+			_, err := i.fn.Call(l.globalObject)
+			if err != nil {
+				l.errorCb(err)
+			}
 		}
 	}()
 }
