@@ -37,6 +37,23 @@ you can treat your HTTP server as a normal Go component.
 >
 > The API is not yet stable. use at your own risk.
 
+## BRANCH SPECIFIC NOTES!
+
+> [!WARNING]
+>
+> Do not base work off this branch; it is continuously rebased.
+
+This branch exists as a tool to drive the implementation of new features in
+main. The code has a simple failing test that loads an HTMX app into the
+browser. The errors generated are used to prioritise what to implement next in
+main.
+
+When the new feature is in main, this branch is rebased, and the next features
+is determined.
+
+Once the existing test no longer fails; More functionality will be added to the
+HTMX app to drive the implementation of UI event handlers, form behaviour, etc.
+
 ## Looking for sponsors
 
 If this tool could reach a minimum level of usability, this would be extremely
