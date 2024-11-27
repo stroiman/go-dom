@@ -267,16 +267,11 @@ func (host *ScriptHost) NewContext(window Window) *ScriptContext {
 		window.DispatchEvent(NewCustomEvent("error"))
 	}
 	context.eventLoop = NewEventLoop(global, errorCallback)
-	// Hmmm, should this be synchronized? Could potentially run multiple threads?
 	host.contexts[context.v8ctx] = context
 	context.CacheNode(global, window)
 	context.disposers = append(context.disposers, context.eventLoop.Start())
 
 	return context
-}
-
-func (c *ScriptContext) StartEventLoop() {
-	c.eventLoop.Start()
 }
 
 type Wrapper ScriptHost

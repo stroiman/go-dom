@@ -11,7 +11,6 @@ import (
 var _ = Describe("EventLoop", func() {
 	It("Defers execution", func() {
 		ctx := NewTestContext()
-		ctx.StartEventLoop()
 		c := make(chan bool)
 		defer close(c)
 
@@ -36,7 +35,6 @@ var _ = Describe("EventLoop", func() {
 
 	It("Dispatches an 'error' event on unhandled error", func() {
 		ctx := NewTestContext(IgnoreUnhandledErrors)
-		ctx.StartEventLoop()
 		c := make(chan bool)
 		defer close(c)
 		Expect(
