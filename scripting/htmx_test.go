@@ -20,17 +20,3 @@ var _ = Describe("Load from server", Ordered, func() {
 		Eventually(called).Should(Receive())
 	})
 })
-
-const indexHTML = `<html><head>
-  <script src="/public/xpath.js"></script>
-  <script>
-  const { XPathExpression, XPathResult } = window;
-  const evaluate = XPathExpression.prototype.evaluate;
-  XPathExpression.prototype.evaluate = function (context, type, res) {
-    return evaluate.call(this, context, type ?? XPathResult.ANY_TYPE, res);
-  };
-  </script>
-  <script src="/public/htmx.js"></script>
-  </head><body>
-  <div hx-get="/increment">Count: 1</div>
-</body></html>`
