@@ -29,7 +29,7 @@ type Node interface {
 	InsertBefore(newNode Node, referenceNode Node) (Node, error)
 	NodeName() string
 	NodeType() NodeType
-	OwnerDocument() Document // TODO: Element, not Node
+	OwnerDocument() Document
 	Parent() Node
 	RemoveChild(node Node) error
 	NextSibling() Node
@@ -75,7 +75,10 @@ func (n *node) ChildNodes() NodeList { return n.childNodes }
 
 func (n *node) Parent() Node { return n.parent }
 
-func (n *node) setParent(parent Node) { n.parent = parent }
+func (n *node) setParent(parent Node) {
+	n.parent = parent
+	n.parentTarget = parent
+}
 
 func (n *node) Connected() (result bool) {
 	if n.parent != nil {

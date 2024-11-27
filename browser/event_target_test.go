@@ -65,4 +65,59 @@ var _ = Describe("EventTarget", func() {
 		target.DispatchEvent(NewCustomEvent("click"))
 		Expect(callCount).To(Equal(2), "Final state")
 	})
+
+	Describe("Event propagation", func() {
+		It("Should propagate the event to the parent", func() {
+			called := false
+
+			window := NewWindow(nil)
+			Expect(window.LoadHTML(`<body><div id="source"></div></body>`)).To(Succeed())
+			// window.Document()
+			var l EventHandler = NewEventHandlerFunc(func(e Event) error {
+				called = true
+				return nil
+			})
+			window.Document().Body().AddEventListener("custom", l)
+			window.Document().GetElementById("source").DispatchEvent(NewCustomEvent("custom"))
+			Expect(called).To(BeTrue())
+		})
+
+		It("Should propagate the event to the window", func() {
+			called := false
+
+			window := NewWindow(nil)
+			Expect(window.LoadHTML(`<body><div id="source"></div></body>`)).To(Succeed())
+			// window.Document()
+			var l EventHandler = NewEventHandlerFunc(func(e Event) error {
+				called = true
+				return nil
+			})
+			window.AddEventListener("custom", l)
+			window.Document().GetElementById("source").DispatchEvent(NewCustomEvent("custom"))
+			Expect(called).To(BeTrue())
+		})
+
+		It("Should not propagate if the handler calls `StopPropagation()`", func() {
+			calledA := false
+			calledB := false
+
+			window := NewWindow(nil)
+			Expect(window.LoadHTML(`<body><div id="source"></div></body>`)).To(Succeed())
+			// window.Document()
+			window.Document().
+				Body().
+				AddEventListener("custom", NewEventHandlerFunc(func(e Event) error {
+					calledA = true
+					e.StopPropagation()
+					return nil
+				}))
+			window.AddEventListener("custom", NewEventHandlerFunc(func(e Event) error {
+				calledB = true
+				return nil
+			}))
+			window.Document().GetElementById("source").DispatchEvent(NewCustomEvent("custom"))
+			Expect(calledA).To(BeTrue(), "Event dispatched on body")
+			Expect(calledB).To(BeFalse(), "Event dispatched on window")
+		})
+	})
 })

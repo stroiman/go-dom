@@ -36,20 +36,22 @@ type window struct {
 }
 
 func NewWindow(url *url.URL) Window {
-	return &window{
+	result := &window{
 		eventTarget: newEventTarget(),
-		document:    NewDocument(),
 		url:         url,
 	}
+	result.document = NewDocument(result)
+	return result
 }
 
 func newWindow(httpClient http.Client, url *url.URL) *window {
-	return &window{
+	result := &window{
 		eventTarget: newEventTarget(),
-		document:    NewDocument(),
 		httpClient:  httpClient,
 		url:         url,
 	}
+	result.document = NewDocument(result)
+	return result
 }
 
 func (w *window) Document() Document {

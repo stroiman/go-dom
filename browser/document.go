@@ -28,10 +28,16 @@ type elementConstructor func(doc *document) Element
 
 type document struct {
 	rootNode
+	ownerWindow Window
 }
 
-func NewDocument() Document {
-	return &document{newRootNode()}
+func NewDocument(window Window) Document {
+	result := &document{newRootNode(), window}
+	// Hmmm, can document be replaced; and now the old doc's event goes to a
+	// window they shouldn't?
+	// What about disconnected documents, e.g. `new Document()` in the browser?
+	result.parentTarget = window
+	return result
 }
 
 func (d *document) Body() Element {

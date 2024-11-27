@@ -11,7 +11,8 @@ type EventTarget interface {
 
 type eventTarget struct {
 	base
-	lmap map[string][]EventHandler
+	parentTarget EventTarget
+	lmap         map[string][]EventHandler
 }
 
 func newEventTarget() eventTarget {
@@ -70,6 +71,10 @@ func (e *eventTarget) DispatchEvent(event Event) error {
 			return err
 		}
 	}
+
+	if e.parentTarget != nil && event.shouldPropagate() {
+		e.parentTarget.DispatchEvent(event)
+	}
 	return nil
 }
 
@@ -77,6 +82,9 @@ func (e *eventTarget) DispatchEvent(event Event) error {
 
 type Event interface {
 	Type() string
+	StopPropagation()
+	// Unexported
+	shouldPropagate() bool
 }
 
 type CustomEvent interface {
@@ -85,10 +93,14 @@ type CustomEvent interface {
 
 type event struct {
 	eventType string
+	propagate bool
 }
 
 func newEvent(eventType string) event {
-	return event{eventType}
+	return event{
+		eventType: eventType,
+		propagate: true,
+	}
 }
 
 func (e *event) Type() string { return e.eventType }
@@ -101,6 +113,9 @@ func NewCustomEvent(eventType string) CustomEvent {
 	e := &customEvent{newEvent(eventType)}
 	return e
 }
+
+func (e *event) StopPropagation()      { e.propagate = false }
+func (e *event) shouldPropagate() bool { return e.propagate }
 
 /* -------- EventHandler -------- */
 
