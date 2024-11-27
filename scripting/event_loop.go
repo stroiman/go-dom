@@ -29,7 +29,16 @@ func NewEventLoop(global *v8.Object, cb func(error)) *EventLoop {
 	return &EventLoop{make(chan workItem), global, cb}
 }
 
-func (l *EventLoop) Start() {
+type Disposable interface {
+	Dispose()
+}
+
+type DisposeFunc func()
+
+func (fn DisposeFunc) Dispose() { fn() }
+
+func (l *EventLoop) Start() Disposable {
+	closer := make(chan bool)
 	go func() {
 		for i := range l.workItems {
 			_, err := i.fn.Call(l.globalObject)
@@ -37,11 +46,17 @@ func (l *EventLoop) Start() {
 				l.errorCb(err)
 			}
 		}
+		closer <- true
 	}()
-}
-
-func (l *EventLoop) Stop() {
-	close(l.workItems)
+	// There is some logic here that isn't tested specifically (but HTMX test
+	// fails if not implemented properly).
+	// When we shut down, we must be sure that we don't have any running scripts
+	// when disposing the v8 Isolate, otherwise that will cause a panic.
+	// That is why the close function waits for a channel event before proceeding
+	return DisposeFunc(func() {
+		close(l.workItems)
+		<-closer
+	})
 }
 
 func installEventLoopGlobals(host *ScriptHost, globalObjectTemplate *v8.ObjectTemplate) {

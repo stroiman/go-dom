@@ -48,6 +48,7 @@ type ScriptContext struct {
 	v8nodes   map[ObjectId]*v8.Value
 	domNodes  map[ObjectId]Entity
 	eventLoop *EventLoop
+	disposers []Disposable
 }
 
 func (c *ScriptContext) CacheNode(obj *v8.Object, node Entity) (*v8.Value, error) {
@@ -197,6 +198,7 @@ func (host *ScriptHost) NewContext(window Window) *ScriptContext {
 	context.eventLoop = NewEventLoop(global, errorCallback)
 	host.contexts[context.v8ctx] = context
 	context.CacheNode(global, window)
+	context.disposers = append(context.disposers, context.eventLoop.Start())
 
 	return context
 }
@@ -219,7 +221,9 @@ func must(err error) {
 }
 
 func (ctx *ScriptContext) Dispose() {
-	ctx.eventLoop.Stop()
+	for _, dispose := range ctx.disposers {
+		dispose.Dispose()
+	}
 	ctx.pinner.Unpin()
 	delete(ctx.host.contexts, ctx.v8ctx)
 	ctx.v8ctx.Close()
