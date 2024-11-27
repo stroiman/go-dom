@@ -1,5 +1,24 @@
 # go-dom - Headless browser for Go
 
+## BRANCH SPECIFIC NOTES!
+
+> [!WARNING]
+>
+> Do not base work off this branch; it is continuously rebased.
+
+This branch exists as a tool to drive the implementation of new features in
+main. The code has a simple failing test that loads an HTMX app into the
+browser. The errors generated are used to prioritise what to implement next in
+main.
+
+When the new feature is in main, this branch is rebased, and the next features
+is determined.
+
+Once the existing test no longer fails; More functionality will be added to the
+HTMX app to drive the implementation of UI event handlers, form behaviour, etc.
+
+## Original readme
+
 > [!NOTE] 
 >
 > This is still in development, and has not reached a level of usability.
