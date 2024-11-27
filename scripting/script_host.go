@@ -41,12 +41,13 @@ func (h *ScriptHost) MustGetContext(v8ctx *v8.Context) *ScriptContext {
 }
 
 type ScriptContext struct {
-	host     *ScriptHost
-	v8ctx    *v8.Context
-	window   Window
-	pinner   runtime.Pinner
-	v8nodes  map[ObjectId]*v8.Value
-	domNodes map[ObjectId]Entity
+	host      *ScriptHost
+	v8ctx     *v8.Context
+	window    Window
+	pinner    runtime.Pinner
+	v8nodes   map[ObjectId]*v8.Value
+	domNodes  map[ObjectId]Entity
+	eventLoop *EventLoop
 }
 
 func (c *ScriptContext) CacheNode(obj *v8.Object, node Entity) (*v8.Value, error) {
@@ -171,7 +172,7 @@ func NewScriptHost() *ScriptHost {
 	host.windowTemplate = window.GetInstanceTemplate()
 	host.contexts = make(map[*v8.Context]*ScriptContext)
 	installGlobals(window, host, globalInstalls)
-
+	installEventLoopGlobals(host, host.windowTemplate)
 	return host
 }
 
@@ -190,10 +191,15 @@ func (host *ScriptHost) NewContext(window Window) *ScriptContext {
 		domNodes: make(map[ObjectId]Entity),
 	}
 	global = context.v8ctx.Global()
+	context.eventLoop = NewEventLoop(global)
 	host.contexts[context.v8ctx] = context
 	context.CacheNode(global, window)
 
 	return context
+}
+
+func (c *ScriptContext) StartEventLoop() {
+	c.eventLoop.Start()
 }
 
 type Wrapper ScriptHost
@@ -210,6 +216,7 @@ func must(err error) {
 }
 
 func (ctx *ScriptContext) Dispose() {
+	ctx.eventLoop.Stop()
 	ctx.pinner.Unpin()
 	delete(ctx.host.contexts, ctx.v8ctx)
 	ctx.v8ctx.Close()

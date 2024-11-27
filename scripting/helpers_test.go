@@ -46,10 +46,10 @@ func NewTestContext(hooks ...CreateHook) TestScriptContext {
 	window := browser.NewWindow(new(url.URL))
 	// window.LoadHTML(html)
 	ctx.ScriptContext = host.NewContext(window)
+	DeferCleanup(ctx.Dispose)
 	for _, hook := range hooks {
 		hook(ctx.ScriptContext)
 	}
-	DeferCleanup(ctx.Dispose)
 	return ctx
 }
 

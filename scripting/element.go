@@ -51,6 +51,23 @@ type argumentHelper struct {
 	ctx *ScriptContext
 }
 
+func newArgumentHelper(host *ScriptHost, info *v8.FunctionCallbackInfo) argumentHelper {
+	ctx := host.MustGetContext(info.Context())
+	return argumentHelper{info, ctx}
+}
+
+func (h argumentHelper) GetFunctionArg(index int) (*v8.Function, error) {
+	args := h.Args()
+	if index >= len(args) {
+		return nil, ErrWrongNoOfArguments
+	}
+	arg := args[index]
+	if arg.IsFunction() {
+		return arg.AsFunction()
+	}
+	return nil, ErrIncompatibleType
+}
+
 func (h argumentHelper) GetInt32Arg(index int) (int32, error) {
 	args := h.Args()
 	if index >= len(args) {
