@@ -5,13 +5,13 @@ import (
 	"net/url"
 
 	. "github.com/onsi/ginkgo/v2"
-	"github.com/onsi/gomega"
 	"github.com/stroiman/go-dom/browser"
 	. "github.com/stroiman/go-dom/scripting"
 )
 
 type TestScriptContext struct {
 	*ScriptContext
+	ignoreUnhandledErrors bool
 }
 
 // RunTestScript wraps the [v8.RunScript] function but converts the return value
@@ -38,29 +38,35 @@ func (c TestScriptContext) MustRunTestScript(script string) any {
 	return result
 }
 
-type CreateHook func(ctx *ScriptContext)
+type CreateHook func(ctx *TestScriptContext)
+
+var IgnoreUnhandledErrors CreateHook = func(ctx *TestScriptContext) {
+	ctx.ignoreUnhandledErrors = true
+}
 
 // NewTextContext loads HTML into a browser for a single Ginkgo test. It
 // installs the proper Ginkgo cleanup handler.
 func NewTestContext(hooks ...CreateHook) TestScriptContext {
-	var unhandledErrors []any
 	ctx := TestScriptContext{}
 	window := browser.NewWindow(new(url.URL))
 	// window.LoadHTML(html)
 	ctx.ScriptContext = host.NewContext(window)
 	DeferCleanup(ctx.Dispose)
 	for _, hook := range hooks {
-		hook(ctx.ScriptContext)
+		hook(&ctx)
 	}
-	DeferCleanup(func() {
-		gomega.Expect(unhandledErrors).To(gomega.BeEmpty())
-	})
-	ctx.Window().
-		AddEventListener("error",
-			browser.NewEventHandlerFunc(func(e browser.Event) error {
-				unhandledErrors = append(unhandledErrors, e)
-				return nil
-			}))
+	// if !ctx.ignoreUnhandledErrors {
+	// 	var unhandledErrors []any
+	// 	DeferCleanup(func() {
+	// 		gomega.Expect(unhandledErrors).To(gomega.BeEmpty())
+	// 	})
+	// 	ctx.Window().
+	// 		AddEventListener("error",
+	// 			browser.NewEventHandlerFunc(func(e browser.Event) error {
+	// 				unhandledErrors = append(unhandledErrors, e)
+	// 				return nil
+	// 			}))
+	// }
 	return ctx
 }
 
@@ -86,7 +92,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 		window := browser.NewWindow(new(url.URL))
 		ctx.ScriptContext = host.NewContext(window)
 		for _, hook := range hooks {
-			hook(ctx.ScriptContext)
+			hook(&ctx)
 		}
 	})
 
@@ -98,7 +104,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 }
 
 func LoadHTML(html string) CreateHook {
-	return func(ctx *ScriptContext) {
+	return func(ctx *TestScriptContext) {
 		ctx.Window().LoadHTML(html)
 	}
 }

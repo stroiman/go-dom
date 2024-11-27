@@ -1,6 +1,8 @@
 package scripting
 
 import (
+	"errors"
+
 	"github.com/stroiman/go-dom/browser"
 	v8 "github.com/tommie/v8go"
 )
@@ -65,10 +67,15 @@ func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 				ctx := host.MustGetContext(info.Context())
 				if target, ok := ctx.domNodes[info.This().GetInternalField(0).Int32()].(browser.EventTarget); ok {
-					args := info.Args()
-					listener := NewV8EventListener(iso, args[1])
-					target.AddEventListener(args[0].String(), listener)
-					return v8.Undefined(iso), nil
+					args := newArgumentHelper(host, info)
+					eventType, e1 := args.GetStringArg(0)
+					fn, e2 := args.GetFunctionArg(1)
+					err := errors.Join(e1, e2)
+					if err == nil {
+						listener := NewV8EventListener(iso, fn.Value)
+						target.AddEventListener(eventType, listener)
+					}
+					return v8.Undefined(iso), err
 				} else {
 					return nil, v8.NewTypeError(iso, "What?")
 				}

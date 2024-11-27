@@ -58,9 +58,14 @@ func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandle
 
 func (e *eventTarget) DispatchEvent(event Event) error {
 	listeners := e.lmap[event.Type()]
+
 	for _, l := range listeners {
 		err := l.HandleEvent(event)
 		// TODO: Aggregate errors
+		// Browser behaviour (firefox) An error is reported on using the `error`
+		// event on `window`.
+		// All errors are reported individually, so remaining event handlers are
+		// still executed.
 		if err != nil {
 			return err
 		}
