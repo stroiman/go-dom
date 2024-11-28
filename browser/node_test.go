@@ -98,4 +98,33 @@ var _ = Describe("Node", func() {
 			})
 		})
 	})
+
+	Describe("Contains", func() {
+		It("Should return true for an immediate child", func() {
+			doc := ParseHtmlString(
+				`<body><div id="parent-1"><div id="1">1</div></div></body>`,
+			)
+			child := doc.GetElementById("1")
+			parent := doc.GetElementById("parent-1")
+			Expect(parent.Contains(child)).To(BeTrue())
+		})
+
+		It("Should return true for a grandchild", func() {
+			doc := ParseHtmlString(
+				`<body><div id="parent-1"><div id="1"><div id="2"><div id="3"></div></div></div></div></body>`,
+			)
+			child := doc.GetElementById("3")
+			parent := doc.GetElementById("parent-1")
+			Expect(parent.Contains(child)).To(BeTrue())
+		})
+
+		It("Should return false for a sibling", func() {
+			doc := ParseHtmlString(
+				`<body><div id="parent-1"><div id="1"></div></div><div id="parent-2"></div></body>`,
+			)
+			child := doc.GetElementById("parent-2")
+			parent := doc.GetElementById("parent-1")
+			Expect(parent.Contains(child)).To(BeFalse())
+		})
+	})
 })

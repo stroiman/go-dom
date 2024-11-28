@@ -26,6 +26,7 @@ type Node interface {
 	AppendChild(node Node) Node
 	ChildNodes() NodeList
 	Connected() bool
+	Contains(node Node) bool
 	InsertBefore(newNode Node, referenceNode Node) (Node, error)
 	NodeName() string
 	NodeType() NodeType
@@ -72,6 +73,16 @@ func (n NodeHelper) InsertBefore(newChild Node, referenceNode Node) (Node, error
 }
 
 func (n *node) ChildNodes() NodeList { return n.childNodes }
+
+func (n *node) Contains(node Node) bool {
+	for _, c := range n.ChildNodes().All() {
+		if c == node || c.Contains(node) {
+			return true
+
+		}
+	}
+	return false
+}
 
 func (n *node) Parent() Node { return n.parent }
 
