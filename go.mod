@@ -27,4 +27,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go v0.0.0-20241124100952-3d0636d060c4
+replace github.com/tommie/v8go v0.22.0 => /Users/peter/go/src/github/stroiman/v8go

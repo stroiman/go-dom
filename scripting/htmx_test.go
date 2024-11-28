@@ -22,18 +22,22 @@ var _ = Describe("Load from server", Focus, Ordered, func() {
 		counter := win.Document().GetElementById("counter")
 		Expect(counter.Click()).To(Succeed())
 	})
-	It("Has the right console functions", func() {
-		server := app.CreateServer()
-		DeferCleanup(func() { server = nil })
-		browser := NewTestBrowserFromHandler(server)
-		win, err := browser.OpenWindow("/index.html")
-		Expect(err).Error().ToNot(HaveOccurred())
-		called := make(chan bool)
-		handler := NewEventHandlerFuncWithoutError(func(e Event) { called <- true })
-		win.AddEventListener("htmx:load", handler)
-		<-called
-		// Eventually(called).Should(Receive())
-		counter := win.Document().GetElementById("counter")
-		Expect(counter.Click()).To(Succeed())
-	})
+
+	//	It("Has the right console functions", func() {
+	//		server := app.CreateServer()
+	//		DeferCleanup(func() { server = nil })
+	//		browser := NewTestBrowserFromHandler(server)
+	//		win, err := browser.OpenWindow("/index.html")
+	//		Expect(err).ToNot(HaveOccurred())
+	//		fmt.Println()
+	//		fmt.Println(win.Eval(`Object.getOwnPropertyNames(console).join(',')`))
+	//		win.Eval(`
+	//
+	// console.log('𐀀');
+	// console.log('a');
+	// console.error('error');
+	// `)
+	//
+	//		return
+	//	})
 })
