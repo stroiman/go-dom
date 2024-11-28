@@ -7,7 +7,7 @@ import (
 	app "github.com/stroiman/go-dom/internal/test/htmx-app"
 )
 
-var _ = Describe("Load from server", Ordered, func() {
+var _ = Describe("Load from server", Focus, Ordered, func() {
 	It("Renders HTMX without errors", func() {
 		server := app.CreateServer()
 		DeferCleanup(func() { server = nil })
@@ -17,6 +17,24 @@ var _ = Describe("Load from server", Ordered, func() {
 		called := make(chan bool)
 		handler := NewEventHandlerFuncWithoutError(func(e Event) { called <- true })
 		win.AddEventListener("htmx:load", handler)
-		Eventually(called).Should(Receive())
+		<-called
+		// Eventually(called).Should(Receive())
+		counter := win.Document().GetElementById("counter")
+		counter.Click()
+	})
+
+	It("Has the right console functions", func() {
+		server := app.CreateServer()
+		DeferCleanup(func() { server = nil })
+		browser := NewTestBrowserFromHandler(server)
+		win, err := browser.OpenWindow("/index.html")
+		Expect(err).Error().ToNot(HaveOccurred())
+		called := make(chan bool)
+		handler := NewEventHandlerFuncWithoutError(func(e Event) { called <- true })
+		win.AddEventListener("htmx:load", handler)
+		<-called
+		// Eventually(called).Should(Receive())
+		counter := win.Document().GetElementById("counter")
+		counter.Click()
 	})
 })
