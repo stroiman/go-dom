@@ -63,8 +63,8 @@ func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandle
 }
 
 func (e *eventTarget) DispatchEvent(event Event) error {
-	slog.Debug("DispatchEvent", "EventType", event.Type())
 	listeners := e.lmap[event.Type()]
+	slog.Debug("DispatchEvent", "EventType", event.Type(), "Listener count", len(listeners))
 
 	for _, l := range listeners {
 		err := l.HandleEvent(event)

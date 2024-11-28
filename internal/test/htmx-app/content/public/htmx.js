@@ -2864,6 +2864,11 @@ var htmx = (function () {
    * @param {TriggerHandler} handler
    */
   function addTriggerHandler(elt, triggerSpec, nodeData, handler) {
+    console.log(
+      "Add trigger handler",
+      JSON.stringify(triggerSpec),
+      JSON.stringify(nodeData),
+    );
     if (triggerSpec.trigger === "revealed") {
       initScrollHandler();
       addEventListener(elt, handler, nodeData, triggerSpec);
@@ -3111,6 +3116,7 @@ var htmx = (function () {
   function initNode(elt) {
     console.log("Init node", elt.outerHTML);
     if (closest(elt, htmx.config.disableSelector)) {
+      console.log("Disable");
       cleanUpElement(elt);
       return;
     }
@@ -3125,15 +3131,27 @@ var htmx = (function () {
 
       const triggerSpecs = getTriggerSpecs(elt);
       const hasExplicitHttpAction = processVerbs(elt, nodeData, triggerSpecs);
+      console.log(
+        "Process",
+        elt.outerHTML,
+        "Action",
+        hasExplicitHttpAction,
+        "triggers",
+        JSON.stringify(triggerSpecs),
+      );
 
       if (!hasExplicitHttpAction) {
         if (getClosestAttributeValue(elt, "hx-boost") === "true") {
+          console.log("Closest!");
           boostElement(elt, nodeData, triggerSpecs);
         } else if (hasAttribute(elt, "hx-trigger")) {
+          console.log("HAS TRIGGER!");
           triggerSpecs.forEach(function (triggerSpec) {
             // For "naked" triggers, don't do anything at all
             addTriggerHandler(elt, triggerSpec, nodeData, function () {});
           });
+        } else {
+          console.log("FALLTHROUGH");
         }
       }
 
