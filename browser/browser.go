@@ -2,6 +2,7 @@ package browser
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -17,10 +18,12 @@ type ScriptEngineFactory interface {
 type Browser struct {
 	Client              http.Client
 	ScriptEngineFactory ScriptEngineFactory
+	windows             []*window
 }
 
 // TODO: Rename to Open
-func (b Browser) OpenWindow(location string) (Window, error) {
+func (b *Browser) OpenWindow(location string) (Window, error) {
+	slog.Debug("Browser: OpenWindow", "URL", location)
 	resp, err := b.Client.Get(location)
 	if err != nil {
 		return nil, err
@@ -34,6 +37,7 @@ func (b Browser) OpenWindow(location string) (Window, error) {
 	}
 	window := newWindow(b.Client, u)
 	var scriptEngine ScriptEngine
+	b.windows = append(b.windows, window)
 	if b.ScriptEngineFactory != nil {
 		scriptEngine = b.ScriptEngineFactory.NewScriptEngine(window)
 	}
@@ -43,7 +47,7 @@ func (b Browser) OpenWindow(location string) (Window, error) {
 }
 
 // TODO: Delete
-func (b Browser) Open(url string) Document {
+func (b *Browser) Open(url string) Document {
 	resp, err := b.Client.Get(url)
 	if err != nil {
 		panic("err")
@@ -66,7 +70,7 @@ func (h HandlerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 	return rec.Result(), nil
 }
 
-func NewBrowserFromHandler(handler http.Handler) Browser {
+func NewBrowserFromHandler(handler http.Handler) *Browser {
 	cookiejar, err := cookiejar.New(nil)
 	if err != nil {
 		panic(err)
@@ -76,7 +80,15 @@ func NewBrowserFromHandler(handler http.Handler) Browser {
 		Transport: HandlerRoundTripper{handler},
 		Jar:       cookiejar,
 	}
-	return Browser{
+	return &Browser{
 		Client: client,
+	}
+}
+
+func (b *Browser) Dispose() {
+	slog.Debug("Browser: Dispose")
+	for _, win := range b.windows {
+		slog.Debug("Browser: Dispose window")
+		win.Dispose()
 	}
 }

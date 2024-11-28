@@ -25,6 +25,7 @@ type ScriptEngine interface {
 	Eval(script string) (any, error)
 	// Run a script, ignoring any returned value
 	Run(script string) error
+	Dispose()
 }
 
 type window struct {
@@ -97,4 +98,10 @@ func (w *window) Location() Location {
 		u = new(url.URL)
 	}
 	return NewLocation(u)
+}
+
+func (w *window) Dispose() {
+	if w.scriptEngine != nil {
+		w.scriptEngine.Dispose()
+	}
 }

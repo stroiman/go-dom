@@ -2,6 +2,7 @@ package scripting
 
 import (
 	"fmt"
+	"log/slog"
 	"runtime"
 
 	"github.com/stroiman/go-dom/browser"
@@ -177,6 +178,18 @@ func NewScriptHost() *ScriptHost {
 }
 
 func (host *ScriptHost) Dispose() {
+	var undiposedContexts []*ScriptContext
+	for _, ctx := range host.contexts {
+		undiposedContexts = append(undiposedContexts, ctx)
+	}
+	undisposedCount := len(undiposedContexts)
+
+	if undisposedCount > 0 {
+		slog.Warn("Script host shutdown: Not all contexts disposed", "count", len(host.contexts))
+		for _, ctx := range undiposedContexts {
+			ctx.Dispose()
+		}
+	}
 	host.iso.Dispose()
 }
 
@@ -195,6 +208,7 @@ func (host *ScriptHost) NewContext(window Window) *ScriptContext {
 		window.DispatchEvent(NewCustomEvent("error"))
 	}
 	context.eventLoop = NewEventLoop(global, errorCallback)
+	// Hmmm, should this be synchronized? Could potentially run multiple threads?
 	host.contexts[context.v8ctx] = context
 	context.CacheNode(global, window)
 	context.disposers = append(context.disposers, context.eventLoop.Start())
@@ -220,10 +234,12 @@ func must(err error) {
 }
 
 func (ctx *ScriptContext) Dispose() {
+	slog.Debug("ScriptContext: Dispose")
 	for _, dispose := range ctx.disposers {
 		dispose.Dispose()
 	}
 	ctx.pinner.Unpin()
+	// TODO: Synchronize
 	delete(ctx.host.contexts, ctx.v8ctx)
 	ctx.v8ctx.Close()
 }
