@@ -49,6 +49,14 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	helper.CreateReadonlyProp("outerHTML", Element.OuterHTML)
 	helper.CreateReadonlyProp("tagName", Element.TagName)
 	helper.CreateFunctionStringToString("getAttribute", Element.GetAttribute)
+	helper.CreateFunction(
+		"hasAttribute",
+		func(instance Element, info argumentHelper) (*v8.Value, error) {
+			name, e1 := info.GetStringArg(0)
+			result, e2 := v8.NewValue(iso, instance.GetAttribute(name) != "")
+			return result, errors.Join(e1, e2)
+		},
+	)
 	helper.CreateReadonlyProp2(
 		"attributes",
 		func(element Element, ctx *ScriptContext) (*v8.Value, error) {

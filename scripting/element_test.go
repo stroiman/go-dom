@@ -19,11 +19,23 @@ var _ = Describe("V8 Element", func() {
 		Expect(ctx.RunTestScript("document.body.nodeType")).To(BeEquivalentTo(1))
 	})
 
-	It("Should support getAtribute", func() {
-		ctx := NewTestContext(LoadHTML(`<div id="1" class="foo"></div>`))
-		Expect(ctx.RunTestScript(
-			`document.getElementById("1").getAttribute("class")`,
-		)).To(Equal("foo"))
+	Describe("Attributes", func() {
+		It("Should support getAtribute", func() {
+			ctx := NewTestContext(LoadHTML(`<div id="1" class="foo"></div>`))
+			Expect(ctx.RunTestScript(
+				`document.getElementById("1").getAttribute("class")`,
+			)).To(Equal("foo"))
+		})
+
+		It("Should support hasAtribute", func() {
+			ctx := NewTestContext(LoadHTML(`<div id="1" class="foo"></div>`))
+			Expect(ctx.RunTestScript(
+				`document.getElementById("1").hasAttribute("class")`,
+			)).To(BeTrue())
+			Expect(ctx.RunTestScript(
+				`document.getElementById("1").hasAttribute("foo")`,
+			)).To(BeFalse())
+		})
 	})
 
 	It("Should support insertAdjacentHTML", func() {
