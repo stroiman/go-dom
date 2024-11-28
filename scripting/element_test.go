@@ -47,4 +47,18 @@ var _ = Describe("V8 Element", func() {
 			ctx.Window().Document().Body().OuterHTML(),
 		).To(Equal(`<body><p>foo</p><div id="1" class="foo"></div></body>`))
 	})
+
+	It("Should have a querySelector function", func() {
+		ctx := NewTestContext(LoadHTML(`<div id="1" class="foo"></div>`))
+		Expect(ctx.RunTestScript(
+			`typeof document.getElementById("1").querySelector`,
+		)).To(Equal("function"))
+	})
+
+	It("Should have a querySelectorAll function", func() {
+		ctx := NewTestContext(LoadHTML(`<div id="1" class="foo"></div>`))
+		Expect(ctx.RunTestScript(
+			`typeof document.getElementById("1").querySelectorAll`,
+		)).To(Equal("function"))
+	})
 })

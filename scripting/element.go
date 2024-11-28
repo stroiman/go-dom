@@ -70,6 +70,32 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 			return
 		},
 	)
+	helper.CreateFunction(
+		"querySelector",
+		func(instance Element, info argumentHelper) (*v8.Value, error) {
+			selector, e1 := info.GetStringArg(0)
+			node, e2 := instance.QuerySelector(selector)
+			err := errors.Join(e1, e2)
+			if err != nil {
+				return nil, err
+			}
+			if node == nil {
+				return v8.Null(iso), nil
+			}
+			return info.ctx.GetInstanceForNode(node)
+		})
+	helper.CreateFunction(
+		"querySelectorAll",
+		func(instance Element, info argumentHelper) (*v8.Value, error) {
+			selector, e1 := info.GetStringArg(0)
+			nodeList, e2 := instance.QuerySelectorAll(selector)
+			err := errors.Join(e1, e2)
+			if err != nil {
+				return nil, err
+			}
+			return info.ctx.GetInstanceForNodeByName("NodeList", nodeList)
+		},
+	)
 	return builder.constructor
 }
 
