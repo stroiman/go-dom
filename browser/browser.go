@@ -16,7 +16,6 @@ type ScriptEngineFactory interface {
 // windows/tabs. Particularly if testing login flow; where the login
 type Browser struct {
 	Client              http.Client
-	ScriptEngine        ScriptEngine
 	ScriptEngineFactory ScriptEngineFactory
 }
 
@@ -34,7 +33,7 @@ func (b Browser) OpenWindow(location string) (Window, error) {
 		return nil, err
 	}
 	window := newWindow(b.Client, u)
-	scriptEngine := b.ScriptEngine
+	var scriptEngine ScriptEngine
 	if b.ScriptEngineFactory != nil {
 		scriptEngine = b.ScriptEngineFactory.NewScriptEngine(window)
 	}
