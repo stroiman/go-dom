@@ -2960,6 +2960,7 @@ var htmx = (function () {
    */
   function findElementsToProcess(elt) {
     if (elt.querySelectorAll) {
+      console.log("query all");
       const boostedSelector =
         ", [hx-boost] a, [data-hx-boost] a, a[hx-boost], a[data-hx-boost]";
 
@@ -2987,6 +2988,7 @@ var htmx = (function () {
 
       return results;
     } else {
+      console.log("No query all");
       return [];
     }
   }
@@ -3107,6 +3109,7 @@ var htmx = (function () {
    * @param {Element|HTMLInputElement} elt
    */
   function initNode(elt) {
+    console.log("Init node", elt.outerHTML);
     if (closest(elt, htmx.config.disableSelector)) {
       cleanUpElement(elt);
       return;
