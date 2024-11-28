@@ -65,13 +65,17 @@ func (c *ScriptContext) CacheNode(obj *v8.Object, node Entity) (*v8.Value, error
 }
 
 func (c *ScriptContext) GetInstanceForNode(
-	node Node,
+	node Entity,
 ) (*v8.Value, error) {
 	iso := c.host.iso
 	if node == nil {
 		return v8.Null(iso), nil
 	}
 	switch n := node.(type) {
+	case CustomEvent:
+		return c.GetInstanceForNodeByName("CustomEvent", n)
+	case Event:
+		return c.GetInstanceForNodeByName("Event", n)
 	case Element:
 		return c.GetInstanceForNodeByName("Element", n)
 	case Node:
@@ -144,7 +148,9 @@ func createGlobals(host *ScriptHost, classes []class) []globalInstall {
 func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
 	classes := []class{
-		{"CustomEvent", CreateCustomEvent, nil},
+		{"Event", CreateEvent, []class{
+			{"CustomEvent", CreateCustomEvent, nil},
+		}},
 		{"NamedNodeMap", CreateNamedNodeMap, nil},
 		{"Location", CreateLocationPrototype, nil},
 		{"NodeList", CreateNodeList, nil},

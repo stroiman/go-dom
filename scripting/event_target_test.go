@@ -34,4 +34,19 @@ target.addEventListener('custom', listener);
 		ctx.Window().DispatchEvent(browser.NewCustomEvent("custom"))
 		Expect(ctx.RunTestScript("callCount")).To(BeEquivalentTo(1))
 	})
+
+	Describe("Events", func() {
+		It("Should have a type", func() {
+			Expect(ctx.RunTestScript(`
+var event;
+window.addEventListener('custom', e => { event = e });
+window.dispatchEvent(NewCustomEvent('custom'));
+event.type`,
+			)).To(Equal("custom"))
+			By("Inheriting directly from event")
+			Expect(
+				ctx.RunTestScript(`Object.getPrototypeOf(event) === Event.prototype`),
+			).To(BeTrue())
+		})
+	})
 })

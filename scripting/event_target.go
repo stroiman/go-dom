@@ -8,18 +8,22 @@ import (
 )
 
 type v8EventListener struct {
-	iso *v8.Isolate
+	ctx *ScriptContext
 	val *v8.Value
 }
 
-func NewV8EventListener(iso *v8.Isolate, val *v8.Value) browser.EventHandler {
-	return v8EventListener{iso, val}
+func NewV8EventListener(ctx *ScriptContext, val *v8.Value) browser.EventHandler {
+	return v8EventListener{ctx, val}
 }
 
 func (l v8EventListener) HandleEvent(e browser.Event) error {
 	f, err := l.val.AsFunction()
 	if err == nil {
-		_, err = f.Call(l.val, v8.Undefined(l.iso))
+		var event *v8.Value
+		event, err = l.ctx.GetInstanceForNode(e)
+		if err == nil {
+			_, err = f.Call(l.val, event)
+		}
 	}
 	return err
 }
@@ -27,6 +31,14 @@ func (l v8EventListener) HandleEvent(e browser.Event) error {
 func (l v8EventListener) Equals(other browser.EventHandler) bool {
 	x, ok := other.(v8EventListener)
 	return ok && x.val == l.val
+}
+
+func CreateEvent(host *ScriptHost) *v8.FunctionTemplate {
+	result := NewIllegalConstructorBuilder[browser.Event](host)
+	result.SetDefaultInstanceLookup()
+	protoBuilder := result.NewPrototypeBuilder()
+	protoBuilder.CreateReadonlyProp("type", browser.Event.Type)
+	return result.constructor
 }
 
 func CreateCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
@@ -72,7 +84,7 @@ func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 					fn, e2 := args.GetFunctionArg(1)
 					err := errors.Join(e1, e2)
 					if err == nil {
-						listener := NewV8EventListener(iso, fn.Value)
+						listener := NewV8EventListener(ctx, fn.Value)
 						target.AddEventListener(eventType, listener)
 					}
 					return v8.Undefined(iso), err

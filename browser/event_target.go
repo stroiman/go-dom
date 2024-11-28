@@ -87,6 +87,7 @@ func (e *eventTarget) DispatchEvent(event Event) error {
 /* -------- Event & CustomEvent -------- */
 
 type Event interface {
+	Entity
 	Type() string
 	StopPropagation()
 	// Unexported
@@ -98,12 +99,14 @@ type CustomEvent interface {
 }
 
 type event struct {
+	base
 	eventType string
 	propagate bool
 }
 
 func newEvent(eventType string) event {
 	return event{
+		base:      newBase(),
 		eventType: eventType,
 		propagate: true,
 	}
