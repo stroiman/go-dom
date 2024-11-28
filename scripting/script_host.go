@@ -2,7 +2,6 @@ package scripting
 
 import (
 	"fmt"
-	"net/http"
 	"runtime"
 
 	"github.com/stroiman/go-dom/browser"
@@ -248,13 +247,6 @@ func (ctx *ScriptContext) Eval(script string) (interface{}, error) {
 
 func (ctx *ScriptContext) Window() Window {
 	return ctx.window
-}
-
-// TODO: Refactor, deps are totally the wrong way around
-func (ctx *ScriptContext) NewBrowserFromHandler(handler http.Handler) Browser {
-	browser := NewBrowserFromHandler(handler)
-	browser.ScriptEngine = ctx
-	return browser
 }
 
 func v8ValueToGoValue(result *v8go.Value) (interface{}, error) {

@@ -9,8 +9,6 @@ import (
 )
 
 var _ = Describe("Load from server", func() {
-	ctx := InitializeContextWithEmptyHtml()
-
 	It("Loads from an HTTP server", func() {
 		server := http.NewServeMux()
 		server.Handle(
@@ -19,7 +17,7 @@ var _ = Describe("Load from server", func() {
 				res.Write([]byte("<body>Hello, World!</body>"))
 			}),
 		)
-		browser := ctx.NewBrowserFromHandler(server)
+		browser := NewTestBrowserFromHandler(server)
 		window, err := browser.OpenWindow("/index.html")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(window.Document().Body().OuterHTML()).To(Equal("<body>Hello, World!</body>"))
@@ -34,7 +32,7 @@ var _ = Describe("Load from server", func() {
 				res.Write([]byte("<body>Hello, World!</body>"))
 			}),
 		)
-		browser := ctx.NewBrowserFromHandler(server)
+		browser := NewTestBrowserFromHandler(server)
 		Expect(browser.OpenWindow("/not-found.html")).Error().To(HaveOccurred())
 	})
 
