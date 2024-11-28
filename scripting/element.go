@@ -79,6 +79,7 @@ func (h argumentHelper) GetInt32Arg(index int) (int32, error) {
 	}
 	return 0, ErrIncompatibleType
 }
+
 func (h argumentHelper) GetStringArg(index int) (string, error) {
 	args := h.Args()
 	if index >= len(args) {
@@ -89,6 +90,22 @@ func (h argumentHelper) GetStringArg(index int) (string, error) {
 		return arg.String(), nil
 	}
 	return "", ErrIncompatibleType
+}
+
+func (h argumentHelper) GetNodeArg(index int) (Node, error) {
+	args := h.Args()
+	if index >= len(args) {
+		return nil, ErrWrongNoOfArguments
+	}
+	arg := args[index]
+	if arg.IsObject() {
+		o := arg.Object()
+		cached, ok_1 := h.ctx.GetCachedNode(o)
+		if node, ok_2 := cached.(Node); ok_1 && ok_2 {
+			return node, nil
+		}
+	}
+	return nil, v8.NewTypeError(h.ctx.host.iso, "Must be a node")
 }
 
 var (

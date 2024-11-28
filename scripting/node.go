@@ -32,5 +32,15 @@ func CreateNode(host *ScriptHost) *v8.FunctionTemplate {
 			return ctx.GetInstanceForNodeByName("NodeList", instance.ChildNodes())
 		},
 	)
+	protoBuilder.CreateFunction("contains",
+		func(instance browser.Node, info argumentHelper) (result *v8.Value, err error) {
+			var node browser.Node
+			node, err = info.GetNodeArg(0)
+			if err == nil {
+				result, err = v8.NewValue(info.ctx.host.iso, instance.Contains(node))
+			}
+			return
+		},
+	)
 	return builder.constructor
 }
