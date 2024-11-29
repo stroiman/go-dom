@@ -2,11 +2,15 @@
 
 > [!NOTE] 
 >
-> This is only a POC. There is a lot to do before reaching a level of usability.
+> This is still in development, and has not reached a level of usability.
 >
-> This starts as a hobby project for learning; there is no guarantee that it
-> will ever become a useful tool; unless it will gain traction and support of
-> multiple developers.
+> Given the progress I've had in the short time I spent working on this, I
+> believe this _will_ reach a level of usability. But it depends on how much
+> time I will have for this
+>
+> You can help by sponsoring the project. If I could reach a level where I could
+> work full-time on this, the Go community could have the most awesome testing
+> tool at their disposal within a few months.
 
 [Software license](./LICENSE.txt) (note: I currently distribute the source under
 the MIT license, but as this will most likely depend on v8go, I need to verify
@@ -236,6 +240,21 @@ would welcome contributions. Particularly if:
   - In particular, if you've done this from Go.
 
 ## Out of scope.
+
+## Full Spec Compliance
+
+> A goal is not always meant to be reached, it often serves simply as something to aim at.
+> 
+> - Bruce Lee
+
+While it is a goal to reach whatwg spec compliance, the primary goal is to have
+a useful tool for testing modern web applications; and they rarely depend on
+quirks mode.
+
+Another example is `document.write`. I've yet to work on any application that
+depends on this. However, implementing support for this feature require a
+complete rewrite of the HTML parser. You would need a really good case (or
+sponsorship level) to have that prioritised.
 
 ### Accessibility tree
 
