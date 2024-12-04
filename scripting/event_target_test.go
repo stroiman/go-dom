@@ -36,16 +36,31 @@ target.addEventListener('custom', listener);
 	})
 
 	Describe("Events", func() {
+		Describe("Custom events dispatched from Go-code", func() {
+			It("Should be of type Event", func() {
+				Expect(ctx.RunTestScript(`
+var event;
+window.addEventListener('custom', e => { event = e });`,
+				)).Error().ToNot(HaveOccurred())
+				ctx.Window().DispatchEvent(browser.NewCustomEvent("custom"))
+				Expect(
+					ctx.RunTestScript(`Object.getPrototypeOf(event) === CustomEvent.prototype`),
+				).To(BeTrue())
+				Expect(
+					ctx.RunTestScript(`event instanceof Event`),
+				).To(BeTrue())
+			})
+		})
 		It("Should have a type", func() {
 			Expect(ctx.RunTestScript(`
 var event;
 window.addEventListener('custom', e => { event = e });
-window.dispatchEvent(NewCustomEvent('custom'));
+window.dispatchEvent(new CustomEvent('custom'));
 event.type`,
 			)).To(Equal("custom"))
 			By("Inheriting directly from event")
 			Expect(
-				ctx.RunTestScript(`Object.getPrototypeOf(event) === Event.prototype`),
+				ctx.RunTestScript(`Object.getPrototypeOf(event) === CustomEvent.prototype`),
 			).To(BeTrue())
 		})
 	})
