@@ -102,7 +102,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 				this, ok := ctx.GetCachedNode(args.This())
 				if doc, e_ok := this.(Document); ok && e_ok {
 					element := doc.GetElementById(args.Args()[0].String())
-					return ctx.GetInstanceForNodeByName("Element", element)
+					return ctx.GetInstanceForNode(element)
 				}
 				return nil, v8.NewTypeError(iso, "Object not a Document")
 			}),

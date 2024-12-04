@@ -64,6 +64,12 @@ func (c *ScriptContext) CacheNode(obj *v8.Object, node Entity) (*v8.Value, error
 	return val, nil
 }
 
+var HTMLElementMap = map[string]string{
+	"A":   "HTMLAnchorElement",
+	"P":   "HTMLParagraphElement",
+	"DIV": "HTMLDivElement",
+}
+
 func (c *ScriptContext) GetInstanceForNode(
 	node Entity,
 ) (*v8.Value, error) {
@@ -77,6 +83,9 @@ func (c *ScriptContext) GetInstanceForNode(
 	case Event:
 		return c.GetInstanceForNodeByName("Event", n)
 	case Element:
+		if constructor, ok := HTMLElementMap[n.TagName()]; ok {
+			return c.GetInstanceForNodeByName(constructor, n)
+		}
 		return c.GetInstanceForNodeByName("Element", n)
 	case Node:
 		return c.GetInstanceForNodeByName("Node", n)
@@ -130,11 +139,15 @@ type class struct {
 // before subclasses
 func createGlobals(host *ScriptHost, classes []class) []globalInstall {
 	result := make([]globalInstall, 0)
+	var htmlElement *v8.FunctionTemplate
 	var iter func(*v8.FunctionTemplate, []class)
 	iter = func(superClass *v8.FunctionTemplate, classes []class) {
 		for _, class := range classes {
 			constructor := class.constructor(host)
 			result = append(result, globalInstall{class.globalIdentifier, constructor})
+			if class.globalIdentifier == "HTMLElement" {
+				htmlElement = constructor
+			}
 			if superClass != nil {
 				constructor.Inherit(superClass)
 			}
@@ -142,6 +155,14 @@ func createGlobals(host *ScriptHost, classes []class) []globalInstall {
 		}
 	}
 	iter(nil, classes)
+
+	if htmlElement != nil {
+		for _, cls := range HTMLElementMap {
+			fn := NewIllegalConstructorBuilder[Element](host).constructor
+			fn.Inherit(htmlElement)
+			result = append(result, globalInstall{cls, fn})
+		}
+	}
 	return result
 }
 
