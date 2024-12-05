@@ -21,6 +21,7 @@ type Document interface {
 	CreateDocumentFragment() DocumentFragment
 	CreateElement(string) Element
 	DocumentElement() Element
+	Location() Location
 	// unexported
 	createElement(*html.Node) Element
 }
@@ -122,6 +123,10 @@ func (d *document) createHtmlNode() *html.Node {
 	return &html.Node{
 		Type: html.DocumentNode,
 	}
+}
+
+func (d *document) Location() Location {
+	return d.ownerWindow.Location()
 }
 
 func (d *document) QuerySelector(pattern string) (Node, error) {
