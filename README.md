@@ -248,8 +248,10 @@ would welcome contributions. Particularly if:
 > - Bruce Lee
 
 While it is a goal to reach whatwg spec compliance, the primary goal is to have
-a useful tool for testing modern web applications; and they rarely depend on
-quirks mode.
+a useful tool for testing modern web applications. 
+
+Some specs don't really have an effect modern web applications. For example, you
+generally wouldn't write an application that depends on quirks mode.
 
 Another example is `document.write`. I've yet to work on any application that
 depends on this. However, implementing support for this feature require a
