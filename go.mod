@@ -15,16 +15,16 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/pprof v0.0.0-20241029153458-d1b30febd7db // indirect
-	github.com/tommie/v8go/deps/android_amd64 v0.0.0-20241023013435-d8e1c56d9e6a // indirect
-	github.com/tommie/v8go/deps/android_arm64 v0.0.0-20241023013435-d8e1c56d9e6a // indirect
-	github.com/tommie/v8go/deps/darwin_amd64 v0.0.0-20241023013435-d8e1c56d9e6a // indirect
-	github.com/tommie/v8go/deps/darwin_arm64 v0.0.0-20241023013435-d8e1c56d9e6a // indirect
-	github.com/tommie/v8go/deps/linux_amd64 v0.0.0-20241023013435-d8e1c56d9e6a // indirect
-	github.com/tommie/v8go/deps/linux_arm64 v0.0.0-20241023013435-d8e1c56d9e6a // indirect
+	github.com/tommie/v8go/deps/android_amd64 v0.0.0-20241204042837-b89a2a1babcb // indirect
+	github.com/tommie/v8go/deps/android_arm64 v0.0.0-20241204042837-b89a2a1babcb // indirect
+	github.com/tommie/v8go/deps/darwin_amd64 v0.0.0-20241204042837-b89a2a1babcb // indirect
+	github.com/tommie/v8go/deps/darwin_arm64 v0.0.0-20241204042837-b89a2a1babcb // indirect
+	github.com/tommie/v8go/deps/linux_amd64 v0.0.0-20241204042837-b89a2a1babcb // indirect
+	github.com/tommie/v8go/deps/linux_arm64 v0.0.0-20241204042837-b89a2a1babcb // indirect
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go v0.0.0-20241124100952-3d0636d060c4
+replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go v0.0.0-20241205110000-b1cbb578b204
