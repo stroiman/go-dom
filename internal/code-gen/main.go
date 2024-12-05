@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"os"
 )
 
 //go:embed webref/ed/elements/html.json
@@ -19,13 +20,26 @@ type ElementsJSON struct {
 }
 
 func main() {
+	args := os.Args
+	if len(args) != 3 || args[1] != "-o" {
+		fmt.Println("Usage: code-gen -o <output_file>")
+		fmt.Println(args[0])
+		fmt.Println(args[1])
+		fmt.Println(args[2])
+		os.Exit(1 + len(args))
+	}
 	output := ElementsJSON{}
 	json.Unmarshal(html_defs, &output)
-	fmt.Println("DEFS", string(html_defs))
-	fmt.Print("package scripting\n\n")
-	fmt.Print("var htmlElements = map[string]string {\n")
-	for _, element := range output.Elements {
-		fmt.Printf("\t\"%s\": \"%s\",\n", element.Name, element.Interface)
+
+	file, err := os.Create(args[2])
+	if err != nil {
+		fmt.Println("Error creating output file")
+		os.Exit(1)
 	}
-	fmt.Println("}")
+	fmt.Fprint(file, "package scripting\n\n")
+	fmt.Fprint(file, "var htmlElements = map[string]string {\n")
+	for _, element := range output.Elements {
+		fmt.Fprintf(file, "\t\"%s\": \"%s\",\n", element.Name, element.Interface)
+	}
+	fmt.Fprint(file, "}\n")
 }

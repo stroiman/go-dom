@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"runtime"
+	"strings"
 
 	"github.com/stroiman/go-dom/browser"
 	. "github.com/stroiman/go-dom/browser"
@@ -64,12 +65,6 @@ func (c *ScriptContext) CacheNode(obj *v8.Object, node Entity) (*v8.Value, error
 	return val, nil
 }
 
-var HTMLElementMap = map[string]string{
-	"A":   "HTMLAnchorElement",
-	"P":   "HTMLParagraphElement",
-	"DIV": "HTMLDivElement",
-}
-
 func (c *ScriptContext) GetInstanceForNode(
 	node Entity,
 ) (*v8.Value, error) {
@@ -83,7 +78,7 @@ func (c *ScriptContext) GetInstanceForNode(
 	case Event:
 		return c.GetInstanceForNodeByName("Event", n)
 	case Element:
-		if constructor, ok := HTMLElementMap[n.TagName()]; ok {
+		if constructor, ok := htmlElements[strings.ToLower(n.TagName())]; ok {
 			return c.GetInstanceForNodeByName(constructor, n)
 		}
 		return c.GetInstanceForNodeByName("Element", n)
@@ -157,9 +152,15 @@ func createGlobals(host *ScriptHost, classes []class) []globalInstall {
 	iter(nil, classes)
 
 	if htmlElement != nil {
-		for _, cls := range HTMLElementMap {
-			fn := NewIllegalConstructorBuilder[Element](host).constructor
-			fn.Inherit(htmlElement)
+		uniqueNames := make(map[string]*v8.FunctionTemplate)
+		for _, cls := range htmlElements {
+			if _, ok := uniqueNames[cls]; !ok && cls != "HTMLElement" {
+				fn := NewIllegalConstructorBuilder[Element](host).constructor
+				fn.Inherit(htmlElement)
+				uniqueNames[cls] = fn
+			}
+		}
+		for cls, fn := range uniqueNames {
 			result = append(result, globalInstall{cls, fn})
 		}
 	}
