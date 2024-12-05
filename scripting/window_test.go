@@ -28,6 +28,12 @@ var _ = Describe("Window", func() {
 		})
 	})
 
+	Describe("location property", func() {
+		It("Should be a Location", func() {
+			Expect(ctx.RunTestScript("window.location instanceof Location")).To(BeTrue())
+		})
+	})
+
 	Describe("Window Events", func() {
 		Describe("DOMContentLoaded", func() {
 			It("Should be fired _after_ script has executed", func() {

@@ -8,16 +8,25 @@ import (
 
 func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	res := v8.NewFunctionTemplateWithError(
-		iso,
-		func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			scriptContext := host.MustGetContext(args.Context())
-			return scriptContext.CacheNode(args.This(), NewDocument(nil))
+	builder := NewConstructorBuilder[Document](
+		host,
+		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			scriptContext := host.MustGetContext(info.Context())
+			return scriptContext.CacheNode(info.This(), NewDocument(nil))
 		},
 	)
-	instanceTemplate := res.GetInstanceTemplate()
+	builder.SetDefaultInstanceLookup()
+	protoBuilder := builder.NewPrototypeBuilder()
+	protoBuilder.CreateReadonlyProp2(
+		"location",
+		func(instance Document, ctx *ScriptContext) (*v8.Value, error) {
+			return ctx.v8ctx.Global().Get("location")
+		},
+	)
+	instanceBuilder := builder.NewInstanceBuilder()
+	instanceTemplate := instanceBuilder.proto
 	instanceTemplate.SetInternalFieldCount(1)
-	proto := res.PrototypeTemplate()
+	proto := builder.constructor.PrototypeTemplate()
 	proto.Set("createElement", v8.NewFunctionTemplate(iso,
 		func(info *v8.FunctionCallbackInfo) *v8.Value {
 			return v8.Undefined(iso)
@@ -107,5 +116,5 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 				return nil, v8.NewTypeError(iso, "Object not a Document")
 			}),
 	)
-	return res
+	return builder.constructor
 }
