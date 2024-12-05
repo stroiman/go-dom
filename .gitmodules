@@ -1,0 +1,3 @@
+[submodule "internal/code-gen/webref"]
+	path = internal/code-gen/webref
+	url = https://github.com/w3c/webref.git
