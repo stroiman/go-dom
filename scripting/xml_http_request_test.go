@@ -7,7 +7,7 @@ import (
 )
 
 var _ = Describe("V8 XmlHttpRequest", func() {
-	It("Should be an EventTarget", func() {
+	It("Should inherit from EventTarget", func() {
 		ctx := NewTestContext()
 		Expect(ctx.RunTestScript("new XMLHttpRequest() instanceof EventTarget")).To(BeTrue())
 	})
