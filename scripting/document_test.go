@@ -89,6 +89,12 @@ var _ = Describe("V8 Document", func() {
 		})
 	})
 
+	Describe("location property", func() {
+		It("Should equal window.location", func() {
+			Expect(ctx.RunTestScript("document.location === location")).To(BeTrue())
+		})
+	})
+
 	Describe("body and Body", func() {
 		It("document.body Should return a <body>", func() {
 			ctx.Window().LoadHTML(`<html><body></body></html>`)
