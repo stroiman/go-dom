@@ -86,22 +86,22 @@ func (req *XmlHttpRequest) send(body io.Reader) error {
 }
 
 func (req *XmlHttpRequest) Send() error {
-	if req.async {
-		req.DispatchEvent(NewCustomEvent((XHREventLoadstart)))
-		go req.send(nil)
-		return nil
-	}
-	return req.send(nil)
+	return req.SendBody(nil)
 }
 
-func (req *XmlHttpRequest) SendBody(body XHRRequestBody) error {
-	req.headers["Content-Type"] = []string{"application/x-www-form-urlencoded"}
+func (req *XmlHttpRequest) SendBody(body *XHRRequestBody) error {
+	var reader io.Reader
+	if body != nil {
+		// TODO: Set content type or not?
+		req.headers["Content-Type"] = []string{"application/x-www-form-urlencoded"}
+		reader = body.getReader()
+	}
 	if req.async {
 		req.DispatchEvent(NewCustomEvent((XHREventLoadstart)))
-		go req.send(body.getReader())
+		go req.send(reader)
 		return nil
 	}
-	return req.send(body.getReader())
+	return req.send(reader)
 }
 
 func (req *XmlHttpRequest) Status() int { return req.status }
@@ -142,7 +142,7 @@ type XHRRequestBody struct {
 	data []byte // Temporary solution, should probably be an io.Reader
 }
 
-func NewXHRRequestBodyOfFormData(data *FormData) XHRRequestBody {
+func NewXHRRequestBodyOfFormData(data *FormData) *XHRRequestBody {
 	sb := strings.Builder{}
 	for i, e := range data.Entries {
 		if i != 0 {
@@ -155,7 +155,7 @@ func NewXHRRequestBodyOfFormData(data *FormData) XHRRequestBody {
 	}
 	sb.WriteString("foo")
 
-	return XHRRequestBody{
+	return &XHRRequestBody{
 		data: []byte(sb.String()),
 	}
 }
