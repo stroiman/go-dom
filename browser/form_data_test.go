@@ -14,13 +14,26 @@ var _ = Describe("FormData", func() {
 		Expect(NewFormData()).To(BeEmptyFormData())
 	})
 
-	Describe("Append", func() {
-		It("Should allow multiple values with the same key", func() {
-			formData := NewFormData()
+	Describe("Multiple values have been appended with the same key", func() {
+		var formData *FormData
+
+		BeforeEach(func() {
+			formData = NewFormData()
 			formData.Append("Key1", "Value1")
 			formData.Append("Key2", "Value2")
 			formData.Append("Key1", "Value3")
-			Expect(formData).To(HaveEntries("Key1", "Value1", "Key2", "Value2", "Key1", "Value3"))
+			formData.Append("Key3", "Value4")
+		})
+
+		It("Should contain all values", func() {
+			Expect(
+				formData,
+			).To(HaveEntries("Key1", "Value1", "Key2", "Value2", "Key1", "Value3", "Key3", "Value4"))
+		})
+
+		It("Delete() should remove all values with the name", func() {
+			formData.Delete("Key1")
+			Expect(formData).To(HaveEntries("Key2", "Value2", "Key3", "Value4"))
 		})
 	})
 })
@@ -44,7 +57,8 @@ func HaveEntries(entries ...string) types.GomegaMatcher {
 			Value: entries[j+1],
 		}
 	}
-	return WithTransform(func(data *FormData) []FormDataEntry { return data.Entries },
-		ContainElements(expected),
+	return WithTransform(
+		func(data *FormData) []FormDataEntry { return data.Entries },
+		ConsistOf(expected),
 	)
 }
