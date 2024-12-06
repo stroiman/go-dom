@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 )
@@ -20,23 +21,23 @@ type ElementsJSON struct {
 }
 
 func main() {
-	args := os.Args
-	if len(args) != 3 || args[1] != "-o" {
-		fmt.Println("Usage: code-gen -o <output_file>")
-		fmt.Println(args[0])
-		fmt.Println(args[1])
-		fmt.Println(args[2])
-		os.Exit(1 + len(args))
+	outputFile := flag.String("o", "", "Output file to write")
+	flag.Parse()
+	if *outputFile == "" {
+		fmt.Println("Internal code generator from IDL definitions")
+		flag.PrintDefaults()
+		os.Exit(1)
 	}
 	output := ElementsJSON{}
 	json.Unmarshal(html_defs, &output)
 
-	file, err := os.Create(args[2])
+	file, err := os.Create(*outputFile)
 	if err != nil {
 		fmt.Println("Error creating output file")
 		os.Exit(1)
 	}
 	fmt.Fprint(file, "package scripting\n\n")
+	fmt.Fprint(file, "// This file is generated. Do not edit.\n\n")
 	fmt.Fprint(file, "var htmlElements = map[string]string {\n")
 	for _, element := range output.Elements {
 		fmt.Fprintf(file, "\t\"%s\": \"%s\",\n", element.Name, element.Interface)

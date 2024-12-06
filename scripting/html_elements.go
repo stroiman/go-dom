@@ -1,5 +1,7 @@
 package scripting
 
+// This file is generated. Do not edit.
+
 var htmlElements = map[string]string {
 	"html": "HTMLHtmlElement",
 	"head": "HTMLHeadElement",
