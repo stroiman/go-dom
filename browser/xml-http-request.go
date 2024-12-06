@@ -204,14 +204,6 @@ func NewXHRRequestBodyOfFormData(data *FormData) *XHRRequestBody {
 	}
 }
 
-// Bytes retrieves the RAW bytes.
-//
-// Deprecated: This is added for testing purposes only, will probably be
-// removed. File an issue if you believe there's a valid case for this.
-func (b XHRRequestBody) Bytes() []byte {
-	return b.data
-}
-
 func (b XHRRequestBody) getReader() io.Reader {
 	return bytes.NewReader(b.data)
 }
