@@ -2,7 +2,11 @@ package browser
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 // TODO: Events for async
@@ -33,12 +37,14 @@ type XmlHttpRequest struct {
 	method   string
 	url      string
 	response []byte
+	headers  map[string][]string
 }
 
 func NewXmlHttpRequest(client http.Client) *XmlHttpRequest {
 	return &XmlHttpRequest{
 		eventTarget: newEventTarget(),
 		client:      client,
+		headers:     make(map[string][]string),
 	}
 }
 
@@ -60,8 +66,14 @@ func (req *XmlHttpRequest) Open(
 	// TODO: if (req.open) { req.Abort() }
 }
 
-func (req *XmlHttpRequest) send() error {
-	res, err := req.client.Get(req.url)
+func (req *XmlHttpRequest) send(body io.Reader) error {
+	fmt.Println("Create request", req.method, req.url)
+	httpRequest, err := http.NewRequest(req.method, req.url, body)
+	if err != nil {
+		return err
+	}
+	httpRequest.Header = req.headers
+	res, err := req.client.Do(httpRequest)
 	if err != nil {
 		return err
 	}
@@ -76,10 +88,20 @@ func (req *XmlHttpRequest) send() error {
 func (req *XmlHttpRequest) Send() error {
 	if req.async {
 		req.DispatchEvent(NewCustomEvent((XHREventLoadstart)))
-		go req.send()
+		go req.send(nil)
 		return nil
 	}
-	return req.send()
+	return req.send(nil)
+}
+
+func (req *XmlHttpRequest) SendBody(body XHRRequestBody) error {
+	req.headers["Content-Type"] = []string{"application/x-www-form-urlencoded"}
+	if req.async {
+		req.DispatchEvent(NewCustomEvent((XHREventLoadstart)))
+		go req.send(body.getReader())
+		return nil
+	}
+	return req.send(body.getReader())
 }
 
 func (req *XmlHttpRequest) Status() int { return req.status }
@@ -112,4 +134,40 @@ func RequestOptionPassword(_ string) RequestOption {
 		// TODO
 		panic("Not implemented")
 	}
+}
+
+/* -------- XHRRequestBody -------- */
+
+type XHRRequestBody struct {
+	data []byte // Temporary solution, should probably be an io.Reader
+}
+
+func NewXHRRequestBodyOfFormData(data *FormData) XHRRequestBody {
+	sb := strings.Builder{}
+	for i, e := range data.Entries {
+		if i != 0 {
+			sb.WriteString("&")
+		}
+
+		sb.WriteString(url.QueryEscape(e.Name))
+		sb.WriteString("=")
+		sb.WriteString(url.QueryEscape(string(e.Value)))
+	}
+	sb.WriteString("foo")
+
+	return XHRRequestBody{
+		data: []byte(sb.String()),
+	}
+}
+
+// Bytes retrieves the RAW bytes.
+//
+// Deprecated: This is added for testing purposes only, will probably be
+// removed. File an issue if you believe there's a valid case for this.
+func (b XHRRequestBody) Bytes() []byte {
+	return b.data
+}
+
+func (b XHRRequestBody) getReader() io.Reader {
+	return bytes.NewReader(b.data)
 }
