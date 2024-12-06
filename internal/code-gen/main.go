@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -22,20 +23,32 @@ type ElementsJSON struct {
 
 func main() {
 	outputFile := flag.String("o", "", "Output file to write")
+	generatorType := flag.String("g", "", "Generator type")
 	flag.Parse()
-	if *outputFile == "" {
+	if *outputFile == "" || *generatorType == "" {
 		fmt.Println("Internal code generator from IDL definitions")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
-	output := ElementsJSON{}
-	json.Unmarshal(html_defs, &output)
 
 	file, err := os.Create(*outputFile)
 	if err != nil {
 		fmt.Println("Error creating output file")
 		os.Exit(1)
 	}
+
+	switch *generatorType {
+	case "html-elements":
+		generateHtmlElements(file)
+	default:
+		fmt.Println("Unrecognised generator type")
+		os.Exit(1)
+	}
+}
+
+func generateHtmlElements(file io.Writer) {
+	output := ElementsJSON{}
+	json.Unmarshal(html_defs, &output)
 	fmt.Fprint(file, "package scripting\n\n")
 	fmt.Fprint(file, "// This file is generated. Do not edit.\n\n")
 	fmt.Fprint(file, "var htmlElements = map[string]string {\n")
