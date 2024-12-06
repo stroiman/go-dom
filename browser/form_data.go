@@ -52,6 +52,14 @@ func (d *FormData) Keys() []string {
 	return result
 }
 
+func (d *FormData) Values() []FormDataValue {
+	result := make([]FormDataValue, len(d.Entries))
+	for i, e := range d.Entries {
+		result[i] = e.Value
+	}
+	return result
+}
+
 func (d *FormData) Delete(name string) {
 	d.Entries = slices.DeleteFunc(
 		d.Entries,
@@ -76,4 +84,8 @@ func (d *FormData) GetAll(name string) []FormDataValue {
 		}
 	}
 	return result
+}
+
+func (d *FormData) Has(name string) bool {
+	return slices.IndexFunc(d.Entries, elementByName(name)) != -1
 }

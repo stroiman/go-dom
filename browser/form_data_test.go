@@ -28,17 +28,26 @@ var _ = Describe("FormData", func() {
 		It("Should contain all values", func() {
 			Expect(
 				formData,
-			).To(HaveEntries("Key1", "Value1", "Key2", "Value2", "Key1", "Value3", "Key3", "Value4"))
+			).To(HaveEntries(
+				"Key1", "Value1",
+				"Key2", "Value2",
+				"Key1", "Value3",
+				"Key3", "Value4"))
 		})
 
 		It("Delete() should remove all values with the name", func() {
 			formData.Delete("Key1")
-			Expect(formData).To(HaveEntries("Key2", "Value2", "Key3", "Value4"))
+			Expect(formData).To(HaveEntries(
+				"Key2", "Value2",
+				"Key3", "Value4"))
 		})
 
 		It("Set() should replace all values with the name", func() {
 			formData.Set("Key1", "Value5")
-			Expect(formData).To(HaveEntries("Key1", "Value5", "Key2", "Value2", "Key3", "Value4"))
+			Expect(formData).To(HaveEntries(
+				"Key1", "Value5",
+				"Key2", "Value2",
+				"Key3", "Value4"))
 
 		})
 
@@ -46,11 +55,28 @@ var _ = Describe("FormData", func() {
 			formData.Set("Key4", "Value5")
 			Expect(
 				formData,
-			).To(HaveEntries("Key1", "Value1", "Key2", "Value2", "Key1", "Value3", "Key3", "Value4", "Key4", "Value5"))
+			).To(HaveEntries(
+				"Key1", "Value1",
+				"Key2", "Value2",
+				"Key1", "Value3",
+				"Key3", "Value4",
+				"Key4", "Value5"))
 		})
 
 		It("Keys() Should return all keys, including duplicates", func() {
-			Expect(formData.Keys()).To(HaveExactElements("Key1", "Key2", "Key1", "Key3"))
+			Expect(formData.Keys()).To(HaveExactElements(
+				"Key1",
+				"Key2",
+				"Key1",
+				"Key3"))
+		})
+
+		It("Values() Should return all values, including duplicates", func() {
+			Expect(formData.Values()).To(HaveExactElements(
+				BeFormDataStringValue("Value1"),
+				BeFormDataStringValue("Value2"),
+				BeFormDataStringValue("Value3"),
+				BeFormDataStringValue("Value4")))
 		})
 
 		It("Get() Should return the first value with the name", func() {
@@ -59,9 +85,18 @@ var _ = Describe("FormData", func() {
 
 		It("GetAll() Should return all values with the name", func() {
 			Expect(formData.GetAll("Key1")).To(HaveExactElements(
-				BeEquivalentTo("Value1"),
-				BeEquivalentTo("Value3"),
+				BeFormDataStringValue("Value1"),
+				BeFormDataStringValue("Value3"),
 			))
+		})
+
+		Describe("Has()", func() {
+			It("Should return true for a key that exists", func() {
+				Expect(formData.Has("Key1")).To(BeTrue())
+			})
+			It("Should return false for a key that exists", func() {
+				Expect(formData.Has("BadKey")).To(BeFalse())
+			})
 		})
 	})
 })
@@ -89,4 +124,8 @@ func HaveEntries(entries ...string) types.GomegaMatcher {
 		func(data *FormData) []FormDataEntry { return data.Entries },
 		HaveExactElements(expected),
 	)
+}
+
+func BeFormDataStringValue(value string) types.GomegaMatcher {
+	return BeEquivalentTo(value)
 }
