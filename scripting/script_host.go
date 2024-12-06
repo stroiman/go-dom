@@ -197,6 +197,7 @@ func NewScriptHost() *ScriptHost {
 		{"Location", CreateLocationPrototype, nil},
 		{"NodeList", CreateNodeList, nil},
 		{"EventTarget", CreateEventTarget, []class{
+			{"XMLHttpRequest", CreateXmlHttpRequestPrototype, nil},
 			{"Window", CreateWindowTemplate, nil},
 			{"Node", CreateNode, []class{
 				{"Document", CreateDocumentPrototype, nil},

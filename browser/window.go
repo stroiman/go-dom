@@ -17,6 +17,7 @@ type Window interface {
 	Run(string) error
 	SetScriptRunner(ScriptEngine)
 	Location() Location
+	NewXmlHttpRequest() XmlHttpRequest
 }
 
 type ScriptEngine interface {
@@ -104,4 +105,8 @@ func (w *window) Dispose() {
 	if w.scriptEngine != nil {
 		w.scriptEngine.Dispose()
 	}
+}
+
+func (w *window) NewXmlHttpRequest() XmlHttpRequest {
+	return *NewXmlHttpRequest(w.httpClient)
 }
