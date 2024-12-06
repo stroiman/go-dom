@@ -4,10 +4,11 @@ import (
 	"slices"
 )
 
+type FormDataValue string // TODO Blob/file
+
 type FormDataEntry struct {
 	Name  string
-	Value string // TODO Blob/file
-	// TODO FileName string
+	Value FormDataValue
 }
 
 type FormData struct {
@@ -18,7 +19,7 @@ func NewFormData() *FormData {
 	return &FormData{}
 }
 
-func (d *FormData) Append(name string, value string) {
+func (d *FormData) Append(name string, value FormDataValue) {
 	d.Entries = append(d.Entries, FormDataEntry{name, value})
 }
 
@@ -28,7 +29,7 @@ func elementByName(name string) Predicate[FormDataEntry] {
 	return func(e FormDataEntry) bool { return e.Name == name }
 }
 
-func (d *FormData) Set(name string, value string) {
+func (d *FormData) Set(name string, value FormDataValue) {
 	predicate := elementByName(name)
 	i := slices.IndexFunc(d.Entries, predicate)
 	if i == -1 {
@@ -56,4 +57,23 @@ func (d *FormData) Delete(name string) {
 		d.Entries,
 		elementByName(name),
 	)
+}
+
+func (d *FormData) Get(name string) FormDataValue {
+	for _, e := range d.Entries {
+		if e.Name == name {
+			return e.Value
+		}
+	}
+	return ""
+}
+
+func (d *FormData) GetAll(name string) []FormDataValue {
+	var result []FormDataValue
+	for _, e := range d.Entries {
+		if e.Name == name {
+			result = append(result, e.Value)
+		}
+	}
+	return result
 }

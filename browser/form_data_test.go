@@ -52,6 +52,17 @@ var _ = Describe("FormData", func() {
 		It("Keys() Should return all keys, including duplicates", func() {
 			Expect(formData.Keys()).To(HaveExactElements("Key1", "Key2", "Key1", "Key3"))
 		})
+
+		It("Get() Should return the first value with the name", func() {
+			Expect(formData.Get("Key1")).To(BeEquivalentTo("Value1"))
+		})
+
+		It("GetAll() Should return all values with the name", func() {
+			Expect(formData.GetAll("Key1")).To(HaveExactElements(
+				BeEquivalentTo("Value1"),
+				BeEquivalentTo("Value3"),
+			))
+		})
 	})
 })
 
@@ -71,7 +82,7 @@ func HaveEntries(entries ...string) types.GomegaMatcher {
 		j := i * 2
 		expected[i] = FormDataEntry{
 			Name:  entries[j],
-			Value: entries[j+1],
+			Value: FormDataValue(entries[j+1]),
 		}
 	}
 	return WithTransform(
