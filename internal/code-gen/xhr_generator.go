@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"os"
 	"slices"
+
+	"github.com/dave/jennifer/jen"
 )
 
 type ValueType struct {
@@ -125,18 +126,12 @@ type ParsedIdlFile struct {
 //go:embed webref/curated/idlparsed/xhr.json
 var xhrData []byte
 
-func generateXhr(b *builder) {
+func createData() (ESConstructorData, error) {
 	spec := ParsedIdlFile{}
 	err := json.Unmarshal(xhrData, &spec)
 	if err != nil {
 		panic(err)
 	}
-	WriteHeader(b)
-	WriteImports(b, [][][2]string{
-		{{"", "github.com/stroiman/go-dom/browser"}},
-		{{"v8", "github.com/tommie/v8go"}},
-	})
-
 	idlName := spec.IdlNames["XMLHttpRequest"]
 	operations := []ESOperation{}
 	for _, member := range idlName.Members {
@@ -179,8 +174,8 @@ func generateXhr(b *builder) {
 			}
 		}
 	}
-	fmt.Println(operations)
-	os.Exit(1)
+	// fmt.Println(operations)
+	// os.Exit(1)
 
 	data := ESConstructorData{
 		InnerTypeName:      "XmlHttpRequest",
@@ -188,8 +183,25 @@ func generateXhr(b *builder) {
 		CustomConstruction: "scriptContext.Window().NewXmlHttpRequest()",
 		IdlName:            idlName,
 	}
+	return data, nil
+}
 
-	WriteFactoryFunction(b, data)
+const br = "github.com/stroiman/go-dom/browser"
+const sc = "github.com/stroiman/go-dom/scripting"
+const v8 = "github.com/tommie/v8go"
+
+func generateXhr(b *builder) error {
+
+	file := jen.NewFilePath(sc)
+	file.HeaderComment("This file is generated. Do not edit.")
+	file.ImportName(br, "browser")
+	file.ImportAlias(v8, "v8")
+	data, err := createData()
+	if err != nil {
+		return err
+	}
+	writeFactory(file, data)
+	return file.Render(b)
 }
 
 type ESOperationArgument struct {
@@ -231,41 +243,60 @@ func WriteImports(b *builder, imports Imports) {
 	}
 }
 
-func WriteFactoryFunction(b *builder, data ESConstructorData) {
-	funcName := fmt.Sprintf("Create%sPrototype", data.InnerTypeName)
-	qualifiedType := fmt.Sprintf("%s.%s", "browser", data.InnerTypeName)
-	newInnerFuncName := data.CustomConstruction
-	b.Printf("func %s(host *ScriptHost) *v8.FunctionTemplate {\n", funcName)
-	b.indent()
-	defer b.unIndentF("}")
-	b.Printf("// iso := host.iso\n")
-	b.Printf("builder := NewConstructorBuilder[%s](\n", qualifiedType)
-	b.indent()
-	b.Printf("host,\n")
-	b.Printf("func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {\n")
-	b.indent()
-	b.Printf("scriptContext := host.MustGetContext(info.Context())\n")
-	b.Printf("instance := %s\n", newInnerFuncName)
-	b.Printf("return scriptContext.CacheNode(info.This(), instance)\n")
-	b.unIndentF("},\n")
-	b.unIndentF(")\n")
-	b.Printf("builder.SetDefaultInstanceLookup()\n")
-	b.Printf("protoBuilder := builder.NewPrototypeBuilder()\n")
-	WriteOperations(b, data)
-	b.Printf("return builder.constructor\n")
+func writeFactory(f *jen.File, data ESConstructorData) {
+	// cons := jen.Qual(br, "NewXmlHttpRequest")
+	instanceType := jen.Qual(br, "XmlHttpRequest")
+	hostType := jen.Id("ScriptHost")
+	hostPtr := jen.Add(jen.Op("*"), hostType)
+	hostArg := jen.Id("host")
+	iso := jen.Id("iso")
+	// instanceConstructor := jen.Qual(br, "NewXMLHttpRequest")
+	builder := jen.Id("builder")
+	create := jen.Id("NewConstructorBuilder").Op("[").Add(instanceType).Op("]")
+	// v8NewFunctionTemplate := jen.Qual(v8, "NewFunctionTemplate")
+	v8FunctionTemplatePtr := jen.Op("*").Qual(v8, "FunctionTemplate")
+	v8FunctionCallbackInfo := jen.Op("*").Qual(v8, "FunctionCallbackInfo")
+	v8Value := jen.Op("*").Qual(v8, "Value")
+	errorT := jen.Id("error")
+	scriptContext := jen.Id("scriptContext")
+	construct := scriptContext.Clone().Dot("Window").Call().Dot("NewXmlHttpRequest").Call()
+	f.Func().
+		Id(fmt.Sprintf("Create%sPrototype", data.InnerTypeName)).
+		Params(jen.Id("host").Add(hostPtr)).Add(v8FunctionTemplatePtr).
+		Block(
+			jen.Comment(iso.Clone().Op(":=").Add(hostArg).Dot("iso").GoString()),
+			builder.Clone().Op(":=").Add(create).Call(jen.Line().Add(hostArg),
+				jen.Line().Func().
+					Params(jen.Id("info").Add(v8FunctionCallbackInfo)).
+					Params(v8Value, errorT).
+					Block(
+						scriptContext.Clone().Op(":=").Add(hostArg).Dot("MustGetContext").Call(
+							jen.Id("info").Dot("Context").Call(),
+						),
+						jen.Id("instance").Op(":=").Add(construct),
+						jen.Return(scriptContext.Clone().Dot("CacheNode").Call(
+							jen.Id("info").Dot("This").Call(),
+							jen.Id("instance"),
+						)),
+					),
+			),
+			builder.Clone().Dot("SetDefaultInstanceLookup").Call(),
+			jen.Return(builder.Clone().Dot("constructor")),
+		)
 
+	// b.Printf("builder := NewConstructorBuilder[%s](\n", qualifiedType)
 }
 
-func WriteOperations(b *builder, data ESConstructorData) {
-	for _, member := range data.IdlName.Members {
-		if member.Type == "operation" {
-			b.Printf("%s: %s\n", member.Name, member.Type)
-
-			b.indent()
-			for _, a := range member.Arguments {
-				b.Printf("%s: %s - %v\n", a.Name, a.Type, a.IdlType)
-			}
-			b.unIndent()
-		}
-	}
-}
+// func WriteOperations(b *builder, data ESConstructorData) {
+// 	for _, member := range data.IdlName.Members {
+// 		if member.Type == "operation" {
+// 			b.Printf("%s: %s\n", member.Name, member.Type)
+//
+// 			b.indent()
+// 			for _, a := range member.Arguments {
+// 				b.Printf("%s: %s - %v\n", a.Name, a.Type, a.IdlType)
+// 			}
+// 			b.unIndent()
+// 		}
+// 	}
+// }

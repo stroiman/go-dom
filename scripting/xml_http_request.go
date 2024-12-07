@@ -1,9 +1,9 @@
-package scripting
-
 // This file is generated. Do not edit.
 
+package scripting
+
 import (
-	"github.com/stroiman/go-dom/browser"
+	browser "github.com/stroiman/go-dom/browser"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -15,7 +15,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			scriptContext := host.MustGetContext(info.Context())
 			instance := scriptContext.Window().NewXmlHttpRequest()
 			return scriptContext.CacheNode(info.This(), instance)
-		},
-	)
+		})
+	builder.SetDefaultInstanceLookup()
 	return builder.constructor
 }

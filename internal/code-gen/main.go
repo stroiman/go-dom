@@ -50,13 +50,20 @@ func main() {
 
 	file := newBuilder(getWriter(*outputFile))
 
+	var err error
+
 	switch *generatorType {
 	case "html-elements":
 		generateHtmlElements(file)
 	case "xhr":
-		generateXhr(file)
+		err = generateXhr(file)
 	default:
 		fmt.Println("Unrecognised generator type")
+		os.Exit(1)
+	}
+	if err != nil {
+		fmt.Println("Error!")
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
