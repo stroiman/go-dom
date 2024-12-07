@@ -243,48 +243,97 @@ func WriteImports(b *builder, imports Imports) {
 	}
 }
 
-func writeFactory(f *jen.File, data ESConstructorData) {
-	// cons := jen.Qual(br, "NewXmlHttpRequest")
-	instanceType := jen.Qual(br, "XmlHttpRequest")
+type st = *jen.Statement
+
+type JSConstructor struct {
+	argHost          st
+	argInfo          st
+	getThis          st
+	varInstance      st
+	varScriptContext st
+}
+
+func CreateJSConstructor() JSConstructor {
+	argInfo := jen.Id("info")
+	argHost := jen.Id("host")
+	getThis := argInfo.Clone().Dot("This").Call()
+	varInstance := jen.Id("instance")
+	varScriptContext := jen.Id("scriptContext")
+	return JSConstructor{
+		argHost,
+		argInfo,
+		getThis,
+		varInstance,
+		varScriptContext,
+	}
+}
+
+func (c JSConstructor) JSConstructorImpl(grp *jen.Group) {
+	buildInstance := c.varScriptContext.Clone().
+		Dot("Window").
+		Call().
+		Dot("NewXmlHttpRequest").
+		Call()
+	grp.Add(c.varScriptContext).
+		Op(":=").
+		Add(c.argHost).
+		Dot("MustGetContext").
+		Call(c.argInfo)
+	grp.Add(c.varInstance).Op(":=").Add(buildInstance)
+	grp.Return(c.varScriptContext.Clone().Dot("CacheNode").Call(
+		c.getThis,
+		c.varInstance,
+	))
+}
+
+func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 	hostType := jen.Id("ScriptHost")
 	hostPtr := jen.Add(jen.Op("*"), hostType)
-	hostArg := jen.Id("host")
 	iso := jen.Id("iso")
-	// instanceConstructor := jen.Qual(br, "NewXMLHttpRequest")
 	builder := jen.Id("builder")
-	create := jen.Id("NewConstructorBuilder").Op("[").Add(instanceType).Op("]")
-	// v8NewFunctionTemplate := jen.Qual(v8, "NewFunctionTemplate")
 	v8FunctionTemplatePtr := jen.Op("*").Qual(v8, "FunctionTemplate")
-	v8FunctionCallbackInfo := jen.Op("*").Qual(v8, "FunctionCallbackInfo")
 	v8Value := jen.Op("*").Qual(v8, "Value")
 	errorT := jen.Id("error")
-	scriptContext := jen.Id("scriptContext")
-	construct := scriptContext.Clone().Dot("Window").Call().Dot("NewXmlHttpRequest").Call()
+	g := Helper{&jen.Group{}}
 	f.Func().
 		Id(fmt.Sprintf("Create%sPrototype", data.InnerTypeName)).
-		Params(jen.Id("host").Add(hostPtr)).Add(v8FunctionTemplatePtr).
-		Block(
-			jen.Comment(iso.Clone().Op(":=").Add(hostArg).Dot("iso").GoString()),
-			builder.Clone().Op(":=").Add(create).Call(jen.Line().Add(hostArg),
-				jen.Line().Func().
-					Params(jen.Id("info").Add(v8FunctionCallbackInfo)).
+		Params(c.argHost.Clone().Add(hostPtr)).Add(v8FunctionTemplatePtr).
+		BlockFunc(func(grp *jen.Group) {
+			grp.Comment(iso.Clone().Op(":=").Add(g.hostArg()).Dot("iso").GoString())
+			grp.Add(builder).
+				Op(":=").
+				Id("NewConstructorBuilder").
+				Call(c.argHost.Clone(), jen.Func().
+					Params(c.argInfo.Clone().Add(g.v8FunctionCallbackInfoPtr())).
 					Params(v8Value, errorT).
-					Block(
-						scriptContext.Clone().Op(":=").Add(hostArg).Dot("MustGetContext").Call(
-							jen.Id("info").Dot("Context").Call(),
-						),
-						jen.Id("instance").Op(":=").Add(construct),
-						jen.Return(scriptContext.Clone().Dot("CacheNode").Call(
-							jen.Id("info").Dot("This").Call(),
-							jen.Id("instance"),
-						)),
-					),
-			),
-			builder.Clone().Dot("SetDefaultInstanceLookup").Call(),
-			jen.Return(builder.Clone().Dot("constructor")),
-		)
+					BlockFunc(c.JSConstructorImpl))
 
-	// b.Printf("builder := NewConstructorBuilder[%s](\n", qualifiedType)
+			grp.Add(builder).Dot("SetDefaultInstanceLookup").Call()
+			grp.Return(builder.Clone().Dot("constructor"))
+		})
+}
+
+func writeFactory(f *jen.File, data ESConstructorData) {
+	CreateJSConstructor().Run(f, data)
+}
+
+type Helper struct{ *jen.Group }
+
+func (h Helper) BuildInstance() *jen.Statement {
+	return h.scriptContext().Dot("Window").Call().Dot("NewXmlHttpRequest").Call()
+}
+
+func (h Helper) v8FunctionCallbackInfoPtr() *jen.Statement {
+	return h.Op("*").Qual(v8, "FunctionCallbackInfo")
+}
+func (h Helper) hostArg() *jen.Statement {
+	return h.Id("info")
+}
+func (h Helper) infoArg() *jen.Statement {
+	return h.Id("info")
+}
+func (h Helper) scriptContext() *jen.Statement {
+	return h.Id("scriptContext")
 }
 
 // func WriteOperations(b *builder, data ESConstructorData) {

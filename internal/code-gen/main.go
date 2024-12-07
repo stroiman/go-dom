@@ -57,6 +57,7 @@ func main() {
 		generateHtmlElements(file)
 	case "xhr":
 		err = generateXhr(file)
+		break
 	default:
 		fmt.Println("Unrecognised generator type")
 		os.Exit(1)
