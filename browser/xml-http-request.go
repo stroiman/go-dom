@@ -37,7 +37,7 @@ type XmlHttpRequest struct {
 	method   string
 	url      string
 	response []byte
-	headers  map[string][]string
+	headers  http.Header
 }
 
 func NewXmlHttpRequest(client http.Client) *XmlHttpRequest {
@@ -113,6 +113,10 @@ func (req *XmlHttpRequest) Status() int { return req.status }
 func (req *XmlHttpRequest) StatusText() string { return http.StatusText(req.status) }
 
 func (req *XmlHttpRequest) ResponseText() string { return string(req.response) }
+
+func (req *XmlHttpRequest) SetRequestHeader(name string, value string) {
+	req.headers.Add(name, value)
+}
 
 /* -------- Options -------- */
 

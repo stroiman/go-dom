@@ -142,4 +142,24 @@ var _ = Describe("XmlHTTPRequest", func() {
 			})
 		})
 	})
+
+	Describe("SetRequestHeader", func() {
+		It("Should add the header", func() {
+			var actualHeader http.Header
+			handler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				actualHeader = req.Header
+				w.Header().Add("Content-Type", "text/plain")
+				w.Write([]byte("Hello, World!"))
+			})
+			client := http.Client{
+				Transport: TestRoundTripper{handler},
+			}
+			r := NewXmlHttpRequest(client)
+			r.SetRequestHeader("x-test", "42")
+			r.Open("GET", "/dummy")
+			Expect(r.Send()).To(Succeed())
+			Expect(actualHeader.Get("x-test")).To(Equal("42"))
+
+		})
+	})
 })
