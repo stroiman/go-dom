@@ -97,6 +97,11 @@ type PrototypeBuilder[T any] struct {
 	lookup func(*ScriptContext, *v8.Object) (T, error)
 }
 
+func (b PrototypeBuilder[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, error) {
+	ctx := b.host.MustGetContext(info.Context())
+	return b.lookup(ctx, info.This())
+}
+
 type FunctionInfo[T any] struct {
 	instance T
 	ctx      *ScriptContext
@@ -109,7 +114,7 @@ func (h PrototypeBuilder[T]) CreateReadonlyProp2(
 	h.proto.SetAccessorPropertyCallback(name,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := h.host.MustGetContext(info.Context())
-			instance, err := h.lookup(ctx, info.This())
+			instance, err := h.GetInstance(info)
 			if err != nil {
 				return nil, err
 			}
@@ -120,8 +125,7 @@ func (h PrototypeBuilder[T]) CreateReadonlyProp2(
 func (h PrototypeBuilder[T]) CreateReadonlyProp(name string, fn func(T) string) {
 	h.proto.SetAccessorPropertyCallback(name,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := h.host.MustGetContext(info.Context())
-			instance, err := h.lookup(ctx, info.This())
+			instance, err := h.GetInstance(info)
 			if err != nil {
 				return nil, err
 			}
@@ -146,8 +150,7 @@ func (h PrototypeBuilder[T]) CreateReadWriteProp(
 			return v8.NewValue(h.host.iso, value)
 		},
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := h.host.MustGetContext(info.Context())
-			instance, err := h.lookup(ctx, info.This())
+			instance, err := h.GetInstance(info)
 			if err != nil {
 				return nil, err
 			}
@@ -167,12 +170,11 @@ func (h PrototypeBuilder[T]) CreateFunction(
 			h.host.iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 				ctx := h.host.MustGetContext(info.Context())
-				instance, err := h.lookup(ctx, info.This())
+				instance, err := h.GetInstance(info)
 				if err != nil {
 					return nil, err
 				}
 				return fn(instance, argumentHelper{info, ctx})
-				// return v8.NewValue(h.host.iso, value)
 			},
 		),
 		v8.ReadOnly,
