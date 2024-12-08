@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"slices"
+	"unicode"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -161,7 +162,7 @@ func createData() (ESConstructorData, error) {
 					break
 				}
 				if arg.IdlType.IdlType != nil {
-					esArg.Name = arg.IdlType.IdlType.IType.TypeName
+					esArg.Type = arg.IdlType.IdlType.IType.TypeName
 				}
 				arguments = append(arguments, esArg)
 			}
@@ -179,6 +180,7 @@ func createData() (ESConstructorData, error) {
 
 	data := ESConstructorData{
 		InnerTypeName:      "XmlHttpRequest",
+		Operations:         operations,
 		CreatesInnerType:   true,
 		CustomConstruction: "scriptContext.Window().NewXmlHttpRequest()",
 		IdlName:            idlName,
@@ -250,6 +252,7 @@ type JSConstructor struct {
 	argInfo          st
 	getThis          st
 	varInstance      st
+	varIso           st
 	varScriptContext st
 }
 
@@ -258,12 +261,14 @@ func CreateJSConstructor() JSConstructor {
 	argHost := jen.Id("host")
 	getThis := argInfo.Clone().Dot("This").Call()
 	varInstance := jen.Id("instance")
+	varIso := jen.Id("iso")
 	varScriptContext := jen.Id("scriptContext")
 	return JSConstructor{
 		argHost,
 		argInfo,
 		getThis,
 		varInstance,
+		varIso,
 		varScriptContext,
 	}
 }
@@ -278,7 +283,7 @@ func (c JSConstructor) JSConstructorImpl(grp *jen.Group) {
 		Op(":=").
 		Add(c.argHost).
 		Dot("MustGetContext").
-		Call(c.argInfo)
+		Call(c.argInfo.Clone().Dot("Context").Call())
 	grp.Add(c.varInstance).Op(":=").Add(buildInstance)
 	grp.Return(c.varScriptContext.Clone().Dot("CacheNode").Call(
 		c.getThis,
@@ -289,7 +294,6 @@ func (c JSConstructor) JSConstructorImpl(grp *jen.Group) {
 func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 	hostType := jen.Id("ScriptHost")
 	hostPtr := jen.Add(jen.Op("*"), hostType)
-	iso := jen.Id("iso")
 	builder := jen.Id("builder")
 	v8FunctionTemplatePtr := jen.Op("*").Qual(v8, "FunctionTemplate")
 	v8Value := jen.Op("*").Qual(v8, "Value")
@@ -299,18 +303,95 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 		Id(fmt.Sprintf("Create%sPrototype", data.InnerTypeName)).
 		Params(c.argHost.Clone().Add(hostPtr)).Add(v8FunctionTemplatePtr).
 		BlockFunc(func(grp *jen.Group) {
-			grp.Comment(iso.Clone().Op(":=").Add(g.hostArg()).Dot("iso").GoString())
+			grp.Add(c.varIso).Op(":=").Add(jen.Id("host")).Dot("iso").GoString()
 			grp.Add(builder).
 				Op(":=").
-				Id("NewConstructorBuilder").
+				Id("NewConstructorBuilder").Index(jen.Qual(br, data.InnerTypeName)).
 				Call(c.argHost.Clone(), jen.Func().
 					Params(c.argInfo.Clone().Add(g.v8FunctionCallbackInfoPtr())).
 					Params(v8Value, errorT).
 					BlockFunc(c.JSConstructorImpl))
+			grp.Id("protoBuilder").Op(":=").Add(builder).Dot("NewPrototypeBuilder").Call()
+			grp.Id("prototype").Op(":=").Id("protoBuilder").Dot("proto")
+			grp.Line()
+			for _, op := range data.Operations {
+				c.CreateOperation(grp, op)
+			}
 
 			grp.Add(builder).Dot("SetDefaultInstanceLookup").Call()
 			grp.Return(builder.Clone().Dot("constructor"))
 		})
+}
+
+func (c JSConstructor) CreateOperation(grp *jen.Group, op ESOperation) {
+	v8Value := jen.Op("*").Qual(v8, "Value")
+	errorT := jen.Id("error")
+	v8FunctionCallbackInfoPtr := jen.Op("*").Qual(v8, "FunctionCallbackInfo")
+	f := jen.Func().
+		Params(c.argInfo.Clone().Add(v8FunctionCallbackInfoPtr)).
+		Params(v8Value, errorT).
+		BlockFunc(func(grp *jen.Group) {
+			grp.Id("args").Op(":=").Id("info").Dot("Args").Call()
+			argCount := len(op.Arguments)
+			var args []jen.Code
+			for i, arg := range op.Arguments {
+				v := jen.Id(arg.Name) //fmt.Sprintf("arg%d", i))
+				args = append(args, v)
+				var e *jen.Statement
+				if argCount > 1 {
+					e = jen.Id(fmt.Sprintf("err%d", i))
+				} else {
+					e = jen.Id(fmt.Sprintf("err"))
+				}
+				grp.Add(v).
+					Op(",").
+					Add(e).
+					Op(":=").
+					Id("GetArg"+arg.Type).
+					Call(jen.Id("args"), jen.Lit(i))
+			}
+			WriteErrorHandler(grp, len(op.Arguments))
+			grp.Add(jen.Id("instance")).Op(",").Id("err").
+				Op(":=").
+				Id("builder").
+				Dot("GetInstance").
+				Call(jen.Id("info"))
+			WriteReturnOnError(grp)
+			grp.Id("instance").Dot(camelCase(op.Name)).Call(args...)
+			grp.Return(jen.Nil(), jen.Nil())
+		})
+	ft := jen.Qual(v8, "NewFunctionTemplateWithError").Call(c.varIso, f)
+	grp.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft)
+	grp.Line()
+}
+
+func camelCase(s string) string {
+	buffer := make([]rune, 0, len(s))
+	buffer = append(buffer, unicode.ToUpper([]rune(s)[0]))
+	buffer = append(buffer, []rune(s)[1:]...)
+	return string(buffer)
+}
+
+func WriteReturnOnError(grp *jen.Group) {
+	jErr := jen.Id("err")
+	grp.If(jErr.Clone().Op("!=").Nil()).Block(
+		jen.Return(jen.Nil(), jErr),
+	)
+}
+
+func WriteErrorHandler(grp *jen.Group, count int) {
+	if count == 0 {
+		return
+	}
+	jErr := jen.Id("err")
+	if count > 1 {
+		var args []jen.Code
+		for i := 0; i < count; i++ {
+			args = append(args, jen.Id(fmt.Sprintf("err%d", i)))
+		}
+		grp.Add(jErr).Op(":=").Qual("errors", "Join").Call(args...)
+	}
+	WriteReturnOnError(grp)
 }
 
 func writeFactory(f *jen.File, data ESConstructorData) {

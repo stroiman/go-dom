@@ -97,6 +97,11 @@ type PrototypeBuilder[T any] struct {
 	lookup func(*ScriptContext, *v8.Object) (T, error)
 }
 
+func (b ConstructorBuilder[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, error) {
+	ctx := b.host.MustGetContext(info.Context())
+	return b.instanceLookup(ctx, info.This())
+}
+
 func (b PrototypeBuilder[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, error) {
 	ctx := b.host.MustGetContext(info.Context())
 	return b.lookup(ctx, info.This())
@@ -187,3 +192,15 @@ func (h PrototypeBuilder[T]) CreateFunctionStringToString(name string, fn func(T
 		return v8.NewValue(h.host.iso, value)
 	})
 }
+
+func GetArgDOMString(args []*v8.Value, idx int) (result string, err error) {
+	if idx >= len(args) {
+		err = errors.New("Index out of range")
+		return
+	}
+	result = args[idx].String()
+	return
+}
+
+var GetArgByteString = GetArgDOMString
+var GetArgUSVString = GetArgDOMString
