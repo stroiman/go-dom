@@ -32,9 +32,10 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			if err != nil {
 				return nil, err
 			}
-			err = instance.Open(method, url)
-			return nil, err
+			instance.Open(method, url)
+			return nil, nil
 		}
+		return nil, errors.New("Missing arguments")
 	}))
 
 	prototype.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -51,9 +52,10 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			if err != nil {
 				return nil, err
 			}
-			err = instance.SetRequestHeader(name, value)
-			return nil, err
+			instance.SetRequestHeader(name, value)
+			return nil, nil
 		}
+		return nil, errors.New("Missing arguments")
 	}))
 
 	prototype.Set("send", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -71,6 +73,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			err = instance.Send(body)
 			return nil, err
 		}
+		return nil, errors.New("Missing arguments")
 	}))
 
 	prototype.Set("abort", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -102,6 +105,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 				return ToByteString(ctx, result)
 			}
 		}
+		return nil, errors.New("Missing arguments")
 	}))
 
 	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -109,7 +113,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		if err != nil {
 			return nil, err
 		}
-		ctx := host.MustGetGetContext(host.Context())
+		ctx := host.MustGetContext(info.Context())
 		result, err := instance.GetAllResponseHeaders()
 		if err != nil {
 			return nil, err
@@ -133,6 +137,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			err = instance.OverrideMimeType(mime)
 			return nil, err
 		}
+		return nil, errors.New("Missing arguments")
 	}))
 
 	builder.SetDefaultInstanceLookup()

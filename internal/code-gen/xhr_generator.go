@@ -39,6 +39,13 @@ type IdlType struct {
 	IType    IdlTypes  `json:"idlType"`
 }
 
+// Hmmm, can we find this in the IDL somewhere? It's specified in prose, but I
+// can't find it in easy consumable JSON.
+var hasNoError = map[string]bool{
+	"setRequestHeader": true,
+	"open":             true,
+}
+
 type IdlTypes struct {
 	Types    []IdlType
 	IdlType  *IdlType
@@ -451,30 +458,66 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 	// 	Condition: Stmt{jErr.Clone().Op("!=").Nil()},
 	// 	Block:     Stmt{jen.Return(jen.Nil(), jErr)},
 	// }
+	errorHandling := !hasNoError[c.Op.Name]
+	var stmt *jen.Statement
+	hasNewValue := c.Op.ReturnType != "undefined"
+	if hasNewValue {
+		stmt = jen.Id("result")
+	}
+	if errorHandling {
+		if stmt != nil {
+			stmt = stmt.Op(",").Id("err")
+		} else {
+			stmt = jen.Id("err")
+		}
+	}
+	if stmt != nil {
+		if hasNewValue {
+			stmt = stmt.Op(":=")
+		} else {
+			stmt = stmt.Op("=")
+		}
+	}
+
+	// dest := jen.Id("err")
+	// if c.Op.ReturnType != "undefined" {
+	// 	dest = jen.Id("result").Op(",").Add(dest).Op(":=")
+	// 	// returnStmt.Else = Stmt{jen.Return(jen.Nil(), jen.Nil())}
+	// } else {
+	// 	dest = dest.Op("=")
+	// }
 	for _, a := range c.Args {
 		args = append(args, jen.Id(a))
 	}
-	dest := jen.Id("err")
-	if c.Op.ReturnType != "undefined" {
-		dest = jen.Id("result").Op(",").Add(dest).Op(":=")
-		// returnStmt.Else = Stmt{jen.Return(jen.Nil(), jen.Nil())}
-	} else {
-		dest = dest.Op("=")
-	}
 	list := StatementListStmt{}
-	list.Append(Stmt{
-		dest.Id("instance").Dot(camelCase(c.Name)).Call(args...),
-	})
+	if stmt == nil {
+		list.Append(Stmt{
+			jen.Id("instance").Dot(camelCase(c.Name)).Call(args...),
+		})
+	} else {
+		list.Append(Stmt{
+			stmt.Id("instance").Dot(camelCase(c.Name)).Call(args...),
+		})
+	}
 	if c.Op.ReturnType == "undefined" {
-		list.Append(Stmt{jen.Return(jen.Nil(), jen.Id("err"))})
+		if errorHandling {
+			list.Append(Stmt{jen.Return(jen.Nil(), jen.Id("err"))})
+		} else {
+			list.Append(Stmt{jen.Return(jen.Nil(), jen.Nil())})
+		}
 	} else {
 		converter := "To" + c.Op.ReturnType
 		requireContext = true
-		list.Append(IfStmt{
-			Condition: Stmt{jen.Id("err").Op("!=").Nil()},
-			Block:     Stmt{jen.Return(jen.Nil(), jen.Id("err"))},
-			Else:      Stmt{jen.Return(jen.Id(converter).Call(jen.Id("ctx"), jen.Id("result")))},
-		})
+		valueReturn := Stmt{jen.Return(jen.Id(converter).Call(jen.Id("ctx"), jen.Id("result")))}
+		if errorHandling {
+			list.Append(IfStmt{
+				Condition: Stmt{jen.Id("err").Op("!=").Nil()},
+				Block:     Stmt{jen.Return(jen.Nil(), jen.Id("err"))},
+				Else:      valueReturn,
+			})
+		} else {
+			list.Append(valueReturn)
+		}
 	}
 	// list.Append(returnStmt)
 	return GetGeneratorResult{list, requireContext}
@@ -505,16 +548,11 @@ func (c JSConstructor) CreateOperation(grp *jen.Group, op ESOperation) {
 						jen.Id("ctx").
 							Op(":=").
 							Id("host").
-							Dot("MustGetGetContext").
-							Call(jen.Id("host").Dot("Context").Call()),
+							Dot("MustGetContext").
+							Call(jen.Id("info").Dot("Context").Call()),
 					)
 				}
 				grp.Add(generatorResult.Generator.Generate())
-
-				// grp.Add(
-				// 	jen.Id("instance").Dot(camelCase(op.Name)).Call(),
-				// )
-				// WriteErrorHandler(grp, len(op.Arguments))
 			} else {
 				grp.Id("args").Op(":=").Id("info").Dot("Args").Call()
 				grp.Add(
@@ -530,11 +568,8 @@ func (c JSConstructor) CreateOperation(grp *jen.Group, op ESOperation) {
 				inner := &outer
 
 				argCount := len(op.Arguments)
-				// opName := op.Name
 				var args []string
 				for i, arg := range op.Arguments {
-					// targetBlock := statements
-					// targetFunc := opName
 					if arg.Optional {
 						inner = new(IfStmt)
 						statements.Append(inner)
@@ -556,8 +591,6 @@ func (c JSConstructor) CreateOperation(grp *jen.Group, op ESOperation) {
 						Index:   i,
 					}
 					statements.Append(stmt)
-					// statements.Append(stmt)
-					// grp.Add(stmt.Generate())
 				}
 				statements.Append(genErrorHandler(len(op.Arguments)))
 				generatorResult := CallInstance{
@@ -570,11 +603,8 @@ func (c JSConstructor) CreateOperation(grp *jen.Group, op ESOperation) {
 					grp.Add(jen.Id("ctx").Op(":=").Id("host").Dot("MustGetContext").Call(jen.Id("info").Dot("Context").Call()))
 				}
 				grp.Add(outer.Generate())
-				// WriteErrorHandler(grp, len(op.Arguments))
+				grp.Add(jen.Return(jen.Nil(), jen.Qual("errors", "New").Call(jen.Lit("Missing arguments"))))
 			}
-			// WriteReturnOnError(grp)
-			// grp.Id("instance").Dot(camelCase(opName)).Call(args...)
-			// grp.Return(jen.Nil(), jen.Nil())
 		})
 	ft := jen.Qual(v8, "NewFunctionTemplateWithError").Call(c.varIso, f)
 	grp.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft)
