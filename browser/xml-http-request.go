@@ -118,6 +118,10 @@ func (req *XmlHttpRequest) SetRequestHeader(name string, value string) {
 	req.headers.Add(name, value)
 }
 
+func (req *XmlHttpRequest) Abort() error {
+	return errors.New("XmlHttpRequest.Abort called - not implemented - ignoring call")
+}
+
 /* -------- Options -------- */
 
 func RequestOptionAsync(
