@@ -127,6 +127,20 @@ type ParsedIdlFile struct {
 //go:embed webref/curated/idlparsed/xhr.json
 var xhrData []byte
 
+func FindIdlType(idl IdlTypes) string {
+	types := idl.Types
+	if len(types) == 0 && idl.IdlType != nil {
+		types = []IdlType{*idl.IdlType}
+	}
+	for _, t := range types {
+		if t.Type == "return-type" {
+			return t.IType.TypeName
+		}
+	}
+	return ""
+
+}
+
 func createData() (ESConstructorData, error) {
 	spec := ParsedIdlFile{}
 	err := json.Unmarshal(xhrData, &spec)
@@ -134,18 +148,27 @@ func createData() (ESConstructorData, error) {
 		panic(err)
 	}
 	idlName := spec.IdlNames["XMLHttpRequest"]
-	operations := []ESOperation{}
+	type tmp struct {
+		Op ESOperation
+		Ok bool
+	}
+	ops := []*tmp{}
 	for _, member := range idlName.Members {
 		if member.Type == "operation" {
 			if -1 != slices.IndexFunc(
-				operations,
-				func(op ESOperation) bool { return op.Name == member.Name },
+				ops,
+				func(op *tmp) bool { return op.Op.Name == member.Name },
 			) {
 				slog.Warn("Function overloads", "Name", member.Name)
 				continue
 			}
-			arguments := []ESOperationArgument{}
-			argumentsOk := true
+			returnType := FindIdlType(member.IdlType)
+			operation := &tmp{ESOperation{
+				Name:       member.Name,
+				ReturnType: returnType,
+				Arguments:  []ESOperationArgument{},
+			}, true}
+			ops = append(ops, operation)
 			for _, arg := range member.Arguments {
 				esArg := ESOperationArgument{
 					Name: arg.Name,
@@ -158,26 +181,25 @@ func createData() (ESConstructorData, error) {
 						"Argument",
 						arg.Name,
 					)
-					argumentsOk = false
+					operation.Ok = false
 					break
 				}
 				if arg.IdlType.IdlType != nil {
 					esArg.Type = arg.IdlType.IdlType.IType.TypeName
 				}
-				arguments = append(arguments, esArg)
-			}
-			if argumentsOk {
-				operation := ESOperation{
-					Name:      member.Name,
-					Arguments: arguments,
-				}
-				operations = append(operations, operation)
+				operation.Op.Arguments = append(operation.Op.Arguments, esArg)
 			}
 		}
 	}
 	// fmt.Println(operations)
 	// os.Exit(1)
 
+	operations := make([]ESOperation, 0, len(ops))
+	for _, op := range ops {
+		if op.Ok {
+			operations = append(operations, op.Op)
+		}
+	}
 	data := ESConstructorData{
 		InnerTypeName:      "XmlHttpRequest",
 		Operations:         operations,
@@ -214,8 +236,9 @@ type ESOperationArgument struct {
 }
 
 type ESOperation struct {
-	Name      string
-	Arguments []ESOperationArgument
+	Name       string
+	ReturnType string
+	Arguments  []ESOperationArgument
 }
 
 type ESConstructorData struct {
@@ -323,6 +346,140 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 		})
 }
 
+type JenGenerator interface {
+	Generate() *jen.Statement
+}
+
+type GetArgStmt struct {
+	Name    string
+	ErrName string
+	Getter  string
+	Index   int
+}
+
+type IfStmt struct {
+	Condition JenGenerator
+	Block     JenGenerator
+	Else      JenGenerator
+}
+
+func (s GetArgStmt) Generate() *jen.Statement {
+	return AssignmentStmt{
+		[]string{s.Name, s.ErrName},
+		Stmt{jen.Id(s.Getter).Call(jen.Id("args"), jen.Lit(s.Index))},
+	}.Generate()
+}
+
+type AssignmentStmt struct {
+	VarNames   []string
+	Expression JenGenerator
+}
+
+type StatementListStmt struct {
+	Statements []JenGenerator
+}
+
+func (s AssignmentStmt) Generate() *jen.Statement {
+	result := jen.Id(s.VarNames[0])
+	for _, name := range s.VarNames[1:] {
+		result.Op(",").Id(name)
+	}
+	result.Op(":=").Add(s.Expression.Generate())
+	return result
+}
+
+func (s IfStmt) Generate() *jen.Statement {
+	result := jen.If(s.Condition.Generate()).Block(s.Block.Generate())
+	if s.Else != nil {
+		result.Else().Block(s.Else.Generate())
+	}
+	return result
+}
+
+func GetSliceLength(gen JenGenerator) JenGenerator {
+	return Stmt{jen.Len(gen.Generate())}
+}
+
+type GeneratorFunc func() *jen.Statement
+
+func (g GeneratorFunc) Generate() *jen.Statement {
+	return g.Generate()
+}
+
+func Statements(stmts ...JenGenerator) JenGenerator {
+	return StatementListStmt{stmts}
+}
+
+func (s *StatementListStmt) Append(stmt JenGenerator) {
+	s.Statements = append(s.Statements, stmt)
+}
+
+func (s StatementListStmt) Generate() *jen.Statement {
+	result := []jen.Code{}
+	g := jen.Group{}
+	for i, s := range s.Statements {
+		if i > 0 {
+			result = append(result, jen.Line())
+		}
+		g.Add(s.Generate())
+		jenStatement := s.Generate()
+		if jenStatement != nil {
+			result = append(result, jenStatement)
+		}
+	}
+	// return g
+	jenStmt := jen.Statement(result)
+	return &jenStmt
+}
+
+type CallInstance struct {
+	Name string
+	Args []string
+	Op   ESOperation
+}
+
+type GetGeneratorResult struct {
+	Generator      JenGenerator
+	RequireContext bool
+}
+
+func (c CallInstance) GetGenerator() GetGeneratorResult {
+	var requireContext bool
+	args := []jen.Code{}
+	// jErr := jen.Id("err")
+	// returnStmt := IfStmt{
+	// 	Condition: Stmt{jErr.Clone().Op("!=").Nil()},
+	// 	Block:     Stmt{jen.Return(jen.Nil(), jErr)},
+	// }
+	for _, a := range c.Args {
+		args = append(args, jen.Id(a))
+	}
+	dest := jen.Id("err")
+	if c.Op.ReturnType != "undefined" {
+		dest = jen.Id("result").Op(",").Add(dest).Op(":=")
+		// returnStmt.Else = Stmt{jen.Return(jen.Nil(), jen.Nil())}
+	} else {
+		dest = dest.Op("=")
+	}
+	list := StatementListStmt{}
+	list.Append(Stmt{
+		dest.Id("instance").Dot(camelCase(c.Name)).Call(args...),
+	})
+	if c.Op.ReturnType == "undefined" {
+		list.Append(Stmt{jen.Return(jen.Nil(), jen.Id("err"))})
+	} else {
+		converter := "To" + c.Op.ReturnType
+		requireContext = true
+		list.Append(IfStmt{
+			Condition: Stmt{jen.Id("err").Op("!=").Nil()},
+			Block:     Stmt{jen.Return(jen.Nil(), jen.Id("err"))},
+			Else:      Stmt{jen.Return(jen.Id(converter).Call(jen.Id("ctx"), jen.Id("result")))},
+		})
+	}
+	// list.Append(returnStmt)
+	return GetGeneratorResult{list, requireContext}
+}
+
 func (c JSConstructor) CreateOperation(grp *jen.Group, op ESOperation) {
 	v8Value := jen.Op("*").Qual(v8, "Value")
 	errorT := jen.Id("error")
@@ -331,34 +488,93 @@ func (c JSConstructor) CreateOperation(grp *jen.Group, op ESOperation) {
 		Params(c.argInfo.Clone().Add(v8FunctionCallbackInfoPtr)).
 		Params(v8Value, errorT).
 		BlockFunc(func(grp *jen.Group) {
-			grp.Id("args").Op(":=").Id("info").Dot("Args").Call()
-			argCount := len(op.Arguments)
-			var args []jen.Code
-			for i, arg := range op.Arguments {
-				v := jen.Id(arg.Name) //fmt.Sprintf("arg%d", i))
-				args = append(args, v)
-				var e *jen.Statement
-				if argCount > 1 {
-					e = jen.Id(fmt.Sprintf("err%d", i))
-				} else {
-					e = jen.Id(fmt.Sprintf("err"))
-				}
-				grp.Add(v).
-					Op(",").
-					Add(e).
-					Op(":=").
-					Id("GetArg"+arg.Type).
-					Call(jen.Id("args"), jen.Lit(i))
-			}
-			WriteErrorHandler(grp, len(op.Arguments))
 			grp.Add(jen.Id("instance")).Op(",").Id("err").
 				Op(":=").
 				Id("builder").
 				Dot("GetInstance").
 				Call(jen.Id("info"))
 			WriteReturnOnError(grp)
-			grp.Id("instance").Dot(camelCase(op.Name)).Call(args...)
-			grp.Return(jen.Nil(), jen.Nil())
+			if len(op.Arguments) == 0 {
+				generatorResult := CallInstance{
+					Name: op.Name,
+					Args: []string{},
+					Op:   op,
+				}.GetGenerator()
+				if generatorResult.RequireContext {
+					grp.Add(
+						jen.Id("ctx").
+							Op(":=").
+							Id("host").
+							Dot("MustGetGetContext").
+							Call(jen.Id("host").Dot("Context").Call()),
+					)
+				}
+				grp.Add(generatorResult.Generator.Generate())
+
+				// grp.Add(
+				// 	jen.Id("instance").Dot(camelCase(op.Name)).Call(),
+				// )
+				// WriteErrorHandler(grp, len(op.Arguments))
+			} else {
+				grp.Id("args").Op(":=").Id("info").Dot("Args").Call()
+				grp.Add(
+					AssignmentStmt{
+						[]string{"argsLen"},
+						GetSliceLength(Stmt{jen.Id("args")}),
+					}.Generate(),
+				)
+				statements := &StatementListStmt{}
+				outer := IfStmt{
+					Block: statements,
+				}
+				inner := &outer
+
+				argCount := len(op.Arguments)
+				// opName := op.Name
+				var args []string
+				for i, arg := range op.Arguments {
+					// targetBlock := statements
+					// targetFunc := opName
+					if arg.Optional {
+						inner = new(IfStmt)
+						statements.Append(inner)
+						statements = &StatementListStmt{}
+						inner.Block = statements
+					}
+					args = append(args, arg.Name)
+					inner.Condition = (Stmt{jen.Id("argsLen").Op(">=").Lit(i + 1)})
+					var errName string
+					if argCount > 1 {
+						errName = fmt.Sprintf("err%d", i)
+					} else {
+						errName = fmt.Sprintf("err")
+					}
+					stmt := GetArgStmt{
+						Name:    arg.Name,
+						ErrName: errName,
+						Getter:  "GetArg" + arg.Type,
+						Index:   i,
+					}
+					statements.Append(stmt)
+					// statements.Append(stmt)
+					// grp.Add(stmt.Generate())
+				}
+				statements.Append(genErrorHandler(len(op.Arguments)))
+				generatorResult := CallInstance{
+					Name: op.Name,
+					Args: args,
+					Op:   op,
+				}.GetGenerator()
+				statements.Append(generatorResult.Generator)
+				if generatorResult.RequireContext {
+					grp.Add(jen.Id("ctx").Op(":=").Id("host").Dot("MustGetContext").Call(jen.Id("info").Dot("Context").Call()))
+				}
+				grp.Add(outer.Generate())
+				// WriteErrorHandler(grp, len(op.Arguments))
+			}
+			// WriteReturnOnError(grp)
+			// grp.Id("instance").Dot(camelCase(opName)).Call(args...)
+			// grp.Return(jen.Nil(), jen.Nil())
 		})
 	ft := jen.Qual(v8, "NewFunctionTemplateWithError").Call(c.varIso, f)
 	grp.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft)
@@ -372,26 +588,55 @@ func camelCase(s string) string {
 	return string(buffer)
 }
 
-func WriteReturnOnError(grp *jen.Group) {
+type Stmt struct{ *jen.Statement }
+
+func (s Stmt) Generate() *jen.Statement { return s.Statement }
+
+func GenReturnOnError() JenGenerator {
 	jErr := jen.Id("err")
-	grp.If(jErr.Clone().Op("!=").Nil()).Block(
-		jen.Return(jen.Nil(), jErr),
-	)
+	stmt := IfStmt{
+		Condition: Stmt{jErr.Clone().Op("!=").Nil()},
+		Block:     Stmt{jen.Return(jen.Nil(), jErr)},
+	}
+	return stmt
 }
 
-func WriteErrorHandler(grp *jen.Group, count int) {
+func WriteReturnOnError(grp *jen.Group) {
+	grp.Add(GenReturnOnError().Generate())
+}
+
+func Noop() JenGenerator {
+	return GeneratorFunc(func() *jen.Statement {
+		empty := []jen.Code{}
+		emptyStmt := jen.Statement(empty)
+		return &emptyStmt
+	})
+}
+
+func genErrorHandler(count int) JenGenerator {
 	if count == 0 {
-		return
+		return StatementListStmt{}
 	}
 	jErr := jen.Id("err")
+	result := StatementListStmt{}
 	if count > 1 {
 		var args []jen.Code
 		for i := 0; i < count; i++ {
 			args = append(args, jen.Id(fmt.Sprintf("err%d", i)))
 		}
-		grp.Add(jErr).Op(":=").Qual("errors", "Join").Call(args...)
+		s := Stmt{jErr.Clone().Op(":=").Qual("errors", "Join").Call(args...)}
+		result.Append(s)
 	}
-	WriteReturnOnError(grp)
+	result.Append(GenReturnOnError())
+	return result
+
+}
+
+func WriteErrorHandler(grp *jen.Group, count int) {
+	// if count == 0 {
+	// 	return
+	// }
+	grp.Add(genErrorHandler(count).Generate())
 }
 
 func writeFactory(f *jen.File, data ESConstructorData) {

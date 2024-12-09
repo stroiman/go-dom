@@ -19,97 +19,120 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototype := protoBuilder.proto
 
 	prototype.Set("open", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		args := info.Args()
-		method, err0 := GetArgByteString(args, 0)
-		url, err1 := GetArgUSVString(args, 1)
-		err := errors.Join(err0, err1)
-		if err != nil {
-			return nil, err
-		}
 		instance, err := builder.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
-		instance.Open(method, url)
-		return nil, nil
+		args := info.Args()
+		argsLen := len(args)
+		if argsLen >= 2 {
+			method, err0 := GetArgByteString(args, 0)
+			url, err1 := GetArgUSVString(args, 1)
+			err := errors.Join(err0, err1)
+			if err != nil {
+				return nil, err
+			}
+			err = instance.Open(method, url)
+			return nil, err
+		}
 	}))
 
 	prototype.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		args := info.Args()
-		name, err0 := GetArgByteString(args, 0)
-		value, err1 := GetArgByteString(args, 1)
-		err := errors.Join(err0, err1)
-		if err != nil {
-			return nil, err
-		}
 		instance, err := builder.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
-		instance.SetRequestHeader(name, value)
-		return nil, nil
+		args := info.Args()
+		argsLen := len(args)
+		if argsLen >= 2 {
+			name, err0 := GetArgByteString(args, 0)
+			value, err1 := GetArgByteString(args, 1)
+			err := errors.Join(err0, err1)
+			if err != nil {
+				return nil, err
+			}
+			err = instance.SetRequestHeader(name, value)
+			return nil, err
+		}
 	}))
 
 	prototype.Set("send", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		args := info.Args()
-		body, err := GetArg(args, 0)
-		if err != nil {
-			return nil, err
-		}
 		instance, err := builder.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
-		instance.Send(body)
-		return nil, nil
+		args := info.Args()
+		argsLen := len(args)
+		if argsLen >= 1 {
+			body, err := GetArg(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			err = instance.Send(body)
+			return nil, err
+		}
 	}))
 
 	prototype.Set("abort", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		args := info.Args()
 		instance, err := builder.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
-		instance.Abort()
-		return nil, nil
+		err = instance.Abort()
+		return nil, err
 	}))
 
 	prototype.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		args := info.Args()
-		name, err := GetArgByteString(args, 0)
-		if err != nil {
-			return nil, err
-		}
 		instance, err := builder.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
-		instance.GetResponseHeader(name)
-		return nil, nil
+		args := info.Args()
+		argsLen := len(args)
+		ctx := host.MustGetContext(info.Context())
+		if argsLen >= 1 {
+			name, err := GetArgByteString(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			result, err := instance.GetResponseHeader(name)
+			if err != nil {
+				return nil, err
+			} else {
+				return ToByteString(ctx, result)
+			}
+		}
 	}))
 
 	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		args := info.Args()
 		instance, err := builder.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
-		instance.GetAllResponseHeaders()
-		return nil, nil
+		ctx := host.MustGetGetContext(host.Context())
+		result, err := instance.GetAllResponseHeaders()
+		if err != nil {
+			return nil, err
+		} else {
+			return ToByteString(ctx, result)
+		}
 	}))
 
 	prototype.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		args := info.Args()
-		mime, err := GetArgDOMString(args, 0)
-		if err != nil {
-			return nil, err
-		}
 		instance, err := builder.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
-		instance.OverrideMimeType(mime)
-		return nil, nil
+		args := info.Args()
+		argsLen := len(args)
+		if argsLen >= 1 {
+			mime, err := GetArgDOMString(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			err = instance.OverrideMimeType(mime)
+			return nil, err
+		}
 	}))
 
 	builder.SetDefaultInstanceLookup()
