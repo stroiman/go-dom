@@ -37,6 +37,7 @@ type XmlHttpRequest struct {
 	method   string
 	url      string
 	response []byte
+	res      *http.Response
 	headers  http.Header
 }
 
@@ -67,7 +68,6 @@ func (req *XmlHttpRequest) Open(
 }
 
 func (req *XmlHttpRequest) send(body io.Reader) error {
-	fmt.Println("Create request", req.method, req.url)
 	httpRequest, err := http.NewRequest(req.method, req.url, body)
 	if err != nil {
 		return err
@@ -78,6 +78,7 @@ func (req *XmlHttpRequest) send(body io.Reader) error {
 		return err
 	}
 	req.status = res.StatusCode
+	req.res = res
 	b := new(bytes.Buffer) // TODO, branch out depending on content-type
 	_, err = b.ReadFrom(res.Body)
 	req.response = b.Bytes()
@@ -120,6 +121,22 @@ func (req *XmlHttpRequest) SetRequestHeader(name string, value string) {
 
 func (req *XmlHttpRequest) Abort() error {
 	return errors.New("XmlHttpRequest.Abort called - not implemented - ignoring call")
+}
+
+func (req *XmlHttpRequest) GetAllResponseHeaders() (res string, err error) {
+	builder := strings.Builder{}
+	for k, vs := range req.res.Header {
+		key := strings.ToLower(k)
+		if key != "set-cookie" {
+			for _, v := range vs {
+				_, err = builder.WriteString(fmt.Sprintf("%s: %s\r\n", key, v))
+				if err != nil {
+					return
+				}
+			}
+		}
+	}
+	return builder.String(), nil
 }
 
 /* -------- Options -------- */

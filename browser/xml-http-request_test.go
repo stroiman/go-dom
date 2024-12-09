@@ -3,11 +3,14 @@ package browser_test
 import (
 	"io"
 	"net/http"
+	"slices"
+	"strings"
 
 	. "github.com/stroiman/go-dom/browser"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/types"
 )
 
 func newFromHandlerFunc(f func(http.ResponseWriter, *http.Request)) *XmlHttpRequest {
@@ -19,15 +22,16 @@ func newFromHandlerFunc(f func(http.ResponseWriter, *http.Request)) *XmlHttpRequ
 
 var _ = Describe("XmlHTTPRequest", func() {
 	var (
-		handler       http.Handler
-		actualHeader  http.Header
-		actualMethod  string
-		actualReqBody []byte
-		reqErr        error
-		r             *XmlHttpRequest
+		handler        http.Handler
+		actualHeader   http.Header
+		actualMethod   string
+		actualReqBody  []byte
+		reqErr         error
+		responseHeader http.Header
+		r              *XmlHttpRequest
 	)
 
-	BeforeEach(func() {
+	JustBeforeEach(func() {
 		// Create a basic server for testing
 		handler = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			actualHeader = req.Header
@@ -35,7 +39,14 @@ var _ = Describe("XmlHTTPRequest", func() {
 			if req.Body != nil {
 				actualReqBody, reqErr = io.ReadAll(req.Body)
 			}
-			w.Header().Add("Content-Type", "text/plain")
+			for k, vs := range responseHeader {
+				for _, v := range vs {
+					w.Header().Add(k, v)
+				}
+			}
+			if responseHeader == nil || responseHeader.Get("Content-Type") == "" {
+				w.Header().Add("Content-Type", "text/plain")
+			}
 			w.Write([]byte("Hello, World!"))
 		})
 		client := http.Client{
@@ -150,4 +161,55 @@ var _ = Describe("XmlHTTPRequest", func() {
 			Expect(actualHeader.Get("x-test")).To(Equal("42"))
 		})
 	})
+
+	Describe("GetAllResponseHeaders", func() {
+		BeforeEach(func() {
+			responseHeader = make(http.Header)
+			responseHeader.Add("X-Test-1", "value1")
+			responseHeader.Add("X-Test-2", "value2")
+			responseHeader.Add("Content-Type", "text/plain")
+		})
+
+		JustBeforeEach(func() {
+			r.Open("GET", "/dummy")
+			r.Send()
+		})
+
+		It("Should return all headers", func() {
+			Expect(
+				r.GetAllResponseHeaders(),
+			).To(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain"))
+		})
+
+		Describe("Same header is added again", func() {
+			BeforeEach(func() {
+				responseHeader.Add("x-test-1", "value3")
+			})
+
+			It("Should appear twice", func() {
+				Expect(
+					r.GetAllResponseHeaders(),
+				).To(HaveLines("x-test-1: value1", "x-test-1: value3", "x-test-2: value2", "content-type: text/plain"))
+			})
+		})
+
+		Describe("Cookies are added", func() {
+			BeforeEach(func() {
+				responseHeader.Add("set-cookie", "foobar-should-not-be-visible")
+			})
+
+			It("Should not include the cookie", func() {
+				Expect(
+					r.GetAllResponseHeaders(),
+				).To(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain"))
+			})
+		})
+	})
 })
+
+func HaveLines(expected ...string) types.GomegaMatcher {
+	return WithTransform(func(s string) []string {
+		lines := strings.Split(s, "\r\n")
+		return slices.DeleteFunc(lines, func(line string) bool { return line == "" })
+	}, ConsistOf(expected))
+}
