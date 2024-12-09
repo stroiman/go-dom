@@ -2,6 +2,7 @@ package browser
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -137,6 +138,10 @@ func (req *XmlHttpRequest) GetAllResponseHeaders() (res string, err error) {
 		}
 	}
 	return builder.String(), nil
+}
+
+func (req *XmlHttpRequest) OverrideMimeType(mimeType string) error {
+	return errors.New("XmlHttpRequest.OverrideMimeType - not implemented")
 }
 
 /* -------- Options -------- */

@@ -70,6 +70,10 @@ var _ = Describe("XmlHTTPRequest", func() {
 		Skip("Abort not implemented. Skeleton implementation so satisfy JS interface")
 	})
 
+	It("Should handle OverrideMimeType()", func() {
+		Skip("Abort not implemented. Skeleton implementation so satisfy JS interface")
+	})
+
 	Describe("Synchronous calls", func() {
 		// Most browsers have deprecated this on the main thread, so throrough
 		// support is not necessary until the code support WebWorkers.
