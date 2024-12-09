@@ -166,7 +166,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 		})
 	})
 
-	Describe("GetAllResponseHeaders", func() {
+	Describe("Response headers", func() {
 		BeforeEach(func() {
 			responseHeader = make(http.Header)
 			responseHeader.Add("X-Test-1", "value1")
@@ -179,33 +179,58 @@ var _ = Describe("XmlHTTPRequest", func() {
 			r.Send()
 		})
 
-		It("Should return all headers", func() {
-			Expect(
-				r.GetAllResponseHeaders(),
-			).To(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain"))
-		})
-
-		Describe("Same header is added again", func() {
-			BeforeEach(func() {
-				responseHeader.Add("x-test-1", "value3")
-			})
-
-			It("Should appear twice", func() {
-				Expect(
-					r.GetAllResponseHeaders(),
-				).To(HaveLines("x-test-1: value1", "x-test-1: value3", "x-test-2: value2", "content-type: text/plain"))
-			})
-		})
-
-		Describe("Cookies are added", func() {
-			BeforeEach(func() {
-				responseHeader.Add("set-cookie", "foobar-should-not-be-visible")
-			})
-
-			It("Should not include the cookie", func() {
+		Describe("GetAllResponseHeaders", func() {
+			It("Should return all headers", func() {
 				Expect(
 					r.GetAllResponseHeaders(),
 				).To(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain"))
+			})
+
+			Describe("Same header is added again", func() {
+				BeforeEach(func() {
+					responseHeader.Add("x-test-1", "value3")
+				})
+
+				It("Should appear twice", func() {
+					Expect(
+						r.GetAllResponseHeaders(),
+					).To(HaveLines("x-test-1: value1", "x-test-1: value3", "x-test-2: value2", "content-type: text/plain"))
+				})
+			})
+
+			Describe("Cookies are added", func() {
+				BeforeEach(func() {
+					responseHeader.Add("set-cookie", "foobar-should-not-be-visible")
+				})
+
+				It("Should not include the cookie", func() {
+					Expect(
+						r.GetAllResponseHeaders(),
+					).To(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain"))
+				})
+			})
+		})
+
+		Describe("GetResponseHeader", func() {
+			BeforeEach(func() {
+				responseHeader.Add("x-test-1", "value3")
+				responseHeader.Add("set-cookie", "foobar-should-not-be-visible")
+			})
+
+			It("Should return nil when headers not yet received", func() {
+				Skip("TODO - write the test, though it _should_ work")
+			})
+
+			It("Should nil when value is missing", func() {
+				Expect(r.GetResponseHeader("missing")).To(BeNil())
+			})
+
+			It("Should return one value when only one header", func() {
+				Expect(*r.GetResponseHeader("x-test-2")).To(Equal("value2"))
+			})
+
+			It("Should return a comma-separated list when multiple values", func() {
+				Expect(*r.GetResponseHeader("x-test-1")).To(Equal("value1, value3"))
 			})
 		})
 	})

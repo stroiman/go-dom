@@ -144,6 +144,20 @@ func (req *XmlHttpRequest) OverrideMimeType(mimeType string) error {
 	return errors.New("XmlHttpRequest.OverrideMimeType - not implemented")
 }
 
+func (req *XmlHttpRequest) GetResponseHeader(headerName string) *string {
+	if req.res == nil {
+		return nil
+	}
+	key := http.CanonicalHeaderKey(headerName)
+	if val, ok := req.res.Header[key]; ok && len(val) > 0 {
+		res := new(string)
+		*res = strings.Join(val, ", ")
+		return res
+
+	}
+	return nil
+}
+
 /* -------- Options -------- */
 
 func RequestOptionAsync(
