@@ -204,3 +204,13 @@ func GetArgDOMString(args []*v8.Value, idx int) (result string, err error) {
 
 var GetArgByteString = GetArgDOMString
 var GetArgUSVString = GetArgDOMString
+
+func ToByteString(ctx *ScriptContext, str string) (*v8.Value, error) {
+	return v8.NewValue(ctx.host.iso, str)
+}
+func ToNullableByteString(ctx *ScriptContext, str *string) (*v8.Value, error) {
+	if str == nil {
+		return v8.Null(ctx.host.iso), nil
+	}
+	return v8.NewValue(ctx.host.iso, str)
+}
