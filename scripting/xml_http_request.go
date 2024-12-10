@@ -67,7 +67,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		args := info.Args()
 		argsLen := len(args)
 		if argsLen >= 1 {
-			body, err := TryParseArgs(GetBodyFromDocument(args, ctx, 0), GetBodyFromXMLHttpRequestBodyInit(args, ctx, 0))
+			body, err := TryParseArgs(ctx, args, 0, GetBodyFromDocument, GetBodyFromXMLHttpRequestBodyInit)
 			if err != nil {
 				return nil, err
 			}

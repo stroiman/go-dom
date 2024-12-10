@@ -384,10 +384,10 @@ func (s GetArgStmt) Generate() *jen.Statement {
 			Stmt{jen.Id(s.Getter).Call(jen.Id("args"), jen.Lit(s.Index))},
 		}.Generate()
 	} else {
-		statements := []jen.Code{}
+		statements := []jen.Code{jen.Id("ctx"), jen.Id("args"), jen.Lit(s.Index)}
 		for _, t := range s.Arg.IdlType.IdlType.IType.Types {
 			parserName := fmt.Sprintf("Get%sFrom%s", camelCase(s.Arg.Name), t.IType.TypeName)
-			statements = append(statements, jen.Id(parserName).Call(jen.Id("args"), jen.Id("ctx"), jen.Lit(s.Index)))
+			statements = append(statements, jen.Id(parserName))
 		}
 		return AssignmentStmt{
 			[]string{s.Name, s.ErrName},

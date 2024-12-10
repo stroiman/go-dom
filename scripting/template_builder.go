@@ -3,6 +3,7 @@ package scripting
 import (
 	"errors"
 
+	"github.com/stroiman/go-dom/browser"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -213,4 +214,25 @@ func ToNullableByteString(ctx *ScriptContext, str *string) (*v8.Value, error) {
 		return v8.Null(ctx.host.iso), nil
 	}
 	return v8.NewValue(ctx.host.iso, str)
+}
+
+func TryParseArgs[T interface{}](
+	ctx *ScriptContext,
+	args []*v8.Value,
+	index int,
+	parsers ...func(*ScriptContext, *v8.Value) (T, error),
+) (result T, err error) {
+	err = errors.New("TODO")
+	return
+}
+
+func GetBodyFromDocument(ctx *ScriptContext, val *v8.Value) (*browser.XHRRequestBody, error) {
+	return nil, nil
+}
+
+func GetBodyFromXMLHttpRequestBodyInit(
+	ctx *ScriptContext,
+	val *v8.Value,
+) (*browser.XHRRequestBody, error) {
+	return nil, nil
 }
