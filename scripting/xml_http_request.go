@@ -15,6 +15,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		instance := scriptContext.Window().NewXmlHttpRequest()
 		return scriptContext.CacheNode(info.This(), instance)
 	})
+	builder.SetDefaultInstanceLookup()
 	protoBuilder := builder.NewPrototypeBuilder()
 	prototype := protoBuilder.proto
 
@@ -141,6 +142,5 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		return nil, err
 	}))
 
-	builder.SetDefaultInstanceLookup()
 	return builder.constructor
 }

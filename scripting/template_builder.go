@@ -227,12 +227,12 @@ func TryParseArgs[T interface{}](
 }
 
 func GetBodyFromDocument(ctx *ScriptContext, val *v8.Value) (*browser.XHRRequestBody, error) {
-	return nil, nil
+	return nil, errors.New("Not supported yet")
 }
 
 func GetBodyFromXMLHttpRequestBodyInit(
 	ctx *ScriptContext,
 	val *v8.Value,
 ) (*browser.XHRRequestBody, error) {
-	return nil, nil
+	return nil, errors.New("Not supported yet")
 }

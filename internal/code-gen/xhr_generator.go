@@ -347,6 +347,7 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 					Params(c.argInfo.Clone().Add(g.v8FunctionCallbackInfoPtr())).
 					Params(v8Value, errorT).
 					BlockFunc(c.JSConstructorImpl))
+			grp.Add(builder).Dot("SetDefaultInstanceLookup").Call()
 			grp.Id("protoBuilder").Op(":=").Add(builder).Dot("NewPrototypeBuilder").Call()
 			grp.Id("prototype").Op(":=").Id("protoBuilder").Dot("proto")
 			grp.Line()
@@ -354,7 +355,6 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 				c.CreateOperation(grp, op)
 			}
 
-			grp.Add(builder).Dot("SetDefaultInstanceLookup").Call()
 			grp.Return(builder.Clone().Dot("constructor"))
 		})
 }
