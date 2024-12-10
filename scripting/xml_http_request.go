@@ -36,7 +36,6 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		}
 		instance.Open(method, url)
 		return nil, nil
-		// Opt: []
 	}))
 
 	prototype.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -57,10 +56,10 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		}
 		instance.SetRequestHeader(name, value)
 		return nil, nil
-		// Opt: []
 	}))
 
 	prototype.Set("send", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+		ctx := host.MustGetContext(info.Context())
 		instance, err := builder.GetInstance(info)
 		if err != nil {
 			return nil, err
@@ -68,7 +67,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		args := info.Args()
 		argsLen := len(args)
 		if argsLen >= 1 {
-			body, err := GetArg(args, 0)
+			body, err := TryParseArgs(GetBodyFromDocument(args, ctx, 0), GetBodyFromXMLHttpRequestBodyInit(args, ctx, 0))
 			if err != nil {
 				return nil, err
 			}
@@ -78,7 +77,6 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 
 		err = instance.Send()
 		return nil, err
-		// Opt: [{body  true false}]
 	}))
 
 	prototype.Set("abort", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -89,10 +87,10 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 
 		err = instance.Abort()
 		return nil, err
-		// Opt: []
 	}))
 
 	prototype.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+		ctx := host.MustGetContext(info.Context())
 		instance, err := builder.GetInstance(info)
 		if err != nil {
 			return nil, err
@@ -106,26 +104,23 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		if err != nil {
 			return nil, err
 		}
-		ctx := host.MustGetContext(info.Context())
 		result := instance.GetResponseHeader(name)
 		return ToNullableByteString(ctx, result)
-		// Opt: []
 	}))
 
 	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+		ctx := host.MustGetContext(info.Context())
 		instance, err := builder.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
 
-		ctx := host.MustGetContext(info.Context())
 		result, err := instance.GetAllResponseHeaders()
 		if err != nil {
 			return nil, err
 		} else {
 			return ToByteString(ctx, result)
 		}
-		// Opt: []
 	}))
 
 	prototype.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -144,7 +139,6 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		}
 		err = instance.OverrideMimeType(mime)
 		return nil, err
-		// Opt: []
 	}))
 
 	builder.SetDefaultInstanceLookup()
