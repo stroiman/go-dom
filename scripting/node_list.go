@@ -50,27 +50,13 @@ thisArg Optional
 */
 
 func CreateNodeList(host *ScriptHost) *v8.FunctionTemplate {
+	nodeListIterator := NewIterator[browser.Node](
+		host,
+		func(instance browser.Node, ctx *ScriptContext) (*v8.Value, error) {
+			return ctx.GetInstanceForNode(instance)
+		},
+	)
 	iso := host.iso
-	iteratorResultTemplate := v8.NewObjectTemplate(iso)
-	iteratorTemplate := v8.NewObjectTemplate(iso)
-	iteratorTemplate.SetInternalFieldCount(2)
-	createDoneIteratorResult := func(ctx *v8.Context) (*v8.Value, error) {
-		result, err := iteratorResultTemplate.NewInstance(ctx)
-		if err != nil {
-			return nil, err
-		}
-		result.Set("done", true)
-		return result.Value, nil
-	}
-	createNotDoneIteratorResult := func(ctx *v8.Context, value interface{}) (*v8.Value, error) {
-		result, err := iteratorResultTemplate.NewInstance(ctx)
-		if err != nil {
-			return nil, err
-		}
-		result.Set("done", false)
-		result.Set("value", value)
-		return result.Value, nil
-	}
 	builder := NewIllegalConstructorBuilder[browser.NodeList](host)
 	builder.SetDefaultInstanceLookup()
 	proto := builder.NewPrototypeBuilder()
@@ -100,34 +86,12 @@ func CreateNodeList(host *ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(
 			iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				instance, err := iteratorTemplate.NewInstance(info.Context())
-				instance.SetInternalField(0, info.This().GetInternalField(0))
-				instance.Set(
-					"next",
-					*v8.NewFunctionTemplateWithError(iso,
-						func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-							ctx := host.MustGetContext(info.Context())
-							nodeList, err := getInstanceFromThis[browser.NodeList](ctx, info.This())
-							if err != nil {
-								return nil, err
-							}
-							index := (info.This().GetInternalField(1).Int32())
-							item := nodeList.Item(int(index))
-							if item == nil {
-								return createDoneIteratorResult(ctx.v8ctx)
-							} else {
-								item := nodeList.Item(int(index))
-								item_instance, err := ctx.GetInstanceForNode(item)
-								if err != nil {
-									return nil, err
-								}
-								result, err := createNotDoneIteratorResult(ctx.v8ctx, item_instance)
-								return result, info.This().SetInternalField(1, index+1)
-							}
-						},
-					).GetFunction(info.Context()),
-				)
-				return instance.Value, err
+				ctx := host.MustGetContext(info.Context())
+				nodeList, err := getInstanceFromThis[browser.NodeList](ctx, info.This())
+				if err != nil {
+					return nil, err
+				}
+				return nodeListIterator.NewIteratorInstance(ctx, nodeList.All())
 			},
 		),
 	)

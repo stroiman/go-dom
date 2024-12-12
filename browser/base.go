@@ -28,6 +28,10 @@ func newBase() base {
 	return base{NewObjectId()}
 }
 
+func NewEntity() Entity {
+	return base{NewObjectId()}
+}
+
 func (b base) ObjectId() ObjectId { return b.objectId }
 
 type Entity interface {
