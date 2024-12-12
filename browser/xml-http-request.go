@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	netURL "net/url"
 	"strings"
@@ -78,6 +79,7 @@ func (req *xmlHttpRequest) Open(
 	// binding layer? Or different methods?
 	url string,
 	options ...RequestOption) {
+	slog.Debug("XmlHttpRequest.Open")
 
 	req.method = method
 	req.url = url
@@ -88,6 +90,7 @@ func (req *xmlHttpRequest) Open(
 }
 
 func (req *xmlHttpRequest) send(body io.Reader) error {
+	slog.Debug("XmlHttpRequest.Send")
 	httpRequest, err := http.NewRequest(req.method, req.url, body)
 	if err != nil {
 		return err
