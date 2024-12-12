@@ -31,4 +31,13 @@ var _ = Describe("V8 FormData", func() {
 			Array.from(data.keys()).join(",")
 			`)).To(Equal("key1,key2"))
 	})
+	It("Returns entries", func() {
+		c := NewTestContext()
+		Expect(c.RunTestScript(`
+			data = new FormData();
+			data.append("key1", "value1");
+			data.append("key2", "value2");
+			Array.from(data.entries()).map(x => x.join(";")).join(",")
+			`)).To(Equal("key1;value1,key2;value2"))
+	})
 })
