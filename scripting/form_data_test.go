@@ -22,4 +22,13 @@ var _ = Describe("V8 FormData", func() {
 			data.get("key");
 			`)).To(Equal("value"))
 	})
+	It("Returns keys", func() {
+		c := NewTestContext()
+		Expect(c.RunTestScript(`
+			data = new FormData();
+			data.append("key1", "value");
+			data.append("key2", "value");
+			Array.from(data.keys()).join(",")
+			`)).To(Equal("key1,key2"))
+	})
 })

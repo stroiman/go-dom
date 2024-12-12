@@ -17,6 +17,7 @@ type Iterator[T any] struct {
 type EntityLookup[T any] func(value T, ctx *ScriptContext) (*v8.Value, error)
 
 func NewIterator[T any](host *ScriptHost, entityLookup EntityLookup[T]) Iterator[T] {
+	iso := host.iso
 	// TODO, once we have weak handles in v8, we can release the iterator when it
 	// goes out of scope.
 	iterator := Iterator[T]{
@@ -26,6 +27,10 @@ func NewIterator[T any](host *ScriptHost, entityLookup EntityLookup[T]) Iterator
 		entityLookup,
 	}
 	iterator.ot.Set("next", v8.NewFunctionTemplateWithError(host.iso, iterator.Next))
+	iterator.ot.SetSymbol(
+		v8.SymbolIterator(iso),
+		v8.NewFunctionTemplateWithError(host.iso, iterator.NewIterator),
+	)
 	iterator.ot.SetInternalFieldCount(2)
 	return iterator
 }
@@ -66,6 +71,15 @@ func (i Iterator[T]) Next(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		err3 := info.This().SetInternalField(1, index+1)
 		return result, errors.Join(err1, err2, err3)
 	}
+}
+
+func (i Iterator[T]) NewIterator(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := i.host.MustGetContext(info.Context())
+	instance, err := getInstanceFromThis[*IteratorInstance[T]](ctx, info.This())
+	if err != nil {
+		return nil, err
+	}
+	return i.NewIteratorInstance(ctx, instance.items)
 }
 
 func (i Iterator[T]) createDoneIteratorResult(ctx *v8.Context) (*v8.Value, error) {
