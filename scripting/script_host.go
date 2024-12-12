@@ -23,10 +23,12 @@ type globals struct {
 }
 
 type ScriptHost struct {
-	iso            *v8.Isolate
-	windowTemplate *v8.ObjectTemplate
-	globals        globals
-	contexts       map[*v8.Context]*ScriptContext
+	iso             *v8.Isolate
+	inspector       *v8.Inspector
+	inspectorClient *v8.InspectorClient
+	windowTemplate  *v8.ObjectTemplate
+	globals         globals
+	contexts        map[*v8.Context]*ScriptContext
 }
 
 func (h *ScriptHost) GetContext(v8ctx *v8.Context) (*ScriptContext, bool) {
@@ -169,8 +171,24 @@ func createGlobals(host *ScriptHost, classes []class) []globalInstall {
 	return result
 }
 
+func (host *ScriptHost) ConsoleAPIMessage(message v8.ConsoleAPIMessage) {
+	switch message.ErrorLevel {
+	case v8.ErrorLevelDebug:
+		slog.Debug(message.Message)
+	case v8.ErrorLevelInfo:
+	case v8.ErrorLevelLog:
+		slog.Info(message.Message)
+	case v8.ErrorLevelWarning:
+		slog.Warn(message.Message)
+	case v8.ErrorLevelError:
+		slog.Error(message.Message)
+	}
+}
+
 func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
+	host.inspectorClient = v8.NewInspectorClient(host)
+	host.inspector = v8.NewInspector(host.iso, host.inspectorClient)
 	classes := []class{
 		{"Event", CreateEvent, []class{
 			{"CustomEvent", CreateCustomEvent, nil},
@@ -221,6 +239,8 @@ func (host *ScriptHost) Dispose() {
 			ctx.Dispose()
 		}
 	}
+	host.inspectorClient.Dispose()
+	host.inspector.Dispose()
 	host.iso.Dispose()
 }
 
@@ -234,6 +254,7 @@ func (host *ScriptHost) NewContext(window Window) *ScriptContext {
 		v8nodes:  make(map[ObjectId]*v8.Value),
 		domNodes: make(map[ObjectId]Entity),
 	}
+	host.inspector.ContextCreated(context.v8ctx)
 	global = context.v8ctx.Global()
 	errorCallback := func(err error) {
 		window.DispatchEvent(NewCustomEvent("error"))
@@ -265,6 +286,7 @@ func must(err error) {
 }
 
 func (ctx *ScriptContext) Dispose() {
+	ctx.host.inspector.ContextDestroyed(ctx.v8ctx)
 	slog.Debug("ScriptContext: Dispose")
 	for _, dispose := range ctx.disposers {
 		dispose.Dispose()
