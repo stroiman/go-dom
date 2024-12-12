@@ -100,5 +100,18 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 	)
 	protoBuilder.proto.Set("entries", getEntries)
 	protoBuilder.proto.SetSymbol(v8.SymbolIterator(iso), getEntries)
+	protoBuilder.proto.Set(
+		"forEach",
+		v8.NewFunctionTemplateWithError(
+			iso,
+			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				val, e1 := info.Context().
+					RunScript("(d) => { const a = Array.from(d); return a.forEach.bind(a) }", "")
+				f, e2 := val.AsFunction()
+				r, e3 := f.Call(v8.Null(iso), info.This().Value)
+				return r, errors.Join(e1, e2, e3)
+			},
+		),
+	)
 	return builder.constructor
 }
