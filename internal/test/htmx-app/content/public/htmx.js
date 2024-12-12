@@ -4824,6 +4824,13 @@ var htmx = (function () {
     const pathNoAnchor = splitPath[0];
     const anchor = splitPath[1];
 
+    console.log(
+      "Build path",
+      path,
+      useUrlParams,
+      !filteredFormData.keys().next().done,
+    );
+
     let finalPath = path;
     if (useUrlParams) {
       finalPath = pathNoAnchor;
@@ -4840,6 +4847,8 @@ var htmx = (function () {
         }
       }
     }
+
+    console.log("FINAL PATH", finalPath);
 
     if (!verifyPath(elt, finalPath, requestConfig)) {
       triggerErrorEvent(elt, "htmx:invalidPath", requestConfig);
@@ -4882,6 +4891,7 @@ var htmx = (function () {
 
     xhr.onload = function () {
       try {
+        console.log("ONLOAD");
         const hierarchy = hierarchyForElt(elt);
         responseInfo.pathInfo.responsePath = getPathFromResponse(xhr);
         responseHandler(elt, responseInfo);
@@ -5215,7 +5225,17 @@ var htmx = (function () {
     )
       return;
 
+    console.log(
+      "*** -- *** Swapping?",
+      shouldSwap,
+      serverResponse,
+      isError,
+      ignoreTitle,
+      selectOverride,
+      swapOverride,
+    );
     if (!triggerEvent(target, "htmx:beforeSwap", beforeSwapDetails)) return;
+    console.log("Swapping!");
 
     target = beforeSwapDetails.target; // allow re-targeting
     serverResponse = beforeSwapDetails.serverResponse; // allow updating content
@@ -5227,6 +5247,8 @@ var htmx = (function () {
     responseInfo.target = target; // Make updated target available to response events
     responseInfo.failed = isError; // Make failed property available to response events
     responseInfo.successful = !isError; // Make successful property available to response events
+
+    console.log("Should swap?", beforeSwapDetails.shouldSwap);
 
     if (beforeSwapDetails.shouldSwap) {
       if (xhr.status === 286) {

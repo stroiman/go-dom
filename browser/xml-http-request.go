@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	netURL "net/url"
 	"strings"
@@ -62,6 +63,7 @@ type xmlHttpRequest struct {
 }
 
 func NewXmlHttpRequest(client http.Client) XmlHttpRequest {
+	slog.Info(" --- NEW REQUEST ---")
 	return &xmlHttpRequest{
 		eventTarget: newEventTarget(),
 		client:      client,
@@ -78,6 +80,7 @@ func (req *xmlHttpRequest) Open(
 	// binding layer? Or different methods?
 	url string,
 	options ...RequestOption) {
+	slog.Info("XmlHttpRequest.Open", "method", method, "url", url, "objectId", req.ObjectId())
 
 	req.method = method
 	req.url = url
@@ -88,6 +91,7 @@ func (req *xmlHttpRequest) Open(
 }
 
 func (req *xmlHttpRequest) send(body io.Reader) error {
+	slog.Info("XmlHttpRequest.send", "url", req.url, "objectId", req.ObjectId())
 	httpRequest, err := http.NewRequest(req.method, req.url, body)
 	if err != nil {
 		return err
@@ -102,6 +106,7 @@ func (req *xmlHttpRequest) send(body io.Reader) error {
 	b := new(bytes.Buffer) // TODO, branch out depending on content-type
 	_, err = b.ReadFrom(res.Body)
 	req.response = b.Bytes()
+	slog.Info("Response received", "Status", res.StatusCode, "body", string(req.response))
 	req.DispatchEvent(NewCustomEvent(XHREventLoad))
 	return err
 }
