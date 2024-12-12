@@ -2,7 +2,6 @@ package scripting
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/stroiman/go-dom/browser"
 
@@ -22,7 +21,6 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 	stringIterator := NewIterator(
 		host,
 		func(instance string, ctx *ScriptContext) (*v8.Value, error) {
-			fmt.Println("Create instance", instance)
 			return v8.NewValue(ctx.host.iso, instance)
 		},
 	)
@@ -49,7 +47,6 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 	builder.constructor.GetInstanceTemplate().SetSymbol(
 		v8.SymbolIterator(iso),
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			fmt.Println("\n\n*** Iterator")
 			ctx := host.MustGetContext(info.Context())
 			data, err := builder.instanceLookup(ctx, info.This())
 			if err != nil {
@@ -90,11 +87,18 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 		},
 	)
 
-	protoBuilder.CreateFunction(
-		"entries",
-		func(instance *browser.FormData, args argumentHelper) (result *v8.Value, err error) {
-			return entryIterator.NewIteratorInstance(args.ctx, instance.Entries)
+	getEntries := v8.NewFunctionTemplateWithError(
+		iso,
+		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			ctx := host.MustGetContext(info.Context())
+			instance, err := builder.instanceLookup(ctx, info.This())
+			if err != nil {
+				return nil, err
+			}
+			return entryIterator.NewIteratorInstance(ctx, instance.Entries)
 		},
 	)
+	protoBuilder.proto.Set("entries", getEntries)
+	protoBuilder.proto.SetSymbol(v8.SymbolIterator(iso), getEntries)
 	return builder.constructor
 }

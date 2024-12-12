@@ -40,4 +40,19 @@ var _ = Describe("V8 FormData", func() {
 			Array.from(data.entries()).map(x => x.join(";")).join(",")
 			`)).To(Equal("key1;value1,key2;value2"))
 	})
+	It("Implements iterable", func() {
+		c := NewTestContext()
+		Expect(c.RunTestScript(`
+			data = new FormData();
+			typeof data[Symbol.iterator]`)).To(Equal("function"))
+	})
+	It("Is itself iterable entries", func() {
+		c := NewTestContext()
+		Expect(c.RunTestScript(`
+			data = new FormData();
+			data.append("key1", "value1");
+			data.append("key2", "value2");
+			Array.from(data).map(x => x.join(";")).join(",")
+			`)).To(Equal("key1;value1,key2;value2"))
+	})
 })
