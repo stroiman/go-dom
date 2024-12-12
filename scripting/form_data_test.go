@@ -31,6 +31,7 @@ var _ = Describe("V8 FormData", func() {
 			Array.from(data.keys()).join(",")
 			`)).To(Equal("key1,key2"))
 	})
+
 	It("Returns entries", func() {
 		c := NewTestContext()
 		Expect(c.RunTestScript(`
@@ -40,6 +41,19 @@ var _ = Describe("V8 FormData", func() {
 			Array.from(data.entries()).map(x => x.join(";")).join(",")
 			`)).To(Equal("key1;value1,key2;value2"))
 	})
+
+	It("Should support forEach", func() {
+		c := NewTestContext()
+		Expect(c.RunTestScript(`
+			const result = [];
+			data = new FormData();
+			data.append("key1", "value1");
+			data.append("key2", "value2");
+			data.forEach(([k,v]) => { result.push(k + ": " + v) })
+			result.join(", ")
+			`)).To(Equal("key1: value1, key2: value2"))
+	})
+
 	It("Implements iterable", func() {
 		c := NewTestContext()
 		Expect(c.RunTestScript(`

@@ -24,6 +24,7 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 			return v8.NewValue(ctx.host.iso, instance)
 		},
 	)
+
 	entryIterator := NewIterator(
 		host,
 		func(instance browser.FormDataEntry, ctx *ScriptContext) (*v8.Value, error) {
