@@ -90,6 +90,8 @@ func (c *ScriptContext) GetInstanceForNode(
 		return c.GetInstanceForNodeByName("DocumentFragment", n)
 	case Attr:
 		return c.GetInstanceForNodeByName("Attr", n)
+	case FormData:
+		return c.GetInstanceForNodeByName("FormData", n)
 	default:
 		panic("Cannot lookup node")
 	}
@@ -189,6 +191,7 @@ func NewScriptHost() *ScriptHost {
 				{"Attr", CreateAttr, nil},
 			}},
 		}},
+		{"FormData", CreateFormData, nil},
 	}
 
 	globalInstalls := createGlobals(host, classes)
