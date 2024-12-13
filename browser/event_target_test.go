@@ -149,6 +149,10 @@ var _ = Describe("EventTarget", func() {
 				target.DispatchEvent(NewCustomEvent("custom"))
 				Expect(errorOnTarget).To(BeFalse())
 			})
+
+			It("Should return true", func() {
+				Expect(target.DispatchEvent(NewCustomEvent("custom"))).To(BeTrue())
+			})
 		})
 	})
 })

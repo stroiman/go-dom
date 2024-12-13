@@ -73,6 +73,7 @@ var _ = Describe("Parser", func() {
 		browser := dom.NewBrowserFromHandler(handler)
 		result := browser.Open("/")
 		element := result.DocumentElement()
+
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
 	})

@@ -50,9 +50,13 @@ func (b *Browser) OpenWindow(location string) (Window, error) {
 func (b *Browser) Open(url string) Document {
 	resp, err := b.Client.Get(url)
 	if err != nil {
-		panic("err")
+		panic(err)
 	}
-	return ParseHtmlStream(resp.Body)
+	doc, err := ParseHtmlStream(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	return doc
 }
 
 func NewBrowserFromHandler(handler http.Handler) *Browser {

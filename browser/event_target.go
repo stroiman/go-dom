@@ -10,7 +10,7 @@ type EventTarget interface {
 	ObjectId() ObjectId
 	AddEventListener(eventType string, listener EventHandler /* TODO: options */)
 	RemoveEventListener(eventType string, listener EventHandler)
-	DispatchEvent(event Event) error
+	DispatchEvent(event Event) bool
 	// Unexported
 	dispatchError(err Event)
 }
@@ -64,7 +64,8 @@ func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandle
 	}
 }
 
-func (e *eventTarget) DispatchEvent(event Event) error {
+func (e *eventTarget) DispatchEvent(event Event) bool {
+	result := true
 	slog.Debug("Dispatch event", "EventType", event.Type())
 	listeners := e.lmap[event.Type()]
 
@@ -77,7 +78,7 @@ func (e *eventTarget) DispatchEvent(event Event) error {
 	if e.parentTarget != nil && event.shouldPropagate() {
 		e.parentTarget.DispatchEvent(event)
 	}
-	return nil
+	return result
 }
 
 func (e *eventTarget) dispatchError(event Event) {

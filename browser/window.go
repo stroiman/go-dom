@@ -63,15 +63,15 @@ func (w *window) LoadHTML(html string) error {
 	return w.loadReader(strings.NewReader(html))
 }
 
-func (w *window) loadReader(r io.Reader) error {
-	w.document = parseStream(w, r)
-	err := w.Document().DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
-	// 'load' is emitted when css and images are loaded, not relevant yet, so
-	// just emit it right await
+func (w *window) loadReader(r io.Reader) (err error) {
+	w.document, err = parseStream(w, r)
 	if err == nil {
+		w.Document().DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
+		// 'load' is emitted when css and images are loaded, not relevant yet, so
+		// just emit it right await
 		w.Document().DispatchEvent(NewCustomEvent(DocumentEventLoad))
 	}
-	return err
+	return
 }
 
 func (w *window) Run(script string) error {

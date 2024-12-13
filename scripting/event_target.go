@@ -105,11 +105,10 @@ func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 				e := info.Args()[0]
 				intf := e.Object().GetInternalField(0).ExternalInterface()
 				if evt, ok := intf.(browser.Event); ok {
-					target.DispatchEvent(evt)
+					return v8.NewValue(iso, target.DispatchEvent(evt))
 				} else {
 					return nil, v8.NewTypeError(iso, "Not an Event")
 				}
-				return v8.Undefined(iso), nil
 			}), v8.ReadOnly)
 	instanceTemplate := res.GetInstanceTemplate()
 	instanceTemplate.SetInternalFieldCount(1)
