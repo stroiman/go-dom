@@ -1,6 +1,8 @@
 package scripting_test
 
 import (
+	"fmt"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/stroiman/go-dom/browser"
@@ -21,6 +23,9 @@ var _ = Describe("Load from server", Focus, Ordered, func() {
 		// Eventually(called).Should(Receive())
 		counter := win.Document().GetElementById("counter")
 		counter.Click()
+		counter = win.Document().GetElementById("counter")
+		fmt.Println(counter.OuterHTML())
+
 	})
 
 	//	It("Has the right console functions", func() {
