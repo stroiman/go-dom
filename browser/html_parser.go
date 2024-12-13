@@ -37,6 +37,7 @@ func (r ScriptElementRules) Connected(win Window, node Element) {
 			panic(err)
 		}
 		if resp.StatusCode != 200 {
+			slog.Error("Non-OK status code", "StatusCode", resp.StatusCode)
 			panic("Bad response")
 		}
 
