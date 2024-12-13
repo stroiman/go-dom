@@ -1,6 +1,8 @@
 package browser_test
 
 import (
+	"errors"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -119,6 +121,34 @@ var _ = Describe("EventTarget", func() {
 			target.DispatchEvent(NewCustomEvent("custom"))
 			Expect(calledA).To(BeTrue(), "Event dispatched on body")
 			Expect(calledB).To(BeFalse(), "Event dispatched on window")
+		})
+
+		Describe("The event handler generates an error", func() {
+			BeforeEach(func() {
+				target.AddEventListener("custom", NewEventHandlerFunc(func(e Event) error {
+					return errors.New("dummy")
+				}))
+			})
+
+			It("Should be reported on Window", func() {
+				var errorOnWindow bool
+				window.AddEventListener("error", NewEventHandlerFunc(func(e Event) error {
+					errorOnWindow = true
+					return nil
+				}))
+				target.DispatchEvent(NewCustomEvent("custom"))
+				Expect(errorOnWindow).To(BeTrue())
+			})
+
+			It("Should not be reported on target", func() {
+				var errorOnTarget bool
+				target.AddEventListener("error", NewEventHandlerFunc(func(e Event) error {
+					errorOnTarget = true
+					return nil
+				}))
+				target.DispatchEvent(NewCustomEvent("custom"))
+				Expect(errorOnTarget).To(BeFalse())
+			})
 		})
 	})
 })

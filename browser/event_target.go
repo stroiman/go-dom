@@ -11,6 +11,8 @@ type EventTarget interface {
 	AddEventListener(eventType string, listener EventHandler /* TODO: options */)
 	RemoveEventListener(eventType string, listener EventHandler)
 	DispatchEvent(event Event) error
+	// Unexported
+	dispatchError(err Event)
 }
 
 type eventTarget struct {
@@ -67,14 +69,8 @@ func (e *eventTarget) DispatchEvent(event Event) error {
 	listeners := e.lmap[event.Type()]
 
 	for _, l := range listeners {
-		err := l.HandleEvent(event)
-		// TODO: Aggregate errors
-		// Browser behaviour (firefox) An error is reported on using the `error`
-		// event on `window`.
-		// All errors are reported individually, so remaining event handlers are
-		// still executed.
-		if err != nil {
-			return err
+		if err := l.HandleEvent(event); err != nil {
+			e.dispatchError(NewErrorEvent(err))
 		}
 	}
 
@@ -82,6 +78,14 @@ func (e *eventTarget) DispatchEvent(event Event) error {
 		e.parentTarget.DispatchEvent(event)
 	}
 	return nil
+}
+
+func (e *eventTarget) dispatchError(event Event) {
+	if e.parentTarget == nil {
+		e.DispatchEvent(event)
+	} else {
+		e.parentTarget.dispatchError(event)
+	}
 }
 
 /* -------- Event & CustomEvent -------- */
@@ -94,6 +98,11 @@ type Event interface {
 	shouldPropagate() bool
 }
 
+type ErrorEvent interface {
+	Event
+	Err() error
+}
+
 type CustomEvent interface {
 	Event
 }
@@ -102,6 +111,11 @@ type event struct {
 	base
 	eventType string
 	propagate bool
+}
+
+type errorEvent struct {
+	event
+	err error
 }
 
 func newEvent(eventType string) event {
@@ -125,6 +139,12 @@ func NewCustomEvent(eventType string) CustomEvent {
 
 func (e *event) StopPropagation()      { e.propagate = false }
 func (e *event) shouldPropagate() bool { return e.propagate }
+
+func NewErrorEvent(err error) ErrorEvent {
+	return &errorEvent{newEvent("error"), err}
+}
+
+func (e *errorEvent) Err() error { return e.err }
 
 /* -------- EventHandler -------- */
 
