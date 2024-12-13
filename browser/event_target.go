@@ -65,7 +65,6 @@ func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandle
 }
 
 func (e *eventTarget) DispatchEvent(event Event) bool {
-	result := true
 	slog.Debug("Dispatch event", "EventType", event.Type())
 	listeners := e.lmap[event.Type()]
 
@@ -78,7 +77,7 @@ func (e *eventTarget) DispatchEvent(event Event) bool {
 	if e.parentTarget != nil && event.shouldPropagate() {
 		e.parentTarget.DispatchEvent(event)
 	}
-	return result
+	return !event.isCancelled()
 }
 
 func (e *eventTarget) dispatchError(event Event) {
@@ -93,9 +92,11 @@ func (e *eventTarget) dispatchError(event Event) {
 
 type Event interface {
 	Entity
+	PreventDefault()
 	Type() string
 	StopPropagation()
 	// Unexported
+	isCancelled() bool
 	shouldPropagate() bool
 }
 
@@ -110,6 +111,7 @@ type CustomEvent interface {
 
 type event struct {
 	base
+	cancelled bool
 	eventType string
 	propagate bool
 }
@@ -127,8 +129,6 @@ func newEvent(eventType string) event {
 	}
 }
 
-func (e *event) Type() string { return e.eventType }
-
 type customEvent struct {
 	event
 }
@@ -138,8 +138,11 @@ func NewCustomEvent(eventType string) CustomEvent {
 	return e
 }
 
+func (e *event) Type() string          { return e.eventType }
 func (e *event) StopPropagation()      { e.propagate = false }
+func (e *event) PreventDefault()       { e.cancelled = true }
 func (e *event) shouldPropagate() bool { return e.propagate }
+func (e *event) isCancelled() bool     { return e.cancelled }
 
 func NewErrorEvent(err error) ErrorEvent {
 	return &errorEvent{newEvent("error"), err}

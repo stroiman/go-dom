@@ -123,6 +123,20 @@ var _ = Describe("EventTarget", func() {
 			Expect(calledB).To(BeFalse(), "Event dispatched on window")
 		})
 
+		Describe("DispatchEvent return value", func() {
+			It("Should return true", func() {
+				Expect(target.DispatchEvent(NewCustomEvent("custom"))).To(BeTrue())
+			})
+
+			It("Should return false when the handler calls PreventDefault()", func() {
+				target.AddEventListener("custom", NewEventHandlerFunc(func(e Event) error {
+					e.PreventDefault()
+					return nil
+				}))
+				Expect(target.DispatchEvent(NewCustomEvent("custom"))).To(BeFalse())
+			})
+		})
+
 		Describe("The event handler generates an error", func() {
 			BeforeEach(func() {
 				target.AddEventListener("custom", NewEventHandlerFunc(func(e Event) error {
@@ -148,10 +162,6 @@ var _ = Describe("EventTarget", func() {
 				}))
 				target.DispatchEvent(NewCustomEvent("custom"))
 				Expect(errorOnTarget).To(BeFalse())
-			})
-
-			It("Should return true", func() {
-				Expect(target.DispatchEvent(NewCustomEvent("custom"))).To(BeTrue())
 			})
 		})
 	})
