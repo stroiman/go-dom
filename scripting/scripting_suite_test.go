@@ -29,7 +29,7 @@ func NewTestBrowserFromHandler(handler http.Handler) *browser.Browser {
 func init() {
 	var logLevel = test.InstallDefaultTextLogger()
 	logLevel.Set(slog.LevelInfo)
-	logLevel.Set(slog.LevelDebug)
+	// logLevel.Set(slog.LevelDebug)
 
 	BeforeSuite(func() {
 		host = NewScriptHost()

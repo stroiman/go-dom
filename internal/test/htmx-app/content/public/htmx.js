@@ -3279,6 +3279,7 @@ var htmx = (function () {
    */
   function triggerEvent(elt, eventName, detail) {
     elt = resolveTarget(elt);
+    console.log("Target", elt.tagName);
     if (detail == null) {
       detail = {};
     }
@@ -3292,6 +3293,7 @@ var htmx = (function () {
       triggerEvent(elt, "htmx:error", { errorInfo: detail });
     }
     let eventResult = elt.dispatchEvent(event);
+    console.log("Result?", event, eventResult);
     const kebabName = kebabEventName(eventName);
     if (eventResult && kebabName !== eventName) {
       const kebabedEvent = makeEvent(kebabName, event.detail);
@@ -4394,13 +4396,16 @@ var htmx = (function () {
    * @return {boolean}
    */
   function verifyPath(elt, path, requestConfig) {
+    //***** HERE!!!!
     let sameHost;
     let url;
     if (typeof URL === "function") {
+      console.log("HAS URL");
       url = new URL(path, document.location.href);
       const origin = document.location.origin;
       sameHost = origin === url.origin;
     } else {
+      console.log("HAS NO URL");
       // IE11 doesn't support URL
       url = path;
       sameHost = startsWith(path, document.location.origin);
@@ -4820,11 +4825,14 @@ var htmx = (function () {
       triggeringEvent: event,
     };
 
+    console.log("****");
     if (!triggerEvent(elt, "htmx:configRequest", requestConfig)) {
+      console.log("**** cancelled");
       maybeCall(resolve);
       endRequestLock();
       return promise;
     }
+    console.log("**** not cancelled");
 
     // copy out in case the object was overwritten
     path = requestConfig.path;
@@ -4863,6 +4871,7 @@ var htmx = (function () {
     }
 
     if (!verifyPath(elt, finalPath, requestConfig)) {
+      console.log("INVALID PATH");
       triggerErrorEvent(elt, "htmx:invalidPath", requestConfig);
       maybeCall(reject);
       return promise;
