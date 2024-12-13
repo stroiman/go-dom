@@ -256,6 +256,11 @@ func (host *ScriptHost) NewContext(window Window) *ScriptContext {
 		domNodes: make(map[ObjectId]Entity),
 	}
 	host.inspector.ContextCreated(context.v8ctx)
+	err := installPolyfills(context)
+	if err != nil {
+		// TODO: Handle
+		panic(err)
+	}
 	global = context.v8ctx.Global()
 	errorCallback := func(err error) {
 		window.DispatchEvent(NewCustomEvent("error"))
