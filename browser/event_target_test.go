@@ -80,7 +80,7 @@ var _ = Describe("EventTarget", func() {
 			target = window.Document().GetElementById("target")
 		})
 
-		It("Should propagate the event to the parent", func() {
+		It("Should not propagate the event to the parent by default", func() {
 			called := false
 			var l EventHandler = NewEventHandlerFunc(func(e Event) error {
 				called = true
@@ -88,7 +88,7 @@ var _ = Describe("EventTarget", func() {
 			})
 			window.Document().Body().AddEventListener("custom", l)
 			target.DispatchEvent(NewCustomEvent("custom"))
-			Expect(called).To(BeTrue())
+			Expect(called).To(BeFalse())
 		})
 
 		It("Should propagate the event to the window", func() {
@@ -100,7 +100,20 @@ var _ = Describe("EventTarget", func() {
 				return nil
 			})
 			window.AddEventListener("custom", l)
-			target.DispatchEvent(NewCustomEvent("custom"))
+			target.DispatchEvent(NewCustomEvent("custom", EventBubbles(true)))
+			Expect(called).To(BeTrue())
+		})
+
+		It("Should propagate the event to the window if 'bubbles' is set", func() {
+			called := false
+
+			// window.Document()
+			var l EventHandler = NewEventHandlerFunc(func(e Event) error {
+				called = true
+				return nil
+			})
+			window.AddEventListener("custom", l)
+			target.DispatchEvent(NewCustomEvent("custom", EventBubbles(true)))
 			Expect(called).To(BeTrue())
 		})
 
@@ -118,7 +131,7 @@ var _ = Describe("EventTarget", func() {
 				calledB = true
 				return nil
 			}))
-			target.DispatchEvent(NewCustomEvent("custom"))
+			target.DispatchEvent(NewCustomEvent("custom", EventBubbles(true)))
 			Expect(calledA).To(BeTrue(), "Event dispatched on body")
 			Expect(calledB).To(BeFalse(), "Event dispatched on window")
 		})

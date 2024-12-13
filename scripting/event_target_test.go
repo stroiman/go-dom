@@ -10,6 +10,38 @@ import (
 var _ = Describe("EventTarget", func() {
 	ctx := InitializeContext()
 
+	It("Doesn't bubble by default", func() {
+		ctx := NewTestContext(LoadHTML(`<div id="parent"><div id="target"></div></div>`))
+		ctx.MustRunTestScript(`
+			var targetCalled = false;
+			var parentCalled = false;
+			const target = document.getElementById("target")
+			target.addEventListener("go:home", e => { targetCalled = true });
+			document.getElementById("parent").addEventListener(
+				"go:home",
+				e => { parentCalled = true });
+			target.dispatchEvent(new CustomEvent("go:home", {}))
+		`)
+		Expect(ctx.RunTestScript("targetCalled")).To(BeTrue())
+		Expect(ctx.RunTestScript("parentCalled")).To(BeFalse())
+	})
+
+	It("Bubbles when specified in the constructor", func() {
+		ctx := NewTestContext(LoadHTML(`<div id="parent"><div id="target"></div></div>`))
+		ctx.MustRunTestScript(`
+			var targetCalled = false;
+			var parentCalled = false;
+			const target = document.getElementById("target")
+			target.addEventListener("go:home", e => { targetCalled = true });
+			document.getElementById("parent").addEventListener(
+				"go:home",
+				e => { parentCalled = true });
+			target.dispatchEvent(new CustomEvent("go:home", { bubbles: true }))
+		`)
+		Expect(ctx.RunTestScript("targetCalled")).To(BeTrue())
+		Expect(ctx.RunTestScript("parentCalled")).To(BeTrue())
+	})
+
 	It("Is an EventTarget", func() {
 		Expect(ctx.RunTestScript("(new EventTarget()) instanceof EventTarget")).To(BeTrue())
 	})

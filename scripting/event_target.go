@@ -51,7 +51,17 @@ func CreateCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
 			if len(args) < 1 {
 				return nil, v8.NewTypeError(iso, "Must have at least one constructor argument")
 			}
-			e := browser.NewCustomEvent(args[0].String())
+			var eventOptions []browser.CustomEventOption
+			if len(args) > 1 {
+				if options, err := args[1].AsObject(); err == nil {
+					bubbles, err := options.Get("bubbles")
+					if err != nil {
+						return nil, err
+					}
+					eventOptions = append(eventOptions, browser.EventBubbles(bubbles.Boolean()))
+				}
+			}
+			e := browser.NewCustomEvent(args[0].String(), eventOptions...)
 			// TODO: Better memory management
 			ctx.pinner.Pin(e)
 			info.This().SetInternalField(0, v8.NewExternalFromInterface(iso, e))

@@ -65,6 +65,7 @@ func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandle
 }
 
 func (e *eventTarget) DispatchEvent(event Event) bool {
+	event.reset()
 	slog.Debug("Dispatch event", "EventType", event.Type())
 	listeners := e.lmap[event.Type()]
 
@@ -96,6 +97,7 @@ type Event interface {
 	Type() string
 	StopPropagation()
 	// Unexported
+	reset()
 	isCancelled() bool
 	shouldPropagate() bool
 }
@@ -113,6 +115,7 @@ type event struct {
 	base
 	cancelled bool
 	eventType string
+	bubbles   bool
 	propagate bool
 }
 
@@ -121,11 +124,24 @@ type errorEvent struct {
 	err error
 }
 
+type CustomEventOption interface {
+	updateEvent(*event)
+}
+
+type eventOptionFunc func(*event)
+
+func (f eventOptionFunc) updateEvent(e *event) { f(e) }
+
+func EventBubbles(bubbles bool) CustomEventOption {
+	return eventOptionFunc(func(e *event) { e.bubbles = bubbles })
+}
+
 func newEvent(eventType string) event {
 	return event{
 		base:      newBase(),
 		eventType: eventType,
-		propagate: true,
+		bubbles:   false,
+		propagate: false,
 	}
 }
 
@@ -133,8 +149,11 @@ type customEvent struct {
 	event
 }
 
-func NewCustomEvent(eventType string) CustomEvent {
+func NewCustomEvent(eventType string, options ...CustomEventOption) CustomEvent {
 	e := &customEvent{newEvent(eventType)}
+	for _, o := range options {
+		o.updateEvent(&e.event)
+	}
 	return e
 }
 
@@ -142,6 +161,7 @@ func (e *event) Type() string          { return e.eventType }
 func (e *event) StopPropagation()      { e.propagate = false }
 func (e *event) PreventDefault()       { e.cancelled = true }
 func (e *event) shouldPropagate() bool { return e.propagate }
+func (e *event) reset()                { e.propagate = e.bubbles }
 func (e *event) isCancelled() bool     { return e.cancelled }
 
 func NewErrorEvent(err error) ErrorEvent {
