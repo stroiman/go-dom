@@ -67,43 +67,44 @@ var _ = Describe("EventTarget", func() {
 	})
 
 	Describe("Event propagation", func() {
+		var (
+			window Window
+			target Element
+		)
+
+		BeforeEach(func() {
+			window = NewWindow(nil)
+			Expect(window.LoadHTML(`<body><div id="target"></div></body>`)).To(Succeed())
+			target = window.Document().GetElementById("target")
+		})
+
 		It("Should propagate the event to the parent", func() {
 			called := false
-
-			window := NewWindow(nil)
-			Expect(window.LoadHTML(`<body><div id="source"></div></body>`)).To(Succeed())
-			// window.Document()
 			var l EventHandler = NewEventHandlerFunc(func(e Event) error {
 				called = true
 				return nil
 			})
 			window.Document().Body().AddEventListener("custom", l)
-			window.Document().GetElementById("source").DispatchEvent(NewCustomEvent("custom"))
+			target.DispatchEvent(NewCustomEvent("custom"))
 			Expect(called).To(BeTrue())
 		})
 
 		It("Should propagate the event to the window", func() {
 			called := false
 
-			window := NewWindow(nil)
-			Expect(window.LoadHTML(`<body><div id="source"></div></body>`)).To(Succeed())
 			// window.Document()
 			var l EventHandler = NewEventHandlerFunc(func(e Event) error {
 				called = true
 				return nil
 			})
 			window.AddEventListener("custom", l)
-			window.Document().GetElementById("source").DispatchEvent(NewCustomEvent("custom"))
+			target.DispatchEvent(NewCustomEvent("custom"))
 			Expect(called).To(BeTrue())
 		})
 
 		It("Should not propagate if the handler calls `StopPropagation()`", func() {
 			calledA := false
 			calledB := false
-
-			window := NewWindow(nil)
-			Expect(window.LoadHTML(`<body><div id="source"></div></body>`)).To(Succeed())
-			// window.Document()
 			window.Document().
 				Body().
 				AddEventListener("custom", NewEventHandlerFunc(func(e Event) error {
@@ -115,7 +116,7 @@ var _ = Describe("EventTarget", func() {
 				calledB = true
 				return nil
 			}))
-			window.Document().GetElementById("source").DispatchEvent(NewCustomEvent("custom"))
+			target.DispatchEvent(NewCustomEvent("custom"))
 			Expect(calledA).To(BeTrue(), "Event dispatched on body")
 			Expect(calledB).To(BeFalse(), "Event dispatched on window")
 		})
