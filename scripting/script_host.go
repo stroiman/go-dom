@@ -172,6 +172,7 @@ func createGlobals(host *ScriptHost, classes []class) []globalInstall {
 }
 
 func (host *ScriptHost) ConsoleAPIMessage(message v8.ConsoleAPIMessage) {
+	fmt.Println("Message", message)
 	switch message.ErrorLevel {
 	case v8.ErrorLevelDebug:
 		slog.Debug(message.Message)

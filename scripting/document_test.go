@@ -58,10 +58,13 @@ var _ = Describe("V8 Document", func() {
       `)).To(BeTrue())
 		})
 
-		It("Should have `createElement` as a function", func() {
-			Expect(
-				ctx.RunTestScript(`typeof (new Document().createElement)`),
-			).To(Equal("function"))
+		Describe("createElement", func() {
+			It("Should return an HTMLElement", func() {
+				Expect(
+					ctx.RunTestScript(`const base = document.createElement("base");
+						base instanceof HTMLElement`),
+				).To(BeTrue())
+			})
 		})
 
 		It("Should support Document functions", func() {

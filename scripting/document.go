@@ -27,10 +27,18 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	instanceTemplate := instanceBuilder.proto
 	instanceTemplate.SetInternalFieldCount(1)
 	proto := builder.constructor.PrototypeTemplate()
-	proto.Set("createElement", v8.NewFunctionTemplate(iso,
-		func(info *v8.FunctionCallbackInfo) *v8.Value {
-			return v8.Undefined(iso)
-		}))
+	protoBuilder.CreateFunction(
+		"createElement",
+		func(instance Document, args argumentHelper) (val *v8.Value, err error) {
+			var name string
+			name, err = args.GetStringArg(0)
+			if err == nil {
+				e := instance.CreateElement(name)
+				val, err = args.ctx.GetInstanceForNode(e)
+			}
+			return
+		},
+	)
 
 	proto.SetAccessorPropertyCallback("documentElement",
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
