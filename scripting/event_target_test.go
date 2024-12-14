@@ -10,6 +10,24 @@ import (
 var _ = Describe("EventTarget", func() {
 	ctx := InitializeContext()
 
+	It("Isn't cancellable by default", func() {
+		ctx := NewTestContext()
+		Expect(ctx.RunTestScript(`
+			const target = new EventTarget();
+			target.addEventListener("custom", e => { e.preventDefault() });
+			target.dispatchEvent(new CustomEvent("custom"))
+		`)).To(BeTrue())
+	})
+
+	It("Can be cancelled", func() {
+		ctx := NewTestContext()
+		Expect(ctx.RunTestScript(`
+			const target = new EventTarget();
+			target.addEventListener("custom", e => { e.preventDefault() });
+			target.dispatchEvent(new CustomEvent("custom", {cancelable: true }))
+		`)).To(BeTrue())
+	})
+
 	It("Doesn't bubble by default", func() {
 		ctx := NewTestContext(LoadHTML(`<div id="parent"><div id="target"></div></div>`))
 		ctx.MustRunTestScript(`

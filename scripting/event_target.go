@@ -54,11 +54,16 @@ func CreateCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
 			var eventOptions []browser.CustomEventOption
 			if len(args) > 1 {
 				if options, err := args[1].AsObject(); err == nil {
-					bubbles, err := options.Get("bubbles")
+					bubbles, err1 := options.Get("bubbles")
+					cancelable, err2 := options.Get("cancelable")
+					err = errors.Join(err1, err2)
 					if err != nil {
 						return nil, err
 					}
-					eventOptions = append(eventOptions, browser.EventBubbles(bubbles.Boolean()))
+					eventOptions = []browser.CustomEventOption{
+						browser.EventBubbles(bubbles.Boolean()),
+						browser.EventCancelable(cancelable.Boolean()),
+					}
 				}
 			}
 			e := browser.NewCustomEvent(args[0].String(), eventOptions...)

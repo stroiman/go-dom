@@ -115,10 +115,11 @@ type CustomEvent interface {
 
 type event struct {
 	base
-	cancelled bool
-	eventType string
-	bubbles   bool
-	propagate bool
+	cancelable bool
+	cancelled  bool
+	eventType  string
+	bubbles    bool
+	propagate  bool
 }
 
 type errorEvent struct {
@@ -136,6 +137,9 @@ func (f eventOptionFunc) updateEvent(e *event) { f(e) }
 
 func EventBubbles(bubbles bool) CustomEventOption {
 	return eventOptionFunc(func(e *event) { e.bubbles = bubbles })
+}
+func EventCancelable(cancelable bool) CustomEventOption {
+	return eventOptionFunc(func(e *event) { e.cancelable = cancelable })
 }
 
 func newEvent(eventType string) event {
@@ -163,8 +167,12 @@ func (e *event) Type() string          { return e.eventType }
 func (e *event) StopPropagation()      { e.propagate = false }
 func (e *event) PreventDefault()       { e.cancelled = true }
 func (e *event) shouldPropagate() bool { return e.propagate }
-func (e *event) reset()                { e.propagate = e.bubbles }
-func (e *event) isCancelled() bool     { return e.cancelled }
+func (e *event) isCancelled() bool     { return e.cancelable && e.cancelled }
+
+func (e *event) reset() {
+	e.propagate = e.bubbles
+	e.cancelled = false
+}
 
 func NewErrorEvent(err error) ErrorEvent {
 	return &errorEvent{newEvent("error"), err}

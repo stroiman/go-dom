@@ -141,13 +141,29 @@ var _ = Describe("EventTarget", func() {
 				Expect(target.DispatchEvent(NewCustomEvent("custom"))).To(BeTrue())
 			})
 
-			It("Should return false when the handler calls PreventDefault()", func() {
-				target.AddEventListener("custom", NewEventHandlerFunc(func(e Event) error {
-					e.PreventDefault()
-					return nil
-				}))
-				Expect(target.DispatchEvent(NewCustomEvent("custom"))).To(BeFalse())
-			})
+			It(
+				"Should return false when the handler calls PreventDefault() on a cancelable event",
+				func() {
+					target.AddEventListener("custom", NewEventHandlerFunc(func(e Event) error {
+						e.PreventDefault()
+						return nil
+					}))
+					Expect(
+						target.DispatchEvent(NewCustomEvent("custom", EventCancelable(true))),
+					).To(BeFalse())
+				},
+			)
+
+			It(
+				"Should return true when the handler calls PreventDefault() on a non-cancelable event",
+				func() {
+					target.AddEventListener("custom", NewEventHandlerFunc(func(e Event) error {
+						e.PreventDefault()
+						return nil
+					}))
+					Expect(target.DispatchEvent(NewCustomEvent("custom"))).To(BeTrue())
+				},
+			)
 		})
 
 		Describe("The event handler generates an error", func() {
