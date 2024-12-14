@@ -4,21 +4,20 @@ package scripting
 
 import (
 	"errors"
-	"github.com/stroiman/go-dom/browser"
 	v8 "github.com/tommie/v8go"
 )
 
 func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewESXmlHttpRequest(host)
-	builder := NewConstructorBuilder[browser.XmlHttpRequest](host, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	constructor := v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		ctx := host.MustGetContext(info.Context())
 		instance := wrapper.CreateInstance(ctx)
-		return ctx.CacheNode(info.This(), instance)
+		_, err := ctx.CacheNode(info.This(), instance)
+		return nil, err
 	})
-	builder.SetDefaultInstanceLookup()
-	protoBuilder := builder.NewPrototypeBuilder()
-	prototype := protoBuilder.proto
+	constructor.GetInstanceTemplate().SetInternalFieldCount(1)
+	prototype := constructor.PrototypeTemplate()
 
 	prototype.Set("open", v8.NewFunctionTemplateWithError(iso, wrapper.Open))
 	prototype.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, wrapper.SetRequestHeader))
@@ -27,7 +26,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototype.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseHeader))
 	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, wrapper.GetAllResponseHeaders))
 	prototype.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, wrapper.OverrideMimeType))
-	return builder.constructor
+	return constructor
 }
 
 func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

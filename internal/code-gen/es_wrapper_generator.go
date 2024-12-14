@@ -306,10 +306,13 @@ func (c JSConstructor) JSConstructorImpl(grp *jen.Group, data ESConstructorData)
 		Call(c.argInfo.Clone().Dot("Context").Call())
 	buildInstance := jen.Id("wrapper").Dot("CreateInstance").Call(c.varScriptContext)
 	grp.Add(c.varInstance).Op(":=").Add(buildInstance)
-	grp.Return(c.varScriptContext.Clone().Dot("CacheNode").Call(
-		c.getThis,
-		c.varInstance,
-	))
+	grp.List(jen.Id("_"), jen.Id("err")).
+		Op(":=").
+		Add(c.varScriptContext.Clone().Dot("CacheNode").Call(
+			c.getThis,
+			c.varInstance,
+		))
+	grp.Return(jen.Nil(), jen.Id("err"))
 }
 
 func CreateInstance(typeName string, params ...jen.Code) JenGenerator {
@@ -328,7 +331,6 @@ func Assign(ids JenGenerator, expression JenGenerator) JenGenerator {
 func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 	hostType := jen.Id("ScriptHost")
 	hostPtr := jen.Add(jen.Op("*"), hostType)
-	builder := jen.Id("builder")
 	v8FunctionTemplatePtr := jen.Op("*").Qual(v8, "FunctionTemplate")
 	v8Value := jen.Op("*").Qual(v8, "Value")
 	errorT := jen.Id("error")
@@ -344,16 +346,21 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 					CreateInstance(data.WrapperTypeName, jen.Id("host")),
 				).Generate(),
 			)
-			grp.Add(builder).
+			grp.Add(jen.Id("constructor")).
 				Op(":=").
-				Id("NewConstructorBuilder").Index(jen.Qual(br, data.InnerTypeName)).
-				Call(c.argHost.Clone(), jen.Func().
+				Qual(v8, "NewFunctionTemplateWithError").
+				Call(jen.Id("iso"), jen.Func().
 					Params(c.argInfo.Clone().Add(g.v8FunctionCallbackInfoPtr())).
 					Params(v8Value, errorT).
 					BlockFunc(func(grp *jen.Group) { c.JSConstructorImpl(grp, data) }))
-			grp.Add(builder).Dot("SetDefaultInstanceLookup").Call()
-			grp.Id("protoBuilder").Op(":=").Add(builder).Dot("NewPrototypeBuilder").Call()
-			grp.Id("prototype").Op(":=").Id("protoBuilder").Dot("proto")
+			// grp.Add(builder).Dot("SetDefaultInstanceLookup").Call()
+			// grp.Id("protoBuilder").Op(":=").Add(builder).Dot("NewPrototypeBuilder").Call()
+			grp.Id("constructor").
+				Dot("GetInstanceTemplate").
+				Call().
+				Dot("SetInternalFieldCount").
+				Call(jen.Lit(1))
+			grp.Id("prototype").Op(":=").Id("constructor").Dot("PrototypeTemplate").Call()
 			grp.Line()
 			for _, op := range data.Operations {
 				f := jen.Id("wrapper").Dot(camelCase(op.Name))
@@ -362,7 +369,7 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 				// grp.Add(c.CreateOperation(op).Generate())
 			}
 
-			grp.Return(builder.Clone().Dot("constructor"))
+			grp.Return().Id("constructor")
 		})
 	for _, op := range data.Operations {
 		f.Line()
