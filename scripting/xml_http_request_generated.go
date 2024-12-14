@@ -32,7 +32,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 
 func (xhr JSXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
-		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
+		instance, err := xhr.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
@@ -54,7 +54,7 @@ func (xhr JSXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 
 func (xhr JSXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
-		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
+		instance, err := xhr.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +77,7 @@ func (xhr JSXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8
 func (xhr JSXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
 		ctx := xhr.host.MustGetContext(info.Context())
-		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
+		instance, err := xhr.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +99,7 @@ func (xhr JSXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 
 func (xhr JSXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
-		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
+		instance, err := xhr.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
@@ -112,7 +112,7 @@ func (xhr JSXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, err
 func (xhr JSXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
 		ctx := xhr.host.MustGetContext(info.Context())
-		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
+		instance, err := xhr.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
@@ -133,7 +133,7 @@ func (xhr JSXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v
 func (xhr JSXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
 		ctx := xhr.host.MustGetContext(info.Context())
-		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
+		instance, err := xhr.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}
@@ -149,7 +149,7 @@ func (xhr JSXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo)
 
 func (xhr JSXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
-		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
+		instance, err := xhr.GetInstance(info)
 		if err != nil {
 			return nil, err
 		}

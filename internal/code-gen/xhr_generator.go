@@ -581,11 +581,11 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 	return GetGeneratorResult{list, requireContext}
 }
 
-func getInstance(id *jen.Statement) *jen.Statement {
+func getInstance() *jen.Statement {
 	return jen.Id("instance").Op(",").Id("err").
 		Op(":=").
-		Id("GetInstance").Types(id).
-		Call(jen.Id("xhr").Dot("host"), jen.Id("info"))
+		Id("xhr").Dot("GetInstance").
+		Call(jen.Id("info"))
 }
 
 func processOptionalArgs(
@@ -634,7 +634,7 @@ func (c JSConstructor) FunctionTemplateCallbackBody(op ESOperation) JenGenerator
 	return Stmt{jen.BlockFunc(func(grp *jen.Group) {
 		requireContext := new(bool)
 		statements := &StatementListStmt{}
-		statements.AppendJen(getInstance(jen.Qual(br, "XmlHttpRequest")))
+		statements.AppendJen(getInstance())
 		statements.Append(GenReturnOnError())
 
 		firstOptionalArg := slices.IndexFunc(
