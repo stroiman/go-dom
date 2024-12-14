@@ -12,7 +12,7 @@ type EventTarget interface {
 	RemoveEventListener(eventType string, listener EventHandler)
 	DispatchEvent(event Event) bool
 	// Unexported
-	dispatchError(err Event)
+	dispatchError(err ErrorEvent)
 }
 
 type eventTarget struct {
@@ -81,7 +81,8 @@ func (e *eventTarget) DispatchEvent(event Event) bool {
 	return !event.isCancelled()
 }
 
-func (e *eventTarget) dispatchError(event Event) {
+func (e *eventTarget) dispatchError(event ErrorEvent) {
+	slog.Debug("Error occurred", "error", event.Error())
 	if e.parentTarget == nil {
 		e.DispatchEvent(event)
 	} else {
@@ -105,6 +106,7 @@ type Event interface {
 type ErrorEvent interface {
 	Event
 	Err() error
+	Error() string
 }
 
 type CustomEvent interface {
@@ -168,7 +170,8 @@ func NewErrorEvent(err error) ErrorEvent {
 	return &errorEvent{newEvent("error"), err}
 }
 
-func (e *errorEvent) Err() error { return e.err }
+func (e *errorEvent) Err() error    { return e.err }
+func (e *errorEvent) Error() string { return e.err.Error() }
 
 /* -------- EventHandler -------- */
 
