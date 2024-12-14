@@ -213,7 +213,8 @@ func createData() (ESConstructorData, error) {
 	}
 	data := ESConstructorData{
 		InnerTypeName:      "XmlHttpRequest",
-		WrapperTypeName:    "JSXmlHttpRequest",
+		WrapperTypeName:    "ESXmlHttpRequest",
+		Receiver:           "xhr",
 		Operations:         operations,
 		CreatesInnerType:   true,
 		CustomConstruction: "scriptContext.Window().NewXmlHttpRequest()",
@@ -259,6 +260,7 @@ type ESConstructorData struct {
 	CreatesInnerType   bool
 	InnerTypeName      string
 	WrapperTypeName    string
+	Receiver           string
 	CustomConstruction string
 	Operations         []ESOperation
 	IdlName
@@ -300,7 +302,7 @@ func CreateJSConstructor() JSConstructor {
 	getThis := argInfo.Clone().Dot("This").Call()
 	varInstance := jen.Id("instance")
 	varIso := jen.Id("iso")
-	varScriptContext := jen.Id("scriptContext")
+	varScriptContext := jen.Id("ctx")
 	return JSConstructor{
 		argHost,
 		argInfo,
@@ -311,17 +313,13 @@ func CreateJSConstructor() JSConstructor {
 	}
 }
 
-func (c JSConstructor) JSConstructorImpl(grp *jen.Group) {
-	buildInstance := c.varScriptContext.Clone().
-		Dot("Window").
-		Call().
-		Dot("NewXmlHttpRequest").
-		Call()
+func (c JSConstructor) JSConstructorImpl(grp *jen.Group, data ESConstructorData) {
 	grp.Add(c.varScriptContext).
 		Op(":=").
 		Add(c.argHost).
 		Dot("MustGetContext").
 		Call(c.argInfo.Clone().Dot("Context").Call())
+	buildInstance := jen.Id("wrapper").Dot("CreateInstance").Call(c.varScriptContext)
 	grp.Add(c.varInstance).Op(":=").Add(buildInstance)
 	grp.Return(c.varScriptContext.Clone().Dot("CacheNode").Call(
 		c.getThis,
@@ -357,7 +355,7 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 			grp.Add(c.varIso).Op(":=").Add(jen.Id("host")).Dot("iso").GoString()
 			grp.Add(
 				Assign(
-					Id("instance"),
+					Id("wrapper"),
 					CreateInstance(data.WrapperTypeName, jen.Id("host")),
 				).Generate(),
 			)
@@ -367,13 +365,13 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 				Call(c.argHost.Clone(), jen.Func().
 					Params(c.argInfo.Clone().Add(g.v8FunctionCallbackInfoPtr())).
 					Params(v8Value, errorT).
-					BlockFunc(c.JSConstructorImpl))
+					BlockFunc(func(grp *jen.Group) { c.JSConstructorImpl(grp, data) }))
 			grp.Add(builder).Dot("SetDefaultInstanceLookup").Call()
 			grp.Id("protoBuilder").Op(":=").Add(builder).Dot("NewPrototypeBuilder").Call()
 			grp.Id("prototype").Op(":=").Id("protoBuilder").Dot("proto")
 			grp.Line()
 			for _, op := range data.Operations {
-				f := jen.Id("instance").Dot(camelCase(op.Name))
+				f := jen.Id("wrapper").Dot(camelCase(op.Name))
 				ft := NewFunctionTemplate{Stmt{c.varIso}, Stmt{f}}
 				grp.Add(jen.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft.Generate()))
 				// grp.Add(c.CreateOperation(op).Generate())
@@ -383,7 +381,7 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 		})
 	for _, op := range data.Operations {
 		f.Line()
-		f.Add(c.CreateOperationOnStruct(op).Generate())
+		f.Add(c.CreateOperationOnStruct(data, op).Generate())
 	}
 }
 
@@ -581,11 +579,10 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 	return GetGeneratorResult{list, requireContext}
 }
 
-func getInstance() *jen.Statement {
-	return jen.Id("instance").Op(",").Id("err").
-		Op(":=").
-		Id("xhr").Dot("GetInstance").
-		Call(jen.Id("info"))
+func getInstance(receiver string) JenGenerator {
+	return Stmt{
+		jen.Id("instance").Op(",").Id("err").
+			Op(":=").Id(receiver).Dot("GetInstance").Call(jen.Id("info"))}
 }
 
 func processOptionalArgs(
@@ -630,11 +627,14 @@ func processOptionalArgs(
 	innerStatements.Append(genResult.Generator)
 }
 
-func (c JSConstructor) FunctionTemplateCallbackBody(op ESOperation) JenGenerator {
+func (c JSConstructor) FunctionTemplateCallbackBody(
+	data ESConstructorData,
+	op ESOperation,
+) JenGenerator {
 	return Stmt{jen.BlockFunc(func(grp *jen.Group) {
 		requireContext := new(bool)
 		statements := &StatementListStmt{}
-		statements.AppendJen(getInstance())
+		statements.Append(getInstance(data.Receiver))
 		statements.Append(GenReturnOnError())
 
 		firstOptionalArg := slices.IndexFunc(
@@ -714,15 +714,18 @@ func (c JSConstructor) FunctionTemplateCallbackBody(op ESOperation) JenGenerator
 	})}
 }
 
-func (c JSConstructor) CreateOperationOnStruct(op ESOperation) JenGenerator {
+func (c JSConstructor) CreateOperationOnStruct(
+	data ESConstructorData,
+	op ESOperation,
+) JenGenerator {
 	v8Value := jen.Op("*").Qual(v8, "Value")
 	errorT := jen.Id("error")
 	v8FunctionCallbackInfoPtr := jen.Op("*").Qual(v8, "FunctionCallbackInfo")
-	f := c.FunctionTemplateCallbackBody(op).Generate()
+	f := c.FunctionTemplateCallbackBody(data, op).Generate()
 	// ft := NewFunctionTemplate{Stmt{c.varIso}, f}.Generate()
 	return Stmt{
 		jen.Func().
-			Params(jen.Id("xhr").Id("JSXmlHttpRequest")).
+			Params(jen.Id(data.Receiver).Id(data.WrapperTypeName)).
 			Id(camelCase(op.Name)).
 			Params(c.argInfo.Clone().Add(v8FunctionCallbackInfoPtr)).
 			Params(v8Value, errorT).

@@ -8,17 +8,20 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type JSWrapper[T Entity] struct {
+// ESWrapper serves as a helper for building v8 wrapping code around go objects.
+// Generated code assumes that a wrapper type is used with specific helper
+// methods implemented.
+type ESWrapper[T Entity] struct {
 	host *ScriptHost
 }
 
-type JSXmlHttpRequest JSWrapper[XmlHttpRequest]
+type ESXmlHttpRequest ESWrapper[XmlHttpRequest]
 
-func NewJSXmlHttpRequest(host *ScriptHost) JSXmlHttpRequest {
-	return JSXmlHttpRequest{host}
+func NewESXmlHttpRequest(host *ScriptHost) ESXmlHttpRequest {
+	return ESXmlHttpRequest{host}
 }
 
-func (w JSWrapper[T]) GetInstance(info *v8.FunctionCallbackInfo) (result T, err error) {
+func (w ESWrapper[T]) GetInstance(info *v8.FunctionCallbackInfo) (result T, err error) {
 	if ctx, ok := w.host.GetContext(info.Context()); ok {
 		if instance, ok := ctx.GetCachedNode(info.This()); ok {
 			if typedInstance, ok := instance.(T); ok {
@@ -32,6 +35,10 @@ func (w JSWrapper[T]) GetInstance(info *v8.FunctionCallbackInfo) (result T, err 
 	return
 }
 
-func (w JSXmlHttpRequest) GetInstance(info *v8.FunctionCallbackInfo) (XmlHttpRequest, error) {
-	return (JSWrapper[XmlHttpRequest](w)).GetInstance(info)
+func (w ESXmlHttpRequest) CreateInstance(ctx *ScriptContext) XmlHttpRequest {
+	return ctx.Window().NewXmlHttpRequest()
+}
+
+func (w ESXmlHttpRequest) GetInstance(info *v8.FunctionCallbackInfo) (XmlHttpRequest, error) {
+	return (ESWrapper[XmlHttpRequest](w)).GetInstance(info)
 }

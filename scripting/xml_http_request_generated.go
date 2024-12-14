@@ -10,27 +10,27 @@ import (
 
 func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	instance := NewJSXmlHttpRequest(host)
+	wrapper := NewESXmlHttpRequest(host)
 	builder := NewConstructorBuilder[browser.XmlHttpRequest](host, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		scriptContext := host.MustGetContext(info.Context())
-		instance := scriptContext.Window().NewXmlHttpRequest()
-		return scriptContext.CacheNode(info.This(), instance)
+		ctx := host.MustGetContext(info.Context())
+		instance := wrapper.CreateInstance(ctx)
+		return ctx.CacheNode(info.This(), instance)
 	})
 	builder.SetDefaultInstanceLookup()
 	protoBuilder := builder.NewPrototypeBuilder()
 	prototype := protoBuilder.proto
 
-	prototype.Set("open", v8.NewFunctionTemplateWithError(iso, instance.Open))
-	prototype.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, instance.SetRequestHeader))
-	prototype.Set("send", v8.NewFunctionTemplateWithError(iso, instance.Send))
-	prototype.Set("abort", v8.NewFunctionTemplateWithError(iso, instance.Abort))
-	prototype.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, instance.GetResponseHeader))
-	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, instance.GetAllResponseHeaders))
-	prototype.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, instance.OverrideMimeType))
+	prototype.Set("open", v8.NewFunctionTemplateWithError(iso, wrapper.Open))
+	prototype.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, wrapper.SetRequestHeader))
+	prototype.Set("send", v8.NewFunctionTemplateWithError(iso, wrapper.Send))
+	prototype.Set("abort", v8.NewFunctionTemplateWithError(iso, wrapper.Abort))
+	prototype.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseHeader))
+	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, wrapper.GetAllResponseHeaders))
+	prototype.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, wrapper.OverrideMimeType))
 	return builder.constructor
 }
 
-func (xhr JSXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
 		instance, err := xhr.GetInstance(info)
 		if err != nil {
@@ -52,7 +52,7 @@ func (xhr JSXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	}
 }
 
-func (xhr JSXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
 		instance, err := xhr.GetInstance(info)
 		if err != nil {
@@ -74,7 +74,7 @@ func (xhr JSXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8
 	}
 }
 
-func (xhr JSXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
 		ctx := xhr.host.MustGetContext(info.Context())
 		instance, err := xhr.GetInstance(info)
@@ -97,7 +97,7 @@ func (xhr JSXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	}
 }
 
-func (xhr JSXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
 		instance, err := xhr.GetInstance(info)
 		if err != nil {
@@ -109,7 +109,7 @@ func (xhr JSXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	}
 }
 
-func (xhr JSXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
 		ctx := xhr.host.MustGetContext(info.Context())
 		instance, err := xhr.GetInstance(info)
@@ -130,7 +130,7 @@ func (xhr JSXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v
 	}
 }
 
-func (xhr JSXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
 		ctx := xhr.host.MustGetContext(info.Context())
 		instance, err := xhr.GetInstance(info)
@@ -147,7 +147,7 @@ func (xhr JSXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo)
 	}
 }
 
-func (xhr JSXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	{
 		instance, err := xhr.GetInstance(info)
 		if err != nil {
