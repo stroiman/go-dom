@@ -58,6 +58,20 @@ func getInstanceFromThis[T any](ctx *ScriptContext, this *v8.Object) (instance T
 	}
 }
 
+func GetInstance[T any](host *ScriptHost, info *v8.FunctionCallbackInfo) (result T, err error) {
+	if ctx, ok := host.GetContext(info.Context()); ok {
+		if instance, ok := ctx.GetCachedNode(info.This()); ok {
+			if typedInstance, ok := instance.(T); ok {
+				return typedInstance, nil
+			}
+		}
+		err = v8.NewTypeError(ctx.host.iso, "Not an instance of NamedNodeMap")
+		return
+	}
+	err = errors.New("Could not get context")
+	return
+}
+
 func (c *ConstructorBuilder[T]) SetDefaultInstanceLookup() {
 	c.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (val T, err error) {
 		instance, ok := ctx.GetCachedNode(this)

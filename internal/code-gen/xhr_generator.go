@@ -213,6 +213,7 @@ func createData() (ESConstructorData, error) {
 	}
 	data := ESConstructorData{
 		InnerTypeName:      "XmlHttpRequest",
+		WrapperTypeName:    "JSXmlHttpRequest",
 		Operations:         operations,
 		CreatesInnerType:   true,
 		CustomConstruction: "scriptContext.Window().NewXmlHttpRequest()",
@@ -257,6 +258,7 @@ type ESOperation struct {
 type ESConstructorData struct {
 	CreatesInnerType   bool
 	InnerTypeName      string
+	WrapperTypeName    string
 	CustomConstruction string
 	Operations         []ESOperation
 	IdlName
@@ -327,6 +329,19 @@ func (c JSConstructor) JSConstructorImpl(grp *jen.Group) {
 	))
 }
 
+func CreateInstance(typeName string, params ...jen.Code) JenGenerator {
+	constructorName := fmt.Sprintf("New%s", typeName)
+	return Stmt{
+		jen.Id(constructorName).Call(params...),
+	}
+}
+
+func Id(id string) JenGenerator { return Stmt{jen.Id(id)} }
+
+func Assign(ids JenGenerator, expression JenGenerator) JenGenerator {
+	return Stmt{ids.Generate().Op(":=").Add(expression.Generate())}
+}
+
 func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 	hostType := jen.Id("ScriptHost")
 	hostPtr := jen.Add(jen.Op("*"), hostType)
@@ -340,6 +355,12 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 		Params(c.argHost.Clone().Add(hostPtr)).Add(v8FunctionTemplatePtr).
 		BlockFunc(func(grp *jen.Group) {
 			grp.Add(c.varIso).Op(":=").Add(jen.Id("host")).Dot("iso").GoString()
+			grp.Add(
+				Assign(
+					Id("instance"),
+					CreateInstance(data.WrapperTypeName, jen.Id("host")),
+				).Generate(),
+			)
 			grp.Add(builder).
 				Op(":=").
 				Id("NewConstructorBuilder").Index(jen.Qual(br, data.InnerTypeName)).
@@ -352,11 +373,18 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 			grp.Id("prototype").Op(":=").Id("protoBuilder").Dot("proto")
 			grp.Line()
 			for _, op := range data.Operations {
-				c.CreateOperation(grp, op)
+				f := jen.Id("instance").Dot(camelCase(op.Name))
+				ft := NewFunctionTemplate{Stmt{c.varIso}, Stmt{f}}
+				grp.Add(jen.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft.Generate()))
+				// grp.Add(c.CreateOperation(op).Generate())
 			}
 
 			grp.Return(builder.Clone().Dot("constructor"))
 		})
+	for _, op := range data.Operations {
+		f.Line()
+		f.Add(c.CreateOperationOnStruct(op).Generate())
+	}
 }
 
 type JenGenerator interface {
@@ -553,12 +581,11 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 	return GetGeneratorResult{list, requireContext}
 }
 
-func getInstance() *jen.Statement {
+func getInstance(id *jen.Statement) *jen.Statement {
 	return jen.Id("instance").Op(",").Id("err").
 		Op(":=").
-		Id("builder").
-		Dot("GetInstance").
-		Call(jen.Id("info"))
+		Id("GetInstance").Types(id).
+		Call(jen.Id("xhr").Dot("host"), jen.Id("info"))
 }
 
 func processOptionalArgs(
@@ -603,97 +630,116 @@ func processOptionalArgs(
 	innerStatements.Append(genResult.Generator)
 }
 
-func (c JSConstructor) CreateOperation(grp *jen.Group, op ESOperation) {
+func (c JSConstructor) FunctionTemplateCallbackBody(op ESOperation) JenGenerator {
+	return Stmt{jen.BlockFunc(func(grp *jen.Group) {
+		requireContext := new(bool)
+		statements := &StatementListStmt{}
+		statements.AppendJen(getInstance(jen.Qual(br, "XmlHttpRequest")))
+		statements.Append(GenReturnOnError())
+
+		firstOptionalArg := slices.IndexFunc(
+			op.Arguments,
+			func(arg ESOperationArgument) bool {
+				return arg.Optional
+			},
+		)
+		argCount := len(op.Arguments)
+		if firstOptionalArg == -1 {
+			firstOptionalArg = argCount
+		}
+		requiredArgs := op.Arguments[0:firstOptionalArg]
+		// optionalArgs := op.Arguments[firstOptionalArg:]
+		if argCount > 0 {
+			statements.AppendJen(jen.Id("args").Op(":=").Id("info").Dot("Args").Call())
+			statements.Append(AssignmentStmt{
+				[]string{"argsLen"},
+				GetSliceLength(Stmt{jen.Id("args")}),
+			})
+		}
+		if len(requiredArgs) > 0 {
+			statements.Append(IfStmt{
+				Condition: Stmt{jen.Id("argsLen").Op("<").Lit(len(requiredArgs))},
+				Block: Stmt{jen.Return(
+					jen.Nil(),
+					jen.Qual("errors", "New").Call(jen.Lit("Too few arguments")),
+				)},
+			})
+		}
+		argNames := make([]string, 0, len(op.Arguments))
+		for i, arg := range requiredArgs {
+			var errName string
+			if argCount > 1 {
+				errName = fmt.Sprintf("err%d", i)
+			} else {
+				errName = fmt.Sprintf("err")
+			}
+			stmt := GetArgStmt{
+				Name:    arg.Name,
+				ErrName: errName,
+				Getter:  "GetArg" + arg.Type,
+				Index:   i,
+				Arg:     arg,
+			}
+			statements.Append(stmt)
+			argNames = append(argNames, arg.Name)
+		}
+
+		processOptionalArgs(
+			op.Arguments,
+			op.Name,
+			firstOptionalArg,
+			statements,
+			argNames,
+			op,
+			requireContext,
+		)
+
+		statements.Append(genErrorHandler(len(requiredArgs)))
+		genResult := CallInstance{
+			Name: op.Name,
+			Args: argNames,
+			Op:   op,
+		}.GetGenerator()
+		if *requireContext || genResult.RequireContext {
+			statements.Prepend(Stmt{
+				jen.Id("ctx").
+					Op(":=").
+					Id("xhr").Dot("host").
+					Dot("MustGetContext").
+					Call(jen.Id("info").Dot("Context").Call()),
+			})
+		}
+		statements.Append(genResult.Generator)
+		grp.Add(statements.Generate())
+	})}
+}
+
+func (c JSConstructor) CreateOperationOnStruct(op ESOperation) JenGenerator {
 	v8Value := jen.Op("*").Qual(v8, "Value")
 	errorT := jen.Id("error")
 	v8FunctionCallbackInfoPtr := jen.Op("*").Qual(v8, "FunctionCallbackInfo")
-	f := jen.Func().
-		Params(c.argInfo.Clone().Add(v8FunctionCallbackInfoPtr)).
-		Params(v8Value, errorT).
-		BlockFunc(func(grp *jen.Group) {
-			requireContext := new(bool)
-			statements := &StatementListStmt{}
-			statements.AppendJen(getInstance())
-			statements.Append(GenReturnOnError())
+	f := c.FunctionTemplateCallbackBody(op).Generate()
+	// ft := NewFunctionTemplate{Stmt{c.varIso}, f}.Generate()
+	return Stmt{
+		jen.Func().
+			Params(jen.Id("xhr").Id("JSXmlHttpRequest")).
+			Id(camelCase(op.Name)).
+			Params(c.argInfo.Clone().Add(v8FunctionCallbackInfoPtr)).
+			Params(v8Value, errorT).
+			BlockFunc(func(grp *jen.Group) {
+				grp.Add(f)
+			}),
+	}
+	// return Stmt{jen.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft.Generate()).Line()}
+}
 
-			firstOptionalArg := slices.IndexFunc(
-				op.Arguments,
-				func(arg ESOperationArgument) bool {
-					return arg.Optional
-				},
-			)
-			argCount := len(op.Arguments)
-			if firstOptionalArg == -1 {
-				firstOptionalArg = argCount
-			}
-			requiredArgs := op.Arguments[0:firstOptionalArg]
-			// optionalArgs := op.Arguments[firstOptionalArg:]
-			if argCount > 0 {
-				statements.AppendJen(jen.Id("args").Op(":=").Id("info").Dot("Args").Call())
-				statements.Append(AssignmentStmt{
-					[]string{"argsLen"},
-					GetSliceLength(Stmt{jen.Id("args")}),
-				})
-			}
-			if len(requiredArgs) > 0 {
-				statements.Append(IfStmt{
-					Condition: Stmt{jen.Id("argsLen").Op("<").Lit(len(requiredArgs))},
-					Block: Stmt{jen.Return(
-						jen.Nil(),
-						jen.Qual("errors", "New").Call(jen.Lit("Too few arguments")),
-					)},
-				})
-			}
-			argNames := make([]string, 0, len(op.Arguments))
-			for i, arg := range requiredArgs {
-				var errName string
-				if argCount > 1 {
-					errName = fmt.Sprintf("err%d", i)
-				} else {
-					errName = fmt.Sprintf("err")
-				}
-				stmt := GetArgStmt{
-					Name:    arg.Name,
-					ErrName: errName,
-					Getter:  "GetArg" + arg.Type,
-					Index:   i,
-					Arg:     arg,
-				}
-				statements.Append(stmt)
-				argNames = append(argNames, arg.Name)
-			}
+type NewFunctionTemplate struct {
+	iso JenGenerator
+	f   JenGenerator
+}
 
-			processOptionalArgs(
-				op.Arguments,
-				op.Name,
-				firstOptionalArg,
-				statements,
-				argNames,
-				op,
-				requireContext,
-			)
-
-			statements.Append(genErrorHandler(len(requiredArgs)))
-			genResult := CallInstance{
-				Name: op.Name,
-				Args: argNames,
-				Op:   op,
-			}.GetGenerator()
-			if *requireContext || genResult.RequireContext {
-				statements.Prepend(Stmt{
-					jen.Id("ctx").
-						Op(":=").
-						Id("host").
-						Dot("MustGetContext").
-						Call(jen.Id("info").Dot("Context").Call()),
-				})
-			}
-			statements.Append(genResult.Generator)
-			grp.Add(statements.Generate())
-		})
-	ft := jen.Qual(v8, "NewFunctionTemplateWithError").Call(c.varIso, f)
-	grp.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft)
-	grp.Line()
+func (t NewFunctionTemplate) Generate() *jen.Statement {
+	return jen.Qual(v8, "NewFunctionTemplateWithError").Call(t.iso.Generate(), t.f.Generate())
 }
 
 func camelCase(s string) string {

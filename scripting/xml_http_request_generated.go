@@ -10,6 +10,7 @@ import (
 
 func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
+	instance := NewJSXmlHttpRequest(host)
 	builder := NewConstructorBuilder[browser.XmlHttpRequest](host, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		scriptContext := host.MustGetContext(info.Context())
 		instance := scriptContext.Window().NewXmlHttpRequest()
@@ -19,8 +20,19 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	protoBuilder := builder.NewPrototypeBuilder()
 	prototype := protoBuilder.proto
 
-	prototype.Set("open", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		instance, err := builder.GetInstance(info)
+	prototype.Set("open", v8.NewFunctionTemplateWithError(iso, instance.Open))
+	prototype.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, instance.SetRequestHeader))
+	prototype.Set("send", v8.NewFunctionTemplateWithError(iso, instance.Send))
+	prototype.Set("abort", v8.NewFunctionTemplateWithError(iso, instance.Abort))
+	prototype.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, instance.GetResponseHeader))
+	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, instance.GetAllResponseHeaders))
+	prototype.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, instance.OverrideMimeType))
+	return builder.constructor
+}
+
+func (xhr JSXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	{
+		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
 		if err != nil {
 			return nil, err
 		}
@@ -37,10 +49,12 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		}
 		instance.Open(method, url)
 		return nil, nil
-	}))
+	}
+}
 
-	prototype.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		instance, err := builder.GetInstance(info)
+func (xhr JSXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	{
+		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
 		if err != nil {
 			return nil, err
 		}
@@ -57,11 +71,13 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		}
 		instance.SetRequestHeader(name, value)
 		return nil, nil
-	}))
+	}
+}
 
-	prototype.Set("send", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		ctx := host.MustGetContext(info.Context())
-		instance, err := builder.GetInstance(info)
+func (xhr JSXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	{
+		ctx := xhr.host.MustGetContext(info.Context())
+		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
 		if err != nil {
 			return nil, err
 		}
@@ -78,21 +94,25 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 
 		err = instance.Send()
 		return nil, err
-	}))
+	}
+}
 
-	prototype.Set("abort", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		instance, err := builder.GetInstance(info)
+func (xhr JSXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	{
+		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
 		if err != nil {
 			return nil, err
 		}
 
 		err = instance.Abort()
 		return nil, err
-	}))
+	}
+}
 
-	prototype.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		ctx := host.MustGetContext(info.Context())
-		instance, err := builder.GetInstance(info)
+func (xhr JSXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	{
+		ctx := xhr.host.MustGetContext(info.Context())
+		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
 		if err != nil {
 			return nil, err
 		}
@@ -107,11 +127,13 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		}
 		result := instance.GetResponseHeader(name)
 		return ToNullableByteString(ctx, result)
-	}))
+	}
+}
 
-	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		ctx := host.MustGetContext(info.Context())
-		instance, err := builder.GetInstance(info)
+func (xhr JSXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	{
+		ctx := xhr.host.MustGetContext(info.Context())
+		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
 		if err != nil {
 			return nil, err
 		}
@@ -122,10 +144,12 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		} else {
 			return ToByteString(ctx, result)
 		}
-	}))
+	}
+}
 
-	prototype.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		instance, err := builder.GetInstance(info)
+func (xhr JSXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	{
+		instance, err := GetInstance[browser.XmlHttpRequest](xhr.host, info)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +164,5 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		}
 		err = instance.OverrideMimeType(mime)
 		return nil, err
-	}))
-
-	return builder.constructor
+	}
 }
