@@ -28,6 +28,27 @@ func NewUrl() URL {
 	return &url{}
 }
 
+func ParseURL(rawUrl string) (URL, error) {
+	if res, err := netURL.Parse(rawUrl); err == nil {
+		return &url{res}, nil
+	} else {
+		return nil, err
+	}
+}
+
+func CanParseURL(rawUrl string) bool {
+	_, err := ParseURL(rawUrl)
+	return err == nil
+}
+
+func CreateObjectURL(object any) (URL, error) {
+	return nil, newNotImplementedError("URL.CreateObjectURL not implemented yet")
+}
+
+func RevokeObjectURL(object any) (URL, error) {
+	return nil, newNotImplementedError("URL.RevokeObjectURL not implemented yet")
+}
+
 func NewURLFromNetURL(u *netURL.URL) URL {
 	return url{u}
 }
