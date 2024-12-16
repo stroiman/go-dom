@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
+	netURL "net/url"
 	"strings"
 )
 
@@ -193,9 +193,9 @@ func NewXHRRequestBodyOfFormData(data *FormData) *XHRRequestBody {
 			sb.WriteString("&")
 		}
 
-		sb.WriteString(url.QueryEscape(e.Name))
+		sb.WriteString(netURL.QueryEscape(e.Name))
 		sb.WriteString("=")
-		sb.WriteString(url.QueryEscape(string(e.Value)))
+		sb.WriteString(netURL.QueryEscape(string(e.Value)))
 	}
 	sb.WriteString("foo")
 

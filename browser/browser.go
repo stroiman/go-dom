@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
-	"net/url"
+	netURL "net/url"
 )
 
 type ScriptEngineFactory interface {
@@ -31,7 +31,7 @@ func (b *Browser) OpenWindow(location string) (Window, error) {
 	if resp.StatusCode != 200 {
 		return nil, errors.New("Non-ok Response")
 	}
-	u, err := url.Parse(location)
+	u, err := netURL.Parse(location)
 	if err != nil {
 		return nil, err
 	}

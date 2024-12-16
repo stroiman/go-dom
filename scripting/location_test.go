@@ -1,7 +1,7 @@
 package scripting_test
 
 import (
-	"net/url"
+	netURL "net/url"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -11,7 +11,7 @@ import (
 
 var _ = Describe("window.location", func() {
 	It("Should have the location of the document", func() {
-		url, err := url.Parse("http://example.com/foo")
+		url, err := netURL.Parse("http://example.com/foo")
 		Expect(err).ToNot(HaveOccurred())
 		window := browser.NewWindow(url)
 		ctx := host.NewContext(window)

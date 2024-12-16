@@ -4,7 +4,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/url"
+	netURL "net/url"
 	"strings"
 )
 
@@ -34,10 +34,10 @@ type window struct {
 	document     Document
 	scriptEngine ScriptEngine
 	httpClient   http.Client
-	url          *url.URL
+	url          *netURL.URL
 }
 
-func NewWindow(url *url.URL) Window {
+func NewWindow(url *netURL.URL) Window {
 	result := &window{
 		eventTarget: newEventTarget(),
 		url:         url,
@@ -46,7 +46,7 @@ func NewWindow(url *url.URL) Window {
 	return result
 }
 
-func newWindow(httpClient http.Client, url *url.URL) *window {
+func newWindow(httpClient http.Client, url *netURL.URL) *window {
 	result := &window{
 		eventTarget: newEventTarget(),
 		httpClient:  httpClient,
@@ -96,9 +96,9 @@ func (w *window) SetScriptRunner(r ScriptEngine) {
 func (w *window) Location() Location {
 	u := w.url
 	if u == nil {
-		u = new(url.URL)
+		u = new(netURL.URL)
 	}
-	return NewLocation(u)
+	return NewLocationFromNetURL(u)
 }
 
 func (w *window) Dispose() {
