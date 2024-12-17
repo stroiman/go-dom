@@ -18,6 +18,7 @@ type CreateDataData struct {
 
 func createData(data []byte, iName string, dataData CreateDataData) (ESConstructorData, error) {
 	spec := ParsedIdlFile{}
+	var constructor *ESOperation
 	err := json.Unmarshal(data, &spec)
 	if err != nil {
 		panic(err)
@@ -29,44 +30,47 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 	}
 	ops := []*tmp{}
 	for _, member := range idlName.Members {
+		if -1 != slices.IndexFunc(
+			ops,
+			func(op *tmp) bool { return op.Op.Name == member.Name },
+		) {
+			slog.Warn("Function overloads", "Name", member.Name)
+			continue
+		}
+		returnType, nullable := FindIdlType(member.IdlType)
+		operation := &tmp{ESOperation{
+			Name:       member.Name,
+			ReturnType: returnType,
+			Nullable:   nullable,
+			Arguments:  []ESOperationArgument{},
+		}, true}
+		for _, arg := range member.Arguments {
+			esArg := ESOperationArgument{
+				Name:     arg.Name,
+				Optional: arg.Optional,
+				IdlType:  arg.IdlType,
+			}
+			if len(arg.IdlType.Types) > 0 {
+				slog.Warn(
+					"Multiple argument types",
+					"Operation",
+					member.Name,
+					"Argument",
+					arg.Name,
+				)
+				operation.Ok = false
+				break
+			}
+			if arg.IdlType.IdlType != nil {
+				esArg.Type = arg.IdlType.IdlType.IType.TypeName
+			}
+			operation.Op.Arguments = append(operation.Op.Arguments, esArg)
+		}
 		if member.Type == "operation" {
-			if -1 != slices.IndexFunc(
-				ops,
-				func(op *tmp) bool { return op.Op.Name == member.Name },
-			) {
-				slog.Warn("Function overloads", "Name", member.Name)
-				continue
-			}
-			returnType, nullable := FindIdlType(member.IdlType)
-			operation := &tmp{ESOperation{
-				Name:       member.Name,
-				ReturnType: returnType,
-				Nullable:   nullable,
-				Arguments:  []ESOperationArgument{},
-			}, true}
 			ops = append(ops, operation)
-			for _, arg := range member.Arguments {
-				esArg := ESOperationArgument{
-					Name:     arg.Name,
-					Optional: arg.Optional,
-					IdlType:  arg.IdlType,
-				}
-				if len(arg.IdlType.Types) > 0 {
-					slog.Warn(
-						"Multiple argument types",
-						"Operation",
-						member.Name,
-						"Argument",
-						arg.Name,
-					)
-					operation.Ok = false
-					break
-				}
-				if arg.IdlType.IdlType != nil {
-					esArg.Type = arg.IdlType.IdlType.IType.TypeName
-				}
-				operation.Op.Arguments = append(operation.Op.Arguments, esArg)
-			}
+		}
+		if member.Type == "constructor" {
+			constructor = &operation.Op
 		}
 	}
 	// fmt.Println(operations)
@@ -91,6 +95,7 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 		WrapperTypeName:  wrapperTypeName,
 		Receiver:         dataData.Receiver,
 		Operations:       operations,
+		Constructor:      constructor,
 		CreatesInnerType: true,
 		IdlName:          idlName,
 	}, nil
@@ -256,6 +261,7 @@ type ESConstructorData struct {
 	WrapperTypeName  string
 	Receiver         string
 	Operations       []ESOperation
+	Constructor      *ESOperation
 	IdlName
 }
 
