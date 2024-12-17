@@ -78,9 +78,17 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 			operations = append(operations, op.Op)
 		}
 	}
+	wrappedTypeName := dataData.InnerTypeName
+	if wrappedTypeName == "" {
+		wrappedTypeName = idlName.Name
+	}
+	wrapperTypeName := dataData.WrapperTypeName
+	if wrapperTypeName == "" {
+		wrapperTypeName = "ES" + wrappedTypeName
+	}
 	return ESConstructorData{
-		InnerTypeName:    dataData.InnerTypeName,
-		WrapperTypeName:  dataData.WrapperTypeName,
+		InnerTypeName:    wrappedTypeName,
+		WrapperTypeName:  wrapperTypeName,
 		Receiver:         dataData.Receiver,
 		Operations:       operations,
 		CreatesInnerType: true,
@@ -399,8 +407,10 @@ type IfStmt struct {
 func (s GetArgStmt) Generate() *jen.Statement {
 	if s.Arg.Type != "" {
 		return AssignmentStmt{
-			[]string{s.Name, s.ErrName},
-			Stmt{jen.Id(s.Receiver).Dot(s.Getter).Call(jen.Id("args"), jen.Lit(s.Index))},
+			VarNames: []string{s.Name, s.ErrName},
+			Expression: Stmt{
+				jen.Id(s.Receiver).Dot(s.Getter).Call(jen.Id("args"), jen.Lit(s.Index)),
+			},
 		}.Generate()
 	} else {
 		statements := []jen.Code{jen.Id("ctx"), jen.Id("args"), jen.Lit(s.Index)}
@@ -409,8 +419,8 @@ func (s GetArgStmt) Generate() *jen.Statement {
 			statements = append(statements, jen.Id(parserName))
 		}
 		return AssignmentStmt{
-			[]string{s.Name, s.ErrName},
-			Stmt{jen.Id("TryParseArgs").Call(statements...)},
+			VarNames:   []string{s.Name, s.ErrName},
+			Expression: Stmt{jen.Id("TryParseArgs").Call(statements...)},
 		}.Generate()
 	}
 }
@@ -418,6 +428,7 @@ func (s GetArgStmt) Generate() *jen.Statement {
 type AssignmentStmt struct {
 	VarNames   []string
 	Expression JenGenerator
+	NoNewVars  bool
 }
 
 type StatementListStmt struct {
@@ -425,12 +436,15 @@ type StatementListStmt struct {
 }
 
 func (s AssignmentStmt) Generate() *jen.Statement {
-	result := jen.Id(s.VarNames[0])
-	for _, name := range s.VarNames[1:] {
-		result.Op(",").Id(name)
+	list := make([]jen.Code, 0, len(s.VarNames))
+	for _, n := range s.VarNames {
+		list = append(list, jen.Id(n))
 	}
-	result.Op(":=").Add(s.Expression.Generate())
-	return result
+	operator := ":="
+	if s.NoNewVars {
+		operator = "="
+	}
+	return jen.List(list...).Op(operator).Add(s.Expression.Generate())
 }
 
 func (s *StatementListStmt) Prepend(stmt JenGenerator) {
@@ -492,24 +506,20 @@ type CallInstance struct {
 
 type GetGeneratorResult struct {
 	Generator      JenGenerator
+	HasValue       bool
+	HasError       bool
 	RequireContext bool
 }
 
-func (c CallInstance) GetGenerator() GetGeneratorResult {
-	var requireContext bool
+func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResult) {
 	args := []jen.Code{}
-	// jErr := jen.Id("err")
-	// returnStmt := IfStmt{
-	// 	Condition: Stmt{jErr.Clone().Op("!=").Nil()},
-	// 	Block:     Stmt{jen.Return(jen.Nil(), jErr)},
-	// }
-	errorHandling := !hasNoError[c.Op.Name]
+	genRes.HasError = !hasNoError[c.Op.Name]
+	genRes.HasValue = c.Op.ReturnType != "undefined"
 	var stmt *jen.Statement
-	hasNewValue := c.Op.ReturnType != "undefined"
-	if hasNewValue {
+	if genRes.HasValue {
 		stmt = jen.Id("result")
 	}
-	if errorHandling {
+	if genRes.HasError {
 		if stmt != nil {
 			stmt = stmt.Op(",").Id("err")
 		} else {
@@ -517,35 +527,40 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 		}
 	}
 	if stmt != nil {
-		if hasNewValue {
+		if genRes.HasValue {
 			stmt = stmt.Op(":=")
 		} else {
 			stmt = stmt.Op("=")
 		}
 	}
 
-	// dest := jen.Id("err")
-	// if c.Op.ReturnType != "undefined" {
-	// 	dest = jen.Id("result").Op(",").Add(dest).Op(":=")
-	// 	// returnStmt.Else = Stmt{jen.Return(jen.Nil(), jen.Nil())}
-	// } else {
-	// 	dest = dest.Op("=")
-	// }
 	for _, a := range c.Args {
 		args = append(args, jen.Id(a))
 	}
 	list := StatementListStmt{}
+	var evaluation *jen.Statement
+	if instanceName == "" {
+		evaluation = jen.Id(camelCase(c.Name)).Call(args...)
+	} else {
+		evaluation = jen.Id(instanceName).Dot(camelCase(c.Name)).Call(args...)
+	}
 	if stmt == nil {
-		list.Append(Stmt{
-			jen.Id("instance").Dot(camelCase(c.Name)).Call(args...),
-		})
+		list.Append(Stmt{evaluation})
 	} else {
 		list.Append(Stmt{
-			stmt.Id("instance").Dot(camelCase(c.Name)).Call(args...),
+			stmt.Add(evaluation),
 		})
 	}
-	if c.Op.ReturnType == "undefined" {
-		if errorHandling {
+	genRes.Generator = list
+	return
+}
+
+func (c CallInstance) GetGenerator(instanceName string) GetGeneratorResult {
+	genRes := c.PerformCall(instanceName)
+	list := StatementListStmt{}
+	list.Append(genRes.Generator)
+	if !genRes.HasValue {
+		if genRes.HasError {
 			list.Append(Stmt{jen.Return(jen.Nil(), jen.Id("err"))})
 		} else {
 			list.Append(Stmt{jen.Return(jen.Nil(), jen.Nil())})
@@ -556,9 +571,9 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 			converter += "Nullable"
 		}
 		converter += c.Op.ReturnType
-		requireContext = true
+		genRes.RequireContext = true
 		valueReturn := Stmt{jen.Return(jen.Id(converter).Call(jen.Id("ctx"), jen.Id("result")))}
-		if errorHandling {
+		if genRes.HasError {
 			list.Append(IfStmt{
 				Condition: Stmt{jen.Id("err").Op("!=").Nil()},
 				Block:     Stmt{jen.Return(jen.Nil(), jen.Id("err"))},
@@ -568,14 +583,15 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 			list.Append(valueReturn)
 		}
 	}
-	// list.Append(returnStmt)
-	return GetGeneratorResult{list, requireContext}
+	genRes.Generator = list
+	return genRes
 }
 
 func getInstance(receiver string) JenGenerator {
-	return Stmt{
-		jen.Id("instance").Op(",").Id("err").
-			Op(":=").Id(receiver).Dot("GetInstance").Call(jen.Id("info"))}
+	return AssignmentStmt{
+		VarNames:   []string{"instance", "err"},
+		Expression: Stmt{jen.Id(receiver).Dot("GetInstance").Call(jen.Id("info"))},
+	}
 }
 
 func processOptionalArgs(
@@ -618,7 +634,7 @@ func processOptionalArgs(
 		Name: opName,
 		Args: argNames,
 		Op:   op,
-	}.GetGenerator()
+	}.GetGenerator("instance")
 	innerStatements.Append(genResult.Generator)
 }
 
@@ -643,12 +659,11 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 			firstOptionalArg = argCount
 		}
 		requiredArgs := op.Arguments[0:firstOptionalArg]
-		// optionalArgs := op.Arguments[firstOptionalArg:]
 		if argCount > 0 {
 			statements.AppendJen(jen.Id("args").Op(":=").Id("info").Dot("Args").Call())
 			statements.Append(AssignmentStmt{
-				[]string{"argsLen"},
-				GetSliceLength(Stmt{jen.Id("args")}),
+				VarNames:   []string{"argsLen"},
+				Expression: GetSliceLength(Stmt{jen.Id("args")}),
 			})
 		}
 		if len(requiredArgs) > 0 {
@@ -696,12 +711,12 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 			Name: op.Name,
 			Args: argNames,
 			Op:   op,
-		}.GetGenerator()
+		}.GetGenerator("instance")
 		if *requireContext || genResult.RequireContext {
 			statements.Prepend(Stmt{
 				jen.Id("ctx").
 					Op(":=").
-					Id("xhr").Dot("host").
+					Id(data.Receiver).Dot("host").
 					Dot("MustGetContext").
 					Call(jen.Id("info").Dot("Context").Call()),
 			})
