@@ -82,6 +82,7 @@ func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 		}
 		args := info.Args()
 		argsLen := len(args)
+
 		if argsLen >= 1 {
 			body, err := TryParseArgs(ctx, args, 0, GetBodyFromDocument, GetBodyFromXMLHttpRequestBodyInit)
 			if err != nil {
@@ -90,7 +91,6 @@ func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 			err = instance.SendBody(body)
 			return nil, err
 		}
-
 		err = instance.Send()
 		return nil, err
 	}

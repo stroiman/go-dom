@@ -660,7 +660,7 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 		argNames := make([]string, 0, len(op.Arguments))
 		for i, arg := range requiredArgs {
 			var errName string
-			if argCount > 1 {
+			if len(requiredArgs) > 1 {
 				errName = fmt.Sprintf("err%d", i)
 			} else {
 				errName = fmt.Sprintf("err")
@@ -675,6 +675,7 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 			statements.Append(stmt)
 			argNames = append(argNames, arg.Name)
 		}
+		statements.Append(genErrorHandler(len(requiredArgs)))
 
 		processOptionalArgs(
 			op.Arguments,
@@ -686,7 +687,6 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 			requireContext,
 		)
 
-		statements.Append(genErrorHandler(len(requiredArgs)))
 		genResult := CallInstance{
 			Name: op.Name,
 			Args: argNames,
