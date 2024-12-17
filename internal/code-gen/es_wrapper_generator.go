@@ -343,52 +343,76 @@ func Assign(ids JenGenerator, expression JenGenerator) JenGenerator {
 }
 
 func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
+	gen := StatementList(
+		CreateConstructor(c, data),
+		CreateWrapperMethods(c, data),
+	)
+	f.Add(gen.Generate())
+}
+
+func CreateConstructor(c JSConstructor, data ESConstructorData) JenGenerator {
+	v8FunctionTemplatePtr := jen.Op("*").Qual(v8, "FunctionTemplate")
 	hostType := jen.Id("ScriptHost")
 	hostPtr := jen.Add(jen.Op("*"), hostType)
-	v8FunctionTemplatePtr := jen.Op("*").Qual(v8, "FunctionTemplate")
+	return Stmt{
+		jen.Func().
+			Id(fmt.Sprintf("Create%sPrototype", data.InnerTypeName)).
+			Params(c.argHost.Clone().Add(hostPtr)).Add(v8FunctionTemplatePtr).
+			Block(
+				CreateConstructorBody(c, data).Generate(),
+			),
+	}
+}
+
+func CreateConstructorBody(c JSConstructor, data ESConstructorData) JenGenerator {
 	v8Value := jen.Op("*").Qual(v8, "Value")
 	errorT := jen.Id("error")
 	g := Helper{&jen.Group{}}
-	f.Func().
-		Id(fmt.Sprintf("Create%sPrototype", data.InnerTypeName)).
-		Params(c.argHost.Clone().Add(hostPtr)).Add(v8FunctionTemplatePtr).
-		BlockFunc(func(grp *jen.Group) {
-			grp.Add(c.varIso).Op(":=").Add(jen.Id("host")).Dot("iso").GoString()
-			grp.Add(
-				Assign(
-					Id("wrapper"),
-					CreateInstance(data.WrapperTypeName, jen.Id("host")),
-				).Generate(),
-			)
-			grp.Add(jen.Id("constructor")).
-				Op(":=").
-				Qual(v8, "NewFunctionTemplateWithError").
-				Call(jen.Id("iso"), jen.Func().
-					Params(c.argInfo.Clone().Add(g.v8FunctionCallbackInfoPtr())).
-					Params(v8Value, errorT).
-					BlockFunc(func(grp *jen.Group) { c.JSConstructorImpl(grp, data) }))
-			// grp.Add(builder).Dot("SetDefaultInstanceLookup").Call()
-			// grp.Id("protoBuilder").Op(":=").Add(builder).Dot("NewPrototypeBuilder").Call()
-			grp.Id("constructor").
-				Dot("GetInstanceTemplate").
-				Call().
-				Dot("SetInternalFieldCount").
-				Call(jen.Lit(1))
-			grp.Id("prototype").Op(":=").Id("constructor").Dot("PrototypeTemplate").Call()
-			grp.Line()
-			for _, op := range data.Operations {
-				f := jen.Id("wrapper").Dot(camelCase(op.Name))
-				ft := NewFunctionTemplate{Stmt{c.varIso}, Stmt{f}}
-				grp.Add(jen.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft.Generate()))
-				// grp.Add(c.CreateOperation(op).Generate())
-			}
+	return StatementList(
+		Assign(Id("iso"),
+			Stmt{jen.Id("host").Dot("iso")},
+		),
+		Assign(
+			Id("wrapper"),
+			CreateInstance(data.WrapperTypeName, jen.Id("host")),
+		),
+		Assign(Id("constructor"),
+			Stmt{
+				jen.Qual(v8, "NewFunctionTemplateWithError").
+					Call(jen.Id("iso"), jen.Func().
+						Params(c.argInfo.Clone().Add(g.v8FunctionCallbackInfoPtr())).
+						Params(v8Value, errorT).
+						BlockFunc(func(grp *jen.Group) { c.JSConstructorImpl(grp, data) })),
+			},
+		),
+		Stmt{jen.Id("constructor").
+			Dot("GetInstanceTemplate").
+			Call().
+			Dot("SetInternalFieldCount").
+			Call(jen.Lit(1)),
+		},
+		Assign(
+			Id("prototype"),
+			Stmt{jen.Id("constructor").Dot("PrototypeTemplate").Call()},
+		),
+		NewLine(),
+		InstallFunctionHandlers(c, data),
+		Stmt{jen.Return().Id("constructor")},
+	)
+}
 
-			grp.Return().Id("constructor")
-		})
-	for _, op := range data.Operations {
-		f.Line()
-		f.Add(c.CreateOperationOnStruct(data, op).Generate())
+func InstallFunctionHandlers(c JSConstructor, data ESConstructorData) JenGenerator {
+	generators := make([]JenGenerator, len(data.Operations))
+	for i, op := range data.Operations {
+		generators[i] = InstallFunctionHandler(c, op)
 	}
+	return StatementList(generators...)
+}
+
+func InstallFunctionHandler(c JSConstructor, op ESOperation) JenGenerator {
+	f := jen.Id("wrapper").Dot(camelCase(op.Name))
+	ft := NewFunctionTemplate{Stmt{c.varIso}, Stmt{f}}
+	return Stmt{(jen.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft.Generate()))}
 }
 
 type JenGenerator interface {
@@ -440,6 +464,12 @@ type AssignmentStmt struct {
 type StatementListStmt struct {
 	Statements []JenGenerator
 }
+
+func StatementList(statements ...JenGenerator) StatementListStmt {
+	return StatementListStmt{statements}
+}
+
+func NewLine() JenGenerator { return Stmt{jen.Line()} }
 
 func (s AssignmentStmt) Generate() *jen.Statement {
 	list := make([]jen.Code, 0, len(s.VarNames))
@@ -732,7 +762,15 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 	})}
 }
 
-func (c JSConstructor) CreateOperationOnStruct(
+func CreateWrapperMethods(c JSConstructor, data ESConstructorData) JenGenerator {
+	generators := make([]JenGenerator, len(data.Operations))
+	for i, op := range data.Operations {
+		generators[i] = c.CreateWrapperMethod(data, op)
+	}
+	return StatementList(generators...)
+}
+
+func (c JSConstructor) CreateWrapperMethod(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
@@ -740,18 +778,18 @@ func (c JSConstructor) CreateOperationOnStruct(
 	errorT := jen.Id("error")
 	v8FunctionCallbackInfoPtr := jen.Op("*").Qual(v8, "FunctionCallbackInfo")
 	f := c.FunctionTemplateCallbackBody(data, op).Generate()
-	// ft := NewFunctionTemplate{Stmt{c.varIso}, f}.Generate()
-	return Stmt{
-		jen.Func().
-			Params(jen.Id(data.Receiver).Id(data.WrapperTypeName)).
-			Id(camelCase(op.Name)).
-			Params(c.argInfo.Clone().Add(v8FunctionCallbackInfoPtr)).
-			Params(v8Value, errorT).
-			BlockFunc(func(grp *jen.Group) {
-				grp.Add(f)
-			}),
-	}
-	// return Stmt{jen.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft.Generate()).Line()}
+	return StatementList(
+		NewLine(),
+		Stmt{
+			jen.Func().
+				Params(jen.Id(data.Receiver).Id(data.WrapperTypeName)).
+				Id(camelCase(op.Name)).
+				Params(c.argInfo.Clone().Add(v8FunctionCallbackInfoPtr)).
+				Params(v8Value, errorT).
+				BlockFunc(func(grp *jen.Group) {
+					grp.Add(f)
+				}),
+		})
 }
 
 type NewFunctionTemplate struct {
@@ -815,9 +853,6 @@ func genErrorHandler(count int) JenGenerator {
 }
 
 func WriteErrorHandler(grp *jen.Group, count int) {
-	// if count == 0 {
-	// 	return
-	// }
 	grp.Add(genErrorHandler(count).Generate())
 }
 
