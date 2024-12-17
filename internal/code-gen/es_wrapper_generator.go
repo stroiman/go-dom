@@ -7,6 +7,8 @@ import (
 	"slices"
 	"unicode"
 
+	g "github.com/stroiman/go-dom/internal/code-gen/generators"
+
 	"github.com/dave/jennifer/jen"
 )
 
@@ -336,11 +338,7 @@ func CreateInstance(typeName string, params ...jen.Code) JenGenerator {
 	}
 }
 
-func Id(id string) JenGenerator { return Stmt{jen.Id(id)} }
-
-func Assign(ids JenGenerator, expression JenGenerator) JenGenerator {
-	return Stmt{ids.Generate().Op(":=").Add(expression.Generate())}
-}
+func Id(id string) JenGenerator { return Stmt{jen.Id(id).Clone()} }
 
 func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 	gen := StatementList(
@@ -367,37 +365,38 @@ func CreateConstructor(c JSConstructor, data ESConstructorData) JenGenerator {
 func CreateConstructorBody(c JSConstructor, data ESConstructorData) JenGenerator {
 	v8Value := jen.Op("*").Qual(v8, "Value")
 	errorT := jen.Id("error")
-	g := Helper{&jen.Group{}}
+	gr := Helper{&jen.Group{}}
+	constructor := g.Id("constructor")
 	return StatementList(
-		Assign(Id("iso"),
+		g.Assign(Id("iso"),
 			Stmt{jen.Id("host").Dot("iso")},
 		),
-		Assign(
+		g.Assign(
 			Id("wrapper"),
 			CreateInstance(data.WrapperTypeName, jen.Id("host")),
 		),
-		Assign(Id("constructor"),
+		g.Assign(constructor,
 			Stmt{
 				jen.Qual(v8, "NewFunctionTemplateWithError").
 					Call(jen.Id("iso"), jen.Func().
-						Params(c.argInfo.Clone().Add(g.v8FunctionCallbackInfoPtr())).
+						Params(c.argInfo.Clone().Add(gr.v8FunctionCallbackInfoPtr())).
 						Params(v8Value, errorT).
 						BlockFunc(func(grp *jen.Group) { c.JSConstructorImpl(grp, data) })),
 			},
 		),
-		Stmt{jen.Id("constructor").
+		g.Raw(jen.Id("constructor").
 			Dot("GetInstanceTemplate").
 			Call().
 			Dot("SetInternalFieldCount").
 			Call(jen.Lit(1)),
-		},
-		Assign(
+		),
+		g.Assign(
 			Id("prototype"),
 			Stmt{jen.Id("constructor").Dot("PrototypeTemplate").Call()},
 		),
 		NewLine(),
 		InstallFunctionHandlers(c, data),
-		Stmt{jen.Return().Id("constructor")},
+		g.Return(constructor),
 	)
 }
 
@@ -415,9 +414,7 @@ func InstallFunctionHandler(c JSConstructor, op ESOperation) JenGenerator {
 	return Stmt{(jen.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft.Generate()))}
 }
 
-type JenGenerator interface {
-	Generate() *jen.Statement
-}
+type JenGenerator = g.Generator
 
 type GetArgStmt struct {
 	Name     string
@@ -529,7 +526,6 @@ func (s StatementListStmt) Generate() *jen.Statement {
 			result = append(result, jenStatement)
 		}
 	}
-	// return g
 	jenStmt := jen.Statement(result)
 	return &jenStmt
 }
@@ -815,22 +811,14 @@ func (s Stmt) Generate() *jen.Statement { return s.Statement }
 func GenReturnOnError() JenGenerator {
 	jErr := jen.Id("err")
 	stmt := IfStmt{
-		Condition: Stmt{jErr.Clone().Op("!=").Nil()},
-		Block:     Stmt{jen.Return(jen.Nil(), jErr)},
+		Condition: g.Raw(jErr.Clone().Op("!=").Nil()),
+		Block:     g.Raw(jen.Return(jen.Nil(), jErr)),
 	}
 	return stmt
 }
 
 func WriteReturnOnError(grp *jen.Group) {
 	grp.Add(GenReturnOnError().Generate())
-}
-
-func Noop() JenGenerator {
-	return GeneratorFunc(func() *jen.Statement {
-		empty := []jen.Code{}
-		emptyStmt := jen.Statement(empty)
-		return &emptyStmt
-	})
 }
 
 func genErrorHandler(count int) JenGenerator {
