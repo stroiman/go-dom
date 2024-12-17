@@ -28,3 +28,19 @@ func (w ESWrapper[T]) GetInstance(info *v8.FunctionCallbackInfo) (result T, err 
 	err = errors.New("Could not get context")
 	return
 }
+
+func (w ESWrapper[T]) GetArgDOMString(args []*v8.Value, idx int) (result string, err error) {
+	if idx >= len(args) {
+		err = errors.New("Index out of range")
+		return
+	}
+	result = args[idx].String()
+	return
+}
+
+func (w ESWrapper[T]) GetArgByteString(args []*v8.Value, idx int) (result string, err error) {
+	return w.GetArgDOMString(args, idx)
+}
+func (w ESWrapper[T]) GetArgUSVString(args []*v8.Value, idx int) (result string, err error) {
+	return w.GetArgDOMString(args, idx)
+}

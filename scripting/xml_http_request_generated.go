@@ -40,8 +40,8 @@ func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 		if argsLen < 2 {
 			return nil, errors.New("Too few arguments")
 		}
-		method, err0 := GetArgByteString(args, 0)
-		url, err1 := GetArgUSVString(args, 1)
+		method, err0 := xhr.GetArgByteString(args, 0)
+		url, err1 := xhr.GetArgUSVString(args, 1)
 		err = errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
@@ -62,8 +62,8 @@ func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8
 		if argsLen < 2 {
 			return nil, errors.New("Too few arguments")
 		}
-		name, err0 := GetArgByteString(args, 0)
-		value, err1 := GetArgByteString(args, 1)
+		name, err0 := xhr.GetArgByteString(args, 0)
+		value, err1 := xhr.GetArgByteString(args, 1)
 		err = errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
@@ -120,7 +120,7 @@ func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v
 		if argsLen < 1 {
 			return nil, errors.New("Too few arguments")
 		}
-		name, err := GetArgByteString(args, 0)
+		name, err := xhr.GetArgByteString(args, 0)
 		if err != nil {
 			return nil, err
 		}
@@ -157,7 +157,7 @@ func (xhr ESXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8
 		if argsLen < 1 {
 			return nil, errors.New("Too few arguments")
 		}
-		mime, err := GetArgDOMString(args, 0)
+		mime, err := xhr.GetArgDOMString(args, 0)
 		if err != nil {
 			return nil, err
 		}

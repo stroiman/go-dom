@@ -194,18 +194,6 @@ func (h PrototypeBuilder[T]) CreateFunctionStringToString(name string, fn func(T
 	})
 }
 
-func GetArgDOMString(args []*v8.Value, idx int) (result string, err error) {
-	if idx >= len(args) {
-		err = errors.New("Index out of range")
-		return
-	}
-	result = args[idx].String()
-	return
-}
-
-var GetArgByteString = GetArgDOMString
-var GetArgUSVString = GetArgDOMString
-
 func ToByteString(ctx *ScriptContext, str string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, str)
 }

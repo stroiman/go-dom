@@ -382,11 +382,12 @@ type JenGenerator interface {
 }
 
 type GetArgStmt struct {
-	Name    string
-	ErrName string
-	Getter  string
-	Index   int
-	Arg     ESOperationArgument
+	Name     string
+	Receiver string
+	ErrName  string
+	Getter   string
+	Index    int
+	Arg      ESOperationArgument
 }
 
 type IfStmt struct {
@@ -399,7 +400,7 @@ func (s GetArgStmt) Generate() *jen.Statement {
 	if s.Arg.Type != "" {
 		return AssignmentStmt{
 			[]string{s.Name, s.ErrName},
-			Stmt{jen.Id(s.Getter).Call(jen.Id("args"), jen.Lit(s.Index))},
+			Stmt{jen.Id(s.Receiver).Dot(s.Getter).Call(jen.Id("args"), jen.Lit(s.Index))},
 		}.Generate()
 	} else {
 		statements := []jen.Code{jen.Id("ctx"), jen.Id("args"), jen.Lit(s.Index)}
@@ -578,6 +579,7 @@ func getInstance(receiver string) JenGenerator {
 }
 
 func processOptionalArgs(
+	data ESConstructorData,
 	args []ESOperationArgument,
 	opName string,
 	from int,
@@ -599,18 +601,19 @@ func processOptionalArgs(
 		Block:     innerStatements,
 	}
 	innerStatements.Append(GetArgStmt{
-		Name:    arg.Name,
-		ErrName: "err",
-		Getter:  "GetArg" + arg.Type,
-		Index:   from,
-		Arg:     arg,
+		Name:     arg.Name,
+		Receiver: data.Receiver,
+		ErrName:  "err",
+		Getter:   "GetArg" + arg.Type,
+		Index:    from,
+		Arg:      arg,
 	})
 	innerStatements.Append(GenReturnOnError())
 
 	argNames = append(argNames, arg.Name)
 	opName = opName + camelCase(arg.Name)
 	statements.Append(ifArgs)
-	processOptionalArgs(args, opName, from+1, innerStatements, argNames, op, requireContext)
+	processOptionalArgs(data, args, opName, from+1, innerStatements, argNames, op, requireContext)
 	genResult := CallInstance{
 		Name: opName,
 		Args: argNames,
@@ -666,11 +669,12 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 				errName = fmt.Sprintf("err")
 			}
 			stmt := GetArgStmt{
-				Name:    arg.Name,
-				ErrName: errName,
-				Getter:  "GetArg" + arg.Type,
-				Index:   i,
-				Arg:     arg,
+				Name:     arg.Name,
+				ErrName:  errName,
+				Receiver: data.Receiver,
+				Getter:   "GetArg" + arg.Type,
+				Index:    i,
+				Arg:      arg,
 			}
 			statements.Append(stmt)
 			argNames = append(argNames, arg.Name)
@@ -678,6 +682,7 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 		statements.Append(genErrorHandler(len(requiredArgs)))
 
 		processOptionalArgs(
+			data,
 			op.Arguments,
 			op.Name,
 			firstOptionalArg,
