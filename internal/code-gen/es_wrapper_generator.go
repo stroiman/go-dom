@@ -12,6 +12,12 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
+var (
+	v8FunctionTemplatePtr = g.NewTypePackage("FunctionTemplate", v8).Pointer()
+	v8Value               = g.NewTypePackage("Value", v8).Pointer()
+	scriptHostPtr         = g.NewType("ScriptHost").Pointer()
+)
+
 type CreateDataData struct {
 	InnerTypeName   string
 	WrapperTypeName string
@@ -348,22 +354,16 @@ func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 	f.Add(gen.Generate())
 }
 
-func CreateConstructor(c JSConstructor, data ESConstructorData) JenGenerator {
-	v8FunctionTemplatePtr := jen.Op("*").Qual(v8, "FunctionTemplate")
-	hostType := jen.Id("ScriptHost")
-	hostPtr := jen.Add(jen.Op("*"), hostType)
-	return Stmt{
-		jen.Func().
-			Id(fmt.Sprintf("Create%sPrototype", data.InnerTypeName)).
-			Params(c.argHost.Clone().Add(hostPtr)).Add(v8FunctionTemplatePtr).
-			Block(
-				CreateConstructorBody(c, data).Generate(),
-			),
+func CreateConstructor(c JSConstructor, data ESConstructorData) g.Generator {
+	return g.FunctionDefinition{
+		Name:     fmt.Sprintf("Create%sPrototype", data.InnerTypeName),
+		Args:     g.Arg(g.Id("host"), scriptHostPtr),
+		RtnTypes: g.List(v8FunctionTemplatePtr),
+		Body:     CreateConstructorBody(c, data),
 	}
 }
 
-func CreateConstructorBody(c JSConstructor, data ESConstructorData) JenGenerator {
-	v8Value := jen.Op("*").Qual(v8, "Value")
+func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator {
 	errorT := jen.Id("error")
 	gr := Helper{&jen.Group{}}
 	constructor := g.Id("constructor")
@@ -380,7 +380,7 @@ func CreateConstructorBody(c JSConstructor, data ESConstructorData) JenGenerator
 				jen.Qual(v8, "NewFunctionTemplateWithError").
 					Call(jen.Id("iso"), jen.Func().
 						Params(c.argInfo.Clone().Add(gr.v8FunctionCallbackInfoPtr())).
-						Params(v8Value, errorT).
+						Params(v8Value.Generate(), errorT).
 						BlockFunc(func(grp *jen.Group) { c.JSConstructorImpl(grp, data) })),
 			},
 		),

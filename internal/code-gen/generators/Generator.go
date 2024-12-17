@@ -16,7 +16,7 @@ type RawStatement struct{ *jen.Statement }
 
 func (s RawStatement) Generate() *jen.Statement { return s.Statement.Clone() }
 
-func Raw(stmt *jen.Statement) Generator { return RawStatement{stmt} }
+func Raw(stmt *jen.Statement) RawStatement { return RawStatement{stmt} }
 
 func Return(exp Generator) Generator {
 	return Raw(jen.Return(exp.Generate()))
@@ -29,3 +29,13 @@ func Id(id string) Generator {
 func Assign(ids Generator, expression Generator) Generator {
 	return Raw(ids.Generate().Op(":=").Add(expression.Generate()))
 }
+
+type Type struct {
+	RawStatement
+}
+
+func NewType(name string) Type                    { return Type{Raw(jen.Id(name))} }
+func NewTypePackage(name string, pkg string) Type { return Type{Raw(jen.Qual(pkg, name))} }
+func (t Type) Pointer() Generator                 { return Raw(jen.Op("*").Add(t.Generate())) }
+
+func List(generators ...Generator) []Generator { return generators }
