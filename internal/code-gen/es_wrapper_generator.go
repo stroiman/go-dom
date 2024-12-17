@@ -320,21 +320,40 @@ func CreateJSConstructor() JSConstructor {
 	}
 }
 
-func (c JSConstructor) JSConstructorImpl(grp *jen.Group, data ESConstructorData) {
-	grp.Add(c.varScriptContext).
-		Op(":=").
-		Add(c.argHost).
-		Dot("MustGetContext").
-		Call(c.argInfo.Clone().Dot("Context").Call())
-	buildInstance := jen.Id("wrapper").Dot("CreateInstance").Call(c.varScriptContext)
-	grp.Add(c.varInstance).Op(":=").Add(buildInstance)
-	grp.List(jen.Id("_"), jen.Id("err")).
-		Op(":=").
-		Add(c.varScriptContext.Clone().Dot("CacheNode").Call(
-			c.getThis,
-			c.varInstance,
-		))
-	grp.Return(jen.Nil(), jen.Id("err"))
+func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
+	buildInstance := g.Raw(jen.Id("wrapper").Dot("CreateInstance").Call(c.varScriptContext))
+	return StatementList(
+		g.Assign(
+			g.Id("ctx"),
+			g.Raw(
+				c.argHost.Clone().
+					Dot("MustGetContext").
+					Call(c.argInfo.Clone().Dot("Context").Call()),
+			),
+		),
+		g.Assign(g.Raw(c.varInstance), buildInstance),
+		g.Assign(g.Raw(jen.List(jen.Id("_"), jen.Id("err"))),
+			g.Raw(
+				c.varScriptContext.Clone().Dot("CacheNode").Call(
+					c.getThis,
+					c.varInstance,
+				))),
+		g.Return(g.Raw(jen.Nil()), g.Id("err")),
+	)
+
+	// grp.Add(c.varScriptContext).
+	// 	Op(":=").
+	// 	Add(c.argHost).
+	// 	Dot("MustGetContext").
+	// 	Call(c.argInfo.Clone().Dot("Context").Call())
+	// grp.Add(c.varInstance).Op(":=").Add(buildInstance)
+	// grp.List(jen.Id("_"), jen.Id("err")).
+	// 	Op(":=").
+	// 	Add(c.varScriptContext.Clone().Dot("CacheNode").Call(
+	// 		c.getThis,
+	// 		c.varInstance,
+	// 	))
+	// grp.Return(jen.Nil(), jen.Id("err"))
 }
 
 func CreateInstance(typeName string, params ...jen.Code) JenGenerator {
@@ -381,7 +400,7 @@ func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator 
 					Call(jen.Id("iso"), jen.Func().
 						Params(c.argInfo.Clone().Add(gr.v8FunctionCallbackInfoPtr())).
 						Params(v8Value.Generate(), errorT).
-						BlockFunc(func(grp *jen.Group) { c.JSConstructorImpl(grp, data) })),
+						Block(c.JSConstructorImpl(data).Generate())),
 			},
 		),
 		g.Raw(jen.Id("constructor").

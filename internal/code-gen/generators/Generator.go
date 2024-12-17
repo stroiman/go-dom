@@ -18,8 +18,12 @@ func (s RawStatement) Generate() *jen.Statement { return s.Statement.Clone() }
 
 func Raw(stmt *jen.Statement) RawStatement { return RawStatement{stmt} }
 
-func Return(exp Generator) Generator {
-	return Raw(jen.Return(exp.Generate()))
+func Return(exp ...Generator) Generator {
+	var code []jen.Code
+	for _, s := range exp {
+		code = append(code, s.Generate())
+	}
+	return Raw(jen.Return(code...))
 }
 
 func Id(id string) Generator {
