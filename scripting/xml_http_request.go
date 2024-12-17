@@ -7,7 +7,7 @@ import (
 type ESXmlHttpRequest struct{ ESWrapper[XmlHttpRequest] }
 
 func NewESXmlHttpRequest(host *ScriptHost) ESXmlHttpRequest {
-	return ESXmlHttpRequest{ESWrapper[XmlHttpRequest]{host}}
+	return ESXmlHttpRequest{NewESWrapper[XmlHttpRequest](host)}
 }
 
 func (w ESXmlHttpRequest) CreateInstance(ctx *ScriptContext) XmlHttpRequest {

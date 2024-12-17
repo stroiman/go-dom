@@ -12,7 +12,12 @@ import (
 // Generated code assumes that a wrapper type is used with specific helper
 // methods implemented.
 type ESWrapper[T Entity] struct {
+	Converters
 	host *ScriptHost
+}
+
+func NewESWrapper[T Entity](host *ScriptHost) ESWrapper[T] {
+	return ESWrapper[T]{Converters{}, host}
 }
 
 func (w ESWrapper[T]) GetInstance(info *v8.FunctionCallbackInfo) (result T, err error) {
@@ -29,7 +34,9 @@ func (w ESWrapper[T]) GetInstance(info *v8.FunctionCallbackInfo) (result T, err 
 	return
 }
 
-func (w ESWrapper[T]) GetArgDOMString(args []*v8.Value, idx int) (result string, err error) {
+type Converters struct{}
+
+func (w Converters) GetArgDOMString(args []*v8.Value, idx int) (result string, err error) {
 	if idx >= len(args) {
 		err = errors.New("Index out of range")
 		return
@@ -38,9 +45,9 @@ func (w ESWrapper[T]) GetArgDOMString(args []*v8.Value, idx int) (result string,
 	return
 }
 
-func (w ESWrapper[T]) GetArgByteString(args []*v8.Value, idx int) (result string, err error) {
+func (w Converters) GetArgByteString(args []*v8.Value, idx int) (result string, err error) {
 	return w.GetArgDOMString(args, idx)
 }
-func (w ESWrapper[T]) GetArgUSVString(args []*v8.Value, idx int) (result string, err error) {
+func (w Converters) GetArgUSVString(args []*v8.Value, idx int) (result string, err error) {
 	return w.GetArgDOMString(args, idx)
 }
