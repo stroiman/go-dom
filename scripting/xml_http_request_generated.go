@@ -125,7 +125,7 @@ func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v
 			return nil, err
 		}
 		result := instance.GetResponseHeader(name)
-		return ToNullableByteString(ctx, result)
+		return xhr.ToNullableByteString(ctx, result)
 	}
 }
 
@@ -141,7 +141,7 @@ func (xhr ESXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo)
 		if err != nil {
 			return nil, err
 		} else {
-			return ToByteString(ctx, result)
+			return xhr.ToByteString(ctx, result)
 		}
 	}
 }

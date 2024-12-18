@@ -466,7 +466,7 @@ func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResul
 	return
 }
 
-func (c CallInstance) GetGenerator(instanceName string) GetGeneratorResult {
+func (c CallInstance) GetGenerator(receiver string, instanceName string) GetGeneratorResult {
 	genRes := c.PerformCall(instanceName)
 	list := StatementListStmt{}
 	list.Append(genRes.Generator)
@@ -481,9 +481,9 @@ func (c CallInstance) GetGenerator(instanceName string) GetGeneratorResult {
 		if c.Op.Nullable {
 			converter += "Nullable"
 		}
-		converter += c.Op.ReturnType
+		converter += camelCase(c.Op.ReturnType)
 		genRes.RequireContext = true
-		valueReturn := Stmt{jen.Return(jen.Id(converter).Call(jen.Id("ctx"), jen.Id("result")))}
+		valueReturn := Stmt{jen.Return(jen.Id(receiver).Dot(converter).Call(jen.Id("ctx"), jen.Id("result")))}
 		if genRes.HasError {
 			list.Append(IfStmt{
 				Condition: Stmt{jen.Id("err").Op("!=").Nil()},
@@ -545,7 +545,7 @@ func processOptionalArgs(
 		Name: opName,
 		Args: argNames,
 		Op:   op,
-	}.GetGenerator("instance")
+	}.GetGenerator(data.Receiver, "instance")
 	innerStatements.Append(genResult.Generator)
 }
 
@@ -622,7 +622,7 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 			Name: op.Name,
 			Args: argNames,
 			Op:   op,
-		}.GetGenerator("instance")
+		}.GetGenerator(data.Receiver, "instance")
 		if *requireContext || genResult.RequireContext {
 			statements.Prepend(Stmt{
 				jen.Id("ctx").

@@ -194,16 +194,6 @@ func (h PrototypeBuilder[T]) CreateFunctionStringToString(name string, fn func(T
 	})
 }
 
-func ToByteString(ctx *ScriptContext, str string) (*v8.Value, error) {
-	return v8.NewValue(ctx.host.iso, str)
-}
-func ToNullableByteString(ctx *ScriptContext, str *string) (*v8.Value, error) {
-	if str == nil {
-		return v8.Null(ctx.host.iso), nil
-	}
-	return v8.NewValue(ctx.host.iso, str)
-}
-
 func TryParseArgs[T interface{}](
 	ctx *ScriptContext,
 	args []*v8.Value,
