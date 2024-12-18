@@ -40,11 +40,13 @@ func (f FunctionDefinition) Generate() *jen.Statement {
 	for _, t := range f.RtnTypes {
 		rtnTypes = append(rtnTypes, t.Generate())
 	}
-	stmt := jen.Func().
-		Id(f.Name).
-		Params(args...)
+	stmt := jen.Func()
+	if f.Name != "" {
+		stmt.Id(f.Name)
+	}
+	stmt.Params(args...)
 	if len(rtnTypes) > 0 {
-		stmt.List(rtnTypes...)
+		stmt.Params(rtnTypes...)
 	}
 	return stmt.Block(f.Body.Generate())
 }

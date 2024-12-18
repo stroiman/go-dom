@@ -13,9 +13,10 @@ import (
 )
 
 var (
-	v8FunctionTemplatePtr = g.NewTypePackage("FunctionTemplate", v8).Pointer()
-	v8Value               = g.NewTypePackage("Value", v8).Pointer()
-	scriptHostPtr         = g.NewType("ScriptHost").Pointer()
+	v8FunctionTemplatePtr     = g.NewTypePackage("FunctionTemplate", v8).Pointer()
+	v8FunctionCallbackInfoPtr = g.NewTypePackage("FunctionCallbackInfo", v8).Pointer()
+	v8Value                   = g.NewTypePackage("Value", v8).Pointer()
+	scriptHostPtr             = g.NewType("ScriptHost").Pointer()
 )
 
 type CreateDataData struct {
@@ -384,7 +385,6 @@ func CreateConstructor(c JSConstructor, data ESConstructorData) g.Generator {
 
 func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator {
 	errorT := jen.Id("error")
-	gr := Helper{&jen.Group{}}
 	constructor := g.Id("constructor")
 	return StatementList(
 		g.Assign(Id("iso"),
@@ -397,10 +397,13 @@ func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator 
 		g.Assign(constructor,
 			Stmt{
 				jen.Qual(v8, "NewFunctionTemplateWithError").
-					Call(jen.Id("iso"), jen.Func().
-						Params(c.argInfo.Clone().Add(gr.v8FunctionCallbackInfoPtr())).
-						Params(v8Value.Generate(), errorT).
-						Block(c.JSConstructorImpl(data).Generate())),
+					Call(jen.Id("iso"),
+						g.FunctionDefinition{
+							Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
+							RtnTypes: g.List(v8Value, g.Raw(errorT)),
+							Body:     c.JSConstructorImpl(data),
+						}.Generate(),
+					),
 			},
 		),
 		g.Raw(jen.Id("constructor").
