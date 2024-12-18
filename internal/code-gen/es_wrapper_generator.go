@@ -82,8 +82,6 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 			constructor = &operation.Op
 		}
 	}
-	// fmt.Println(operations)
-	// os.Exit(1)
 
 	operations := make([]ESOperation, 0, len(ops))
 	for _, op := range ops {
@@ -214,20 +212,6 @@ func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
 				))),
 		g.Return(g.Raw(jen.Nil()), g.Id("err")),
 	)
-
-	// grp.Add(c.varScriptContext).
-	// 	Op(":=").
-	// 	Add(c.argHost).
-	// 	Dot("MustGetContext").
-	// 	Call(c.argInfo.Clone().Dot("Context").Call())
-	// grp.Add(c.varInstance).Op(":=").Add(buildInstance)
-	// grp.List(jen.Id("_"), jen.Id("err")).
-	// 	Op(":=").
-	// 	Add(c.varScriptContext.Clone().Dot("CacheNode").Call(
-	// 		c.getThis,
-	// 		c.varInstance,
-	// 	))
-	// grp.Return(jen.Nil(), jen.Id("err"))
 }
 
 func CreateInstance(typeName string, params ...jen.Code) JenGenerator {
