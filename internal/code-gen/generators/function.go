@@ -25,6 +25,7 @@ func (a FunctionArgumentList) Arg(name Generator, t Generator) FunctionArgumentL
 type FunctionDefinition struct {
 	Name     string
 	Args     FunctionArgumentList
+	Receiver FunctionArgument
 	RtnTypes []Generator
 	Body     Generator
 }
@@ -41,6 +42,9 @@ func (f FunctionDefinition) Generate() *jen.Statement {
 		rtnTypes = append(rtnTypes, t.Generate())
 	}
 	stmt := jen.Func()
+	if f.Receiver.Name != nil {
+		stmt.Params(f.Receiver.Generate())
+	}
 	if f.Name != "" {
 		stmt.Id(f.Name)
 	}

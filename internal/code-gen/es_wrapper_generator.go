@@ -792,21 +792,18 @@ func (c JSConstructor) CreateWrapperMethod(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
-	v8Value := jen.Op("*").Qual(v8, "Value")
-	errorT := jen.Id("error")
-	v8FunctionCallbackInfoPtr := jen.Op("*").Qual(v8, "FunctionCallbackInfo")
-	f := c.FunctionTemplateCallbackBody(data, op).Generate()
+	f := c.FunctionTemplateCallbackBody(data, op)
 	return StatementList(
 		NewLine(),
-		Stmt{
-			jen.Func().
-				Params(jen.Id(data.Receiver).Id(data.WrapperTypeName)).
-				Id(camelCase(op.Name)).
-				Params(c.argInfo.Clone().Add(v8FunctionCallbackInfoPtr)).
-				Params(v8Value, errorT).
-				BlockFunc(func(grp *jen.Group) {
-					grp.Add(f)
-				}),
+		g.FunctionDefinition{
+			Receiver: g.FunctionArgument{
+				Name: g.Id(data.Receiver),
+				Type: g.Id(data.WrapperTypeName),
+			},
+			Name:     camelCase(op.Name),
+			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
+			RtnTypes: g.List(v8Value, g.Id("error")),
+			Body:     f,
 		})
 }
 
