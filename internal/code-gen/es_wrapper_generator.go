@@ -193,12 +193,12 @@ func CreateJSConstructor() JSConstructor {
 }
 
 func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
-	buildInstance := g.Raw(jen.Id("wrapper").Dot("CreateInstance").Call(c.varScriptContext))
+	buildInstance := g.Raw(jen.Id(data.Receiver).Dot("CreateInstance").Call(c.varScriptContext))
 	return StatementList(
 		g.Assign(
 			g.Id("ctx"),
 			g.Raw(
-				c.argHost.Clone().
+				jen.Id(data.Receiver).Dot("host").
 					Dot("MustGetContext").
 					Call(c.argInfo.Clone().Dot("Context").Call()),
 			),
@@ -226,6 +226,7 @@ func Id(id string) JenGenerator { return Stmt{jen.Id(id).Clone()} }
 func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
 	gen := StatementList(
 		CreateConstructor(c, data),
+		CreateConstructorWrapper(c, data),
 		CreateWrapperMethods(c, data),
 	)
 	f.Add(gen.Generate())
@@ -241,7 +242,6 @@ func CreateConstructor(c JSConstructor, data ESConstructorData) g.Generator {
 }
 
 func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator {
-	errorT := jen.Id("error")
 	constructor := g.Id("constructor")
 	return StatementList(
 		g.Assign(Id("iso"),
@@ -252,16 +252,7 @@ func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator 
 			CreateInstance(data.WrapperTypeName, jen.Id("host")),
 		),
 		g.Assign(constructor,
-			Stmt{
-				jen.Qual(v8, "NewFunctionTemplateWithError").
-					Call(jen.Id("iso"),
-						g.FunctionDefinition{
-							Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
-							RtnTypes: g.List(v8Value, g.Raw(errorT)),
-							Body:     c.JSConstructorImpl(data),
-						}.Generate(),
-					),
-			},
+			NewFunctionTemplate{g.Id("iso"), Stmt{jen.Id("wrapper").Dot("NewInstance")}},
 		),
 		g.Raw(jen.Id("constructor").
 			Dot("GetInstanceTemplate").
@@ -635,6 +626,23 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 		statements.Append(genResult.Generator)
 		grp.Add(statements.Generate())
 	})}
+}
+
+func CreateConstructorWrapper(c JSConstructor, data ESConstructorData) JenGenerator {
+
+	return StatementList(
+		g.Line,
+		g.FunctionDefinition{
+			Name: "NewInstance",
+			Receiver: g.FunctionArgument{
+				Name: g.Id(data.Receiver),
+				Type: g.Id(data.WrapperTypeName),
+			},
+			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
+			RtnTypes: g.List(v8Value, g.Id("error")),
+			Body:     c.JSConstructorImpl(data),
+		},
+	)
 }
 
 func CreateWrapperMethods(c JSConstructor, data ESConstructorData) JenGenerator {

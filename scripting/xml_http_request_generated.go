@@ -10,12 +10,7 @@ import (
 func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewESXmlHttpRequest(host)
-	constructor := v8.NewFunctionTemplateWithError(iso, func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		ctx := host.MustGetContext(info.Context())
-		instance := wrapper.CreateInstance(ctx)
-		_, err := ctx.CacheNode(info.This(), instance)
-		return nil, err
-	})
+	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
 	constructor.GetInstanceTemplate().SetInternalFieldCount(1)
 	prototype := constructor.PrototypeTemplate()
 
@@ -27,6 +22,13 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, wrapper.GetAllResponseHeaders))
 	prototype.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, wrapper.OverrideMimeType))
 	return constructor
+}
+
+func (xhr ESXmlHttpRequest) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := xhr.host.MustGetContext(info.Context())
+	instance := xhr.CreateInstance(ctx)
+	_, err := ctx.CacheNode(info.This(), instance)
+	return nil, err
 }
 
 func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

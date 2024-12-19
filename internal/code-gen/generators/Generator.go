@@ -43,3 +43,5 @@ func NewTypePackage(name string, pkg string) Type { return Type{Raw(jen.Qual(pkg
 func (t Type) Pointer() Generator                 { return Raw(jen.Op("*").Add(t.Generate())) }
 
 func List(generators ...Generator) []Generator { return generators }
+
+var Line Generator = Raw(jen.Line())
