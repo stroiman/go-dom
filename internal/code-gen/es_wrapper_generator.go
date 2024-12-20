@@ -196,25 +196,71 @@ func CreateJSConstructor() JSConstructor {
 }
 
 func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
-	buildInstance := g.Raw(jen.Id(data.Receiver).Dot("CreateInstance").Call(c.varScriptContext))
-	return StatementList(
-		g.Assign(
-			g.Id("ctx"),
-			g.Raw(
-				jen.Id(data.Receiver).Dot("host").
-					Dot("MustGetContext").
-					Call(c.argInfo.Clone().Dot("Context").Call()),
-			),
-		),
-		g.Assign(g.Raw(c.varInstance), buildInstance),
-		g.Assign(g.Raw(jen.List(jen.Id("_"), jen.Id("err"))),
-			g.Raw(
-				c.varScriptContext.Clone().Dot("CacheNode").Call(
-					c.getThis,
-					c.varInstance,
-				))),
-		g.Return(g.Raw(jen.Nil()), g.Id("err")),
+	readArgsResult := ReadArguments(data, *data.Constructor)
+	statements := StatementList(readArgsResult.Generator)
+	statements.Append(
+		g.Assign(g.Id("ctx"), Stmt{jen.Id(data.Receiver).Dot("host").Dot("MustGetContext").Call(
+			jen.Id("info").Dot("Context").Call(),
+		)}),
 	)
+	for i := len(data.Constructor.Arguments); i >= 0; i-- {
+		functionName := "CreateInstance"
+		for j, arg := range data.Constructor.Arguments {
+			if j < i {
+				if arg.Optional {
+					functionName += camelCase(arg.Name)
+				}
+			}
+		}
+		argnames := readArgsResult.ArgNames[0:i]
+		errNames := readArgsResult.ErrNames[0:i]
+		construction := StatementList(
+			g.Return(
+				g.Raw(jen.Id(data.Receiver).Dot(functionName).CallFunc(func(grp *jen.Group) {
+					grp.Add(jen.Id("ctx"))
+					grp.Add(jen.Id("info").Dot("This").Call())
+					for _, name := range argnames {
+						grp.Add(name.Generate())
+					}
+				})),
+			),
+		)
+		if i > 0 {
+			arg := data.Constructor.Arguments[i-1]
+			fmt.Println("Arg", i, arg.Optional)
+
+			argErrorCheck := StatementList(
+				g.Assign(g.Id("err"),
+					g.Raw(jen.Qual("errors", "Join").CallFunc(func(g *jen.Group) {
+						for _, e := range errNames {
+							g.Add(e.Generate())
+						}
+					})),
+				),
+				GenReturnOnError(),
+			)
+			statements.Append(StatementList(
+				IfStmt{
+					Condition: g.Raw(jen.Id("args").Dot("noOfReadArguments").Op(">=").Lit(i)),
+					Block: StatementList(
+						argErrorCheck,
+						construction,
+					),
+				}))
+			if !(arg.Optional) {
+				statements.Append(
+					g.Return(
+						g.Nil,
+						g.Raw(jen.Qual("errors", "New").Call(jen.Lit("Missing arguments"))),
+					),
+				)
+				break
+			}
+		} else {
+			statements.Append(construction)
+		}
+	}
+	return statements
 }
 
 func CreateInstance(typeName string, params ...jen.Code) JenGenerator {
@@ -379,8 +425,8 @@ func Statements(stmts ...JenGenerator) JenGenerator {
 	return StatementListStmt{stmts}
 }
 
-func (s *StatementListStmt) Append(stmt JenGenerator) {
-	s.Statements = append(s.Statements, stmt)
+func (s *StatementListStmt) Append(stmt ...JenGenerator) {
+	s.Statements = append(s.Statements, stmt...)
 }
 func (s *StatementListStmt) AppendJen(stmt *jen.Statement) {
 	s.Statements = append(s.Statements, Stmt{stmt})
@@ -532,13 +578,60 @@ func processOptionalArgs(
 	argNames = append(argNames, arg.Name)
 	opName = opName + camelCase(arg.Name)
 	statements.Append(ifArgs)
-	processOptionalArgs(data, args, opName, from+1, innerStatements, argNames, op, requireContext)
+	processOptionalArgs(
+		data,
+		args,
+		opName,
+		from+1,
+		innerStatements,
+		argNames,
+		op,
+		requireContext,
+	)
 	genResult := CallInstance{
 		Name: opName,
 		Args: argNames,
 		Op:   op,
 	}.GetGenerator(data.Receiver, "instance")
 	innerStatements.Append(genResult.Generator)
+}
+
+type ReadArgumentsResult struct {
+	ArgNames  []g.Generator
+	ErrNames  []g.Generator
+	Generator g.Generator
+}
+
+func ReadArguments(data ESConstructorData, op ESOperation) (res ReadArgumentsResult) {
+	argCount := len(op.Arguments)
+	res.ArgNames = make([]g.Generator, argCount)
+	res.ErrNames = make([]g.Generator, argCount)
+	statements := &StatementListStmt{}
+	if argCount > 0 {
+		statements.Append(
+			g.Assign(
+				g.Id("args"),
+				g.Raw(
+					jen.Id("newArgumentHelper").
+						Call(jen.Id(data.Receiver).Dot("host"), jen.Id("info")),
+				),
+			),
+		)
+	}
+	for i, arg := range op.Arguments {
+		argName := g.Id(arg.Name)
+		errName := g.Id(fmt.Sprintf("err%d", i))
+		res.ArgNames[i] = argName
+		res.ErrNames[i] = errName
+		converterName := fmt.Sprintf("Decode%s", arg.Type)
+		converter := g.Raw(jen.Id(data.Receiver).Dot(converterName))
+		statements.Append(g.Assign(
+			g.Raw(jen.List(argName.Generate(), errName.Generate())),
+			Stmt{jen.Id("TryParseArg").Call(jen.Id("args"), jen.Lit(i), converter)}))
+		// Stmt{jen.Id("args").Dot("GetArg").Call(jen.Lit(i), converter)}))
+	}
+	res.Generator = statements
+	return
 }
 
 func (c JSConstructor) FunctionTemplateCallbackBody(
@@ -628,7 +721,6 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 }
 
 func CreateConstructorWrapper(c JSConstructor, data ESConstructorData) JenGenerator {
-
 	return StatementList(
 		g.Line,
 		g.FunctionDefinition{
@@ -695,7 +787,7 @@ func GenReturnOnError() JenGenerator {
 	jErr := jen.Id("err")
 	stmt := IfStmt{
 		Condition: g.Raw(jErr.Clone().Op("!=").Nil()),
-		Block:     g.Raw(jen.Return(jen.Nil(), jErr)),
+		Block:     g.Return(g.Raw(jen.Nil()), g.Raw(jErr)),
 	}
 	return stmt
 }

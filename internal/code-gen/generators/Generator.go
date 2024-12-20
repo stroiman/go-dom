@@ -34,6 +34,14 @@ func Assign(ids Generator, expression Generator) Generator {
 	return Raw(ids.Generate().Op(":=").Add(expression.Generate()))
 }
 
+func AssignMany(ids []Generator, expression Generator) Generator {
+	var gs []jen.Code
+	for _, id := range ids {
+		gs = append(gs, id.Generate())
+	}
+	return Raw(jen.List(gs...).Op(":=").Add(expression.Generate()))
+}
+
 type Type struct {
 	RawStatement
 }

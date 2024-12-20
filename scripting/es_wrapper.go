@@ -36,6 +36,10 @@ func (w ESWrapper[T]) GetInstance(info *v8.FunctionCallbackInfo) (result T, err 
 
 type Converters struct{}
 
+func (w Converters) DecodeUSVString(ctx *ScriptContext, val *v8.Value) (string, error) {
+	return val.String(), nil
+}
+
 func (w Converters) GetArgDOMString(args []*v8.Value, idx int) (result string, err error) {
 	if idx >= len(args) {
 		err = errors.New("Index out of range")
@@ -60,5 +64,9 @@ func (w Converters) ToNullableByteString(ctx *ScriptContext, str *string) (*v8.V
 }
 
 func (w Converters) ToByteString(ctx *ScriptContext, str string) (*v8.Value, error) {
+	return v8.NewValue(ctx.host.iso, str)
+}
+
+func (w Converters) ToUSVString(ctx *ScriptContext, str string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, str)
 }

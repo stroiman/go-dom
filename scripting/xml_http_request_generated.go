@@ -25,10 +25,9 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 }
 
 func (xhr ESXmlHttpRequest) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+
 	ctx := xhr.host.MustGetContext(info.Context())
-	instance := xhr.CreateInstance(ctx)
-	_, err := ctx.CacheNode(info.This(), instance)
-	return nil, err
+	return xhr.CreateInstance(ctx, info.This())
 }
 
 func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

@@ -16,6 +16,7 @@ type URL interface {
 	GetPort() string
 	GetProtocol() string
 	GetSearch() string
+	ToJSON() (string, error)
 }
 
 type url struct {
@@ -24,8 +25,8 @@ type url struct {
 	url *netURL.URL
 }
 
-func NewUrl() URL {
-	return &url{}
+func NewUrl(url string) (URL, error) {
+	return ParseURL(url)
 }
 
 func ParseURL(rawUrl string) (URL, error) {
@@ -83,3 +84,5 @@ func (l url) GetSearch() string {
 		return ""
 	}
 }
+
+func (l url) ToJSON() (string, error) { return l.GetHref(), nil }

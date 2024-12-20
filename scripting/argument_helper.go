@@ -7,12 +7,13 @@ import (
 
 type argumentHelper struct {
 	*v8.FunctionCallbackInfo
-	ctx *ScriptContext
+	ctx               *ScriptContext
+	noOfReadArguments int
 }
 
 func newArgumentHelper(host *ScriptHost, info *v8.FunctionCallbackInfo) argumentHelper {
 	ctx := host.MustGetContext(info.Context())
-	return argumentHelper{info, ctx}
+	return argumentHelper{info, ctx, 0}
 }
 
 func (h argumentHelper) GetFunctionArg(index int) (*v8.Function, error) {
@@ -65,4 +66,19 @@ func (h argumentHelper) GetNodeArg(index int) (browser.Node, error) {
 		}
 	}
 	return nil, v8.NewTypeError(h.ctx.host.iso, "Must be a node")
+}
+
+func (h *argumentHelper) GetArg(index int) *v8.Value {
+	args := h.FunctionCallbackInfo.Args()
+	if len(args) < index {
+		return nil
+	}
+	arg := args[index]
+	if arg.IsUndefined() {
+		return nil
+	}
+	if h.noOfReadArguments <= index {
+		h.noOfReadArguments = index + 1
+	}
+	return arg
 }

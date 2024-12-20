@@ -58,6 +58,9 @@ func main() {
 	case "xhr":
 		err = generateXhr(file)
 		break
+	case "url":
+		err = generateUrl(file)
+		break
 	default:
 		fmt.Println("Unrecognised generator type")
 		os.Exit(1)

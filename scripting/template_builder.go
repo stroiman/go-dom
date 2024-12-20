@@ -180,7 +180,7 @@ func (h PrototypeBuilder[T]) CreateFunction(
 				if err != nil {
 					return nil, err
 				}
-				return fn(instance, argumentHelper{info, ctx})
+				return fn(instance, argumentHelper{info, ctx, 0})
 			},
 		),
 		v8.ReadOnly,
@@ -202,6 +202,18 @@ func TryParseArgs[T interface{}](
 ) (result T, err error) {
 	err = errors.New("TODO")
 	return
+}
+
+func TryParseArg[T any](
+	args argumentHelper,
+	index int,
+	parser func(*ScriptContext, *v8.Value) (T, error),
+) (result T, err error) {
+	value := args.GetArg(index)
+	if value == nil {
+		return
+	}
+	return parser(args.ctx, value)
 }
 
 func GetBodyFromDocument(ctx *ScriptContext, val *v8.Value) (*browser.XHRRequestBody, error) {
