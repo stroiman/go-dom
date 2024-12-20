@@ -385,12 +385,10 @@ func (s *StatementListStmt) AppendJen(stmt *jen.Statement) {
 
 func (s StatementListStmt) Generate() *jen.Statement {
 	result := []jen.Code{}
-	g := jen.Group{}
 	for i, s := range s.Statements {
 		if i > 0 {
 			result = append(result, jen.Line())
 		}
-		g.Add(s.Generate())
 		jenStatement := s.Generate()
 		if jenStatement != nil {
 			result = append(result, jenStatement)
