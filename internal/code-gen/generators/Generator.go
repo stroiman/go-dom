@@ -44,4 +44,6 @@ func (t Type) Pointer() Generator                 { return Raw(jen.Op("*").Add(t
 
 func List(generators ...Generator) []Generator { return generators }
 
+var Noop = GeneratorFunc(func() *jen.Statement { return nil })
+var Nil Generator = Raw(jen.Nil())
 var Line Generator = Raw(jen.Line())
