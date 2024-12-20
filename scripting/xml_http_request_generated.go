@@ -25,7 +25,6 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 }
 
 func (xhr ESXmlHttpRequest) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-
 	ctx := xhr.host.MustGetContext(info.Context())
 	return xhr.CreateInstance(ctx, info.This())
 }
@@ -78,7 +77,6 @@ func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	}
 	args := info.Args()
 	argsLen := len(args)
-
 	if argsLen >= 1 {
 		body, err := TryParseArgs(ctx, args, 0, GetBodyFromDocument, GetBodyFromXMLHttpRequestBodyInit)
 		if err != nil {
@@ -96,7 +94,6 @@ func (xhr ESXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	if err != nil {
 		return nil, err
 	}
-
 	err = instance.Abort()
 	return nil, err
 }
@@ -126,7 +123,6 @@ func (xhr ESXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo)
 	if err != nil {
 		return nil, err
 	}
-
 	result, err := instance.GetAllResponseHeaders()
 	if err != nil {
 		return nil, err

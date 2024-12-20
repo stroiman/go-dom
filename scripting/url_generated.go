@@ -46,7 +46,6 @@ func (u ESURL) ToJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	result, err := instance.ToJSON()
 	if err != nil {
 		return nil, err
