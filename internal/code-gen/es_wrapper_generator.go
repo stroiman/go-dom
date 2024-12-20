@@ -39,6 +39,9 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 	}
 	ops := []*tmp{}
 	for _, member := range idlName.Members {
+		if member.Special == "static" {
+			continue
+		}
 		if -1 != slices.IndexFunc(
 			ops,
 			func(op *tmp) bool { return op.Op.Name == member.Name },
