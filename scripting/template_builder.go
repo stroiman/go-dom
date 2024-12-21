@@ -205,7 +205,7 @@ func TryParseArgs[T interface{}](
 }
 
 func TryParseArg[T any](
-	args argumentHelper,
+	args *argumentHelper,
 	index int,
 	parser func(*ScriptContext, *v8.Value) (T, error),
 ) (result T, err error) {

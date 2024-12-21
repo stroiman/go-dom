@@ -8,6 +8,6 @@ import (
 var urlPolyfill []byte
 
 func installPolyfills(context *ScriptContext) error {
-	_, err := context.RunScript(string(urlPolyfill))
-	return err
+	// _, err := context.RunScript(string(urlPolyfill))
+	return nil
 }

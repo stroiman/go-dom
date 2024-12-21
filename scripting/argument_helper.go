@@ -11,9 +11,9 @@ type argumentHelper struct {
 	noOfReadArguments int
 }
 
-func newArgumentHelper(host *ScriptHost, info *v8.FunctionCallbackInfo) argumentHelper {
+func newArgumentHelper(host *ScriptHost, info *v8.FunctionCallbackInfo) *argumentHelper {
 	ctx := host.MustGetContext(info.Context())
-	return argumentHelper{info, ctx, 0}
+	return &argumentHelper{info, ctx, 0}
 }
 
 func (h argumentHelper) GetFunctionArg(index int) (*v8.Function, error) {

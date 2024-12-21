@@ -1,8 +1,8 @@
 package scripting
 
 import (
-	"errors"
 	"runtime/cgo"
+	"unsafe"
 
 	"github.com/stroiman/go-dom/browser"
 
@@ -20,20 +20,25 @@ type HandleDisposable cgo.Handle
 
 func (h HandleDisposable) Dispose() { cgo.Handle(h).Delete() }
 
+func (u ESURL) storeHandle(
+	value browser.URL,
+	this *v8.Object,
+	ctx *ScriptContext,
+) (*v8.Value, error) {
+	handle := cgo.NewHandle(value)
+	ctx.AddDisposer(HandleDisposable(handle))
+
+	internalField := v8.NewExternalValue(u.host.iso, unsafe.Pointer(&handle))
+	this.SetInternalField(0, internalField)
+	return nil, nil
+}
+
 func (u ESURL) CreateInstance(ctx *ScriptContext, this *v8.Object, url string) (*v8.Value, error) {
 	value, err := browser.NewUrl(url)
 	if err != nil {
 		return nil, err
 	}
-	handle := cgo.NewHandle(value)
-	internalField, err := v8.NewValue(u.host.iso, (uintptr)(handle))
-	ctx.AddDisposer(HandleDisposable(handle))
-
-	if err != nil {
-		return nil, err
-	}
-	this.SetInternalField(0, internalField)
-	return nil, nil
+	return u.storeHandle(value, this, ctx)
 }
 
 func (u ESURL) CreateInstanceBase(
@@ -42,12 +47,16 @@ func (u ESURL) CreateInstanceBase(
 	url string,
 	base string,
 ) (*v8.Value, error) {
-	return nil, errors.New("TODO")
+	value, err := browser.NewUrlBase(url, base)
+	if err != nil {
+		return nil, err
+	}
+	return u.storeHandle(value, this, ctx)
 }
 
 func (u ESURL) GetInstance(info *v8.FunctionCallbackInfo) (browser.URL, error) {
 	h := info.This().GetInternalField(0)
-	handle := cgo.Handle(h.Uint32())
+	handle := *(*cgo.Handle)(h.External())
 	result := handle.Value().(browser.URL)
 	return result, nil
 }

@@ -29,6 +29,14 @@ func NewUrl(url string) (URL, error) {
 	return ParseURL(url)
 }
 
+func NewUrlBase(relativeUrl string, base string) (URL, error) {
+	if u, err := netURL.Parse(base); err == nil {
+		return NewURLFromNetURL(u.JoinPath(relativeUrl)), nil
+	} else {
+		return nil, err
+	}
+}
+
 func ParseURL(rawUrl string) (URL, error) {
 	if res, err := netURL.Parse(rawUrl); err == nil {
 		return &url{res}, nil

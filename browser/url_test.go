@@ -32,6 +32,14 @@ var _ = Describe("URL", func() {
 		})
 	})
 
+	Describe("Constructing with a base", func() {
+		It("Has the right URL", func() {
+			u, err := NewUrlBase("foo/bar", "http://example.com/")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(u.GetHref()).To(Equal("http://example.com/foo/bar"))
+		})
+	})
+
 	Describe("Not implemented functions", func() {
 		It("Returns correct error on CreateObjectURL", func() {
 			_, err := CreateObjectURL("")
