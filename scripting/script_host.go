@@ -299,6 +299,10 @@ func (ctx *ScriptContext) Dispose() {
 	ctx.v8ctx.Close()
 }
 
+func (ctx *ScriptContext) AddDisposer(disposer Disposable) {
+	ctx.disposers = append(ctx.disposers, disposer)
+}
+
 func (ctx *ScriptContext) RunScript(script string) (*v8.Value, error) {
 	return ctx.v8ctx.RunScript(script, "")
 }

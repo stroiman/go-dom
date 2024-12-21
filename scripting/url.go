@@ -16,6 +16,10 @@ type ESURL struct {
 
 func NewESURL(host *ScriptHost) ESURL { return ESURL{Converters{}, host} }
 
+type HandleDisposable cgo.Handle
+
+func (h HandleDisposable) Dispose() { cgo.Handle(h).Delete() }
+
 func (u ESURL) CreateInstance(ctx *ScriptContext, this *v8.Object, url string) (*v8.Value, error) {
 	value, err := browser.NewUrl(url)
 	if err != nil {
@@ -23,6 +27,8 @@ func (u ESURL) CreateInstance(ctx *ScriptContext, this *v8.Object, url string) (
 	}
 	handle := cgo.NewHandle(value)
 	internalField, err := v8.NewValue(u.host.iso, (uintptr)(handle))
+	ctx.AddDisposer(HandleDisposable(handle))
+
 	if err != nil {
 		return nil, err
 	}
