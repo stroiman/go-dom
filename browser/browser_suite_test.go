@@ -13,7 +13,7 @@ import (
 func init() {
 	var logLevel = test.InstallDefaultTextLogger()
 	logLevel.Set(slog.LevelInfo)
-	logLevel.Set(slog.LevelDebug)
+	// logLevel.Set(slog.LevelDebug)
 }
 
 func TestDomTypes(t *testing.T) {
