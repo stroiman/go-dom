@@ -758,7 +758,8 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 	op ESOperation,
 ) JenGenerator {
 	if op.NotImplemented {
-		return g.Return(g.Nil, g.Raw(jen.Qual("errors", "New").Call(jen.Lit("Not implemented"))))
+		errMsg := fmt.Sprintf("Not implemented: %s.%s", data.Name, op.Name)
+		return g.Return(g.Nil, g.Raw(jen.Qual("errors", "New").Call(jen.Lit(errMsg))))
 	}
 	requireContext := new(bool)
 	statements := &StatementListStmt{}

@@ -134,7 +134,7 @@ func (u ESDOMTokenList) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error
 }
 
 func (u ESDOMTokenList) Supports(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: DOMTokenList.supports")
 }
 
 func (u ESDOMTokenList) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

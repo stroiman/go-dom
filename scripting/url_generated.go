@@ -114,7 +114,7 @@ func (u ESURL) GetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u ESURL) SetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SetHref")
 }
 
 func (u ESURL) Origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -138,23 +138,23 @@ func (u ESURL) GetProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u ESURL) SetProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SetProtocol")
 }
 
 func (u ESURL) GetUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.GetUsername")
 }
 
 func (u ESURL) SetUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SetUsername")
 }
 
 func (u ESURL) GetPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.GetPassword")
 }
 
 func (u ESURL) SetPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SetPassword")
 }
 
 func (u ESURL) GetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -168,7 +168,7 @@ func (u ESURL) GetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u ESURL) SetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SetHost")
 }
 
 func (u ESURL) GetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -182,7 +182,7 @@ func (u ESURL) GetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u ESURL) SetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SetHostname")
 }
 
 func (u ESURL) GetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -196,7 +196,7 @@ func (u ESURL) GetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u ESURL) SetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SetPort")
 }
 
 func (u ESURL) GetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -210,7 +210,7 @@ func (u ESURL) GetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u ESURL) SetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SetPathname")
 }
 
 func (u ESURL) GetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -224,11 +224,11 @@ func (u ESURL) GetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u ESURL) SetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SetSearch")
 }
 
 func (u ESURL) SearchParams(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SearchParams")
 }
 
 func (u ESURL) GetHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -242,5 +242,5 @@ func (u ESURL) GetHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u ESURL) SetHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: URL.SetHash")
 }

@@ -175,15 +175,15 @@ func (xhr ESXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8
 }
 
 func (xhr ESXmlHttpRequest) ReadyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: XMLHttpRequest.ReadyState")
 }
 
 func (xhr ESXmlHttpRequest) GetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: XMLHttpRequest.GetTimeout")
 }
 
 func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: XMLHttpRequest.SetTimeout")
 }
 
 func (xhr ESXmlHttpRequest) GetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -215,11 +215,11 @@ func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*
 }
 
 func (xhr ESXmlHttpRequest) Upload(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: XMLHttpRequest.Upload")
 }
 
 func (xhr ESXmlHttpRequest) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: XMLHttpRequest.ResponseURL")
 }
 
 func (xhr ESXmlHttpRequest) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -243,15 +243,15 @@ func (xhr ESXmlHttpRequest) StatusText(info *v8.FunctionCallbackInfo) (*v8.Value
 }
 
 func (xhr ESXmlHttpRequest) GetResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: XMLHttpRequest.GetResponseType")
 }
 
 func (xhr ESXmlHttpRequest) SetResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: XMLHttpRequest.SetResponseType")
 }
 
 func (xhr ESXmlHttpRequest) Response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: XMLHttpRequest.Response")
 }
 
 func (xhr ESXmlHttpRequest) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -265,5 +265,5 @@ func (xhr ESXmlHttpRequest) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Val
 }
 
 func (xhr ESXmlHttpRequest) ResponseXML(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	return nil, errors.New("Not implemented: XMLHttpRequest.ResponseXML")
 }
