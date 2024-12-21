@@ -99,7 +99,11 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 			rtnType, nullable := FindMemberAttributeType(member)
 			getter = new(ESOperation)
 			*getter = op
-			getter.Name = fmt.Sprintf("Get%s", idlNameToGoName(op.Name))
+			if member.Readonly {
+				getter.Name = idlNameToGoName(op.Name)
+			} else {
+				getter.Name = fmt.Sprintf("Get%s", idlNameToGoName(op.Name))
+			}
 			getter.ReturnType = rtnType
 			getter.Nullable = nullable
 			getter.NotImplemented = slices.Index(missingOps, getter.Name) != -1 || op.NotImplemented
@@ -156,14 +160,12 @@ var notImplementedFunctions = map[string][]string{
 		"withCredentials",
 		"upload",
 		"responseURL",
-		"status",
-		"statusText",
+		"response", // TODO, just because of the return value
 		"responseType",
-		"response",
-		"responseText",
 		"responseXML",
 	},
 	"URL": {
+		"origin", // TODO, standardize getters
 		"SetHref",
 		"SetProtocol",
 		"username",
