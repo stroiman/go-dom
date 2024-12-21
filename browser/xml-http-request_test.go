@@ -82,16 +82,16 @@ var _ = Describe("XmlHTTPRequest", func() {
 		Describe("Request succeeds", func() {
 			It("Can make a request", func() {
 				r.Open("GET", "/dummy")
-				Expect(r.Status()).To(Equal(0))
+				Expect(r.GetStatus()).To(Equal(0))
 				Expect(r.Send()).To(Succeed())
 				// Verify request
 				Expect(actualMethod).To(Equal("GET"))
 				// Verify response
-				Expect(r.Status()).To(Equal(200))
+				Expect(r.GetStatus()).To(Equal(200))
 				// This is the only place we test StatusText; it's dumb wrapper and may
 				// be removed.
-				Expect(r.StatusText()).To(Equal("OK"))
-				Expect(r.ResponseText()).To(Equal("Hello, World!"))
+				Expect(r.GetStatusText()).To(Equal("OK"))
+				Expect(r.GetResponseText()).To(Equal("Hello, World!"))
 			})
 		})
 	})
@@ -120,7 +120,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 			}))
 			By("Sending the request")
 			Expect(r.Send()).To(Succeed())
-			Expect(r.Status()).To(Equal(0), "Response should not have been received yet")
+			Expect(r.GetStatus()).To(Equal(0), "Response should not have been received yet")
 			Expect(loadStarted).To(BeTrue(), "loadstart emitted")
 			Expect(loadEnded).To(BeFalse(), "loadend emitted")
 			Expect(loaded).To(BeFalse(), "load emitted")
@@ -129,8 +129,8 @@ var _ = Describe("XmlHTTPRequest", func() {
 			<-ended
 
 			By("The response should be a success")
-			Expect(r.Status()).To(Equal(200))
-			Expect(r.ResponseText()).To(Equal("Hello, World!"))
+			Expect(r.GetStatus()).To(Equal(200))
+			Expect(r.GetResponseText()).To(Equal("Hello, World!"))
 		})
 	})
 

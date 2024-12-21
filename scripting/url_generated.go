@@ -21,7 +21,7 @@ func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetHref),
 		v8.None)
 	prototype.SetAccessorProperty("origin",
-		v8.NewFunctionTemplateWithError(iso, wrapper.Origin),
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetOrigin),
 		nil,
 		v8.ReadOnly)
 	prototype.SetAccessorProperty("protocol",
@@ -57,7 +57,7 @@ func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetSearch),
 		v8.None)
 	prototype.SetAccessorProperty("searchParams",
-		v8.NewFunctionTemplateWithError(iso, wrapper.SearchParams),
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetSearchParams),
 		nil,
 		v8.ReadOnly)
 	prototype.SetAccessorProperty("hash",
@@ -117,8 +117,14 @@ func (u ESURL) SetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented")
 }
 
-func (u ESURL) Origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+func (u ESURL) GetOrigin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := u.host.MustGetContext(info.Context())
+	instance, err := u.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.GetOrigin()
+	return u.ToUSVString(ctx, result)
 }
 
 func (u ESURL) GetProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -221,7 +227,7 @@ func (u ESURL) SetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented")
 }
 
-func (u ESURL) SearchParams(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u ESURL) GetSearchParams(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented")
 }
 
