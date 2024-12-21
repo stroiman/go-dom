@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"slices"
+	"strings"
 	"unicode"
 
 	g "github.com/stroiman/go-dom/internal/code-gen/generators"
@@ -37,7 +38,9 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 		Op ESOperation
 		Ok bool
 	}
+	missingOps := notImplementedFunctions[iName]
 	ops := []*tmp{}
+	attributes := []ESAttribute{}
 	for _, member := range idlName.Members {
 		if member.Special == "static" {
 			continue
@@ -49,12 +52,14 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 			slog.Warn("Function overloads", "Name", member.Name)
 			continue
 		}
-		returnType, nullable := FindIdlType(member.IdlType)
+		returnType, nullable := FindMemberReturnType(member)
+		notImplemented := slices.Index(missingOps, member.Name) != -1
 		operation := &tmp{ESOperation{
-			Name:       member.Name,
-			ReturnType: returnType,
-			Nullable:   nullable,
-			Arguments:  []ESOperationArgument{},
+			Name:           member.Name,
+			NotImplemented: notImplemented,
+			ReturnType:     returnType,
+			Nullable:       nullable,
+			Arguments:      []ESOperationArgument{},
 		}, true}
 		for _, arg := range member.Arguments {
 			esArg := ESOperationArgument{
@@ -79,10 +84,34 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 			operation.Op.Arguments = append(operation.Op.Arguments, esArg)
 		}
 		if member.Type == "operation" {
+			operation.Op.HasError = !hasNoError[member.Name]
 			ops = append(ops, operation)
 		}
 		if member.Type == "constructor" {
 			constructor = &operation.Op
+		}
+		if IsAttribute(member) {
+			op := operation.Op
+			var (
+				getter *ESOperation
+				setter *ESOperation
+			)
+			rtnType, nullable := FindMemberAttributeType(member)
+			getter = new(ESOperation)
+			*getter = op
+			getter.Name = fmt.Sprintf("Get%s", idlNameToGoName(op.Name))
+			getter.ReturnType = rtnType
+			getter.Nullable = nullable
+			getter.NotImplemented = slices.Index(missingOps, getter.Name) != -1 || op.NotImplemented
+			fmt.Println("RETURN TYPE **", getter.Name, rtnType)
+			if !member.Readonly {
+				setter = new(ESOperation)
+				*setter = op
+				setter.Name = fmt.Sprintf("Set%s", idlNameToGoName(op.Name))
+				setter.NotImplemented = slices.Index(missingOps, setter.Name) != -1 ||
+					op.NotImplemented
+			}
+			attributes = append(attributes, ESAttribute{op.Name, getter, setter})
 		}
 	}
 
@@ -105,6 +134,7 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 		WrapperTypeName:  wrapperTypeName,
 		Receiver:         dataData.Receiver,
 		Operations:       operations,
+		Attributes:       attributes,
 		Constructor:      constructor,
 		CreatesInnerType: true,
 		IdlName:          idlName,
@@ -117,6 +147,35 @@ var hasNoError = map[string]bool{
 	"setRequestHeader":  true,
 	"open":              true,
 	"getResponseHeader": true,
+}
+
+var notImplementedFunctions = map[string][]string{
+	"XMLHttpRequest": {
+		"readyState",
+		"timeout",
+		"withCredentials",
+		"upload",
+		"responseURL",
+		"status",
+		"statusText",
+		"responseType",
+		"response",
+		"responseText",
+		"responseXML",
+	},
+	"URL": {
+		"SetHref",
+		"SetProtocol",
+		"username",
+		"password",
+		"SetHost",
+		"SetPort",
+		"SetHostname",
+		"SetPathname",
+		"searchParams",
+		"SetHash",
+		"SetSearch",
+	},
 }
 
 const br = "github.com/stroiman/go-dom/browser"
@@ -132,10 +191,18 @@ type ESOperationArgument struct {
 }
 
 type ESOperation struct {
-	Name       string
-	ReturnType string
-	Nullable   bool
-	Arguments  []ESOperationArgument
+	Name           string
+	NotImplemented bool
+	ReturnType     string
+	Nullable       bool
+	HasError       bool
+	Arguments      []ESOperationArgument
+}
+
+type ESAttribute struct {
+	Name   string
+	Getter *ESOperation
+	Setter *ESOperation
 }
 
 type ESConstructorData struct {
@@ -144,6 +211,7 @@ type ESConstructorData struct {
 	WrapperTypeName  string
 	Receiver         string
 	Operations       []ESOperation
+	Attributes       []ESAttribute
 	Constructor      *ESOperation
 	IdlName
 }
@@ -208,7 +276,7 @@ func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
 		for j, arg := range data.Constructor.Arguments {
 			if j < i {
 				if arg.Optional {
-					functionName += camelCase(arg.Name)
+					functionName += idlNameToGoName(arg.Name)
 				}
 			}
 		}
@@ -315,6 +383,7 @@ func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator 
 		),
 		NewLine(),
 		InstallFunctionHandlers(c, data),
+		InstallAttributeHandlers(c, data),
 		g.Return(constructor),
 	)
 }
@@ -328,9 +397,53 @@ func InstallFunctionHandlers(c JSConstructor, data ESConstructorData) JenGenerat
 }
 
 func InstallFunctionHandler(c JSConstructor, op ESOperation) JenGenerator {
-	f := jen.Id("wrapper").Dot(camelCase(op.Name))
+	f := jen.Id("wrapper").Dot(idlNameToGoName(op.Name))
 	ft := NewFunctionTemplate{Stmt{c.varIso}, Stmt{f}}
 	return Stmt{(jen.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft.Generate()))}
+}
+
+func InstallAttributeHandlers(c JSConstructor, data ESConstructorData) g.Generator {
+	length := len(data.Attributes)
+	if length == 0 {
+		return g.Noop
+	}
+	generators := make([]JenGenerator, length+1)
+	generators[0] = g.Line
+	for i, op := range data.Attributes {
+		generators[i+1] = InstallAttributeHandler(c, op)
+	}
+	return StatementList(generators...)
+}
+
+func InstallAttributeHandler(c JSConstructor, op ESAttribute) g.Generator {
+	getter := op.Getter
+	setter := op.Setter
+	list := StatementList()
+	if getter != nil {
+		f := jen.Id("wrapper").Dot(idlNameToGoName(getter.Name))
+		ft := NewFunctionTemplate{Stmt{c.varIso}, Stmt{f}}
+		var setterFt g.Generator
+		var Attributes = "ReadOnly"
+		if setter != nil {
+			f := Stmt{jen.Id("wrapper").Dot(idlNameToGoName(setter.Name))}
+			setterFt = NewFunctionTemplate{Stmt{c.varIso}, f}
+			Attributes = "None"
+		} else {
+			setterFt = g.Nil
+		}
+
+		list.Append(Stmt{
+			(jen.Id("prototype").Dot("SetAccessorProperty").Call(jen.Lit(op.Name), jen.Line().Add(ft.Generate()), jen.Line().Add(setterFt.Generate()), jen.Line().Add(jen.Qual(v8, Attributes)))),
+		})
+	}
+	// if setter != nil {
+	// 	f := jen.Id("wrapper").Dot(idlNameToGoName(setter.Name))
+	// 	ft := NewFunctionTemplate{Stmt{c.varIso}, Stmt{f}}
+	// 	list.Append(Stmt{
+	// 		(jen.Id("prototype").Dot("SetAccessorProperty").Call(jen.Lit(op.Name), ft.Generate())),
+	// 	})
+	// }
+	return list
 }
 
 type JenGenerator = g.Generator
@@ -361,7 +474,7 @@ func (s GetArgStmt) Generate() *jen.Statement {
 	} else {
 		statements := []jen.Code{jen.Id("ctx"), jen.Id("args"), jen.Lit(s.Index)}
 		for _, t := range s.Arg.IdlType.IdlType.IType.Types {
-			parserName := fmt.Sprintf("Get%sFrom%s", camelCase(s.Arg.Name), t.IType.TypeName)
+			parserName := fmt.Sprintf("Get%sFrom%s", idlNameToGoName(s.Arg.Name), t.IType.TypeName)
 			statements = append(statements, jen.Id(parserName))
 		}
 		return AssignmentStmt{
@@ -462,7 +575,7 @@ type GetGeneratorResult struct {
 
 func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResult) {
 	args := []jen.Code{}
-	genRes.HasError = !hasNoError[c.Op.Name]
+	genRes.HasError = c.Op.HasError
 	genRes.HasValue = c.Op.ReturnType != "undefined"
 	var stmt *jen.Statement
 	if genRes.HasValue {
@@ -489,9 +602,9 @@ func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResul
 	list := StatementListStmt{}
 	var evaluation *jen.Statement
 	if instanceName == "" {
-		evaluation = jen.Id(camelCase(c.Name)).Call(args...)
+		evaluation = jen.Id(idlNameToGoName(c.Name)).Call(args...)
 	} else {
-		evaluation = jen.Id(instanceName).Dot(camelCase(c.Name)).Call(args...)
+		evaluation = jen.Id(instanceName).Dot(idlNameToGoName(c.Name)).Call(args...)
 	}
 	if stmt == nil {
 		list.Append(Stmt{evaluation})
@@ -519,7 +632,7 @@ func (c CallInstance) GetGenerator(receiver string, instanceName string) GetGene
 		if c.Op.Nullable {
 			converter += "Nullable"
 		}
-		converter += camelCase(c.Op.ReturnType)
+		converter += idlNameToGoName(c.Op.ReturnType)
 		genRes.RequireContext = true
 		valueReturn := Stmt{jen.Return(jen.Id(receiver).Dot(converter).Call(jen.Id("ctx"), jen.Id("result")))}
 		if genRes.HasError {
@@ -576,7 +689,7 @@ func processOptionalArgs(
 	innerStatements.Append(GenReturnOnError())
 
 	argNames = append(argNames, arg.Name)
-	opName = opName + camelCase(arg.Name)
+	opName = opName + idlNameToGoName(arg.Name)
 	statements.Append(ifArgs)
 	processOptionalArgs(
 		data,
@@ -638,6 +751,9 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
+	if op.NotImplemented {
+		return g.Return(g.Nil, g.Raw(jen.Qual("errors", "New").Call(jen.Lit("Not implemented"))))
+	}
 	requireContext := new(bool)
 	statements := &StatementListStmt{}
 	statements.Append(getInstance(data.Receiver))
@@ -741,7 +857,16 @@ func CreateWrapperMethods(c JSConstructor, data ESConstructorData) JenGenerator 
 	for i, op := range data.Operations {
 		generators[i] = c.CreateWrapperMethod(data, op)
 	}
-	return StatementList(generators...)
+	list := StatementList(generators...)
+	for _, attr := range data.Attributes {
+		if attr.Getter != nil {
+			list.Append(c.CreateWrapperMethod(data, *attr.Getter))
+		}
+		if attr.Setter != nil {
+			list.Append(c.CreateWrapperMethod(data, *attr.Setter))
+		}
+	}
+	return list
 }
 
 func (c JSConstructor) CreateWrapperMethod(
@@ -756,7 +881,7 @@ func (c JSConstructor) CreateWrapperMethod(
 				Name: g.Id(data.Receiver),
 				Type: g.Id(data.WrapperTypeName),
 			},
-			Name:     camelCase(op.Name),
+			Name:     idlNameToGoName(op.Name),
 			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
 			RtnTypes: g.List(v8Value, g.Id("error")),
 			Body:     f,
@@ -772,8 +897,21 @@ func (t NewFunctionTemplate) Generate() *jen.Statement {
 	return jen.Qual(v8, "NewFunctionTemplateWithError").Call(t.iso.Generate(), t.f.Generate())
 }
 
-func camelCase(s string) string {
-	buffer := make([]rune, 0, len(s))
+func idlNameToGoName(s string) string {
+	words := strings.Split(s, " ")
+	for i, word := range words {
+		words[i] = upperCaseFirstLetter(word)
+	}
+	return strings.Join(words, "")
+}
+
+func upperCaseFirstLetter(s string) string {
+	strLen := len(s)
+	if strLen == 0 {
+		slog.Warn("Passing empty string to upperCaseFirstLetter")
+		return ""
+	}
+	buffer := make([]rune, 0, strLen)
 	buffer = append(buffer, unicode.ToUpper([]rune(s)[0]))
 	buffer = append(buffer, []rune(s)[1:]...)
 	return string(buffer)

@@ -118,16 +118,38 @@ type ParsedIdlFile struct {
 	IdlParsed `json:"idlParsed"`
 }
 
-func FindIdlType(idl IdlTypes) (string, bool) {
+func FindIdlTypeValue(idl IdlTypes, expectedType string) (IdlType, bool) {
 	types := idl.Types
 	if len(types) == 0 && idl.IdlType != nil {
 		types = []IdlType{*idl.IdlType}
 	}
 	for _, t := range types {
-		if t.Type == "return-type" {
-			return t.IType.TypeName, t.Nullable
+		if t.Type == expectedType {
+			return t, true
 		}
 	}
-	return "", false
+	return IdlType{}, false
+}
 
+func FindIdlType(idl IdlTypes, expectedType string) (string, bool) {
+	if t, ok := FindIdlTypeValue(idl, expectedType); ok {
+		return t.IType.TypeName, t.Nullable
+	}
+	return "", false
+}
+
+func FindMemberReturnType(member IdlNameMember) (string, bool) {
+	return FindIdlType(member.IdlType, "return-type")
+}
+
+func FindMemberAttributeType(member IdlNameMember) (string, bool) {
+	return FindIdlType(member.IdlType, "attribute-type")
+}
+
+func IsAttribute(member IdlNameMember) bool {
+	if member.Type != "attribute" {
+		return false
+	}
+	t, ok := FindIdlTypeValue(member.IdlType, "attribute-type")
+	return ok && t.IType.TypeName != "EventHandler"
 }

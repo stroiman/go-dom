@@ -21,6 +21,51 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototype.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseHeader))
 	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, wrapper.GetAllResponseHeaders))
 	prototype.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, wrapper.OverrideMimeType))
+
+	prototype.SetAccessorProperty("readyState",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetReadyState),
+		nil,
+		v8.ReadOnly)
+	prototype.SetAccessorProperty("timeout",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetTimeout),
+		v8.NewFunctionTemplateWithError(iso, wrapper.SetTimeout),
+		v8.None)
+	prototype.SetAccessorProperty("withCredentials",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetWithCredentials),
+		v8.NewFunctionTemplateWithError(iso, wrapper.SetWithCredentials),
+		v8.None)
+	prototype.SetAccessorProperty("upload",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetUpload),
+		nil,
+		v8.ReadOnly)
+	prototype.SetAccessorProperty("responseURL",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseURL),
+		nil,
+		v8.ReadOnly)
+	prototype.SetAccessorProperty("status",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetStatus),
+		nil,
+		v8.ReadOnly)
+	prototype.SetAccessorProperty("statusText",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetStatusText),
+		nil,
+		v8.ReadOnly)
+	prototype.SetAccessorProperty("responseType",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseType),
+		v8.NewFunctionTemplateWithError(iso, wrapper.SetResponseType),
+		v8.None)
+	prototype.SetAccessorProperty("response",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetResponse),
+		nil,
+		v8.ReadOnly)
+	prototype.SetAccessorProperty("responseText",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseText),
+		nil,
+		v8.ReadOnly)
+	prototype.SetAccessorProperty("responseXML",
+		v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseXML),
+		nil,
+		v8.ReadOnly)
 	return constructor
 }
 
@@ -147,4 +192,60 @@ func (xhr ESXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8
 	}
 	err = instance.OverrideMimeType(mime)
 	return nil, err
+}
+
+func (xhr ESXmlHttpRequest) GetReadyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) GetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) GetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) GetUpload(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) GetResponseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) GetStatus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) GetStatusText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) GetResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) SetResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) GetResponse(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) GetResponseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (xhr ESXmlHttpRequest) GetResponseXML(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented")
 }
