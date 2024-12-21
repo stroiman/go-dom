@@ -4,6 +4,7 @@ package scripting
 
 import (
 	"errors"
+	"fmt"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -69,8 +70,9 @@ func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 
 func (u ESURL) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
-	url, err0 := TryParseArg(args, 0, u.DecodeUSVString)
-	base, err1 := TryParseArg(args, 1, u.DecodeUSVString)
+	url, err0 := TryParseArg(&args, 0, u.DecodeUSVString)
+	base, err1 := TryParseArg(&args, 1, u.DecodeUSVString)
+	fmt.Println("ARGS", url, base, args.noOfReadArguments)
 	ctx := u.host.MustGetContext(info.Context())
 	if args.noOfReadArguments >= 2 {
 		err := errors.Join(err0, err1)
