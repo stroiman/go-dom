@@ -109,6 +109,14 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 				setter.Name = fmt.Sprintf("Set%s", idlNameToGoName(op.Name))
 				setter.NotImplemented = slices.Index(missingOps, setter.Name) != -1 ||
 					op.NotImplemented
+				setter.ReturnType = "undefined"
+				setter.Arguments = []ESOperationArgument{{
+					Name:     "val",
+					Type:     idlNameToGoName(rtnType),
+					Optional: false,
+					Variadic: false,
+					// IdlType  IdlTypes
+				}}
 			}
 			attributes = append(attributes, ESAttribute{op.Name, getter, setter})
 		}
@@ -152,7 +160,6 @@ var notImplementedFunctions = map[string][]string{
 	"XMLHttpRequest": {
 		"readyState",
 		"timeout",
-		"withCredentials",
 		"upload",
 		"responseURL",
 		"response", // TODO, just because of the return value

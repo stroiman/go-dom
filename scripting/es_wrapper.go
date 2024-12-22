@@ -55,6 +55,14 @@ func (w Converters) GetArgByteString(args []*v8.Value, idx int) (result string, 
 func (w Converters) GetArgUSVString(args []*v8.Value, idx int) (result string, err error) {
 	return w.GetArgDOMString(args, idx)
 }
+func (w Converters) GetArgBoolean(args []*v8.Value, idx int) (result bool, err error) {
+	if idx >= len(args) {
+		err = errors.New("Index out of range")
+		return
+	}
+	result = args[idx].Boolean()
+	return
+}
 
 func (w Converters) ToNullableByteString(ctx *ScriptContext, str *string) (*v8.Value, error) {
 	if str == nil {
@@ -72,5 +80,9 @@ func (w Converters) ToUSVString(ctx *ScriptContext, str string) (*v8.Value, erro
 }
 
 func (w Converters) ToUnsignedShort(ctx *ScriptContext, val int) (*v8.Value, error) {
+	return v8.NewValue(ctx.host.iso, val)
+}
+
+func (w Converters) ToBoolean(ctx *ScriptContext, val bool) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
 }
