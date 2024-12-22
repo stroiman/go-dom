@@ -14,7 +14,7 @@ func NewESXmlHttpRequest(host *ScriptHost) ESXmlHttpRequest {
 	return ESXmlHttpRequest{NewESWrapper[XmlHttpRequest](host)}
 }
 
-func (w ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) (*v8.Value, error) {
 	result := ctx.Window().NewXmlHttpRequest()
 	result.SetCatchAllHandler(NewEventHandlerFunc(func(event Event) error {
 		prop := "on" + event.Type()
@@ -23,7 +23,7 @@ func (w ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) (*
 			v8Event, err := ctx.GetInstanceForNode(event)
 			if err == nil {
 				f, _ := handler.AsFunction()
-				target := v8.Null(w.host.iso)
+				target := v8.Null(xhr.host.iso)
 				f.Call(target, v8Event)
 			}
 		}

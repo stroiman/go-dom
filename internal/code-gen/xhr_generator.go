@@ -22,7 +22,6 @@ func generateXhr(b *builder) error {
 	}
 	classWrapper.MarkMembersAsNotImplemented(
 		"readyState",
-		"timeout",
 		"upload",
 		"responseURL",
 		"response", // TODO, just because of the return value

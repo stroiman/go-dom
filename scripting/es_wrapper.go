@@ -80,7 +80,6 @@ func (w Converters) GetArgBoolean(args []*v8.Value, idx int) (result bool, err e
 	result = args[idx].Boolean()
 	return
 }
-
 func (w Converters) ToNullableByteString(ctx *ScriptContext, str *string) (*v8.Value, error) {
 	if str == nil {
 		return v8.Null(ctx.host.iso), nil
@@ -103,15 +102,15 @@ func (w Converters) ToNullableDOMString(ctx *ScriptContext, str *string) (*v8.Va
 	return v8.NewValue(ctx.host.iso, str)
 }
 
+func (w Converters) ToUnsignedLong(ctx *ScriptContext, val int) (*v8.Value, error) {
+	return v8.NewValue(ctx.host.iso, val)
+}
+
 func (w Converters) ToUSVString(ctx *ScriptContext, str string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, str)
 }
 
 func (w Converters) ToUnsignedShort(ctx *ScriptContext, val int) (*v8.Value, error) {
-	return v8.NewValue(ctx.host.iso, val)
-}
-
-func (w Converters) ToUnsignedLong(ctx *ScriptContext, val int) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
 }
 

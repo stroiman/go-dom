@@ -43,6 +43,10 @@ type XmlHttpRequest interface {
 	GetResponseHeader(headerName string) *string
 	SetWithCredentials(val bool) error
 	GetWithCredentials() bool
+	ResponseURL() string
+	Response() string
+	SetTimeout(int) error
+	GetTimeout() int
 }
 
 type xmlHttpRequest struct {
@@ -129,6 +133,10 @@ func (req *xmlHttpRequest) Status() int { return req.status }
 // be in JS wrapper layer
 func (req *xmlHttpRequest) StatusText() string { return http.StatusText(req.status) }
 
+func (req *xmlHttpRequest) ResponseURL() string { return req.url }
+
+func (req *xmlHttpRequest) Response() string { return req.ResponseText() }
+
 func (req *xmlHttpRequest) ResponseText() string { return string(req.response) }
 
 func (req *xmlHttpRequest) SetRequestHeader(name string, value string) {
@@ -181,6 +189,14 @@ func (req *xmlHttpRequest) SetWithCredentials(val bool) error {
 
 func (req *xmlHttpRequest) GetWithCredentials() bool {
 	return false
+}
+
+func (req *xmlHttpRequest) SetTimeout(val int) error {
+	return nil
+}
+
+func (req *xmlHttpRequest) GetTimeout() int {
+	return 0
 }
 
 /* -------- Options -------- */

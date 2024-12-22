@@ -71,7 +71,15 @@ var _ = Describe("XmlHTTPRequest", func() {
 	})
 
 	It("Should handle OverrideMimeType()", func() {
-		Skip("Abort not implemented. Skeleton implementation so satisfy JS interface")
+		Skip("OverrideMimeType not implemented. Skeleton implementation so satisfy JS interface")
+	})
+
+	It("Should handle SetWithCredentials / GetWithCredentials()", func() {
+		Skip("WithCredentials not implemented. Skeleton implementation so satisfy JS interface")
+	})
+
+	It("Should handle SetTimeout / GetTimeout()", func() {
+		Skip("Timeout not implemented. Skeleton implementation so satisfy JS interface")
 	})
 
 	Describe("Synchronous calls", func() {
@@ -232,6 +240,22 @@ var _ = Describe("XmlHTTPRequest", func() {
 			It("Should return a comma-separated list when multiple values", func() {
 				Expect(*r.GetResponseHeader("x-test-1")).To(Equal("value1, value3"))
 			})
+		})
+	})
+
+	It("Should handle response types", func() {
+		Skip(
+			"Different response types from server should result in different values for `Response()`",
+		)
+	})
+
+	It("Should follow redirects", func() {
+		Skip("Redirects not implemented")
+	})
+
+	Describe("ResponseURL()", func() {
+		It("Should be updated on redirects", func() {
+			Skip("Redirects not implemented")
 		})
 	})
 })
