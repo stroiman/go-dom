@@ -71,6 +71,7 @@ func (e *eventTarget) DispatchEvent(event Event) bool {
 
 	for _, l := range listeners {
 		if err := l.HandleEvent(event); err != nil {
+			slog.Debug("Error occurred", "error", err.Error())
 			e.dispatchError(NewErrorEvent(err))
 		}
 	}
@@ -82,7 +83,6 @@ func (e *eventTarget) DispatchEvent(event Event) bool {
 }
 
 func (e *eventTarget) dispatchError(event ErrorEvent) {
-	slog.Debug("Error occurred", "error", event.Error())
 	if e.parentTarget == nil {
 		e.DispatchEvent(event)
 	} else {
