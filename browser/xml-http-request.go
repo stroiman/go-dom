@@ -171,6 +171,14 @@ func (req *XmlHttpRequest) GetWithCredentials() bool {
 	return false
 }
 
+func (req *XmlHttpRequest) SetTimeout(val int) error {
+	return nil
+}
+
+func (req *XmlHttpRequest) GetTimeout() int {
+	return 0
+}
+
 /* -------- Options -------- */
 
 func RequestOptionAsync(

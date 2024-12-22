@@ -78,6 +78,10 @@ var _ = Describe("XmlHTTPRequest", func() {
 		Skip("WithCredentials not implemented. Skeleton implementation so satisfy JS interface")
 	})
 
+	It("Should handle SetTimeout / GetTimeout()", func() {
+		Skip("Timeout not implemented. Skeleton implementation so satisfy JS interface")
+	})
+
 	Describe("Synchronous calls", func() {
 		// Most browsers have deprecated this on the main thread, so throrough
 		// support is not necessary until the code support WebWorkers.

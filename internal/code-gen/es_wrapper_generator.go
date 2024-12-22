@@ -159,7 +159,7 @@ var hasNoError = map[string]bool{
 var notImplementedFunctions = map[string][]string{
 	"XMLHttpRequest": {
 		"readyState",
-		"timeout",
+		// "timeout",
 		"upload",
 		"responseURL",
 		"response", // TODO, just because of the return value
