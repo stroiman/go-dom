@@ -1061,6 +1061,7 @@ var htmx = (function () {
         elt = null;
       }, delay);
     } else {
+      console.log("Classlist.add");
       elt.classList && elt.classList.add(clazz);
     }
   }
@@ -2095,6 +2096,7 @@ var htmx = (function () {
     target.classList.remove(htmx.config.swappingClass);
     forEach(settleInfo.elts, function (elt) {
       if (elt.classList) {
+        console.log("Classlist.add 1");
         elt.classList.add(htmx.config.settlingClass);
       }
       triggerEvent(elt, "htmx:afterSwap", swapOptions.eventInfo);
@@ -3595,6 +3597,7 @@ var htmx = (function () {
     forEach(indicators, function (ic) {
       const internalData = getInternalData(ic);
       internalData.requestCount = (internalData.requestCount || 0) + 1;
+      console.log("Classlist.add 3");
       ic.classList.add.call(ic.classList, htmx.config.requestClass);
     });
     return indicators;
@@ -5278,6 +5281,7 @@ var htmx = (function () {
         swapSpec.ignoreTitle = ignoreTitle;
       }
 
+      console.log("Classlist.add 4");
       target.classList.add(htmx.config.swappingClass);
 
       // optional transition API promise callbacks
