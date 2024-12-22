@@ -115,6 +115,14 @@ func createData(data []byte, dataData CreateDataData) (ESConstructorData, error)
 				setter.Name = fmt.Sprintf("Set%s", idlNameToGoName(op.Name))
 				setter.NotImplemented = slices.Index(missingOps, setter.Name) != -1 ||
 					op.NotImplemented
+				setter.ReturnType = "undefined"
+				setter.Arguments = []ESOperationArgument{{
+					Name:     "val",
+					Type:     idlNameToGoName(rtnType),
+					Optional: false,
+					Variadic: false,
+					// IdlType  IdlTypes
+				}}
 			}
 			attributes = append(attributes, ESAttribute{op.Name, getter, setter})
 		}

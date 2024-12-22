@@ -160,6 +160,14 @@ func (req *XmlHttpRequest) GetResponseHeader(headerName string) *string {
 	return nil
 }
 
+// func (req *XmlHttpRequest) SetWithCredentials(val bool) error {
+// 	return nil
+// }
+//
+// func (req *XmlHttpRequest) GetWithCredentials() bool {
+// 	return false
+// }
+
 /* -------- Options -------- */
 
 func RequestOptionAsync(
