@@ -71,7 +71,11 @@ var _ = Describe("XmlHTTPRequest", func() {
 	})
 
 	It("Should handle OverrideMimeType()", func() {
-		Skip("Abort not implemented. Skeleton implementation so satisfy JS interface")
+		Skip("OverrideMimeType not implemented. Skeleton implementation so satisfy JS interface")
+	})
+
+	It("Should handle SetWithCredentials / GetWithCredentials()", func() {
+		Skip("WithCredentials not implemented. Skeleton implementation so satisfy JS interface")
 	})
 
 	Describe("Synchronous calls", func() {
