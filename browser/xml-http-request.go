@@ -141,7 +141,9 @@ func (req *XmlHttpRequest) GetAllResponseHeaders() (res string, err error) {
 }
 
 func (req *XmlHttpRequest) OverrideMimeType(mimeType string) error {
-	return errors.New("XmlHttpRequest.OverrideMimeType - not implemented")
+	// This has no effect at the moment, but has an empty implementation to be
+	// compatible with HTMX.
+	return nil
 }
 
 func (req *XmlHttpRequest) GetResponseHeader(headerName string) *string {
