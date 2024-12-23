@@ -64,4 +64,16 @@ var _ = Describe("ClassList", func() {
 			Expect(el.GetAttribute("class")).To(Equal("x y  z"))
 		})
 	})
+
+	Describe("Item", func() {
+		It("Should return the item with the specified value", func() {
+			el.SetAttribute("class", "a b c")
+			Expect(classList.Item(1)).To(HaveValue(Equal("b")))
+		})
+
+		It("Should return nil when the index is too large", func() {
+			el.SetAttribute("class", "a b c")
+			Expect(classList.Item(3)).To(BeNil())
+		})
+	})
 })

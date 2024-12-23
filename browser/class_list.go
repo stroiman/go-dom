@@ -49,3 +49,15 @@ func (l DOMTokenList) GetValue() string {
 func (l DOMTokenList) SetValue(val string) {
 	l.element.SetAttribute("class", val)
 }
+
+func (l DOMTokenList) Item(index int) *string {
+	class := l.element.GetAttribute("class")
+	if class == "" {
+		return nil
+	}
+	classes := strings.Split(class, " ")
+	if index >= len(classes) {
+		return nil
+	}
+	return &classes[index]
+}

@@ -160,6 +160,7 @@ var hasNoError = map[string]bool{
 	"setRequestHeader":  true,
 	"open":              true,
 	"getResponseHeader": true,
+	"item":              true,
 }
 
 type TypeCustomization []string

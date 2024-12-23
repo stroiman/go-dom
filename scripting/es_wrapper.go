@@ -49,6 +49,15 @@ func (w Converters) GetArgDOMString(args []*v8.Value, idx int) (result string, e
 	return
 }
 
+func (w Converters) GetArgUnsignedLong(args []*v8.Value, idx int) (result int, err error) {
+	if idx >= len(args) {
+		err = errors.New("Index out of range")
+		return
+	}
+	result = int(args[idx].Int32())
+	return
+}
+
 func (w Converters) GetArgByteString(args []*v8.Value, idx int) (result string, err error) {
 	return w.GetArgDOMString(args, idx)
 }
@@ -76,6 +85,13 @@ func (w Converters) ToByteString(ctx *ScriptContext, str string) (*v8.Value, err
 }
 
 func (w Converters) ToDOMString(ctx *ScriptContext, str string) (*v8.Value, error) {
+	return v8.NewValue(ctx.host.iso, str)
+}
+
+func (w Converters) ToNullableDOMString(ctx *ScriptContext, str *string) (*v8.Value, error) {
+	if str == nil {
+		return v8.Null(ctx.host.iso), nil
+	}
 	return v8.NewValue(ctx.host.iso, str)
 }
 

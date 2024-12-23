@@ -18,7 +18,6 @@ func generateDOMTypes(b *builder) error {
 		TypeName: "DOMTokenList",
 		Receiver: "u",
 		Customization: []string{
-			"item",
 			"contains",
 			"remove",
 			"toggle",
