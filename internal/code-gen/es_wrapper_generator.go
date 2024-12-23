@@ -176,6 +176,16 @@ var notImplementedFunctions = map[string][]string{
 		"SetHash",
 		"SetSearch",
 	},
+	"DOMTokenList": {
+		"item",
+		"contains",
+		"remove",
+		"toggle",
+		"replace",
+		"supports",
+		"value",
+		"length",
+	},
 }
 
 const br = "github.com/stroiman/go-dom/browser"

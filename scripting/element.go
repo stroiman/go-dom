@@ -8,8 +8,32 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+type ESElement struct {
+	ESWrapper[Element]
+}
+
+func (e ESElement) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	tokenList := e.host.globals.namedGlobals["DOMTokenList"]
+	ctx := e.host.MustGetContext(info.Context())
+	instance, err := tokenList.GetInstanceTemplate().NewInstance(ctx.v8ctx)
+	if err != nil {
+		return nil, err
+	}
+	element, err := e.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	value, err := v8.NewValue(e.host.iso, element.ObjectId())
+	if err != nil {
+		return nil, err
+	}
+	instance.SetInternalField(0, value)
+	return instance.Value, nil
+}
+
 func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
+	wrapper := ESElement{NewESWrapper[Element](host)}
 	builder := NewIllegalConstructorBuilder[Element](host)
 	builder.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (Element, error) {
 		element, ok := ctx.GetCachedNode(this)
@@ -20,6 +44,8 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 		}
 	}
 	helper := builder.NewPrototypeBuilder()
+	prototypeTemplate := helper.proto
+	prototypeTemplate.SetAccessorPropertyCallback("classList", wrapper.ClassList, nil, v8.ReadOnly)
 	helper.CreateReadonlyProp("outerHTML", Element.OuterHTML)
 	helper.CreateReadonlyProp("tagName", Element.TagName)
 	helper.CreateFunctionStringToString("getAttribute", Element.GetAttribute)

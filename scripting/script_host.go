@@ -213,6 +213,7 @@ func NewScriptHost() *ScriptHost {
 		}},
 		{"FormData", CreateFormData, nil},
 		{"URL", CreateURLPrototype, nil},
+		{"DOMTokenList", CreateDOMTokenListPrototype, nil},
 	}
 
 	globalInstalls := createGlobals(host, classes)
