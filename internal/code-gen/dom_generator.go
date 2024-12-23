@@ -14,10 +14,19 @@ func generateDOMTypes(b *builder) error {
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
 	file.ImportAlias(v8, "v8")
-	data, err := createData(domData, "DOMTokenList", CreateDataData{
-		// InnerTypeName:   "XmlHttpRequest",
-		//WrapperTypeName: "ESXmlHttpRequest",
+	data, err := createData(domData, CreateDataData{
+		TypeName: "DOMTokenList",
 		Receiver: "u",
+		Customization: []string{
+			"item",
+			"contains",
+			"remove",
+			"toggle",
+			"replace",
+			"supports",
+			"value",
+			"length",
+		},
 	})
 	if err != nil {
 		return err

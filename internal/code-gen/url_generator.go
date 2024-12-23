@@ -14,10 +14,24 @@ func generateUrl(b *builder) error {
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
 	file.ImportAlias(v8, "v8")
-	data, err := createData(urlData, "URL", CreateDataData{
+	data, err := createData(urlData, CreateDataData{
+		TypeName: "URL",
 		// InnerTypeName:   "XmlHttpRequest",
 		//WrapperTypeName: "ESXmlHttpRequest",
 		Receiver: "u",
+		Customization: []string{
+			"SetHref",
+			"SetProtocol",
+			"username",
+			"password",
+			"SetHost",
+			"SetPort",
+			"SetHostname",
+			"SetPathname",
+			"searchParams",
+			"SetHash",
+			"SetSearch",
+		},
 	})
 	if err != nil {
 		return err

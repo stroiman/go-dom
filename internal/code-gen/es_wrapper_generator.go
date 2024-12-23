@@ -21,24 +21,26 @@ var (
 )
 
 type CreateDataData struct {
+	TypeName        string
 	InnerTypeName   string
 	WrapperTypeName string
 	Receiver        string
+	Customization   TypeCustomization
 }
 
-func createData(data []byte, iName string, dataData CreateDataData) (ESConstructorData, error) {
+func createData(data []byte, dataData CreateDataData) (ESConstructorData, error) {
 	spec := ParsedIdlFile{}
 	var constructor *ESOperation
 	err := json.Unmarshal(data, &spec)
 	if err != nil {
 		panic(err)
 	}
-	idlName := spec.IdlNames[iName]
+	idlName := spec.IdlNames[dataData.TypeName]
 	type tmp struct {
 		Op ESOperation
 		Ok bool
 	}
-	missingOps := notImplementedFunctions[iName]
+	missingOps := dataData.Customization
 	ops := []*tmp{}
 	attributes := []ESAttribute{}
 	for _, member := range idlName.Members {
@@ -152,41 +154,7 @@ var hasNoError = map[string]bool{
 	"getResponseHeader": true,
 }
 
-var notImplementedFunctions = map[string][]string{
-	"XMLHttpRequest": {
-		"readyState",
-		"timeout",
-		"withCredentials",
-		"upload",
-		"responseURL",
-		"response", // TODO, just because of the return value
-		"responseType",
-		"responseXML",
-	},
-	"URL": {
-		"SetHref",
-		"SetProtocol",
-		"username",
-		"password",
-		"SetHost",
-		"SetPort",
-		"SetHostname",
-		"SetPathname",
-		"searchParams",
-		"SetHash",
-		"SetSearch",
-	},
-	"DOMTokenList": {
-		"item",
-		"contains",
-		"remove",
-		"toggle",
-		"replace",
-		"supports",
-		"value",
-		"length",
-	},
-}
+type TypeCustomization []string
 
 const br = "github.com/stroiman/go-dom/browser"
 const sc = "github.com/stroiman/go-dom/scripting"

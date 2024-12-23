@@ -23,7 +23,7 @@ func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototype.Set("supports", v8.NewFunctionTemplateWithError(iso, wrapper.Supports))
 
 	prototype.SetAccessorProperty("length",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetLength),
+		v8.NewFunctionTemplateWithError(iso, wrapper.Length),
 		nil,
 		v8.ReadOnly)
 	prototype.SetAccessorProperty("value",
@@ -79,7 +79,7 @@ func (u ESDOMTokenList) Supports(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	return nil, errors.New("Not implemented")
 }
 
-func (u ESDOMTokenList) GetLength(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u ESDOMTokenList) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented")
 }
 

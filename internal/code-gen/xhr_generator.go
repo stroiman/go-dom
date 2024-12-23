@@ -14,10 +14,21 @@ func generateXhr(b *builder) error {
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
 	file.ImportAlias(v8, "v8")
-	data, err := createData(xhrData, "XMLHttpRequest", CreateDataData{
+	data, err := createData(xhrData, CreateDataData{
+		TypeName:        "XMLHttpRequest",
 		InnerTypeName:   "XmlHttpRequest",
 		WrapperTypeName: "ESXmlHttpRequest",
 		Receiver:        "xhr",
+		Customization: []string{
+			"readyState",
+			"timeout",
+			"withCredentials",
+			"upload",
+			"responseURL",
+			"response", // TODO, just because of the return value
+			"responseType",
+			"responseXML",
+		},
 	})
 	if err != nil {
 		return err
