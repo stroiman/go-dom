@@ -106,15 +106,15 @@ func (req *XmlHttpRequest) SendBody(body *XHRRequestBody) error {
 	return req.send(reader)
 }
 
-func (req *XmlHttpRequest) GetStatus() int { return req.status }
+func (req *XmlHttpRequest) Status() int { return req.status }
 
 // GetStatusText implements the [statusText] property
 // [statusText]: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/statusText
 // TODO: Should this exist? It's just a wrapper around [http.GetStatusText], could
 // be in JS wrapper layer
-func (req *XmlHttpRequest) GetStatusText() string { return http.StatusText(req.status) }
+func (req *XmlHttpRequest) StatusText() string { return http.StatusText(req.status) }
 
-func (req *XmlHttpRequest) GetResponseText() string { return string(req.response) }
+func (req *XmlHttpRequest) ResponseText() string { return string(req.response) }
 
 func (req *XmlHttpRequest) SetRequestHeader(name string, value string) {
 	req.headers.Add(name, value)

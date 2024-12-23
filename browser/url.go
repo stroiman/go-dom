@@ -11,7 +11,7 @@ type URL interface {
 	GetHref() string
 	// TODO
 	// SetHref(href string)
-	GetOrigin() string
+	Origin() string
 	GetPathname() string
 	GetPort() string
 	GetProtocol() string
@@ -77,7 +77,7 @@ func (l url) GetHostname() string {
 
 func (l url) GetHref() string { return l.url.String() }
 
-func (l url) GetOrigin() string { return l.url.Scheme + "://" + l.url.Host }
+func (l url) Origin() string { return l.url.Scheme + "://" + l.url.Host }
 
 func (l url) GetPathname() string { return l.url.Path }
 

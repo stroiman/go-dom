@@ -99,7 +99,11 @@ func createData(data []byte, iName string, dataData CreateDataData) (ESConstruct
 			rtnType, nullable := FindMemberAttributeType(member)
 			getter = new(ESOperation)
 			*getter = op
-			getter.Name = fmt.Sprintf("Get%s", idlNameToGoName(op.Name))
+			getterName := idlNameToGoName(op.Name)
+			if !member.Readonly {
+				getterName = fmt.Sprintf("Get%s", getterName)
+			}
+			getter.Name = getterName
 			getter.ReturnType = rtnType
 			getter.Nullable = nullable
 			getter.NotImplemented = slices.Index(missingOps, getter.Name) != -1 || op.NotImplemented
@@ -291,7 +295,6 @@ func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
 		)
 		if i > 0 {
 			arg := data.Constructor.Arguments[i-1]
-			fmt.Println("Arg", i, arg.Optional)
 
 			argErrorCheck := StatementList(
 				g.Assign(g.Id("err"),

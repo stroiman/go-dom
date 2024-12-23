@@ -17,7 +17,7 @@ func CreateLocationPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	helper.CreateReadonlyProp("host", Location.GetHost)
 	helper.CreateReadonlyProp("hostname", Location.GetHostname)
 	helper.CreateReadonlyProp("href", Location.GetHref)
-	helper.CreateReadonlyProp("origin", Location.GetOrigin)
+	helper.CreateReadonlyProp("origin", Location.Origin)
 	helper.CreateReadonlyProp("pathname", Location.GetPathname)
 	helper.CreateReadonlyProp("port", Location.GetPort)
 	helper.CreateReadonlyProp("protocol", Location.GetProtocol)
