@@ -74,3 +74,7 @@ func (w Converters) ToUSVString(ctx *ScriptContext, str string) (*v8.Value, erro
 func (w Converters) ToUnsignedShort(ctx *ScriptContext, val int) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
 }
+
+func (w Converters) ToUnsignedLong(ctx *ScriptContext, val int) (*v8.Value, error) {
+	return v8.NewValue(ctx.host.iso, val)
+}

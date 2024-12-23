@@ -5,19 +5,15 @@ import (
 	"strings"
 )
 
-type DOMTokenList interface {
-	Add(...string) error
-}
-
-type classList struct {
+type DOMTokenList struct {
 	element Element
 }
 
 func NewClassList(element Element) DOMTokenList {
-	return &classList{element}
+	return DOMTokenList{element}
 }
 
-func (l *classList) Add(tokens ...string) error {
+func (l DOMTokenList) Add(tokens ...string) error {
 	var classes []string
 	class := l.element.GetAttribute("class")
 	if class != "" {
@@ -36,4 +32,20 @@ func (l *classList) Add(tokens ...string) error {
 	}
 	l.element.SetAttribute("class", strings.Join(classes, " "))
 	return nil
+}
+
+func (l DOMTokenList) Length() int {
+	class := l.element.GetAttribute("class")
+	if class == "" {
+		return 0
+	}
+	return len(strings.Split(class, " "))
+}
+
+func (l DOMTokenList) GetValue() string {
+	return l.element.GetAttribute("class")
+}
+
+func (l DOMTokenList) SetValue(val string) {
+	l.element.SetAttribute("class", val)
 }

@@ -80,7 +80,13 @@ func (u ESDOMTokenList) Supports(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 }
 
 func (u ESDOMTokenList) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	ctx := u.host.MustGetContext(info.Context())
+	instance, err := u.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.Length()
+	return u.ToUnsignedLong(ctx, result)
 }
 
 func (u ESDOMTokenList) GetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
