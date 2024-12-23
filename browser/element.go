@@ -20,6 +20,7 @@ func (attrs Attributes) Length() int {
 type Element interface {
 	ElementContainer
 	Append(Element) Element
+	ClassList() DOMTokenList
 	GetAttribute(name string) string
 	SetAttribute(name string, value string)
 	GetAttributes() NamedNodeMap
@@ -66,6 +67,10 @@ func (e *element) TagName() string {
 func (parent *element) Append(child Element) Element {
 	NodeHelper{parent}.AppendChild(child)
 	return child
+}
+
+func (e *element) ClassList() DOMTokenList {
+	return NewClassList(e)
 }
 
 func (parent *element) AppendChild(child Node) Node {
