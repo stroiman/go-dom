@@ -61,6 +61,9 @@ func main() {
 	case "url":
 		err = generateUrl(file)
 		break
+	case "dom":
+		err = generateDOMTypes(file)
+		break
 	default:
 		fmt.Println("Unrecognised generator type")
 		os.Exit(1)
