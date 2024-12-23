@@ -19,10 +19,20 @@ type browserError struct {
 
 const (
 	errorTypeDOMError int = iota
+	errorTypeSyntaxError
 	errorTypeNotImplementedError
 )
 
-type DOMError error
+const (
+	domErrorSyntaxError int = iota
+	domErrorInvalidCharacter
+)
+
+type DOMError struct {
+	error
+	code int
+}
+
 type NotImplementedError error
 
 func newBrowserError(base string, msg string, errorType int) error {
@@ -34,7 +44,11 @@ func (e browserError) Error() string {
 }
 
 func newDomError(msg string) error {
-	return DOMError(newBrowserError("DOMError", msg, errorTypeDOMError))
+	return DOMError{newBrowserError("DOMError", msg, errorTypeDOMError), -1}
+}
+
+func newDomErrorCode(msg string, code int) error {
+	return DOMError{newBrowserError("DOMError", msg, errorTypeDOMError), code}
 }
 
 func newNotImplementedError(msg string) error {
@@ -53,4 +67,14 @@ func isBrowserErrorOfType(err error, errorType int) bool {
 
 func IsNotImplementedError(err error) bool {
 	return isBrowserErrorOfType(err, errorTypeNotImplementedError)
+}
+
+func IsSyntaxError(err error) bool {
+	e, ok := err.(DOMError)
+	return ok && e.code == domErrorSyntaxError
+}
+
+func IsInvalidCharacterError(err error) bool {
+	e, ok := err.(DOMError)
+	return ok && e.code == domErrorInvalidCharacter
 }
