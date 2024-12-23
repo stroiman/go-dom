@@ -90,9 +90,29 @@ func (u ESDOMTokenList) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 }
 
 func (u ESDOMTokenList) GetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	ctx := u.host.MustGetContext(info.Context())
+	instance, err := u.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.GetValue()
+	return u.ToDOMString(ctx, result)
 }
 
 func (u ESDOMTokenList) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	instance, err := u.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	args := info.Args()
+	argsLen := len(args)
+	if argsLen < 1 {
+		return nil, errors.New("Too few arguments")
+	}
+	val, err := u.GetArgDOMString(args, 0)
+	if err != nil {
+		return nil, err
+	}
+	instance.SetValue(val)
+	return nil, nil
 }

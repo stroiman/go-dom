@@ -75,6 +75,10 @@ func (w Converters) ToByteString(ctx *ScriptContext, str string) (*v8.Value, err
 	return v8.NewValue(ctx.host.iso, str)
 }
 
+func (w Converters) ToDOMString(ctx *ScriptContext, str string) (*v8.Value, error) {
+	return v8.NewValue(ctx.host.iso, str)
+}
+
 func (w Converters) ToUSVString(ctx *ScriptContext, str string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, str)
 }

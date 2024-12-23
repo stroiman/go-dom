@@ -24,7 +24,6 @@ func generateDOMTypes(b *builder) error {
 			"toggle",
 			"replace",
 			"supports",
-			"value",
 		},
 	})
 	if err != nil {
