@@ -263,17 +263,31 @@ func CreateJSConstructor() JSConstructor {
 	}
 }
 
+func IllegalConstructor(data ESConstructorData) g.Generator {
+	return g.Return(g.Nil,
+		g.Raw(jen.Qual(v8, "NewTypeError").Call(
+			jen.Id(data.Receiver).Dot("host").Dot("iso"), jen.Lit("Illegal Constructor"),
+		)),
+	)
+}
+
 func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
-	readArgsResult := ReadArguments(data, *data.Constructor)
-	statements := StatementList(readArgsResult.Generator)
+	if data.Constructor == nil {
+		return IllegalConstructor(data)
+	}
+	var readArgsResult ReadArgumentsResult
+	var constructorArguments []ESOperationArgument
+	readArgsResult = ReadArguments(data, *data.Constructor)
+	constructorArguments = data.Constructor.Arguments
+	statements := StatementList(readArgsResult)
 	statements.Append(
 		g.Assign(g.Id("ctx"), Stmt{jen.Id(data.Receiver).Dot("host").Dot("MustGetContext").Call(
 			jen.Id("info").Dot("Context").Call(),
 		)}),
 	)
-	for i := len(data.Constructor.Arguments); i >= 0; i-- {
+	for i := len(constructorArguments); i >= 0; i-- {
 		functionName := "CreateInstance"
-		for j, arg := range data.Constructor.Arguments {
+		for j, arg := range constructorArguments {
 			if j < i {
 				if arg.Optional {
 					functionName += idlNameToGoName(arg.Name)
@@ -294,8 +308,7 @@ func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
 			),
 		)
 		if i > 0 {
-			arg := data.Constructor.Arguments[i-1]
-
+			arg := constructorArguments[i-1]
 			argErrorCheck := StatementList(
 				g.Assign(g.Id("err"),
 					g.Raw(jen.Qual("errors", "Join").CallFunc(func(g *jen.Group) {
@@ -714,6 +727,14 @@ type ReadArgumentsResult struct {
 	Generator g.Generator
 }
 
+func (r ReadArgumentsResult) Generate() *jen.Statement {
+	if r.Generator != nil {
+		return r.Generator.Generate()
+	} else {
+		return g.Noop.Generate()
+	}
+}
+
 func ReadArguments(data ESConstructorData, op ESOperation) (res ReadArgumentsResult) {
 	argCount := len(op.Arguments)
 	res.ArgNames = make([]g.Generator, argCount)
@@ -797,7 +818,7 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 			Name:     arg.Name,
 			ErrName:  errName,
 			Receiver: data.Receiver,
-			Getter:   "GetArg" + arg.Type,
+			Getter:   "GetArg" + idlNameToGoName(arg.Type),
 			Index:    i,
 			Arg:      arg,
 		}
