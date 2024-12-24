@@ -60,3 +60,10 @@ func (w *ESMethodWrapper) SetNotImplemented() *ESMethodWrapper {
 	w.NotImplemented = true
 	return w
 }
+
+// SetNoError is a simple wrapper around [HasNoError] to support a
+// chaning DSL syntax.
+func (w *ESMethodWrapper) SetNoError() *ESMethodWrapper {
+	w.HasNoError = true
+	return w
+}
