@@ -30,6 +30,11 @@ func generateXhr(b *builder) error {
 		"responseType",
 		"responseXML",
 	)
+
+	classWrapper.Method("open").HasNoError = true
+	classWrapper.Method("getResponseHeader").HasNoError = true
+	classWrapper.Method("setRequestHeader").HasNoError = true
+
 	data, err := createData(xhrData, classWrapper)
 	if err != nil {
 		return err

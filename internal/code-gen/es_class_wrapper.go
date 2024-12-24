@@ -7,6 +7,8 @@ type TypeCustomization []string
 type ESMethodWrapper struct {
 	// When set, the ES wrapper will generate an error with the message, "Not implemented"
 	NotImplemented bool
+	// HasNoError tells that the wrapped Go method doesn't generate an error.
+	HasNoError bool
 }
 
 // ESClassWrapper contains information about how to generate ES wrapper code

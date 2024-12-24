@@ -77,7 +77,8 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 			operation.Op.Arguments = append(operation.Op.Arguments, esArg)
 		}
 		if member.Type == "operation" {
-			operation.Op.HasError = !hasNoError[member.Name]
+			opCustomization := dataData.GetMethodCustomization(member.Name)
+			operation.Op.HasError = !opCustomization.HasNoError
 			ops = append(ops, operation)
 		}
 		if member.Type == "constructor" {
@@ -145,15 +146,6 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 		CreatesInnerType: true,
 		IdlName:          idlName,
 	}, nil
-}
-
-// Hmmm, can we find this in the IDL somewhere? It's specified in prose, but I
-// can't find it in easy consumable JSON.
-var hasNoError = map[string]bool{
-	"setRequestHeader":  true,
-	"open":              true,
-	"getResponseHeader": true,
-	"item":              true,
 }
 
 const br = "github.com/stroiman/go-dom/browser"
