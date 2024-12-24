@@ -37,7 +37,12 @@ func (w ESWrapper[T]) GetInstance(info *v8.FunctionCallbackInfo) (result T, err 
 type Converters struct{}
 
 func (w Converters) DecodeUSVString(ctx *ScriptContext, val *v8.Value) (string, error) {
+
 	return val.String(), nil
+}
+
+func (w Converters) DecodeBoolean(ctx *ScriptContext, val *v8.Value) (bool, error) {
+	return val.Boolean(), nil
 }
 
 func (w Converters) GetArgDOMString(args []*v8.Value, idx int) (result string, err error) {

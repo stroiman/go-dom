@@ -70,7 +70,7 @@ func (h argumentHelper) GetNodeArg(index int) (browser.Node, error) {
 
 func (h *argumentHelper) GetArg(index int) *v8.Value {
 	args := h.FunctionCallbackInfo.Args()
-	if len(args) < index {
+	if len(args) <= index {
 		return nil
 	}
 	arg := args[index]

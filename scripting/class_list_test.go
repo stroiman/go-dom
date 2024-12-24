@@ -35,5 +35,41 @@ var _ = Describe("V8 Element.classList", func() {
 			div := scriptContext.Window().Document().GetElementById("target")
 			Expect(div.GetAttribute("class")).To(Equal("a b c x"))
 		})
+
+		Describe("force as true", func() {
+			It("Should leave an existing item and return true", func() {
+				Expect(scriptContext.RunTestScript(`
+				document.getElementById("target").classList.toggle("b", true)
+			`)).To(BeTrue())
+				div := scriptContext.Window().Document().GetElementById("target")
+				Expect(div.GetAttribute("class")).To(Equal("a b c"))
+			})
+
+			It("Should add a non-existing item and return true", func() {
+				Expect(scriptContext.RunTestScript(`
+				document.getElementById("target").classList.toggle("x", true)
+			`)).To(BeTrue())
+				div := scriptContext.Window().Document().GetElementById("target")
+				Expect(div.GetAttribute("class")).To(Equal("a b c x"))
+			})
+		})
+
+		Describe("force as false", func() {
+			It("Should remove an existing item and return false", func() {
+				Expect(scriptContext.RunTestScript(`
+				document.getElementById("target").classList.toggle("b", false)
+			`)).To(BeFalse())
+				div := scriptContext.Window().Document().GetElementById("target")
+				Expect(div.GetAttribute("class")).To(Equal("a c"))
+			})
+
+			It("Should ignore a non-existing item and return false", func() {
+				Expect(scriptContext.RunTestScript(`
+				document.getElementById("target").classList.toggle("x", false)
+			`)).To(BeFalse())
+				div := scriptContext.Window().Document().GetElementById("target")
+				Expect(div.GetAttribute("class")).To(Equal("a b c"))
+			})
+		})
 	})
 })
