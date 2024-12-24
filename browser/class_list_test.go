@@ -47,6 +47,17 @@ var _ = Describe("ClassList", func() {
 		})
 	})
 
+	Describe("All", func() {
+		It("Should return a list of all classes", func() {
+			el.SetAttribute("class", "a b c")
+			classes := make([]string, 0, 3)
+			for class := range classList.All() {
+				classes = append(classes, class)
+			}
+			Expect(classes).To(ConsistOf("a", "b", "c"))
+		})
+	})
+
 	Describe("Contains", func() {
 		It("Should return true for an existing class", func() {
 			el.SetAttribute("class", "a b c")

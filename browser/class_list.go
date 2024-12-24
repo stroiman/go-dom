@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"iter"
 	"slices"
 	"strings"
 )
@@ -28,6 +29,17 @@ func (l DOMTokenList) Add(tokens ...string) error {
 	}
 	l.setTokens(classes)
 	return nil
+}
+
+func (l DOMTokenList) All() iter.Seq[string] {
+	return func(yield func(string) bool) {
+		tokens := l.getTokens()
+		for _, token := range tokens {
+			if !yield(token) {
+				return
+			}
+		}
+	}
 }
 
 func (l DOMTokenList) Contains(token string) bool {
