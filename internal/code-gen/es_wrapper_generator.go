@@ -146,6 +146,7 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 		Constructor:      constructor,
 		CreatesInnerType: true,
 		IdlName:          idlName,
+		RunCustomCode:    dataData.RunCustomCode,
 	}, nil
 }
 
@@ -190,6 +191,7 @@ type ESConstructorData struct {
 	Operations       []ESOperation
 	Attributes       []ESAttribute
 	Constructor      *ESOperation
+	RunCustomCode    bool
 	IdlName
 }
 
@@ -349,7 +351,8 @@ func CreateConstructor(c JSConstructor, data ESConstructorData) g.Generator {
 
 func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator {
 	constructor := g.Id("constructor")
-	return StatementList(
+
+	statements := StatementList(
 		g.Assign(Id("iso"),
 			Stmt{jen.Id("host").Dot("iso")},
 		),
@@ -373,8 +376,14 @@ func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator 
 		NewLine(),
 		InstallFunctionHandlers(c, data),
 		InstallAttributeHandlers(c, data),
-		g.Return(constructor),
 	)
+	if data.RunCustomCode {
+		statements.Append(
+			g.Raw(jen.Id("wrapper").Dot("CustomInitialiser").Call(jen.Id("constructor"))),
+		)
+	}
+	statements.Append(g.Return(constructor))
+	return statements
 }
 
 func InstallFunctionHandlers(c JSConstructor, data ESConstructorData) JenGenerator {

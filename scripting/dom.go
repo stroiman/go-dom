@@ -10,10 +10,16 @@ import (
 
 type ESDOMTokenList struct {
 	ESWrapper[browser.Element]
+	Iterator Iterator[string]
 }
 
 func NewESDOMTokenList(host *ScriptHost) ESDOMTokenList {
-	return ESDOMTokenList{NewESWrapper[browser.Element](host)}
+	return ESDOMTokenList{
+		NewESWrapper[browser.Element](host),
+		NewIterator(host, func(item string, ctx *ScriptContext) (*v8.Value, error) {
+			return v8.NewValue(host.iso, item)
+		}),
+	}
 }
 
 func (l ESDOMTokenList) GetInstance(
@@ -24,6 +30,22 @@ func (l ESDOMTokenList) GetInstance(
 		result = browser.NewClassList(element)
 	}
 	return
+}
+
+func (l ESDOMTokenList) CustomInitialiser(constructor *v8.FunctionTemplate) {
+	constructor.GetInstanceTemplate().SetSymbol(
+		v8.SymbolIterator(l.host.iso),
+		v8.NewFunctionTemplateWithError(l.host.iso, l.GetIterator),
+	)
+}
+
+func (l ESDOMTokenList) GetIterator(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := l.host.MustGetContext(info.Context())
+	instance, err := l.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	return l.Iterator.NewIteratorInstanceOfIterable(ctx, instance)
 }
 
 func (l ESDOMTokenList) Toggle(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

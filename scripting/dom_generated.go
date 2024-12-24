@@ -30,6 +30,7 @@ func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetValue),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetValue),
 		v8.None)
+	wrapper.CustomInitialiser(constructor)
 	return constructor
 }
 

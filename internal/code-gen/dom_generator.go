@@ -16,8 +16,9 @@ func generateDOMTypes(b *builder) error {
 	file.ImportAlias(v8, "v8")
 
 	wrapper := ESClassWrapper{
-		TypeName: "DOMTokenList",
-		Receiver: "u",
+		TypeName:      "DOMTokenList",
+		Receiver:      "u",
+		RunCustomCode: true,
 	}
 
 	wrapper.Method("item").SetNoError()

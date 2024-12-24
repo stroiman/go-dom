@@ -17,6 +17,21 @@ var _ = Describe("V8 Element.classList", func() {
 		Expect(element.GetAttribute("class")).To(Equal("c1 c2"))
 	})
 
+	It("Should be an iterable", func() {
+		ctx := NewTestContext(LoadHTML("<div id='target' class='a b c'></div>"))
+		Expect(ctx.RunTestScript(`
+			list = document.getElementById("target").classList
+			typeof list[Symbol.iterator]`)).To(Equal("function"))
+	})
+
+	It("Should be an iterable of class names", func() {
+		ctx := NewTestContext(LoadHTML("<div id='target' class='a b c'></div>"))
+		Expect(ctx.RunTestScript(`
+			const list = document.getElementById('target').classList;
+			Array.from(list).join(",")
+		`)).To(Equal("a,b,c"))
+	})
+
 	Describe(".toggle", func() {
 		scriptContext := InitializeContext(LoadHTML(`<div id="target" class="a b c"></div>`))
 
