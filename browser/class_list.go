@@ -64,6 +64,16 @@ func (l DOMTokenList) Remove(token string) {
 	}
 }
 
+func (l DOMTokenList) Replace(oldToken string, newToken string) bool {
+	if l.Contains(oldToken) {
+		l.Remove(oldToken)
+		l.Add(newToken)
+		return true
+	} else {
+		return false
+	}
+}
+
 func (l DOMTokenList) Toggle(token string) bool {
 	if l.Contains(token) {
 		l.Remove(token)

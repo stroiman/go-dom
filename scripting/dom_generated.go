@@ -112,7 +112,24 @@ func (u ESDOMTokenList) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 }
 
 func (u ESDOMTokenList) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	ctx := u.host.MustGetContext(info.Context())
+	instance, err := u.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	args := info.Args()
+	argsLen := len(args)
+	if argsLen < 2 {
+		return nil, errors.New("Too few arguments")
+	}
+	token, err0 := u.GetArgDOMString(args, 0)
+	newToken, err1 := u.GetArgDOMString(args, 1)
+	err = errors.Join(err0, err1)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.Replace(token, newToken)
+	return u.ToBoolean(ctx, result)
 }
 
 func (u ESDOMTokenList) Supports(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

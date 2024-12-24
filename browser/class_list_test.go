@@ -109,4 +109,18 @@ var _ = Describe("ClassList", func() {
 			Expect(el.GetAttribute("class")).To(Equal("a b c"))
 		})
 	})
+
+	Describe(".Replace", func() {
+		It("Should remove, insert, and remove true on existing item", func() {
+			el.SetAttribute("class", "a b c")
+			Expect(classList.Replace("b", "x")).To(BeTrue())
+			Expect(el.GetAttribute("class")).To(Equal("a c x"))
+		})
+
+		It("Should leave the list and return false on non-existing item", func() {
+			el.SetAttribute("class", "a b c")
+			Expect(classList.Replace("y", "x")).To(BeFalse())
+			Expect(el.GetAttribute("class")).To(Equal("a b c"))
+		})
+	})
 })

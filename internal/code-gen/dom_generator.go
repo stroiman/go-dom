@@ -24,7 +24,7 @@ func generateDOMTypes(b *builder) error {
 	wrapper.Method("contains").SetNoError()
 	wrapper.Method("remove").SetNoError()
 	wrapper.Method("toggle").SetCustomImplementation()
-	wrapper.Method("replace").SetNotImplemented()
+	wrapper.Method("replace").SetNoError()
 	wrapper.Method("supports").SetNotImplemented()
 
 	data, err := createData(domData, wrapper)
