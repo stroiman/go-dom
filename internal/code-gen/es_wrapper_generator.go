@@ -20,15 +20,7 @@ var (
 	scriptHostPtr             = g.NewType("ScriptHost").Pointer()
 )
 
-type CreateDataData struct {
-	TypeName        string
-	InnerTypeName   string
-	WrapperTypeName string
-	Receiver        string
-	Customization   TypeCustomization
-}
-
-func createData(data []byte, dataData CreateDataData) (ESConstructorData, error) {
+func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error) {
 	spec := ParsedIdlFile{}
 	var constructor *ESOperation
 	err := json.Unmarshal(data, &spec)
@@ -162,8 +154,6 @@ var hasNoError = map[string]bool{
 	"getResponseHeader": true,
 	"item":              true,
 }
-
-type TypeCustomization []string
 
 const br = "github.com/stroiman/go-dom/browser"
 const sc = "github.com/stroiman/go-dom/scripting"

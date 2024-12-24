@@ -14,7 +14,7 @@ func generateXhr(b *builder) error {
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
 	file.ImportAlias(v8, "v8")
-	data, err := createData(xhrData, CreateDataData{
+	data, err := createData(xhrData, ESClassWrapper{
 		TypeName:        "XMLHttpRequest",
 		InnerTypeName:   "XmlHttpRequest",
 		WrapperTypeName: "ESXmlHttpRequest",
