@@ -2,6 +2,7 @@ package scripting
 
 import (
 	"errors"
+	"iter"
 
 	"github.com/stroiman/go-dom/browser"
 	v8 "github.com/tommie/v8go"
@@ -38,12 +39,29 @@ func NewIterator[T any](host *ScriptHost, entityLookup EntityLookup[T]) Iterator
 type IteratorInstance[T any] struct {
 	browser.Entity
 	items []T
+	next  func() (T, bool)
+	stop  func()
+}
+
+func SeqOfSlice[T any](items []T) iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for _, item := range items {
+			if !yield(item) {
+				return
+			}
+		}
+	}
+
 }
 
 func (i Iterator[T]) NewIteratorInstance(context *ScriptContext, items []T) (*v8.Value, error) {
+	seq := SeqOfSlice(items)
+	next, stop := iter.Pull(seq)
 	iterator := &IteratorInstance[T]{
 		browser.NewEntity(),
 		items,
+		next,
+		stop,
 	}
 	res, err := i.ot.NewInstance(context.v8ctx)
 	if err == nil {
@@ -60,12 +78,13 @@ func (i Iterator[T]) Next(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	items := instance.items
+	next := instance.next
+	stop := instance.stop
 	index := info.This().GetInternalField(1).Int32()
-	if int(index) >= len(items) {
+	if item, ok := next(); !ok {
+		stop()
 		return i.createDoneIteratorResult(ctx.v8ctx)
 	} else {
-		item := instance.items[int(index)]
 		value, err1 := i.entityLookup(item, ctx)
 		result, err2 := i.createNotDoneIteratorResult(ctx.v8ctx, value)
 		err3 := info.This().SetInternalField(1, index+1)
