@@ -14,25 +14,24 @@ func generateUrl(b *builder) error {
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
 	file.ImportAlias(v8, "v8")
-	data, err := createData(urlData, ESClassWrapper{
+	wrapper := ESClassWrapper{
 		TypeName: "URL",
-		// InnerTypeName:   "XmlHttpRequest",
-		//WrapperTypeName: "ESXmlHttpRequest",
 		Receiver: "u",
-		Customization: []string{
-			"SetHref",
-			"SetProtocol",
-			"username",
-			"password",
-			"SetHost",
-			"SetPort",
-			"SetHostname",
-			"SetPathname",
-			"searchParams",
-			"SetHash",
-			"SetSearch",
-		},
-	})
+	}
+	wrapper.MarkMembersAsNotImplemented(
+		"SetHref",
+		"SetProtocol",
+		"username",
+		"password",
+		"SetHost",
+		"SetPort",
+		"SetHostname",
+		"SetPathname",
+		"searchParams",
+		"SetHash",
+		"SetSearch",
+	)
+	data, err := createData(urlData, wrapper)
 	if err != nil {
 		return err
 	}

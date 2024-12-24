@@ -14,17 +14,18 @@ func generateDOMTypes(b *builder) error {
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
 	file.ImportAlias(v8, "v8")
-	data, err := createData(domData, ESClassWrapper{
+	wrapper := ESClassWrapper{
 		TypeName: "DOMTokenList",
 		Receiver: "u",
-		Customization: []string{
-			"contains",
-			"remove",
-			"toggle",
-			"replace",
-			"supports",
-		},
-	})
+	}
+	wrapper.MarkMembersAsNotImplemented(
+		"contains",
+		"remove",
+		"toggle",
+		"replace",
+		"supports",
+	)
+	data, err := createData(domData, wrapper)
 	if err != nil {
 		return err
 	}

@@ -11,3 +11,7 @@ type ESClassWrapper struct {
 	Receiver        string
 	Customization   TypeCustomization
 }
+
+func (w *ESClassWrapper) MarkMembersAsNotImplemented(names ...string) {
+	w.Customization = names
+}

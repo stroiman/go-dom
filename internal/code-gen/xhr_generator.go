@@ -14,22 +14,23 @@ func generateXhr(b *builder) error {
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
 	file.ImportAlias(v8, "v8")
-	data, err := createData(xhrData, ESClassWrapper{
+	classWrapper := ESClassWrapper{
 		TypeName:        "XMLHttpRequest",
 		InnerTypeName:   "XmlHttpRequest",
 		WrapperTypeName: "ESXmlHttpRequest",
 		Receiver:        "xhr",
-		Customization: []string{
-			"readyState",
-			"timeout",
-			"withCredentials",
-			"upload",
-			"responseURL",
-			"response", // TODO, just because of the return value
-			"responseType",
-			"responseXML",
-		},
-	})
+	}
+	classWrapper.MarkMembersAsNotImplemented(
+		"readyState",
+		"timeout",
+		"withCredentials",
+		"upload",
+		"responseURL",
+		"response", // TODO, just because of the return value
+		"responseType",
+		"responseXML",
+	)
+	data, err := createData(xhrData, classWrapper)
 	if err != nil {
 		return err
 	}
