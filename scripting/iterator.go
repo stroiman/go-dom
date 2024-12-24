@@ -36,9 +36,13 @@ func NewIterator[T any](host *ScriptHost, entityLookup EntityLookup[T]) Iterator
 	return iterator
 }
 
+type Iterable[T any] interface {
+	All() iter.Seq[T]
+}
+
 type IteratorInstance[T any] struct {
 	browser.Entity
-	items []T
+	items Iterable[T]
 	next  func() (T, bool)
 	stop  func()
 }
@@ -51,12 +55,27 @@ func SeqOfSlice[T any](items []T) iter.Seq[T] {
 			}
 		}
 	}
+}
 
+type SliceIterable[T any] struct {
+	items []T
+}
+
+func (i SliceIterable[T]) All() iter.Seq[T] {
+	return SeqOfSlice(i.items)
 }
 
 func (i Iterator[T]) NewIteratorInstance(context *ScriptContext, items []T) (*v8.Value, error) {
-	seq := SeqOfSlice(items)
+	return i.NewIteratorInstanceOfIterable(context, SliceIterable[T]{items})
+}
+
+func (i Iterator[T]) NewIteratorInstanceOfIterable(
+	context *ScriptContext,
+	items Iterable[T],
+) (*v8.Value, error) {
+	seq := items.All()
 	next, stop := iter.Pull(seq)
+
 	iterator := &IteratorInstance[T]{
 		browser.NewEntity(),
 		items,
@@ -98,7 +117,7 @@ func (i Iterator[T]) NewIterator(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	if err != nil {
 		return nil, err
 	}
-	return i.NewIteratorInstance(ctx, instance.items)
+	return i.NewIteratorInstanceOfIterable(ctx, instance.items)
 }
 
 func (i Iterator[T]) createDoneIteratorResult(ctx *v8.Context) (*v8.Value, error) {
