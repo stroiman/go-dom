@@ -57,7 +57,22 @@ func (u ESDOMTokenList) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u ESDOMTokenList) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	ctx := u.host.MustGetContext(info.Context())
+	instance, err := u.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	args := info.Args()
+	argsLen := len(args)
+	if argsLen < 1 {
+		return nil, errors.New("Too few arguments")
+	}
+	token, err := u.GetArgDOMString(args, 0)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.Contains(token)
+	return u.ToBoolean(ctx, result)
 }
 
 func (u ESDOMTokenList) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

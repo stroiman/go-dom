@@ -21,7 +21,7 @@ func generateDOMTypes(b *builder) error {
 	}
 
 	wrapper.Method("item").SetNoError()
-	wrapper.Method("contains").SetNotImplemented()
+	wrapper.Method("contains").SetNoError()
 	wrapper.Method("remove").SetNotImplemented()
 	wrapper.Method("toggle").SetNotImplemented()
 	wrapper.Method("replace").SetNotImplemented()

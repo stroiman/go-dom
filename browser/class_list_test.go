@@ -47,12 +47,25 @@ var _ = Describe("ClassList", func() {
 		})
 	})
 
+	Describe("Contains", func() {
+		It("Should return true for an existing class", func() {
+			el.SetAttribute("class", "a b c")
+			Expect(classList.Contains("a")).To(BeTrue())
+		})
+
+		It("Should return false for an non-existing class", func() {
+			el.SetAttribute("class", "a b c")
+			Expect(classList.Contains("x")).To(BeFalse())
+		})
+	})
+
 	Describe("Length", func() {
 		It("Should return the number of classes", func() {
 			el.SetAttribute("class", "a b c")
 			Expect(classList.Length()).To(Equal(3))
 		})
 	})
+
 	Describe("Get/Set Value", func() {
 		It("Should read the class attribute", func() {
 			el.SetAttribute("class", "a b c")

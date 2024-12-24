@@ -34,6 +34,12 @@ func (l DOMTokenList) Add(tokens ...string) error {
 	return nil
 }
 
+func (l DOMTokenList) Contains(token string) bool {
+	class := l.element.GetAttribute("class")
+	classes := strings.Split(class, " ")
+	return slices.Contains(classes, token)
+}
+
 func (l DOMTokenList) Length() int {
 	class := l.element.GetAttribute("class")
 	if class == "" {
