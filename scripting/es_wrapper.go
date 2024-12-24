@@ -2,7 +2,10 @@ package scripting
 
 import (
 	"errors"
+	"runtime/cgo"
+	"unsafe"
 
+	"github.com/stroiman/go-dom/browser"
 	. "github.com/stroiman/go-dom/browser"
 
 	v8 "github.com/tommie/v8go"
@@ -114,4 +117,23 @@ func (w Converters) ToUnsignedLong(ctx *ScriptContext, val int) (*v8.Value, erro
 
 func (w Converters) ToBoolean(ctx *ScriptContext, val bool) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
+}
+
+type HandleReffedObject[T any] struct {
+	host *ScriptHost
+}
+
+func (o HandleReffedObject[T]) Store(value T, ctx *ScriptContext, this *v8.Object) {
+	handle := cgo.NewHandle(value)
+	ctx.AddDisposer(HandleDisposable(handle))
+
+	internalField := v8.NewExternalValue(o.host.iso, unsafe.Pointer(&handle))
+	this.SetInternalField(0, internalField)
+}
+
+func (o HandleReffedObject[T]) GetInstance(info *v8.FunctionCallbackInfo) (browser.URL, error) {
+	h := info.This().GetInternalField(0)
+	handle := *(*cgo.Handle)(h.External())
+	result := handle.Value().(browser.URL)
+	return result, nil
 }
