@@ -64,6 +64,16 @@ func (l DOMTokenList) Remove(token string) {
 	}
 }
 
+func (l DOMTokenList) Toggle(token string) bool {
+	if l.Contains(token) {
+		l.Remove(token)
+		return false
+	} else {
+		l.Add(token)
+		return true
+	}
+}
+
 func (l DOMTokenList) getTokens() []string {
 	class := l.element.GetAttribute("class")
 	if class == "" {
