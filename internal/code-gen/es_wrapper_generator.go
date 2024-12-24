@@ -48,12 +48,18 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 		returnType, nullable := FindMemberReturnType(member)
 		methodCustomization := dataData.GetMethodCustomization(member.Name)
 		operation := &tmp{ESOperation{
-			Name:           member.Name,
-			NotImplemented: methodCustomization.NotImplemented,
-			ReturnType:     returnType,
-			Nullable:       nullable,
-			Arguments:      []ESOperationArgument{},
+			Name:                member.Name,
+			NotImplemented:      methodCustomization.NotImplemented,
+			ReturnType:          returnType,
+			Nullable:            nullable,
+			MethodCustomization: methodCustomization,
+			Arguments:           []ESOperationArgument{},
 		}, true}
+		if member.Type == "operation" {
+			operation.Op.HasError = !operation.Op.MethodCustomization.HasNoError
+			operation.Op.CustomImplementation = operation.Op.MethodCustomization.CustomImplementation
+			ops = append(ops, operation)
+		}
 		for _, arg := range member.Arguments {
 			esArg := ESOperationArgument{
 				Name:     arg.Name,
@@ -75,11 +81,6 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 				esArg.Type = arg.IdlType.IdlType.IType.TypeName
 			}
 			operation.Op.Arguments = append(operation.Op.Arguments, esArg)
-		}
-		if member.Type == "operation" {
-			opCustomization := dataData.GetMethodCustomization(member.Name)
-			operation.Op.HasError = !opCustomization.HasNoError
-			ops = append(ops, operation)
 		}
 		if member.Type == "constructor" {
 			constructor = &operation.Op
@@ -161,12 +162,18 @@ type ESOperationArgument struct {
 }
 
 type ESOperation struct {
-	Name           string
-	NotImplemented bool
-	ReturnType     string
-	Nullable       bool
-	HasError       bool
-	Arguments      []ESOperationArgument
+	Name                 string
+	NotImplemented       bool
+	ReturnType           string
+	Nullable             bool
+	HasError             bool
+	CustomImplementation bool
+	MethodCustomization  ESMethodWrapper
+	Arguments            []ESOperationArgument
+}
+
+func (op ESOperation) GetHasError() bool {
+	return op.HasError
 }
 
 type ESAttribute struct {
@@ -557,7 +564,7 @@ type GetGeneratorResult struct {
 
 func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResult) {
 	args := []jen.Code{}
-	genRes.HasError = c.Op.HasError
+	genRes.HasError = c.Op.GetHasError()
 	genRes.HasValue = c.Op.ReturnType != "undefined"
 	var stmt *jen.Statement
 	if genRes.HasValue {
@@ -843,9 +850,11 @@ func CreateConstructorWrapper(c JSConstructor, data ESConstructorData) JenGenera
 }
 
 func CreateWrapperMethods(c JSConstructor, data ESConstructorData) JenGenerator {
-	generators := make([]JenGenerator, len(data.Operations))
-	for i, op := range data.Operations {
-		generators[i] = c.CreateWrapperMethod(data, op)
+	generators := make([]JenGenerator, 0, len(data.Operations))
+	for _, op := range data.Operations {
+		if !op.CustomImplementation {
+			generators = append(generators, c.CreateWrapperMethod(data, op))
+		}
 	}
 	list := StatementList(generators...)
 	for _, attr := range data.Attributes {
