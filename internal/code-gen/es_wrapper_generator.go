@@ -32,7 +32,6 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 		Op ESOperation
 		Ok bool
 	}
-	missingOps := dataData.Customization
 	ops := []*tmp{}
 	attributes := []ESAttribute{}
 	for _, member := range idlName.Members {
@@ -47,10 +46,10 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 			continue
 		}
 		returnType, nullable := FindMemberReturnType(member)
-		notImplemented := slices.Index(missingOps, member.Name) != -1
+		methodCustomization := dataData.Customization[member.Name]
 		operation := &tmp{ESOperation{
 			Name:           member.Name,
-			NotImplemented: notImplemented,
+			NotImplemented: methodCustomization.NotImplemented,
 			ReturnType:     returnType,
 			Nullable:       nullable,
 			Arguments:      []ESOperationArgument{},
@@ -100,12 +99,14 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 			getter.Name = getterName
 			getter.ReturnType = rtnType
 			getter.Nullable = nullable
-			getter.NotImplemented = slices.Index(missingOps, getter.Name) != -1 || op.NotImplemented
+			getterCustomization := dataData.Customization[getter.Name]
+			getter.NotImplemented = getterCustomization.NotImplemented || op.NotImplemented
 			if !member.Readonly {
 				setter = new(ESOperation)
 				*setter = op
 				setter.Name = fmt.Sprintf("Set%s", idlNameToGoName(op.Name))
-				setter.NotImplemented = slices.Index(missingOps, setter.Name) != -1 ||
+				methodCustomization := dataData.Customization[setter.Name]
+				setter.NotImplemented = methodCustomization.NotImplemented ||
 					op.NotImplemented
 				setter.ReturnType = "undefined"
 				setter.Arguments = []ESOperationArgument{{
