@@ -46,7 +46,7 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 			continue
 		}
 		returnType, nullable := FindMemberReturnType(member)
-		methodCustomization := dataData.Customization[member.Name]
+		methodCustomization := dataData.GetMethodCustomization(member.Name)
 		operation := &tmp{ESOperation{
 			Name:           member.Name,
 			NotImplemented: methodCustomization.NotImplemented,
@@ -99,13 +99,13 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 			getter.Name = getterName
 			getter.ReturnType = rtnType
 			getter.Nullable = nullable
-			getterCustomization := dataData.Customization[getter.Name]
+			getterCustomization := dataData.GetMethodCustomization(getter.Name)
 			getter.NotImplemented = getterCustomization.NotImplemented || op.NotImplemented
 			if !member.Readonly {
 				setter = new(ESOperation)
 				*setter = op
 				setter.Name = fmt.Sprintf("Set%s", idlNameToGoName(op.Name))
-				methodCustomization := dataData.Customization[setter.Name]
+				methodCustomization := dataData.GetMethodCustomization(setter.Name)
 				setter.NotImplemented = methodCustomization.NotImplemented ||
 					op.NotImplemented
 				setter.ReturnType = "undefined"
