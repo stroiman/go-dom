@@ -14,11 +14,7 @@ func NewClassList(element Element) DOMTokenList {
 }
 
 func (l DOMTokenList) Add(tokens ...string) error {
-	var classes []string
-	class := l.element.GetAttribute("class")
-	if class != "" {
-		classes = strings.Split(class, " ")
-	}
+	classes := l.getTokens()
 	for _, token := range tokens {
 		if token == "" {
 			return newDomErrorCode("Empty token", domErrorSyntaxError)
@@ -35,17 +31,12 @@ func (l DOMTokenList) Add(tokens ...string) error {
 }
 
 func (l DOMTokenList) Contains(token string) bool {
-	class := l.element.GetAttribute("class")
-	classes := strings.Split(class, " ")
+	classes := l.getTokens()
 	return slices.Contains(classes, token)
 }
 
 func (l DOMTokenList) Length() int {
-	class := l.element.GetAttribute("class")
-	if class == "" {
-		return 0
-	}
-	return len(strings.Split(class, " "))
+	return len(l.getTokens())
 }
 
 func (l DOMTokenList) GetValue() string {
@@ -57,13 +48,17 @@ func (l DOMTokenList) SetValue(val string) {
 }
 
 func (l DOMTokenList) Item(index int) *string {
-	class := l.element.GetAttribute("class")
-	if class == "" {
-		return nil
-	}
-	classes := strings.Split(class, " ")
+	classes := l.getTokens()
 	if index >= len(classes) {
 		return nil
 	}
 	return &classes[index]
+}
+
+func (l DOMTokenList) getTokens() []string {
+	class := l.element.GetAttribute("class")
+	if class == "" {
+		return []string{}
+	}
+	return strings.Split(class, " ")
 }
