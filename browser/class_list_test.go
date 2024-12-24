@@ -89,4 +89,24 @@ var _ = Describe("ClassList", func() {
 			Expect(classList.Item(3)).To(BeNil())
 		})
 	})
+
+	Describe("Remove", func() {
+		It("Should remove an existing class", func() {
+			el.SetAttribute("class", "a b c")
+			classList.Remove("b")
+			Expect(el.GetAttribute("class")).To(Equal("a c"))
+		})
+
+		It("Should remove the last class", func() {
+			el.SetAttribute("class", "a b c")
+			classList.Remove("c")
+			Expect(el.GetAttribute("class")).To(Equal("a b"))
+		})
+
+		It("Should leave the list intact for a non-existing class", func() {
+			el.SetAttribute("class", "a b c")
+			classList.Remove("x")
+			Expect(el.GetAttribute("class")).To(Equal("a b c"))
+		})
+	})
 })

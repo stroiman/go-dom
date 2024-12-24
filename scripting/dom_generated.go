@@ -94,7 +94,21 @@ func (u ESDOMTokenList) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u ESDOMTokenList) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	instance, err := u.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	args := info.Args()
+	argsLen := len(args)
+	if argsLen < 1 {
+		return nil, errors.New("Too few arguments")
+	}
+	tokens, err := u.GetArgDOMString(args, 0)
+	if err != nil {
+		return nil, err
+	}
+	instance.Remove(tokens)
+	return nil, nil
 }
 
 func (u ESDOMTokenList) Toggle(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
