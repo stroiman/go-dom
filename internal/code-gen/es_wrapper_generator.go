@@ -48,16 +48,16 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 		returnType, nullable := FindMemberReturnType(member)
 		methodCustomization := dataData.GetMethodCustomization(member.Name)
 		operation := &tmp{ESOperation{
-			Name:                member.Name,
-			NotImplemented:      methodCustomization.NotImplemented,
-			ReturnType:          returnType,
-			Nullable:            nullable,
-			MethodCustomization: methodCustomization,
-			Arguments:           []ESOperationArgument{},
+			Name:                 member.Name,
+			NotImplemented:       methodCustomization.NotImplemented,
+			CustomImplementation: methodCustomization.CustomImplementation,
+			ReturnType:           returnType,
+			Nullable:             nullable,
+			MethodCustomization:  methodCustomization,
+			Arguments:            []ESOperationArgument{},
 		}, true}
 		if member.Type == "operation" {
 			operation.Op.HasError = !operation.Op.MethodCustomization.HasNoError
-			operation.Op.CustomImplementation = operation.Op.MethodCustomization.CustomImplementation
 			ops = append(ops, operation)
 		}
 		for _, arg := range member.Arguments {
@@ -103,6 +103,8 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 			getter.Nullable = nullable
 			getterCustomization := dataData.GetMethodCustomization(getter.Name)
 			getter.NotImplemented = getterCustomization.NotImplemented || op.NotImplemented
+			getter.CustomImplementation = getterCustomization.CustomImplementation ||
+				op.CustomImplementation
 			if !member.Readonly {
 				setter = new(ESOperation)
 				*setter = op
@@ -110,6 +112,8 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 				methodCustomization := dataData.GetMethodCustomization(setter.Name)
 				setter.NotImplemented = methodCustomization.NotImplemented ||
 					op.NotImplemented
+				setter.CustomImplementation = methodCustomization.CustomImplementation ||
+					op.CustomImplementation
 				setter.ReturnType = "undefined"
 				setter.Arguments = []ESOperationArgument{{
 					Name:     "val",
@@ -862,9 +866,7 @@ func CreateConstructorWrapper(c JSConstructor, data ESConstructorData) JenGenera
 func CreateWrapperMethods(c JSConstructor, data ESConstructorData) JenGenerator {
 	generators := make([]JenGenerator, 0, len(data.Operations))
 	for _, op := range data.Operations {
-		if !op.CustomImplementation {
-			generators = append(generators, c.CreateWrapperMethod(data, op))
-		}
+		generators = append(generators, c.CreateWrapperMethod(data, op))
 	}
 	list := StatementList(generators...)
 	for _, attr := range data.Attributes {
@@ -882,6 +884,9 @@ func (c JSConstructor) CreateWrapperMethod(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
+	if op.CustomImplementation {
+		return g.Noop
+	}
 	f := c.FunctionTemplateCallbackBody(data, op)
 	return StatementList(
 		NewLine(),

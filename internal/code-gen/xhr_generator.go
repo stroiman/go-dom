@@ -22,7 +22,6 @@ func generateXhr(b *builder) error {
 	}
 	classWrapper.MarkMembersAsNotImplemented(
 		"readyState",
-		"upload",
 		"responseURL",
 		"response", // TODO, just because of the return value
 		"responseType",
@@ -30,6 +29,7 @@ func generateXhr(b *builder) error {
 	)
 
 	classWrapper.Method("open").SetCustomImplementation()
+	classWrapper.Method("upload").SetCustomImplementation()
 	classWrapper.Method("getResponseHeader").HasNoError = true
 	classWrapper.Method("setRequestHeader").HasNoError = true
 

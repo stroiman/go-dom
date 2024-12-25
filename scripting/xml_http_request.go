@@ -56,3 +56,7 @@ func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (result *v8.Valu
 	}
 	return
 }
+
+func (xhr ESXmlHttpRequest) Upload(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return info.This().Value, nil
+}
