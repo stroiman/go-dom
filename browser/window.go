@@ -11,6 +11,7 @@ import (
 type Window interface {
 	EventTarget
 	Document() Document
+	Dispose()
 	// TODO: Remove, for testing
 	LoadHTML(string) error
 	Eval(string) (any, error)
