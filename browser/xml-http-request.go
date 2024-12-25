@@ -31,7 +31,7 @@ const (
 // TODO: Type URL (or is it in v8 already?)
 
 type XmlHttpRequest struct {
-	eventTarget
+	EventTarget
 	client   http.Client
 	async    bool
 	status   int
@@ -44,7 +44,7 @@ type XmlHttpRequest struct {
 
 func NewXmlHttpRequest(client http.Client) *XmlHttpRequest {
 	return &XmlHttpRequest{
-		eventTarget: newEventTarget(),
+		EventTarget: NewEventTarget(),
 		client:      client,
 		headers:     make(map[string][]string),
 	}
