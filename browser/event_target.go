@@ -11,14 +11,16 @@ type EventTarget interface {
 	AddEventListener(eventType string, listener EventHandler /* TODO: options */)
 	RemoveEventListener(eventType string, listener EventHandler)
 	DispatchEvent(event Event) bool
+	SetCatchAllHandler(listener EventHandler)
 	// Unexported
 	dispatchError(err ErrorEvent)
 }
 
 type eventTarget struct {
 	base
-	parentTarget EventTarget
-	lmap         map[string][]EventHandler
+	parentTarget    EventTarget
+	lmap            map[string][]EventHandler
+	catchAllHandler EventHandler
 }
 
 func newEventTarget() eventTarget {
@@ -64,8 +66,18 @@ func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandle
 	}
 }
 
+func (e *eventTarget) SetCatchAllHandler(handler EventHandler) {
+	e.catchAllHandler = handler
+}
+
 func (e *eventTarget) DispatchEvent(event Event) bool {
 	event.reset()
+	if e.catchAllHandler != nil {
+		if err := e.catchAllHandler.HandleEvent(event); err != nil {
+			slog.Debug("Error occurred", "error", err.Error())
+			e.dispatchError(NewErrorEvent(err))
+		}
+	}
 	slog.Debug("Dispatch event", "EventType", event.Type())
 	listeners := e.lmap[event.Type()]
 

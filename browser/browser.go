@@ -59,6 +59,21 @@ func (b *Browser) Open(url string) Document {
 	return doc
 }
 
+// Creates a new window containing an empty document
+func (b *Browser) NewWindow(baseUrl string) (Window, error) {
+	u, err := netURL.Parse(baseUrl)
+	if err != nil {
+		return nil, err
+	}
+	window := newWindow(b.Client, u)
+	var scriptEngine ScriptEngine
+	if b.ScriptEngineFactory != nil {
+		scriptEngine = b.ScriptEngineFactory.NewScriptEngine(window)
+	}
+	window.SetScriptRunner(scriptEngine)
+	return window, nil
+}
+
 func NewBrowserFromHandler(handler http.Handler) *Browser {
 	cookiejar, err := cookiejar.New(nil)
 	if err != nil {

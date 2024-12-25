@@ -16,6 +16,19 @@ func NewESXmlHttpRequest(host *ScriptHost) ESXmlHttpRequest {
 
 func (w ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) (*v8.Value, error) {
 	result := ctx.Window().NewXmlHttpRequest()
+	result.SetCatchAllHandler(NewEventHandlerFunc(func(event Event) error {
+		prop := "on" + event.Type()
+		handler, err := this.Get(prop)
+		if err == nil && handler.IsFunction() {
+			v8Event, err := ctx.GetInstanceForNode(event)
+			if err == nil {
+				f, _ := handler.AsFunction()
+				target := v8.Null(w.host.iso)
+				f.Call(target, v8Event)
+			}
+		}
+		return nil
+	}))
 	ctx.CacheNode(this, result)
 	return nil, nil
 }
