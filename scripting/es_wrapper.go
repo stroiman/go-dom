@@ -84,10 +84,13 @@ func (w Converters) ToNullableByteString(ctx *ScriptContext, str *string) (*v8.V
 	if str == nil {
 		return v8.Null(ctx.host.iso), nil
 	}
-	return v8.NewValue(ctx.host.iso, str)
+	return v8.NewValue(ctx.host.iso, *str)
 }
 
 func (w Converters) ToByteString(ctx *ScriptContext, str string) (*v8.Value, error) {
+	if str == "" {
+		return v8.Null(ctx.host.iso), nil
+	}
 	return v8.NewValue(ctx.host.iso, str)
 }
 
@@ -103,6 +106,10 @@ func (w Converters) ToNullableDOMString(ctx *ScriptContext, str *string) (*v8.Va
 }
 
 func (w Converters) ToUnsignedLong(ctx *ScriptContext, val int) (*v8.Value, error) {
+	return v8.NewValue(ctx.host.iso, val)
+}
+
+func (w Converters) ToAny(ctx *ScriptContext, val string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
 }
 

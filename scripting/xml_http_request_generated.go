@@ -235,7 +235,13 @@ func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*
 }
 
 func (xhr ESXmlHttpRequest) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: XMLHttpRequest.ResponseURL")
+	ctx := xhr.host.MustGetContext(info.Context())
+	instance, err := xhr.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.ResponseURL()
+	return xhr.ToUSVString(ctx, result)
 }
 
 func (xhr ESXmlHttpRequest) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -267,7 +273,13 @@ func (xhr ESXmlHttpRequest) SetResponseType(info *v8.FunctionCallbackInfo) (*v8.
 }
 
 func (xhr ESXmlHttpRequest) Response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: XMLHttpRequest.Response")
+	ctx := xhr.host.MustGetContext(info.Context())
+	instance, err := xhr.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.Response()
+	return xhr.ToAny(ctx, result)
 }
 
 func (xhr ESXmlHttpRequest) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

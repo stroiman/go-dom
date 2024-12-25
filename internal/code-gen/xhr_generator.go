@@ -22,8 +22,6 @@ func generateXhr(b *builder) error {
 	}
 	classWrapper.MarkMembersAsNotImplemented(
 		"readyState",
-		"responseURL",
-		"response", // TODO, just because of the return value
 		"responseType",
 		"responseXML",
 	)

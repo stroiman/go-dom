@@ -148,6 +148,9 @@ func (req *xmlHttpRequest) Abort() error {
 }
 
 func (req *xmlHttpRequest) GetAllResponseHeaders() (res string, err error) {
+	if req.res == nil {
+		return
+	}
 	builder := strings.Builder{}
 	for k, vs := range req.res.Header {
 		key := strings.ToLower(k)
