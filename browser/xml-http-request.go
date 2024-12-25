@@ -28,10 +28,23 @@ const (
 	XHREventLoadend   XHREvent = "loadend"
 )
 
-// TODO: Type URL (or is it in v8 already?)
-
-type XmlHttpRequest struct {
+type XmlHttpRequest interface {
 	EventTarget
+	Abort() error
+	Open(string, string, ...RequestOption)
+	Send() error
+	SendBody(body *XHRRequestBody) error
+	Status() int
+	StatusText() string
+	ResponseText() string
+	SetRequestHeader(name string, value string)
+	GetAllResponseHeaders() (res string, err error)
+	OverrideMimeType(mimeType string) error
+	GetResponseHeader(headerName string) *string
+}
+
+type xmlHttpRequest struct {
+	eventTarget
 	client   http.Client
 	async    bool
 	status   int
@@ -42,17 +55,17 @@ type XmlHttpRequest struct {
 	headers  http.Header
 }
 
-func NewXmlHttpRequest(client http.Client) *XmlHttpRequest {
-	return &XmlHttpRequest{
-		EventTarget: NewEventTarget(),
+func NewXmlHttpRequest(client http.Client) XmlHttpRequest {
+	return &xmlHttpRequest{
+		eventTarget: newEventTarget(),
 		client:      client,
 		headers:     make(map[string][]string),
 	}
 }
 
-type RequestOption = func(req *XmlHttpRequest)
+type RequestOption = func(req *xmlHttpRequest)
 
-func (req *XmlHttpRequest) Open(
+func (req *xmlHttpRequest) Open(
 	method string,
 	// TODO: Should this be a `string` or a stringer? The JS object should accept
 	// stringable objects, e.g., a URL, but should we convert here; or on the JS
@@ -68,7 +81,7 @@ func (req *XmlHttpRequest) Open(
 	// TODO: if (req.open) { req.Abort() }
 }
 
-func (req *XmlHttpRequest) send(body io.Reader) error {
+func (req *xmlHttpRequest) send(body io.Reader) error {
 	httpRequest, err := http.NewRequest(req.method, req.url, body)
 	if err != nil {
 		return err
@@ -87,11 +100,11 @@ func (req *XmlHttpRequest) send(body io.Reader) error {
 	return err
 }
 
-func (req *XmlHttpRequest) Send() error {
+func (req *xmlHttpRequest) Send() error {
 	return req.SendBody(nil)
 }
 
-func (req *XmlHttpRequest) SendBody(body *XHRRequestBody) error {
+func (req *xmlHttpRequest) SendBody(body *XHRRequestBody) error {
 	var reader io.Reader
 	if body != nil {
 		// TODO: Set content type or not?
@@ -106,25 +119,25 @@ func (req *XmlHttpRequest) SendBody(body *XHRRequestBody) error {
 	return req.send(reader)
 }
 
-func (req *XmlHttpRequest) Status() int { return req.status }
+func (req *xmlHttpRequest) Status() int { return req.status }
 
 // GetStatusText implements the [statusText] property
 // [statusText]: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/statusText
 // TODO: Should this exist? It's just a wrapper around [http.GetStatusText], could
 // be in JS wrapper layer
-func (req *XmlHttpRequest) StatusText() string { return http.StatusText(req.status) }
+func (req *xmlHttpRequest) StatusText() string { return http.StatusText(req.status) }
 
-func (req *XmlHttpRequest) ResponseText() string { return string(req.response) }
+func (req *xmlHttpRequest) ResponseText() string { return string(req.response) }
 
-func (req *XmlHttpRequest) SetRequestHeader(name string, value string) {
+func (req *xmlHttpRequest) SetRequestHeader(name string, value string) {
 	req.headers.Add(name, value)
 }
 
-func (req *XmlHttpRequest) Abort() error {
+func (req *xmlHttpRequest) Abort() error {
 	return errors.New("XmlHttpRequest.Abort called - not implemented - ignoring call")
 }
 
-func (req *XmlHttpRequest) GetAllResponseHeaders() (res string, err error) {
+func (req *xmlHttpRequest) GetAllResponseHeaders() (res string, err error) {
 	builder := strings.Builder{}
 	for k, vs := range req.res.Header {
 		key := strings.ToLower(k)
@@ -140,13 +153,13 @@ func (req *XmlHttpRequest) GetAllResponseHeaders() (res string, err error) {
 	return builder.String(), nil
 }
 
-func (req *XmlHttpRequest) OverrideMimeType(mimeType string) error {
+func (req *xmlHttpRequest) OverrideMimeType(mimeType string) error {
 	// This has no effect at the moment, but has an empty implementation to be
 	// compatible with HTMX.
 	return nil
 }
 
-func (req *XmlHttpRequest) GetResponseHeader(headerName string) *string {
+func (req *xmlHttpRequest) GetResponseHeader(headerName string) *string {
 	if req.res == nil {
 		return nil
 	}
@@ -160,11 +173,11 @@ func (req *XmlHttpRequest) GetResponseHeader(headerName string) *string {
 	return nil
 }
 
-// func (req *XmlHttpRequest) SetWithCredentials(val bool) error {
+// func (req *xmlHttpRequest) SetWithCredentials(val bool) error {
 // 	return nil
 // }
 //
-// func (req *XmlHttpRequest) GetWithCredentials() bool {
+// func (req *xmlHttpRequest) GetWithCredentials() bool {
 // 	return false
 // }
 
@@ -173,18 +186,18 @@ func (req *XmlHttpRequest) GetResponseHeader(headerName string) *string {
 func RequestOptionAsync(
 	val bool,
 ) RequestOption {
-	return func(req *XmlHttpRequest) { req.async = val }
+	return func(req *xmlHttpRequest) { req.async = val }
 }
 
 func RequestOptionUserName(_ string) RequestOption {
-	return func(req *XmlHttpRequest) {
+	return func(req *xmlHttpRequest) {
 		// TODO
 		panic("Not implemented")
 	}
 }
 
 func RequestOptionPassword(_ string) RequestOption {
-	return func(req *XmlHttpRequest) {
+	return func(req *xmlHttpRequest) {
 		// TODO
 		panic("Not implemented")
 	}

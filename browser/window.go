@@ -109,5 +109,5 @@ func (w *window) Dispose() {
 }
 
 func (w *window) NewXmlHttpRequest() XmlHttpRequest {
-	return *NewXmlHttpRequest(w.httpClient)
+	return NewXmlHttpRequest(w.httpClient)
 }

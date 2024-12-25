@@ -13,7 +13,7 @@ import (
 	"github.com/onsi/gomega/types"
 )
 
-func newFromHandlerFunc(f func(http.ResponseWriter, *http.Request)) *XmlHttpRequest {
+func newFromHandlerFunc(f func(http.ResponseWriter, *http.Request)) XmlHttpRequest {
 	client := http.Client{
 		Transport: TestRoundTripper{http.HandlerFunc(f)},
 	}
@@ -28,7 +28,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 		actualReqBody  []byte
 		reqErr         error
 		responseHeader http.Header
-		r              *XmlHttpRequest
+		r              XmlHttpRequest
 	)
 
 	JustBeforeEach(func() {
