@@ -14,6 +14,7 @@ type EventTarget interface {
 	SetCatchAllHandler(listener EventHandler)
 	// Unexported
 	dispatchError(err ErrorEvent)
+	dispatchEvent(event Event) bool
 }
 
 type eventTarget struct {
@@ -72,13 +73,17 @@ func (e *eventTarget) SetCatchAllHandler(handler EventHandler) {
 
 func (e *eventTarget) DispatchEvent(event Event) bool {
 	event.reset()
+	slog.Debug("Dispatch event", "EventType", event.Type())
+	return e.dispatchEvent(event)
+}
+
+func (e *eventTarget) dispatchEvent(event Event) bool {
 	if e.catchAllHandler != nil {
 		if err := e.catchAllHandler.HandleEvent(event); err != nil {
 			slog.Debug("Error occurred", "error", err.Error())
 			e.dispatchError(NewErrorEvent(err))
 		}
 	}
-	slog.Debug("Dispatch event", "EventType", event.Type())
 	listeners := e.lmap[event.Type()]
 
 	for _, l := range listeners {
@@ -89,7 +94,7 @@ func (e *eventTarget) DispatchEvent(event Event) bool {
 	}
 
 	if e.parentTarget != nil && event.shouldPropagate() {
-		e.parentTarget.DispatchEvent(event)
+		e.parentTarget.dispatchEvent(event)
 	}
 	return !event.isCancelled()
 }
