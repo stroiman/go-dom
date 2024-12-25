@@ -41,6 +41,8 @@ type XmlHttpRequest interface {
 	GetAllResponseHeaders() (res string, err error)
 	OverrideMimeType(mimeType string) error
 	GetResponseHeader(headerName string) *string
+	SetWithCredentials(val bool) error
+	GetWithCredentials() bool
 }
 
 type xmlHttpRequest struct {
@@ -173,13 +175,13 @@ func (req *xmlHttpRequest) GetResponseHeader(headerName string) *string {
 	return nil
 }
 
-// func (req *xmlHttpRequest) SetWithCredentials(val bool) error {
-// 	return nil
-// }
-//
-// func (req *xmlHttpRequest) GetWithCredentials() bool {
-// 	return false
-// }
+func (req *xmlHttpRequest) SetWithCredentials(val bool) error {
+	return nil
+}
+
+func (req *xmlHttpRequest) GetWithCredentials() bool {
+	return false
+}
 
 /* -------- Options -------- */
 
