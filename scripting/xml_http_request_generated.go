@@ -74,26 +74,6 @@ func (xhr ESXmlHttpRequest) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Valu
 	return xhr.CreateInstance(ctx, info.This())
 }
 
-func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	instance, err := xhr.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 2 {
-		return nil, errors.New("Too few arguments")
-	}
-	method, err0 := xhr.GetArgByteString(args, 0)
-	url, err1 := xhr.GetArgUSVString(args, 1)
-	err = errors.Join(err0, err1)
-	if err != nil {
-		return nil, err
-	}
-	instance.Open(method, url)
-	return nil, nil
-}
-
 func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	instance, err := xhr.GetInstance(info)
 	if err != nil {

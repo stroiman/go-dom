@@ -31,7 +31,7 @@ func generateXhr(b *builder) error {
 		"responseXML",
 	)
 
-	classWrapper.Method("open").HasNoError = true
+	classWrapper.Method("open").SetCustomImplementation()
 	classWrapper.Method("getResponseHeader").HasNoError = true
 	classWrapper.Method("setRequestHeader").HasNoError = true
 
