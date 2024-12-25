@@ -14,10 +14,12 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 	var server http.Handler
 	var window browser.Window
 	var evt chan bool
+	var actualPath string
 
 	BeforeEach(func() {
 		evt = make(chan bool)
 		server = http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			actualPath = req.URL.Path
 		})
 		br := NewTestBrowserFromHandler(server)
 		var err error
@@ -80,9 +82,10 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 			xhr.onloadend = function() {
 				loadendEvent = e
 			}
-			xhr.open("GET", "/", true);
+			xhr.open("GET", "/PATH", true);
 			xhr.send()
 		`)).To(Succeed())
 		<-evt
+		Expect(actualPath).To(Equal("/PATH"))
 	})
 })

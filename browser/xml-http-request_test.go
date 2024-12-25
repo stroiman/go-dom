@@ -98,7 +98,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 				Expect(r.Status()).To(Equal(200))
 				// This is the only place we test StatusText; it's dumb wrapper and may
 				// be removed.
-				Expect(r.StatusText()).To(Equal("OK"))
+				Expect(r.StatusText()).To(HaveValue(Equal("OK")))
 				Expect(r.ResponseText()).To(Equal("Hello, World!"))
 			})
 		})
@@ -191,7 +191,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 			It("Should return all headers", func() {
 				Expect(
 					r.GetAllResponseHeaders(),
-				).To(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain"))
+				).To(HaveValue(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain")))
 			})
 
 			Describe("Same header is added again", func() {
@@ -202,7 +202,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 				It("Should appear twice", func() {
 					Expect(
 						r.GetAllResponseHeaders(),
-					).To(HaveLines("x-test-1: value1", "x-test-1: value3", "x-test-2: value2", "content-type: text/plain"))
+					).To(HaveValue(HaveLines("x-test-1: value1", "x-test-1: value3", "x-test-2: value2", "content-type: text/plain")))
 				})
 			})
 
@@ -214,7 +214,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 				It("Should not include the cookie", func() {
 					Expect(
 						r.GetAllResponseHeaders(),
-					).To(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain"))
+					).To(HaveValue(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain")))
 				})
 			})
 		})

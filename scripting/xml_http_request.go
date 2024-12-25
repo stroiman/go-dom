@@ -23,8 +23,7 @@ func (xhr ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) 
 			v8Event, err := ctx.GetInstanceForNode(event)
 			if err == nil {
 				f, _ := handler.AsFunction()
-				target := v8.Null(xhr.host.iso)
-				f.Call(target, v8Event)
+				f.Call(this, v8Event)
 			}
 		}
 		return nil

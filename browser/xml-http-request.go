@@ -36,10 +36,10 @@ type XmlHttpRequest interface {
 	Send() error
 	SendBody(body *XHRRequestBody) error
 	Status() int
-	StatusText() string
+	StatusText() *string
 	ResponseText() string
 	SetRequestHeader(name string, value string)
-	GetAllResponseHeaders() (res string, err error)
+	GetAllResponseHeaders() (res *string, err error)
 	OverrideMimeType(mimeType string) error
 	GetResponseHeader(headerName string) *string
 	SetWithCredentials(val bool) error
@@ -63,6 +63,7 @@ type xmlHttpRequest struct {
 }
 
 func NewXmlHttpRequest(client http.Client) XmlHttpRequest {
+	slog.Info(" --- NEW REQUEST ---")
 	return &xmlHttpRequest{
 		eventTarget: newEventTarget(),
 		client:      client,
@@ -79,7 +80,7 @@ func (req *xmlHttpRequest) Open(
 	// binding layer? Or different methods?
 	url string,
 	options ...RequestOption) {
-	slog.Debug("XmlHttpRequest.Open")
+	slog.Info("XmlHttpRequest.Open", "method", method, "url", url, "objectId", req.ObjectId())
 
 	req.method = method
 	req.url = url
@@ -90,7 +91,7 @@ func (req *xmlHttpRequest) Open(
 }
 
 func (req *xmlHttpRequest) send(body io.Reader) error {
-	slog.Debug("XmlHttpRequest.Send")
+	slog.Info("XmlHttpRequest.send", "url", req.url, "objectId", req.ObjectId())
 	httpRequest, err := http.NewRequest(req.method, req.url, body)
 	if err != nil {
 		return err
@@ -105,6 +106,7 @@ func (req *xmlHttpRequest) send(body io.Reader) error {
 	b := new(bytes.Buffer) // TODO, branch out depending on content-type
 	_, err = b.ReadFrom(res.Body)
 	req.response = b.Bytes()
+	slog.Info("Response received", "Status", res.StatusCode, "body", string(req.response))
 	req.DispatchEvent(NewCustomEvent(XHREventLoad))
 	return err
 }
@@ -134,11 +136,14 @@ func (req *xmlHttpRequest) Status() int { return req.status }
 // [statusText]: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/statusText
 // TODO: Should this exist? It's just a wrapper around [http.GetStatusText], could
 // be in JS wrapper layer
-func (req *xmlHttpRequest) StatusText() string { return http.StatusText(req.status) }
-
-func (req *xmlHttpRequest) ResponseURL() string { return req.url }
+func (req *xmlHttpRequest) StatusText() *string {
+	res := http.StatusText(req.status)
+	return &res
+}
 
 func (req *xmlHttpRequest) Response() string { return req.ResponseText() }
+
+func (req *xmlHttpRequest) ResponseURL() string { return req.url }
 
 func (req *xmlHttpRequest) ResponseText() string { return string(req.response) }
 
@@ -150,7 +155,10 @@ func (req *xmlHttpRequest) Abort() error {
 	return errors.New("XmlHttpRequest.Abort called - not implemented - ignoring call")
 }
 
-func (req *xmlHttpRequest) GetAllResponseHeaders() (res string, err error) {
+func (req *xmlHttpRequest) GetAllResponseHeaders() (res *string, err error) {
+	if req.res == nil {
+		return nil, nil
+	}
 	builder := strings.Builder{}
 	for k, vs := range req.res.Header {
 		key := strings.ToLower(k)
@@ -163,7 +171,8 @@ func (req *xmlHttpRequest) GetAllResponseHeaders() (res string, err error) {
 			}
 		}
 	}
-	return builder.String(), nil
+	result := builder.String()
+	return &result, nil
 }
 
 func (req *xmlHttpRequest) OverrideMimeType(mimeType string) error {
