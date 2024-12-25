@@ -200,6 +200,16 @@ func TryParseArgs[T interface{}](
 	index int,
 	parsers ...func(*ScriptContext, *v8.Value) (T, error),
 ) (result T, err error) {
+	if index >= len(args) {
+		err = errors.New("Bad index")
+		return
+	}
+	arg := args[index]
+	for _, parser := range parsers {
+		if result, err = parser(ctx, arg); err == nil {
+			return
+		}
+	}
 	err = errors.New("TODO")
 	return
 }
@@ -217,6 +227,9 @@ func TryParseArg[T any](
 }
 
 func GetBodyFromDocument(ctx *ScriptContext, val *v8.Value) (*browser.XHRRequestBody, error) {
+	if val == nil {
+		return nil, nil
+	}
 	return nil, errors.New("Not supported yet")
 }
 

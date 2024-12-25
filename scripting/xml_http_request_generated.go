@@ -94,26 +94,6 @@ func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8
 	return nil, nil
 }
 
-func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
-	instance, err := xhr.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen >= 1 {
-		body, err := TryParseArgs(ctx, args, 0, GetBodyFromDocument, GetBodyFromXMLHttpRequestBodyInit)
-		if err != nil {
-			return nil, err
-		}
-		err = instance.SendBody(body)
-		return nil, err
-	}
-	err = instance.Send()
-	return nil, err
-}
-
 func (xhr ESXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	instance, err := xhr.GetInstance(info)
 	if err != nil {
