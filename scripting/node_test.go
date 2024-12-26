@@ -7,6 +7,17 @@ import (
 )
 
 var _ = Describe("V8 Node", func() {
+	Describe("firstChild", func() {
+		It("Returns the correct node", func() {
+			ctx := NewTestContext(LoadHTML(`<div id="parent-1"><div id="child">child</div></div>`))
+			Expect(
+				ctx.RunTestScript(
+					`document.getElementById("parent-1").firstChild.getAttribute("id")`,
+				),
+			).To(Equal("child"))
+		})
+	})
+
 	Describe("contains", func() {
 		It("Returns true, when passed a child", func() {
 			ctx := NewTestContext(LoadHTML(`<div id="parent-1"><div id="child">child</div></div>`))
@@ -16,6 +27,7 @@ var _ = Describe("V8 Node", func() {
 				),
 			).To(BeTrue())
 		})
+
 		It("Should return false, when passed a sibling", func() {
 			ctx := NewTestContext(
 				LoadHTML(`<div id="parent-1"></div><div id="parent-2"></div></div>`),

@@ -34,6 +34,7 @@ type Node interface {
 	Parent() Node
 	RemoveChild(node Node) error
 	NextSibling() Node
+	FirstChild() Node
 	// unexported
 	createHtmlNode() *html.Node
 	insertBefore(newNode Node, referenceNode Node) (Node, error)
@@ -164,6 +165,13 @@ func (n *node) OwnerDocument() Document {
 		return parent.OwnerDocument()
 	}
 	return nil
+}
+
+func (n *node) FirstChild() Node {
+	if n.childNodes.Length() == 0 {
+		return nil
+	}
+	return n.childNodes.Item(0)
 }
 
 func (n *node) NextSibling() Node {
