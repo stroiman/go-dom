@@ -111,6 +111,8 @@ func (e *eventTarget) dispatchError(event ErrorEvent) {
 
 type Event interface {
 	Entity
+	Cancelable() bool
+	Bubbles() bool
 	PreventDefault()
 	Type() string
 	StopPropagation()
@@ -183,6 +185,8 @@ func NewCustomEvent(eventType string, options ...CustomEventOption) CustomEvent 
 func (e *event) Type() string          { return e.eventType }
 func (e *event) StopPropagation()      { e.propagate = false }
 func (e *event) PreventDefault()       { e.cancelled = true }
+func (e *event) Cancelable() bool      { return e.cancelable }
+func (e *event) Bubbles() bool         { return e.bubbles }
 func (e *event) shouldPropagate() bool { return e.propagate }
 func (e *event) isCancelled() bool     { return e.cancelable && e.cancelled }
 

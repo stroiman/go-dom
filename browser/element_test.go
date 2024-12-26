@@ -151,4 +151,18 @@ var _ = Describe("Element", func() {
   </div>`))
 		})
 	})
+
+	Describe("Click", func() {
+		It("Is cancelable and bubbles", func() {
+			var event Event
+			doc := ParseHtmlString(`<body><div id="target"></div></body>`)
+			element := doc.GetElementById("target")
+			element.AddEventListener("click", NewEventHandlerFuncWithoutError(func(e Event) {
+				event = e
+			}))
+			element.Click()
+			Expect(event.Cancelable()).To(BeTrue())
+			Expect(event.Bubbles()).To(BeTrue())
+		})
+	})
 })
