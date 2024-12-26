@@ -162,6 +162,9 @@ func createGlobals(host *ScriptHost, classes []class) []globalInstall {
 				fn := NewIllegalConstructorBuilder[Element](host).constructor
 				fn.Inherit(htmlElement)
 				uniqueNames[cls] = fn
+				if cls == "HTMLTemplateElement" {
+					CreateMembers(host.iso, fn)
+				}
 			}
 		}
 		for cls, fn := range uniqueNames {
