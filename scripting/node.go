@@ -62,6 +62,31 @@ func CreateNode(host *ScriptHost) *v8.FunctionTemplate {
 			return
 		},
 	)
+	protoBuilder.CreateFunction("appendChild",
+		func(instance browser.Node, info argumentHelper) (result *v8.Value, err error) {
+			var node browser.Node
+			if node, err = info.GetNodeArg(0); err == nil {
+				result = info.This().Value
+				instance.AppendChild(node)
+			}
+			return
+		},
+	)
+	protoBuilder.CreateFunction("insertBefore",
+		func(instance browser.Node, info argumentHelper) (result *v8.Value, err error) {
+			var resNode browser.Node
+			node, err0 := info.GetNodeArg(0)
+			refNode, err1 := info.GetNodeArg(1)
+			if err = errors.Join(err0, err1); err == nil {
+				resNode, err = instance.InsertBefore(node, refNode)
+			}
+			if err == nil {
+				return info.ctx.GetInstanceForNode(resNode)
+			}
+
+			return
+		},
+	)
 	return builder.constructor
 }
 
