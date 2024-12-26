@@ -58,17 +58,17 @@ var ElementMap = map[atom.Atom]ElementSteps{
 	atom.Script: ScriptElementRules{},
 }
 
-func parseStream(w *window, r io.Reader) (Document, error) {
+func parseIntoDocument(w Window, doc Document, r io.Reader) error {
 	node, err := html.Parse(r)
 	if err != nil {
-		return nil, err
-	}
-	doc := NewDocument(w)
-	if w != nil {
-		w.document = doc
+		return err
 	}
 	iterate(w, doc, doc, node)
-	return doc, nil
+	return nil
+}
+func parseStream(w Window, r io.Reader) (Document, error) {
+	doc := NewDocument(w)
+	return doc, parseIntoDocument(w, doc, r)
 }
 
 func cloneNode(n *html.Node) *html.Node {

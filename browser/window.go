@@ -66,7 +66,9 @@ func (w *window) LoadHTML(html string) error {
 }
 
 func (w *window) loadReader(r io.Reader) (err error) {
-	w.document, err = parseStream(w, r)
+	doc := NewDocument(w)
+	w.document = doc
+	err = parseIntoDocument(w, doc, r)
 	if err == nil {
 		w.Document().DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
 		// 'load' is emitted when css and images are loaded, not relevant yet, so
