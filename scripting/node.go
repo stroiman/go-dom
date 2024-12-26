@@ -1,6 +1,8 @@
 package scripting
 
 import (
+	"errors"
+
 	"github.com/stroiman/go-dom/browser"
 	v8 "github.com/tommie/v8go"
 )
@@ -29,6 +31,7 @@ func CreateNode(host *ScriptHost) *v8.FunctionTemplate {
 		nil,
 		v8.ReadOnly,
 	)
+	prototype.Set("removeChild", v8.NewFunctionTemplateWithError(iso, wrapper.RemoveChild))
 
 	builder.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (browser.Node, error) {
 		instance, ok := ctx.GetCachedNode(this)
@@ -70,4 +73,15 @@ func (n ESNode) GetFirstChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 	}
 	result := node.FirstChild()
 	return ctx.GetInstanceForNode(result)
+}
+
+func (n ESNode) RemoveChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	args := newArgumentHelper(n.host, info)
+	child, err0 := args.GetNodeArg(0)
+	parent, err1 := n.GetInstance(info)
+	err := errors.Join(err0, err1)
+	if err != nil {
+		return nil, err
+	}
+	return nil, parent.RemoveChild(child)
 }
