@@ -187,11 +187,31 @@ func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value
 }
 
 func (xhr ESXmlHttpRequest) GetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	ctx := xhr.host.MustGetContext(info.Context())
+	instance, err := xhr.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.GetWithCredentials()
+	return xhr.ToBoolean(ctx, result)
 }
 
 func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented")
+	instance, err := xhr.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	args := info.Args()
+	argsLen := len(args)
+	if argsLen < 1 {
+		return nil, errors.New("Too few arguments")
+	}
+	val, err := xhr.GetArgBoolean(args, 0)
+	if err != nil {
+		return nil, err
+	}
+	instance.SetWithCredentials(val)
+	return nil, nil
 }
 
 func (xhr ESXmlHttpRequest) Upload(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

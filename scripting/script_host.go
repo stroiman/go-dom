@@ -84,12 +84,12 @@ func (c *ScriptContext) GetInstanceForNode(
 			return c.GetInstanceForNodeByName(constructor, n)
 		}
 		return c.GetInstanceForNodeByName("Element", n)
-	case Node:
-		return c.GetInstanceForNodeByName("Node", n)
 	case Document:
 		return c.GetInstanceForNodeByName("Document", n)
 	case DocumentFragment:
 		return c.GetInstanceForNodeByName("DocumentFragment", n)
+	case Node:
+		return c.GetInstanceForNodeByName("Node", n)
 	case Attr:
 		return c.GetInstanceForNodeByName("Attr", n)
 	case FormData:
@@ -214,6 +214,7 @@ func NewScriptHost() *ScriptHost {
 		{"FormData", CreateFormData, nil},
 		{"URL", CreateURLPrototype, nil},
 		{"DOMTokenList", CreateDOMTokenListPrototype, nil},
+		{"DOMParser", CreateDOMParserPrototype, nil},
 	}
 
 	globalInstalls := createGlobals(host, classes)

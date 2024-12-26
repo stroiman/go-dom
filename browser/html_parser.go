@@ -66,6 +66,7 @@ func parseIntoDocument(w Window, doc Document, r io.Reader) error {
 	iterate(w, doc, doc, node)
 	return nil
 }
+
 func parseStream(w Window, r io.Reader) (Document, error) {
 	doc := NewDocument(w)
 	return doc, parseIntoDocument(w, doc, r)
@@ -117,10 +118,13 @@ func ParseHtmlStream(s io.Reader) (Document, error) {
 }
 
 func ParseHtmlString(s string) Document {
-	// TODO - remove, only used in tests
 	doc, err := ParseHtmlStream(strings.NewReader(s))
 	if err != nil {
 		panic(err)
 	}
 	return doc
+}
+
+func ParseHtmlStringWin(s string, win Window) (Document, error) {
+	return parseStream(win, strings.NewReader(s))
 }
