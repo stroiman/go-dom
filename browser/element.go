@@ -26,6 +26,7 @@ type Element interface {
 	GetAttributes() NamedNodeMap
 	InsertAdjacentHTML(position string, text string) error
 	OuterHTML() string
+	InnerHTML() string
 	TagName() string
 	// unexported
 	getAttributes() Attributes
@@ -84,6 +85,14 @@ func (e *element) InsertBefore(newChild Node, reference Node) (Node, error) {
 func (e *element) OuterHTML() string {
 	writer := &strings.Builder{}
 	html.Render(writer, toHtmlNode(e))
+	return string(writer.String())
+}
+
+func (e *element) InnerHTML() string {
+	writer := &strings.Builder{}
+	for _, child := range e.ChildNodes().All() {
+		html.Render(writer, toHtmlNode(child))
+	}
 	return string(writer.String())
 }
 

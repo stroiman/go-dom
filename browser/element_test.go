@@ -132,7 +132,23 @@ var _ = Describe("Element", func() {
   </div><div>1st new child</div><div>2nd new child</div>
   <div id="3">El 1</div>
 </body>`))
+		})
+	})
 
+	Describe("HTML Rendering", func() {
+		It("Should support OuterHTML", func() {
+			doc := ParseHtmlString(`<body><div id="2">El 2
+    <div>El 2-a</div>
+    <div>El 2-b</div>
+  </div></body>`)
+			Expect(doc.Body().OuterHTML()).To(Equal(`<body><div id="2">El 2
+    <div>El 2-a</div>
+    <div>El 2-b</div>
+  </div></body>`))
+			Expect(doc.Body().InnerHTML()).To(Equal(`<div id="2">El 2
+    <div>El 2-a</div>
+    <div>El 2-b</div>
+  </div>`))
 		})
 	})
 })
