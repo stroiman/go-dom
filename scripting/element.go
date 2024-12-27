@@ -35,14 +35,7 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := ESElement{NewESWrapper[Element](host)}
 	builder := NewIllegalConstructorBuilder[Element](host)
-	builder.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (Element, error) {
-		element, ok := ctx.GetCachedNode(this)
-		if e, e_ok := element.(Element); e_ok && ok {
-			return e, nil
-		} else {
-			return nil, v8.NewTypeError(iso, "Not an instance of Element")
-		}
-	}
+	builder.SetDefaultInstanceLookup()
 	helper := builder.NewPrototypeBuilder()
 	prototypeTemplate := helper.proto
 	prototypeTemplate.SetAccessorPropertyCallback("classList", wrapper.ClassList, nil, v8.ReadOnly)
