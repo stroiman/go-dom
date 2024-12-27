@@ -144,4 +144,14 @@ var _ = Describe("V8 Document", func() {
 			).To(Equal(`<div data-key="1">1</div>,<div data-key="2">2</div>`))
 		})
 	})
+
+	Describe("createDocumentFragment", func() {
+		It("Should return a DocumentFragment", func() {
+			ctx := NewTestContext()
+			Expect(ctx.RunTestScript(`
+				const fragment = document.createDocumentFragment();
+				Object.getPrototypeOf(fragment) === DocumentFragment.prototype
+			`)).To(BeTrue())
+		})
+	})
 })

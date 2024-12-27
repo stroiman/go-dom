@@ -39,6 +39,13 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			return
 		},
 	)
+	protoBuilder.CreateFunction(
+		"createDocumentFragment",
+		func(instance Document, args argumentHelper) (val *v8.Value, err error) {
+			e := instance.CreateDocumentFragment()
+			return args.ctx.GetInstanceForNode(e)
+		},
+	)
 
 	proto.SetAccessorPropertyCallback("documentElement",
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
