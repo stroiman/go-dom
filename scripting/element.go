@@ -56,7 +56,16 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 			return ctx.GetInstanceForNodeByName("NamedNodeMap", element.GetAttributes())
 		},
 	)
-
+	helper.CreateFunction("setAttribute",
+		func(instance Element, info argumentHelper) (result *v8.Value, err error) {
+			name, err0 := info.GetStringArg(0)
+			value, err1 := info.GetStringArg(1)
+			if err = errors.Join(err0, err1); err == nil {
+				instance.SetAttribute(name, value)
+			}
+			return
+		},
+	)
 	helper.CreateFunction(
 		"insertAdjacentHTML",
 		func(element Element, info argumentHelper) (val *v8.Value, err error) {

@@ -20,11 +20,16 @@ var _ = Describe("V8 Element", func() {
 	})
 
 	Describe("Attributes", func() {
-		It("Should support getAtribute", func() {
+		It("Should support set/getAtribute", func() {
 			ctx := NewTestContext(LoadHTML(`<div id="1" class="foo"></div>`))
 			Expect(ctx.RunTestScript(
 				`document.getElementById("1").getAttribute("class")`,
 			)).To(Equal("foo"))
+			Expect(ctx.RunTestScript(`
+				const e = document.getElementById("1")
+				e.setAttribute("data-foo", "bar");
+				e.getAttribute("data-foo")`,
+			)).To(Equal("bar"))
 		})
 
 		It("Should support hasAtribute", func() {
