@@ -69,7 +69,7 @@ var _ = Describe("Parser", func() {
 			w.Write([]byte("<html></html>"))
 		})
 		browser := dom.NewBrowserFromHandler(handler)
-		result, err := browser.OpenWindow("/")
+		result, err := browser.Open("/")
 		Expect(err).ToNot(HaveOccurred())
 		element := result.Document().DocumentElement()
 

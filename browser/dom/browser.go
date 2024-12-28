@@ -17,8 +17,7 @@ type Browser struct {
 	windows             []*window
 }
 
-// TODO: Rename to Open
-func (b *Browser) OpenWindow(location string) (window Window, err error) {
+func (b *Browser) Open(location string) (window Window, err error) {
 	slog.Debug("Browser: OpenWindow", "URL", location)
 	resp, err := b.Client.Get(location)
 	if err != nil {

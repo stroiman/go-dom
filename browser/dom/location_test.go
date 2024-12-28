@@ -15,7 +15,7 @@ var _ = Describe("Window.Location", func() {
 			func(res http.ResponseWriter, req *http.Request) { res.Write([]byte("<html></html>")) },
 		)
 		browser := NewBrowserFromHandler(handler)
-		win, err := browser.OpenWindow("http://localhost:9999/foo/bar")
+		win, err := browser.Open("http://localhost:9999/foo/bar")
 		Expect(err).ToNot(HaveOccurred())
 		location := win.Location()
 		Expect(location.GetHost()).To(Equal("localhost:9999"), "host")
@@ -34,7 +34,7 @@ var _ = Describe("Window.Location", func() {
 			func(res http.ResponseWriter, req *http.Request) { res.Write([]byte("<html></html>")) },
 		)
 		browser := NewBrowserFromHandler(handler)
-		win, err := browser.OpenWindow("http://localhost:9999/foo#heading-1")
+		win, err := browser.Open("http://localhost:9999/foo#heading-1")
 		Expect(err).ToNot(HaveOccurred())
 		location := win.Location()
 		Expect(location.GetHost()).To(Equal("localhost:9999"), "host")
@@ -48,7 +48,7 @@ var _ = Describe("Window.Location", func() {
 			func(res http.ResponseWriter, req *http.Request) { res.Write([]byte("<html></html>")) },
 		)
 		browser := NewBrowserFromHandler(handler)
-		win, err := browser.OpenWindow("http://localhost:9999/foo/bar?q=baz")
+		win, err := browser.Open("http://localhost:9999/foo/bar?q=baz")
 		Expect(err).ToNot(HaveOccurred())
 		location := win.Location()
 		Expect(location.GetHost()).To(Equal("localhost:9999"), "host")

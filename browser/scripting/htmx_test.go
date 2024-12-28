@@ -15,7 +15,7 @@ var _ = Describe("Load from server", Ordered, func() {
 		DeferCleanup(func() { server = nil })
 
 		browser := NewTestBrowserFromHandler(server)
-		win, err := browser.OpenWindow("/index.html")
+		win, err := browser.Open("/index.html")
 		win.AddEventListener("htmx:error", NewEventHandlerFunc(func(e Event) error {
 			slog.Error("ERRROR", "msg", e)
 			return nil
