@@ -1,12 +1,17 @@
 # go-dom - Headless browser for Go
 
+> [!WARNING] 
+> 
+> This project is facing a restructure, so be aware that you need to update
+> dependencies, if you depend on this.
+
 > [!NOTE] 
 >
 > This is still in development, and has not reached a level of usability.
 >
 > Given the progress I've had in the short time I spent working on this, I
 > believe this _will_ reach a level of usability. But it depends on how much
-> time I will have for this
+> time I will have for this.
 >
 > You can help by sponsoring the project. If I could reach a level where I could
 > work full-time on this, the Go community could have the most awesome testing
@@ -37,8 +42,8 @@ you want to verify:
 
 - JavaScript code has the desired behaviour
 - General browser behaviour is verified, e.g. 
-  - clicking a `<button type="submit">` submits the form
-  - A and a redirect response is followed.
+  - clicking a `<button type="submit">` submits the form and a redirect response
+    is followed.
 
 Some advantages of a native headless browser are:
 
