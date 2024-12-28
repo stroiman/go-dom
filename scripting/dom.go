@@ -70,3 +70,25 @@ func (l ESDOMTokenList) Toggle(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 	}
 	return v8.NewValue(l.host.iso, instance.Toggle(token))
 }
+
+type ESHTMLTemplateElement struct {
+	ESWrapper[browser.HTMLTemplateElement]
+}
+
+func NewESHTMLTemplateElement(host *ScriptHost) ESHTMLTemplateElement {
+	return ESHTMLTemplateElement{NewESWrapper[browser.HTMLTemplateElement](host)}
+}
+
+func (e ESHTMLTemplateElement) CreateInstance(
+	ctx *ScriptContext,
+	this *v8.Object,
+) (*v8.Value, error) {
+	return nil, errors.New("TODO")
+}
+
+func (e ESHTMLTemplateElement) ToDocumentFragment(
+	ctx *ScriptContext,
+	fragment browser.DocumentFragment,
+) (*v8.Value, error) {
+	return ctx.GetInstanceForNode(fragment)
+}

@@ -9,29 +9,46 @@ import (
 //go:embed webref/curated/idlparsed/dom.json
 var domData []byte
 
+//go:embed webref/curated/idlparsed/html.json
+var htmlData []byte
+
 func generateDOMTypes(b *builder) error {
 	file := jen.NewFilePath(sc)
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
 	file.ImportAlias(v8, "v8")
 
-	wrapper := ESClassWrapper{
+	domTokenList := ESClassWrapper{
 		TypeName:      "DOMTokenList",
 		Receiver:      "u",
 		RunCustomCode: true,
 	}
+	domTokenList.Method("item").SetNoError()
+	domTokenList.Method("contains").SetNoError()
+	domTokenList.Method("remove").SetNoError()
+	domTokenList.Method("toggle").SetCustomImplementation()
+	domTokenList.Method("replace").SetNoError()
+	domTokenList.Method("supports").SetNotImplemented()
 
-	wrapper.Method("item").SetNoError()
-	wrapper.Method("contains").SetNoError()
-	wrapper.Method("remove").SetNoError()
-	wrapper.Method("toggle").SetCustomImplementation()
-	wrapper.Method("replace").SetNoError()
-	wrapper.Method("supports").SetNotImplemented()
+	htmlTemplateElement := ESClassWrapper{
+		TypeName: "HTMLTemplateElement",
+		Receiver: "e",
+	}
+	htmlTemplateElement.Method("shadowRootMode").SetNotImplemented()
+	htmlTemplateElement.Method("shadowRootDelegatesFocus").SetNotImplemented()
+	htmlTemplateElement.Method("shadowRootClonable").SetNotImplemented()
+	htmlTemplateElement.Method("shadowRootSerializable").SetNotImplemented()
 
-	data, err := createData(domData, wrapper)
+	domTokenListData, err := createData(domData, domTokenList)
 	if err != nil {
 		return err
 	}
-	writeFactory(file, data)
+	htmlTemplateData, err := createData(htmlData, htmlTemplateElement)
+
+	if err != nil {
+		return err
+	}
+	writeFactory(file, domTokenListData)
+	writeFactory(file, htmlTemplateData)
 	return file.Render(b)
 }

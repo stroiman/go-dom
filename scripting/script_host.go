@@ -138,15 +138,13 @@ type class struct {
 // before subclasses
 func createGlobals(host *ScriptHost, classes []class) []globalInstall {
 	result := make([]globalInstall, 0)
-	var htmlElement *v8.FunctionTemplate
 	var iter func(*v8.FunctionTemplate, []class)
+	uniqueNames := make(map[string]*v8.FunctionTemplate)
 	iter = func(superClass *v8.FunctionTemplate, classes []class) {
 		for _, class := range classes {
 			constructor := class.constructor(host)
 			result = append(result, globalInstall{class.globalIdentifier, constructor})
-			if class.globalIdentifier == "HTMLElement" {
-				htmlElement = constructor
-			}
+			uniqueNames[class.globalIdentifier] = constructor
 			if superClass != nil {
 				constructor.Inherit(superClass)
 			}
@@ -155,17 +153,14 @@ func createGlobals(host *ScriptHost, classes []class) []globalInstall {
 	}
 	iter(nil, classes)
 
-	if htmlElement != nil {
-		uniqueNames := make(map[string]*v8.FunctionTemplate)
+	if htmlElement, ok := uniqueNames["HTMLElement"]; ok {
 		for _, cls := range htmlElements {
-			if _, ok := uniqueNames[cls]; !ok && cls != "HTMLElement" {
+			if _, ok := uniqueNames[cls]; !ok {
 				fn := NewIllegalConstructorBuilder[Element](host).constructor
 				fn.Inherit(htmlElement)
 				uniqueNames[cls] = fn
+				result = append(result, globalInstall{cls, fn})
 			}
-		}
-		for cls, fn := range uniqueNames {
-			result = append(result, globalInstall{cls, fn})
 		}
 	}
 	return result
@@ -206,7 +201,9 @@ func NewScriptHost() *ScriptHost {
 					{"ShadowRoot", CreateShadowRootPrototype, nil},
 				}},
 				{"Element", CreateElement, []class{
-					{"HTMLElement", CreateHtmlElement, nil},
+					{"HTMLElement", CreateHtmlElement, []class{
+						{"HTMLTemplateElement", CreateHTMLTemplateElementPrototype, nil},
+					}},
 				}},
 				{"Attr", CreateAttr, nil},
 			}},
