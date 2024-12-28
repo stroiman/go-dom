@@ -111,7 +111,7 @@ func (w Converters) ToUSVString(ctx *ScriptContext, str string) (*v8.Value, erro
 }
 
 func (w Converters) ToUnsignedShort(ctx *ScriptContext, val int) (*v8.Value, error) {
-	return v8.NewValue(ctx.host.iso, val)
+	return v8.NewValue(ctx.host.iso, uint32(val))
 }
 
 func (w Converters) ToBoolean(ctx *ScriptContext, val bool) (*v8.Value, error) {

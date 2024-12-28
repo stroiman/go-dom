@@ -85,4 +85,15 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 		`)).To(Succeed())
 		<-evt
 	})
+
+	Describe("Send", func() {
+		It("Should send with `null`", func() {
+			Expect(window.Eval(`
+				const xhr = new XMLHttpRequest();
+				xhr.open("GET", "/");
+				xhr.send(null)
+				xhr.status
+			`)).To(BeEquivalentTo(200))
+		})
+	})
 })
