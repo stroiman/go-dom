@@ -42,19 +42,6 @@ func (b *Browser) OpenWindow(location string) (Window, error) {
 	return window, err
 }
 
-// TODO: Delete
-func (b *Browser) Open(url string) Document {
-	resp, err := b.Client.Get(url)
-	if err != nil {
-		panic(err)
-	}
-	doc, err := ParseHtmlStream(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	return doc
-}
-
 // Creates a new window containing an empty document
 func (b *Browser) NewWindow(baseUrl string) (window Window, err error) {
 	var url *netURL.URL

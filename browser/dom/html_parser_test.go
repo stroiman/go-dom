@@ -69,8 +69,9 @@ var _ = Describe("Parser", func() {
 			w.Write([]byte("<html></html>"))
 		})
 		browser := dom.NewBrowserFromHandler(handler)
-		result := browser.Open("/")
-		element := result.DocumentElement()
+		result, err := browser.OpenWindow("/")
+		Expect(err).ToNot(HaveOccurred())
+		element := result.Document().DocumentElement()
 
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
