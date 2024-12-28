@@ -1,7 +1,6 @@
 package dom
 
 import (
-	"fmt"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -43,7 +42,6 @@ func NewHTMLTemplateElement(node *html.Node, ownerDocument Document) HTMLTemplat
 func (e *htmlTemplateElement) Content() DocumentFragment { return e.content }
 
 func (e *htmlTemplateElement) createHtmlNode() *html.Node {
-	fmt.Println("FOO")
 	node := e.element.createHtmlNode()
 	for _, child := range e.content.nodes() {
 		node.AppendChild(NodeIterator{child}.toHtmlNode(nil))
