@@ -154,8 +154,8 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 	}, nil
 }
 
-const br = "github.com/stroiman/go-dom/browser"
-const sc = "github.com/stroiman/go-dom/scripting"
+const br = "github.com/stroiman/go-dom/browser/dom"
+const sc = "github.com/stroiman/go-dom/browser/scripting"
 const v8 = "github.com/tommie/v8go"
 
 type ESOperationArgument struct {
