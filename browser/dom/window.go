@@ -8,6 +8,19 @@ import (
 	"strings"
 )
 
+type ScriptEngineFactory interface {
+	NewScriptEngine(window Window) ScriptEngine
+}
+
+type ScriptEngine interface {
+	// Run a script, and convert the result to a Go type. This will result in an
+	// error if the returned value cannot be represented as a Go type.
+	Eval(script string) (any, error)
+	// Run a script, ignoring any returned value
+	Run(script string) error
+	Dispose()
+}
+
 type Window interface {
 	EventTarget
 	Document() Document
@@ -19,15 +32,6 @@ type Window interface {
 	SetScriptRunner(ScriptEngine)
 	Location() Location
 	NewXmlHttpRequest() XmlHttpRequest
-}
-
-type ScriptEngine interface {
-	// Run a script, and convert the result to a Go type. This will result in an
-	// error if the returned value cannot be represented as a Go type.
-	Eval(script string) (any, error)
-	// Run a script, ignoring any returned value
-	Run(script string) error
-	Dispose()
 }
 
 type window struct {
@@ -42,6 +46,25 @@ func NewWindow(url *netURL.URL) Window {
 	result := &window{
 		eventTarget: newEventTarget(),
 		url:         url,
+	}
+	result.document = NewDocument(result)
+	return result
+}
+
+type WindowOptions struct {
+	ScriptEngineFactory
+	HttpClient http.Client
+	URL        *netURL.URL
+}
+
+func NewWindowFromOptions(options WindowOptions) Window {
+	result := &window{
+		eventTarget: newEventTarget(),
+		httpClient:  options.HttpClient,
+		url:         options.URL,
+	}
+	if options.ScriptEngineFactory != nil {
+		result.scriptEngine = options.ScriptEngineFactory.NewScriptEngine(result)
 	}
 	result.document = NewDocument(result)
 	return result
@@ -66,9 +89,8 @@ func (w *window) LoadHTML(html string) error {
 }
 
 func (w *window) loadReader(r io.Reader) (err error) {
-	doc := NewDocument(w)
-	w.document = doc
-	err = parseIntoDocument(w, doc, r)
+	w.document = NewDocument(w)
+	err = parseIntoDocument(w, w.document, r)
 	if err == nil {
 		w.Document().DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
 		// 'load' is emitted when css and images are loaded, not relevant yet, so

@@ -8,10 +8,6 @@ import (
 	netURL "net/url"
 )
 
-type ScriptEngineFactory interface {
-	NewScriptEngine(window Window) ScriptEngine
-}
-
 // Pretty stupid right now, but should _probably_ allow handling multiple
 // windows/tabs. This used to be the case for _some_ identity providers, but I'm
 // not sure if that even work anymore because of browser sercurity.
@@ -60,18 +56,17 @@ func (b *Browser) Open(url string) Document {
 }
 
 // Creates a new window containing an empty document
-func (b *Browser) NewWindow(baseUrl string) (Window, error) {
-	u, err := netURL.Parse(baseUrl)
-	if err != nil {
-		return nil, err
+func (b *Browser) NewWindow(baseUrl string) (window Window, err error) {
+	var url *netURL.URL
+	url, err = netURL.Parse(baseUrl)
+	if err == nil {
+		window = NewWindowFromOptions(WindowOptions{
+			b.ScriptEngineFactory,
+			b.Client,
+			url,
+		})
 	}
-	window := newWindow(b.Client, u)
-	var scriptEngine ScriptEngine
-	if b.ScriptEngineFactory != nil {
-		scriptEngine = b.ScriptEngineFactory.NewScriptEngine(window)
-	}
-	window.SetScriptRunner(scriptEngine)
-	return window, nil
+	return
 }
 
 func NewBrowserFromHandler(handler http.Handler) *Browser {
@@ -79,7 +74,6 @@ func NewBrowserFromHandler(handler http.Handler) *Browser {
 	if err != nil {
 		panic(err)
 	}
-
 	client := http.Client{
 		Transport: TestRoundTripper{handler},
 		Jar:       cookiejar,
