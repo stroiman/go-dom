@@ -75,7 +75,7 @@ var _ = Describe("EventTarget", func() {
 		)
 
 		BeforeEach(func() {
-			window = NewWindow(nil)
+			window = NewWindow()
 			Expect(window.LoadHTML(`<body><div id="target"></div></body>`)).To(Succeed())
 			target = window.Document().GetElementById("target")
 		})

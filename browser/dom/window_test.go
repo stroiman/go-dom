@@ -9,7 +9,7 @@ import (
 
 var _ = Describe("Window", func() {
 	It("Should have a document.documentElement instance of HTMLElement", func() {
-		win := NewWindow(nil)
+		win := NewWindow()
 		win.LoadHTML("")
 		Expect(win.Document().DocumentElement()).To(BeHTMLElement())
 	})

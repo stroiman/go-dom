@@ -42,19 +42,36 @@ type window struct {
 	url          *netURL.URL
 }
 
-func NewWindow(url *netURL.URL) Window {
-	result := &window{
-		eventTarget: newEventTarget(),
-		url:         url,
+func NewWindow(options ...WindowOption) Window {
+	var o WindowOptions
+	for _, option := range options {
+		option.Apply(&o)
 	}
-	result.document = NewDocument(result)
-	return result
+	return NewWindowFromOptions(o)
 }
 
 type WindowOptions struct {
 	ScriptEngineFactory
 	HttpClient http.Client
 	URL        *netURL.URL
+}
+
+type WindowOption interface {
+	Apply(options *WindowOptions)
+}
+
+type WindowOptionFunc func(*WindowOptions)
+
+func (f WindowOptionFunc) Apply(options *WindowOptions) { f(options) }
+
+func WindowOptionUrl(url *netURL.URL) WindowOptionFunc {
+	return func(options *WindowOptions) {
+		options.URL = url
+	}
+}
+
+func (o WindowOptions) Apply(options *WindowOptions) {
+	*options = o
 }
 
 func NewWindowFromOptions(options WindowOptions) Window {

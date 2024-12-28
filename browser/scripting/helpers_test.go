@@ -2,8 +2,6 @@ package scripting_test
 
 import (
 	"fmt"
-	"net/url"
-	netURL "net/url"
 
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/stroiman/go-dom/browser/dom"
@@ -49,7 +47,7 @@ var IgnoreUnhandledErrors CreateHook = func(ctx *TestScriptContext) {
 // installs the proper Ginkgo cleanup handler.
 func NewTestContext(hooks ...CreateHook) TestScriptContext {
 	ctx := TestScriptContext{}
-	window := dom.NewWindow(new(netURL.URL))
+	window := dom.NewWindow()
 	// window.LoadHTML(html)
 	ctx.ScriptContext = host.NewContext(window)
 	DeferCleanup(ctx.Dispose)
@@ -90,7 +88,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 	ctx := TestScriptContext{}
 
 	BeforeEach(func() {
-		window := dom.NewWindow(new(url.URL))
+		window := dom.NewWindow()
 		ctx.ScriptContext = host.NewContext(window)
 		for _, hook := range hooks {
 			hook(&ctx)

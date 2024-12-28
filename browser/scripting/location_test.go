@@ -13,7 +13,7 @@ var _ = Describe("window.location", func() {
 	It("Should have the location of the document", func() {
 		url, err := netURL.Parse("http://example.com/foo")
 		Expect(err).ToNot(HaveOccurred())
-		window := dom.NewWindow(url)
+		window := dom.NewWindow(dom.WindowOptionUrl(url))
 		ctx := host.NewContext(window)
 		DeferCleanup(func() {
 			ctx.Dispose()

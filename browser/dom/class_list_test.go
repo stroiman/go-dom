@@ -13,7 +13,7 @@ var _ = Describe("ClassList", func() {
 		classList DOMTokenList
 	)
 	BeforeEach(func() {
-		doc := NewDocument(NewWindow(nil))
+		doc := NewWindow().Document()
 		el = doc.CreateElement("div")
 		classList = el.ClassList()
 	})
