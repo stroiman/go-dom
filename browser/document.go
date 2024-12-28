@@ -80,6 +80,9 @@ func (d *document) CreateElement(name string) Element {
 }
 
 func (d *document) createElement(node *html.Node) Element {
+	if node.Data == "template" {
+		return NewHTMLTemplateElement(node, d)
+	}
 	return NewHTMLElement(node, d)
 }
 

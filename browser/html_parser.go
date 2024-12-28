@@ -12,10 +12,19 @@ import (
 )
 
 type ElementSteps interface {
+	AppendChild(parent Node, child Node) Node
 	Connected(w Window, n Element)
 }
 
-type ScriptElementRules struct{}
+type BaseRules struct{}
+
+func (r BaseRules) AppendChild(parent Node, child Node) Node {
+	return parent.AppendChild(child)
+}
+
+func (r BaseRules) Connected(w Window, n Element) {}
+
+type ScriptElementRules struct{ BaseRules }
 
 func (r ScriptElementRules) Connected(win Window, node Element) {
 	var script string
@@ -54,8 +63,20 @@ func (r ScriptElementRules) Connected(win Window, node Element) {
 	}
 }
 
+type TemplateElementRules struct{ BaseRules }
+
+func (TemplateElementRules) AppendChild(parent Node, child Node) Node {
+	template, ok := child.(HTMLTemplateElement)
+	if !ok {
+		panic("Parser error, applying tepmlate rules to non-template element")
+	}
+	parent.AppendChild(child)
+	return template.Content()
+}
+
 var ElementMap = map[atom.Atom]ElementSteps{
-	atom.Script: ScriptElementRules{},
+	atom.Script:   ScriptElementRules{},
+	atom.Template: TemplateElementRules{},
 }
 
 func parseIntoDocument(w Window, doc Document, r io.Reader) error {
@@ -84,11 +105,16 @@ func cloneNode(n *html.Node) *html.Node {
 
 func createElementFromNode(w Window, d Document, parent Node, source *html.Node) Element {
 	rules := ElementMap[source.DataAtom]
-	newElm := d.createElement(cloneNode(source))
-	if parent != nil {
-		parent.AppendChild(newElm)
+	if rules == nil {
+		rules = BaseRules{}
 	}
-	iterate(w, d, newElm, source)
+	var newNode Node
+	newElm := d.createElement(cloneNode(source))
+	newNode = newElm
+	if parent != nil {
+		newNode = rules.AppendChild(parent, newElm)
+	}
+	iterate(w, d, newNode, source)
 	// ?
 	if rules != nil {
 		if newElm.Connected() {
