@@ -117,5 +117,14 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 			`)).To(BeEquivalentTo(200))
 			Expect(string(body)).To(Equal("k1=v1&k2=v2"))
 		})
+
+		It("Should be able to send a string", func() {
+			Expect(window.Eval(`
+				const xhr = new XMLHttpRequest();
+				xhr.send("body contents")
+				xhr.status
+			`)).To(BeEquivalentTo(200))
+			Expect(string(body)).To(Equal("body contents"))
+		})
 	})
 })

@@ -237,6 +237,9 @@ func GetBodyFromXMLHttpRequestBodyInit(
 	ctx *ScriptContext,
 	val *v8.Value,
 ) (*browser.XHRRequestBody, error) {
+	if val.IsString() {
+		return browser.NewXHRRequestBodyOfString(val.String()), nil
+	}
 	if !val.IsObject() {
 		return nil, errors.New("Not supported yet")
 	}

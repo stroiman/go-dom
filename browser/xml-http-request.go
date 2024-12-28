@@ -227,6 +227,10 @@ type XHRRequestBody struct {
 	data []byte // Temporary solution, should probably be an io.Reader
 }
 
+func NewXHRRequestBodyOfString(data string) *XHRRequestBody {
+	return &XHRRequestBody{[]byte(data)}
+}
+
 func NewXHRRequestBodyOfFormData(data *FormData) *XHRRequestBody {
 	sb := strings.Builder{}
 	for i, e := range data.Entries {
