@@ -42,12 +42,34 @@ type window struct {
 	url          *netURL.URL
 }
 
-func NewWindow(options ...WindowOption) Window {
-	var o WindowOptions
-	for _, option := range options {
-		option.Apply(&o)
+func NewWindow(windowOptions ...WindowOption) Window {
+	var options WindowOptions
+	for _, option := range windowOptions {
+		option.Apply(&options)
 	}
-	return NewWindowFromOptions(o)
+	result := &window{
+		eventTarget: newEventTarget(),
+		httpClient:  options.HttpClient,
+		url:         options.URL,
+	}
+	if options.ScriptEngineFactory != nil {
+		result.scriptEngine = options.ScriptEngineFactory.NewScriptEngine(result)
+	}
+	result.document = NewDocument(result)
+	return result
+}
+
+func NewWindowReader(reader io.Reader, windowOptions ...WindowOption) (window Window, err error) {
+	window = NewWindow(windowOptions...)
+	document := window.Document()
+	err = parseIntoDocument(window, document, reader)
+	if err == nil {
+		document.DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
+		// 'load' is emitted when css and images are loaded, not relevant yet, so
+		// just emit it right await
+		document.DispatchEvent(NewCustomEvent(DocumentEventLoad))
+	}
+	return
 }
 
 type WindowOptions struct {
@@ -72,19 +94,6 @@ func WindowOptionUrl(url *netURL.URL) WindowOptionFunc {
 
 func (o WindowOptions) Apply(options *WindowOptions) {
 	*options = o
-}
-
-func NewWindowFromOptions(options WindowOptions) Window {
-	result := &window{
-		eventTarget: newEventTarget(),
-		httpClient:  options.HttpClient,
-		url:         options.URL,
-	}
-	if options.ScriptEngineFactory != nil {
-		result.scriptEngine = options.ScriptEngineFactory.NewScriptEngine(result)
-	}
-	result.document = NewDocument(result)
-	return result
 }
 
 func newWindow(httpClient http.Client, url *netURL.URL) *window {

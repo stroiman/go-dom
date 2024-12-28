@@ -18,7 +18,7 @@ type Browser struct {
 }
 
 // TODO: Rename to Open
-func (b *Browser) OpenWindow(location string) (Window, error) {
+func (b *Browser) OpenWindow(location string) (window Window, err error) {
 	slog.Debug("Browser: OpenWindow", "URL", location)
 	resp, err := b.Client.Get(location)
 	if err != nil {
@@ -27,19 +27,12 @@ func (b *Browser) OpenWindow(location string) (Window, error) {
 	if resp.StatusCode != 200 {
 		return nil, errors.New("Non-ok Response")
 	}
-	u, err := netURL.Parse(location)
-	if err != nil {
-		return nil, err
+	var url *netURL.URL
+	url, err = netURL.Parse(location)
+	if err == nil {
+		window, err = NewWindowReader(resp.Body, b.createOptions(url))
 	}
-	window := newWindow(b.Client, u)
-	var scriptEngine ScriptEngine
-	b.windows = append(b.windows, window)
-	if b.ScriptEngineFactory != nil {
-		scriptEngine = b.ScriptEngineFactory.NewScriptEngine(window)
-	}
-	window.SetScriptRunner(scriptEngine)
-	err = window.loadReader(resp.Body)
-	return window, err
+	return
 }
 
 // Creates a new window containing an empty document
@@ -47,11 +40,7 @@ func (b *Browser) NewWindow(baseUrl string) (window Window, err error) {
 	var url *netURL.URL
 	url, err = netURL.Parse(baseUrl)
 	if err == nil {
-		window = NewWindowFromOptions(WindowOptions{
-			b.ScriptEngineFactory,
-			b.Client,
-			url,
-		})
+		window = NewWindow(b.createOptions(url))
 	}
 	return
 }
@@ -67,6 +56,14 @@ func NewBrowserFromHandler(handler http.Handler) *Browser {
 	}
 	return &Browser{
 		Client: client,
+	}
+}
+
+func (b *Browser) createOptions(url *netURL.URL) WindowOptions {
+	return WindowOptions{
+		ScriptEngineFactory: b.ScriptEngineFactory,
+		HttpClient:          b.Client,
+		URL:                 url,
 	}
 }
 
