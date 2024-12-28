@@ -238,7 +238,6 @@ func NewXHRRequestBodyOfFormData(data *FormData) *XHRRequestBody {
 		sb.WriteString("=")
 		sb.WriteString(netURL.QueryEscape(string(e.Value)))
 	}
-	sb.WriteString("foo")
 
 	return &XHRRequestBody{
 		data: []byte(sb.String()),

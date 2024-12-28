@@ -160,7 +160,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 				Expect(actualReqContentType).To(Equal("application/x-www-form-urlencoded"))
 				Expect(
 					string(actualReqBody),
-				).To(Equal("key1=Value%2542&key2=Value%26%3D42&key3=International%3F+%C3%A6%C3%B8%C3%A5foo"))
+				).To(Equal("key1=Value%2542&key2=Value%26%3D42&key3=International%3F+%C3%A6%C3%B8%C3%A5"))
 			})
 		})
 	})
