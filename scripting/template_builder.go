@@ -237,5 +237,17 @@ func GetBodyFromXMLHttpRequestBodyInit(
 	ctx *ScriptContext,
 	val *v8.Value,
 ) (*browser.XHRRequestBody, error) {
-	return nil, errors.New("Not supported yet")
+	if !val.IsObject() {
+		return nil, errors.New("Not supported yet")
+	}
+	obj := val.Object()
+	node, ok := ctx.GetCachedNode(obj)
+	if !ok {
+		return nil, errors.New("Not a node")
+	}
+	formData, ok := node.(*browser.FormData)
+	if ok {
+		return browser.NewXHRRequestBodyOfFormData(formData), nil
+	}
+	return nil, errors.New("Not a node")
 }

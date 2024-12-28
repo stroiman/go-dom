@@ -1,6 +1,7 @@
 package scripting_test
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/stroiman/go-dom/browser"
@@ -14,10 +15,18 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 	var server http.Handler
 	var window browser.Window
 	var evt chan bool
+	var body []byte
 
 	BeforeEach(func() {
 		evt = make(chan bool)
 		server = http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+			if req.Body != nil {
+				var err error
+				body, err = io.ReadAll(req.Body)
+				if err != nil {
+					panic(err)
+				}
+			}
 		})
 		br := NewTestBrowserFromHandler(server)
 		var err error
@@ -94,6 +103,19 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 				xhr.send(null)
 				xhr.status
 			`)).To(BeEquivalentTo(200))
+		})
+
+		It("Should be able to send formdata", func() {
+			Expect(window.Eval(`
+				const xhr = new XMLHttpRequest();
+				const data = new FormData()
+				data.append("k1", "v1")
+				data.append("k2", "v2")
+				xhr.open("GET", "/");
+				xhr.send(data)
+				xhr.status
+			`)).To(BeEquivalentTo(200))
+			Expect(string(body)).To(Equal("k1=v1&k2=v2"))
 		})
 	})
 })
