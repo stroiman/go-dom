@@ -9,7 +9,7 @@ import (
 )
 
 type ESElement struct {
-	ESWrapper[Element]
+	ESElementContainerWrapper[Element]
 }
 
 func (e ESElement) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -33,8 +33,9 @@ func (e ESElement) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 
 func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	wrapper := ESElement{NewESWrapper[Element](host)}
+	wrapper := ESElement{NewESContainerWrapper[Element](host)}
 	builder := NewIllegalConstructorBuilder[Element](host)
+	wrapper.Install(builder.constructor)
 	builder.SetDefaultInstanceLookup()
 	helper := builder.NewPrototypeBuilder()
 	prototypeTemplate := helper.proto
@@ -79,32 +80,32 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 			return
 		},
 	)
-	helper.CreateFunction(
-		"querySelector",
-		func(instance Element, info argumentHelper) (*v8.Value, error) {
-			selector, e1 := info.GetStringArg(0)
-			node, e2 := instance.QuerySelector(selector)
-			err := errors.Join(e1, e2)
-			if err != nil {
-				return nil, err
-			}
-			if node == nil {
-				return v8.Null(iso), nil
-			}
-			return info.ctx.GetInstanceForNode(node)
-		})
-	helper.CreateFunction(
-		"querySelectorAll",
-		func(instance Element, info argumentHelper) (*v8.Value, error) {
-			selector, e1 := info.GetStringArg(0)
-			nodeList, e2 := instance.QuerySelectorAll(selector)
-			err := errors.Join(e1, e2)
-			if err != nil {
-				return nil, err
-			}
-			return info.ctx.GetInstanceForNodeByName("NodeList", nodeList)
-		},
-	)
+	// helper.CreateFunction(
+	// 	"querySelector",
+	// 	func(instance Element, info argumentHelper) (*v8.Value, error) {
+	// 		selector, e1 := info.GetStringArg(0)
+	// 		node, e2 := instance.QuerySelector(selector)
+	// 		err := errors.Join(e1, e2)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		if node == nil {
+	// 			return v8.Null(iso), nil
+	// 		}
+	// 		return info.ctx.GetInstanceForNode(node)
+	// 	})
+	// helper.CreateFunction(
+	// 	"querySelectorAll",
+	// 	func(instance Element, info argumentHelper) (*v8.Value, error) {
+	// 		selector, e1 := info.GetStringArg(0)
+	// 		nodeList, e2 := instance.QuerySelectorAll(selector)
+	// 		err := errors.Join(e1, e2)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		return info.ctx.GetInstanceForNodeByName("NodeList", nodeList)
+	// 	},
+	// )
 	return builder.constructor
 }
 

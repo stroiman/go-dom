@@ -6,8 +6,17 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+type ESDocumentWrapper struct {
+	ESElementContainerWrapper[Document]
+}
+
+func NewDocumentWrapper(host *ScriptHost) ESDocumentWrapper {
+	return ESDocumentWrapper{NewESContainerWrapper[Document](host)}
+}
+
 func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
+	wrapper := NewDocumentWrapper(host)
 	builder := NewConstructorBuilder[Document](
 		host,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -15,6 +24,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			return scriptContext.CacheNode(info.This(), NewDocument(nil))
 		},
 	)
+	wrapper.Install(builder.constructor)
 	builder.SetDefaultInstanceLookup()
 	protoBuilder := builder.NewPrototypeBuilder()
 	protoBuilder.CreateReadonlyProp2(
@@ -82,41 +92,6 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		},
 		nil,
 		v8.ReadOnly,
-	)
-	proto.Set(
-		"querySelector",
-		v8.NewFunctionTemplateWithError(iso,
-			func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := host.MustGetContext(args.Context())
-				this, ok := ctx.GetCachedNode(args.This())
-				if doc, e_ok := this.(Document); ok && e_ok {
-					node, err := doc.QuerySelector(args.Args()[0].String())
-					if err != nil {
-						return nil, err
-					}
-					if node == nil {
-						return v8.Null(iso), nil
-					}
-					return ctx.GetInstanceForNode(node)
-				}
-				return nil, v8.NewTypeError(iso, "Object not a Document")
-			}),
-	)
-	proto.Set(
-		"querySelectorAll",
-		v8.NewFunctionTemplateWithError(iso,
-			func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := host.MustGetContext(args.Context())
-				this, ok := ctx.GetCachedNode(args.This())
-				if doc, e_ok := this.(Document); ok && e_ok {
-					nodeList, err := doc.QuerySelectorAll(args.Args()[0].String())
-					if err != nil {
-						return nil, err
-					}
-					return ctx.GetInstanceForNodeByName("NodeList", nodeList)
-				}
-				return nil, v8.NewTypeError(iso, "Object not a Document")
-			}),
 	)
 	proto.Set(
 		"getElementById",

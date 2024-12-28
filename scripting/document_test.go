@@ -154,4 +154,10 @@ var _ = Describe("V8 Document", func() {
 			`)).To(BeTrue())
 		})
 	})
+
+	It("Should create document fragments", func() {
+		Expect(ctx.RunTestScript(
+			`Object.getPrototypeOf(document.createDocumentFragment()) === DocumentFragment.prototype`,
+		)).To(BeTrue())
+	})
 })

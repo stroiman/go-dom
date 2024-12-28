@@ -10,5 +10,7 @@ import (
 // for inheritence, i.e., `node instanceof DocumentFragment`
 func CreateDocumentFragmentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	builder := NewIllegalConstructorBuilder[Location](host)
+	wrapper := NewESContainerWrapper[DocumentFragment](host)
+	wrapper.Install(builder.constructor)
 	return builder.constructor
 }
