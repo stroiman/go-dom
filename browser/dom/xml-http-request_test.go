@@ -29,7 +29,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 		actualReqBody  []byte
 		reqErr         error
 		responseHeader http.Header
-		r              XmlHttpRequest
+		xhr            XmlHttpRequest
 	)
 
 	JustBeforeEach(func() {
@@ -50,10 +50,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 			}
 			w.Write([]byte("Hello, World!"))
 		})
-		client := http.Client{
-			Transport: TestRoundTripper{handler},
-		}
-		r = NewXmlHttpRequest(client)
+		xhr = NewXmlHttpRequest(NewHttpClientFromHandler(handler))
 		DeferCleanup(func() {
 			// Allow GC after test run
 			handler = nil
@@ -90,17 +87,17 @@ var _ = Describe("XmlHTTPRequest", func() {
 		// It was written as the first test as it's the easier case to deal with
 		Describe("Request succeeds", func() {
 			It("Can make a request", func() {
-				r.Open("GET", "/dummy")
-				Expect(r.Status()).To(Equal(0))
-				Expect(r.Send()).To(Succeed())
+				xhr.Open("GET", "/dummy")
+				Expect(xhr.Status()).To(Equal(0))
+				Expect(xhr.Send()).To(Succeed())
 				// Verify request
 				Expect(actualMethod).To(Equal("GET"))
 				// Verify response
-				Expect(r.Status()).To(Equal(200))
+				Expect(xhr.Status()).To(Equal(200))
 				// This is the only place we test StatusText; it's dumb wrapper and may
 				// be removed.
-				Expect(r.StatusText()).To(Equal("OK"))
-				Expect(r.ResponseText()).To(Equal("Hello, World!"))
+				Expect(xhr.StatusText()).To(Equal("OK"))
+				Expect(xhr.ResponseText()).To(Equal("Hello, World!"))
 			})
 		})
 	})
@@ -112,24 +109,24 @@ var _ = Describe("XmlHTTPRequest", func() {
 				loadEnded   bool
 				loaded      bool
 			)
-			r.Open("GET", "/dummy", RequestOptionAsync(true))
-			r.AddEventListener(XHREventLoadstart, NewEventHandlerFunc(func(e Event) error {
+			xhr.Open("GET", "/dummy", RequestOptionAsync(true))
+			xhr.AddEventListener(XHREventLoadstart, NewEventHandlerFunc(func(e Event) error {
 				loadStarted = true
 				return nil
 			}))
-			r.AddEventListener(XHREventLoadend, NewEventHandlerFunc(func(e Event) error {
+			xhr.AddEventListener(XHREventLoadend, NewEventHandlerFunc(func(e Event) error {
 				loadEnded = true
 				return nil
 			}))
 			ended := make(chan bool)
-			r.AddEventListener(XHREventLoad, NewEventHandlerFunc(func(e Event) error {
+			xhr.AddEventListener(XHREventLoad, NewEventHandlerFunc(func(e Event) error {
 				loaded = true
 				ended <- true
 				return nil
 			}))
 			By("Sending the request")
-			Expect(r.Send()).To(Succeed())
-			Expect(r.Status()).To(Equal(0), "Response should not have been received yet")
+			Expect(xhr.Send()).To(Succeed())
+			Expect(xhr.Status()).To(Equal(0), "Response should not have been received yet")
 			Expect(loadStarted).To(BeTrue(), "loadstart emitted")
 			Expect(loadEnded).To(BeFalse(), "loadend emitted")
 			Expect(loaded).To(BeFalse(), "load emitted")
@@ -138,8 +135,8 @@ var _ = Describe("XmlHTTPRequest", func() {
 			<-ended
 
 			By("The response should be a success")
-			Expect(r.Status()).To(Equal(200))
-			Expect(r.ResponseText()).To(Equal("Hello, World!"))
+			Expect(xhr.Status()).To(Equal(200))
+			Expect(xhr.ResponseText()).To(Equal("Hello, World!"))
 		})
 	})
 
@@ -149,12 +146,12 @@ var _ = Describe("XmlHTTPRequest", func() {
 				// This test uses blocking requests.
 				// This isn't the ususal case, but the test is much easier to write; and
 				// code being tested is unrelated to blocking/non-blocking.
-				r.Open("POST", "/dummy")
+				xhr.Open("POST", "/dummy")
 				formData := NewFormData()
 				formData.Append("key1", "Value%42")
 				formData.Append("key2", "Value&=42")
 				formData.Append("key3", "International? æøå")
-				r.SendBody(NewXHRRequestBodyOfFormData(formData))
+				xhr.SendBody(NewXHRRequestBodyOfFormData(formData))
 				Expect(reqErr).ToNot(HaveOccurred())
 				Expect(actualMethod).To(Equal("POST"))
 				actualReqContentType := actualHeader.Get("Content-Type")
@@ -168,9 +165,9 @@ var _ = Describe("XmlHTTPRequest", func() {
 
 	Describe("SetRequestHeader", func() {
 		It("Should add the header", func() {
-			r.SetRequestHeader("x-test", "42")
-			r.Open("GET", "/dummy")
-			Expect(r.Send()).To(Succeed())
+			xhr.SetRequestHeader("x-test", "42")
+			xhr.Open("GET", "/dummy")
+			Expect(xhr.Send()).To(Succeed())
 			Expect(actualHeader.Get("x-test")).To(Equal("42"))
 		})
 	})
@@ -184,14 +181,14 @@ var _ = Describe("XmlHTTPRequest", func() {
 		})
 
 		JustBeforeEach(func() {
-			r.Open("GET", "/dummy")
-			r.Send()
+			xhr.Open("GET", "/dummy")
+			xhr.Send()
 		})
 
 		Describe("GetAllResponseHeaders", func() {
 			It("Should return all headers", func() {
 				Expect(
-					r.GetAllResponseHeaders(),
+					xhr.GetAllResponseHeaders(),
 				).To(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain"))
 			})
 
@@ -202,7 +199,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 
 				It("Should appear twice", func() {
 					Expect(
-						r.GetAllResponseHeaders(),
+						xhr.GetAllResponseHeaders(),
 					).To(HaveLines("x-test-1: value1", "x-test-1: value3", "x-test-2: value2", "content-type: text/plain"))
 				})
 			})
@@ -214,7 +211,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 
 				It("Should not include the cookie", func() {
 					Expect(
-						r.GetAllResponseHeaders(),
+						xhr.GetAllResponseHeaders(),
 					).To(HaveLines("x-test-1: value1", "x-test-2: value2", "content-type: text/plain"))
 				})
 			})
@@ -231,15 +228,15 @@ var _ = Describe("XmlHTTPRequest", func() {
 			})
 
 			It("Should nil when value is missing", func() {
-				Expect(r.GetResponseHeader("missing")).To(BeNil())
+				Expect(xhr.GetResponseHeader("missing")).To(BeNil())
 			})
 
 			It("Should return one value when only one header", func() {
-				Expect(*r.GetResponseHeader("x-test-2")).To(Equal("value2"))
+				Expect(*xhr.GetResponseHeader("x-test-2")).To(Equal("value2"))
 			})
 
 			It("Should return a comma-separated list when multiple values", func() {
-				Expect(*r.GetResponseHeader("x-test-1")).To(Equal("value1, value3"))
+				Expect(*xhr.GetResponseHeader("x-test-1")).To(Equal("value1, value3"))
 			})
 		})
 	})
