@@ -96,16 +96,6 @@ func (o WindowOptions) Apply(options *WindowOptions) {
 	*options = o
 }
 
-func newWindow(httpClient http.Client, url *netURL.URL) *window {
-	result := &window{
-		eventTarget: newEventTarget(),
-		httpClient:  httpClient,
-		url:         url,
-	}
-	result.document = NewDocument(result)
-	return result
-}
-
 func (w *window) Document() Document {
 	return w.document
 }
