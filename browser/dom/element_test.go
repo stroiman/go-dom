@@ -27,6 +27,10 @@ var _ = Describe("Element", func() {
 		})
 	})
 
+	It("Should support Get/SetTextContent", func() {
+		Skip("Only setter created yet")
+	})
+
 	Describe("InsertAdjacentHTML", func() {
 		It("Should insert correctly 'beforeBegin'", func() {
 			doc := ParseHtmlString(`<body>

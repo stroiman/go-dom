@@ -25,16 +25,26 @@ var _ = Describe("Browser", func() {
 		Expect(element.TagName()).To(Equal("HTML"))
 	})
 
-	It("It returns an error on non-200", func() {
+	It("Executes scripts", func() {
 		// This is not necessarily desired behaviour right now.
 		server := http.NewServeMux()
 		server.Handle(
 			"GET /index.html",
 			http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-				res.Write([]byte("<body>Hello, World!</body>"))
+				res.Write([]byte(`<body>
+					<div id='target'></div>
+					<script>
+						const target = document.getElementById('target');
+						target.textContent = "42"
+					</script>
+				</body>`))
 			}),
 		)
 		browser := NewBrowserFromHandler(server)
-		Expect(browser.Open("/not-found.html")).Error().To(HaveOccurred())
+		DeferCleanup(func() { browser.Dispose() })
+		win, err := browser.Open("/index.html")
+		Expect(err).ToNot(HaveOccurred())
+		target := win.Document().GetElementById("target")
+		Expect(target.OuterHTML()).To(Equal(`<div id="target">42</div>`))
 	})
 })

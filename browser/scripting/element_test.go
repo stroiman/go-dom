@@ -19,6 +19,10 @@ var _ = Describe("V8 Element", func() {
 		Expect(ctx.RunTestScript("document.body.nodeType")).To(BeEquivalentTo(1))
 	})
 
+	It("Supports textContent property", func() {
+		Skip("Add test?")
+	})
+
 	Describe("Attributes", func() {
 		It("Should support set/getAtribute", func() {
 			ctx := NewTestContext(LoadHTML(`<div id="1" class="foo"></div>`))

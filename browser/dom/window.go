@@ -10,6 +10,7 @@ import (
 
 type ScriptEngineFactory interface {
 	NewScriptEngine(window Window) ScriptEngine
+	Dispose()
 }
 
 type ScriptEngine interface {
@@ -36,10 +37,11 @@ type Window interface {
 
 type window struct {
 	eventTarget
-	document     Document
-	scriptEngine ScriptEngine
-	httpClient   http.Client
-	baseLocation string
+	document            Document
+	scriptEngineFactory ScriptEngineFactory
+	scriptEngine        ScriptEngine
+	httpClient          http.Client
+	baseLocation        string
 }
 
 func NewWindow(windowOptions ...WindowOption) Window {
@@ -48,13 +50,12 @@ func NewWindow(windowOptions ...WindowOption) Window {
 		option.Apply(&options)
 	}
 	result := &window{
-		eventTarget:  newEventTarget(),
-		httpClient:   options.HttpClient,
-		baseLocation: options.BaseLocation,
+		eventTarget:         newEventTarget(),
+		httpClient:          options.HttpClient,
+		baseLocation:        options.BaseLocation,
+		scriptEngineFactory: options.ScriptEngineFactory,
 	}
-	if options.ScriptEngineFactory != nil {
-		result.scriptEngine = options.ScriptEngineFactory.NewScriptEngine(result)
-	}
+	result.initScriptEngine()
 	result.document = NewDocument(result)
 	return result
 }
@@ -73,13 +74,12 @@ func OpenWindowFromLocation(location string, windowOptions ...WindowOption) (Win
 		options.BaseLocation = location
 	}
 	result := &window{
-		eventTarget:  newEventTarget(),
-		httpClient:   options.HttpClient,
-		baseLocation: options.BaseLocation,
+		eventTarget:         newEventTarget(),
+		httpClient:          options.HttpClient,
+		baseLocation:        options.BaseLocation,
+		scriptEngineFactory: options.ScriptEngineFactory,
 	}
-	if options.ScriptEngineFactory != nil {
-		result.scriptEngine = options.ScriptEngineFactory.NewScriptEngine(result)
-	}
+	result.initScriptEngine()
 	result.document = NewDocument(result)
 	resp, err := result.httpClient.Get(location)
 	if err != nil {
@@ -90,6 +90,17 @@ func OpenWindowFromLocation(location string, windowOptions ...WindowOption) (Win
 	}
 	err = result.loadReader(resp.Body)
 	return result, err
+}
+
+func (w *window) initScriptEngine() {
+	factory := w.scriptEngineFactory
+	engine := w.scriptEngine
+	if engine != nil {
+		engine.Dispose()
+	}
+	if factory != nil {
+		w.scriptEngine = factory.NewScriptEngine(w)
+	}
 }
 
 func NewWindowReader(reader io.Reader, windowOptions ...WindowOption) (window Window, err error) {

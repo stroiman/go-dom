@@ -7,6 +7,7 @@ import (
 
 	. "github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/internal/http"
+	"github.com/stroiman/go-dom/browser/scripting"
 )
 
 // Pretty stupid right now, but should _probably_ allow handling multiple
@@ -29,12 +30,15 @@ func (b *Browser) Open(location string) (window Window, err error) {
 		return nil, errors.New("Non-ok Response")
 	}
 	window, err = NewWindowReader(resp.Body, b.createOptions(location))
+	b.windows = append(b.windows, window)
 	return
 }
 
 func NewBrowserFromHandler(handler http.Handler) *Browser {
+	host := scripting.NewScriptHost()
 	return &Browser{
-		Client: NewHttpClientFromHandler(handler),
+		ScriptEngineFactory: (*scripting.Wrapper)(host),
+		Client:              NewHttpClientFromHandler(handler),
 	}
 }
 
@@ -49,7 +53,9 @@ func (b *Browser) createOptions(location string) WindowOptions {
 func (b *Browser) Dispose() {
 	slog.Debug("Browser: Dispose")
 	for _, win := range b.windows {
-		slog.Debug("Browser: Dispose window")
 		win.Dispose()
+	}
+	if b.ScriptEngineFactory != nil {
+		b.ScriptEngineFactory.Dispose()
 	}
 }

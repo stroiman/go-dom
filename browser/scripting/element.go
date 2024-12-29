@@ -40,6 +40,18 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	helper := builder.NewPrototypeBuilder()
 	prototypeTemplate := helper.proto
 	prototypeTemplate.SetAccessorPropertyCallback("classList", wrapper.ClassList, nil, v8.ReadOnly)
+	prototypeTemplate.SetAccessorPropertyCallback(
+		"textContent",
+		nil,
+		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			e, err := wrapper.GetInstance(info)
+			if err == nil {
+				e.SetTextContent(info.Args()[0].String())
+			}
+			return nil, err
+		},
+		v8.None,
+	)
 	helper.CreateReadonlyProp("outerHTML", Element.OuterHTML)
 	helper.CreateReadonlyProp("tagName", Element.TagName)
 	helper.CreateFunctionStringToString("getAttribute", Element.GetAttribute)

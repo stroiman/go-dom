@@ -281,6 +281,11 @@ func (w *Wrapper) NewScriptEngine(window Window) dom.ScriptEngine {
 	return host.NewContext(window)
 }
 
+func (w *Wrapper) Dispose() {
+	host := (*ScriptHost)(w)
+	host.Dispose()
+}
+
 func must(err error) {
 	if err != nil {
 		panic(err)
