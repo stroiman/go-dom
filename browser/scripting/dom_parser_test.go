@@ -11,7 +11,6 @@ var _ = Describe("DOM Parser", func() {
 		Expect(ctx.RunTestScript(`
 			const parser = new DOMParser()
 			const doc = parser.parseFromString("<div id='target'></div>", "text/html")
-			console.log("Constructor", Object.getPrototypeOf(doc).constructor.name)
 		`)).Error().ToNot(HaveOccurred())
 		Expect(
 			ctx.RunTestScript("Object.getPrototypeOf(doc) === Document.prototype"),
@@ -29,7 +28,6 @@ var _ = Describe("DOM Parser", func() {
 		Expect(ctx.RunTestScript(`
 			const parser = new DOMParser()
 			const doc = parser.parseFromString("<div id='target'></div>", "text/html")
-			console.log("Constructor", Object.getPrototypeOf(doc).constructor.name)
 		`)).Error().ToNot(HaveOccurred())
 		Skip("HTMLDocument not properly implemented")
 		Expect(
