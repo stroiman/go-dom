@@ -2,10 +2,8 @@ package dom_test
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/stroiman/go-dom/browser/dom"
-	domHTTP "github.com/stroiman/go-dom/browser/internal/http"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -61,22 +59,6 @@ var _ = Describe("Parser", func() {
 				MatchStructure("BODY",
 					MatchStructure("DIV"),
 				)))
-	})
-
-	It("Should be able to read from an http.Handler instance", func() {
-		handler := (http.HandlerFunc)(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
-			w.Header().Add("Content-Type", "text/html") // For good measure, not used yet"
-			w.Write([]byte("<html></html>"))
-		})
-		result, err := dom.OpenWindowFromLocation("/", dom.WindowOptions{
-			HttpClient: domHTTP.NewHttpClientFromHandler(handler),
-		})
-		Expect(err).ToNot(HaveOccurred())
-		element := result.Document().DocumentElement()
-
-		Expect(element.NodeName()).To(Equal("HTML"))
-		Expect(element.TagName()).To(Equal("HTML"))
 	})
 
 	It("Should parse text nodes in body", func() {

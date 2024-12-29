@@ -112,25 +112,3 @@ func LoadHTML(html string) CreateHook {
 func InitializeContextWithEmptyHtml() *TestScriptContext {
 	return InitializeContext(LoadHTML("<html></html>"))
 }
-
-type TestBrowserWrapper struct {
-	*dom.Browser
-	*ScriptContext
-	url string
-}
-
-func CreateTestBrowser() *TestBrowserWrapper {
-	result := new(TestBrowserWrapper)
-
-	BeforeEach(func() {
-
-	})
-
-	AfterEach(func() {
-		result.ScriptContext.Dispose()
-		// Ready for GC
-		result.ScriptContext = nil
-		result.Browser = nil
-	})
-	return result
-}

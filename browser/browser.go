@@ -1,10 +1,11 @@
-package dom
+package browser
 
 import (
 	"errors"
 	"log/slog"
 	"net/http"
 
+	. "github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/internal/http"
 )
 
@@ -14,7 +15,7 @@ import (
 type Browser struct {
 	Client              http.Client
 	ScriptEngineFactory ScriptEngineFactory
-	windows             []*window
+	windows             []Window
 }
 
 func (b *Browser) Open(location string) (window Window, err error) {

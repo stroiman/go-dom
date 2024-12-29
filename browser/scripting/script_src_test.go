@@ -22,18 +22,6 @@ var _ = Describe("Load from server", func() {
 		Expect(window.Document().Body().OuterHTML()).To(Equal("<body>Hello, World!</body>"))
 	})
 
-	It("It returns an error on non-200", func() {
-		// This is not necessarily desired behaviour right now.
-		server := http.NewServeMux()
-		server.Handle(
-			"GET /index.html",
-			http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-				res.Write([]byte("<body>Hello, World!</body>"))
-			}),
-		)
-		Expect(OpenTestWindowFromHandler("/not-found.html", server)).Error().To(HaveOccurred())
-	})
-
 	It("Should download and execute script from script tags", func() {
 		// Create a simple server, serving an HTML file and JS
 		server := http.NewServeMux()
