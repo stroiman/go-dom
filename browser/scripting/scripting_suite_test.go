@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/internal/test"
+	"github.com/stroiman/go-dom/browser/internal/test"
 	. "github.com/stroiman/go-dom/browser/scripting"
 )
 

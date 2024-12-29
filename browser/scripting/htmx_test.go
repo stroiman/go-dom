@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/stroiman/go-dom/browser/dom"
-	app "github.com/stroiman/go-dom/internal/test/htmx-app"
+	app "github.com/stroiman/go-dom/browser/internal/test/htmx-app"
 )
 
 var _ = Describe("Load from server", Ordered, func() {
