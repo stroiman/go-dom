@@ -54,7 +54,6 @@ var _ = Describe("ScriptHost", func() {
 		Describe("Load document with script", func() {
 			It("Runs the script when connected to DOM", func() {
 				window := ctx.Window()
-				window.SetScriptRunner(ctx)
 				window.LoadHTML(`
 <html>
   <body>
