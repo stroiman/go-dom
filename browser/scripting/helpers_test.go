@@ -48,24 +48,11 @@ var IgnoreUnhandledErrors CreateHook = func(ctx *TestScriptContext) {
 func NewTestContext(hooks ...CreateHook) TestScriptContext {
 	ctx := TestScriptContext{}
 	window := dom.NewWindow()
-	// window.LoadHTML(html)
 	ctx.ScriptContext = host.NewContext(window)
 	DeferCleanup(ctx.Dispose)
 	for _, hook := range hooks {
 		hook(&ctx)
 	}
-	// if !ctx.ignoreUnhandledErrors {
-	// 	var unhandledErrors []any
-	// 	DeferCleanup(func() {
-	// 		gomega.Expect(unhandledErrors).To(gomega.BeEmpty())
-	// 	})
-	// 	ctx.Window().
-	// 		AddEventListener("error",
-	// 			dom.NewEventHandlerFunc(func(e dom.Event) error {
-	// 				unhandledErrors = append(unhandledErrors, e)
-	// 				return nil
-	// 			}))
-	// }
 	return ctx
 }
 
