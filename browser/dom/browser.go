@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	netURL "net/url"
+
+	. "github.com/stroiman/go-dom/browser/internal/http"
 )
 
 // Pretty stupid right now, but should _probably_ allow handling multiple
@@ -50,7 +52,7 @@ func NewBrowserFromHandler(handler http.Handler) *Browser {
 		panic(err)
 	}
 	client := http.Client{
-		Transport: TestRoundTripper{handler},
+		Transport: TestRoundTripper{Handler: handler},
 		Jar:       cookiejar,
 	}
 	return &Browser{

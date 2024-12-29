@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	. "github.com/stroiman/go-dom/browser/dom"
+	. "github.com/stroiman/go-dom/browser/internal/http"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -15,7 +16,7 @@ import (
 
 func newFromHandlerFunc(f func(http.ResponseWriter, *http.Request)) XmlHttpRequest {
 	client := http.Client{
-		Transport: TestRoundTripper{http.HandlerFunc(f)},
+		Transport: TestRoundTripper{Handler: http.HandlerFunc(f)},
 	}
 	return NewXmlHttpRequest(client)
 }
