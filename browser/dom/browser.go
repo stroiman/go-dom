@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"net/http/cookiejar"
 	netURL "net/url"
 
 	. "github.com/stroiman/go-dom/browser/internal/http"
@@ -47,16 +46,8 @@ func (b *Browser) NewWindow(baseUrl string) (window Window, err error) {
 }
 
 func NewBrowserFromHandler(handler http.Handler) *Browser {
-	cookiejar, err := cookiejar.New(nil)
-	if err != nil {
-		panic(err)
-	}
-	client := http.Client{
-		Transport: TestRoundTripper{Handler: handler},
-		Jar:       cookiejar,
-	}
 	return &Browser{
-		Client: client,
+		Client: NewHttpClientFromHandler(handler),
 	}
 }
 
