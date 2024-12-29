@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	netURL "net/url"
 
 	. "github.com/stroiman/go-dom/browser/internal/http"
 )
@@ -27,21 +26,7 @@ func (b *Browser) Open(location string) (window Window, err error) {
 	if resp.StatusCode != 200 {
 		return nil, errors.New("Non-ok Response")
 	}
-	var url *netURL.URL
-	url, err = netURL.Parse(location)
-	if err == nil {
-		window, err = NewWindowReader(resp.Body, b.createOptions(url))
-	}
-	return
-}
-
-// Creates a new window containing an empty document
-func (b *Browser) NewWindow(baseUrl string) (window Window, err error) {
-	var url *netURL.URL
-	url, err = netURL.Parse(baseUrl)
-	if err == nil {
-		window = NewWindow(b.createOptions(url))
-	}
+	window, err = NewWindowReader(resp.Body, b.createOptions(location))
 	return
 }
 
@@ -51,11 +36,11 @@ func NewBrowserFromHandler(handler http.Handler) *Browser {
 	}
 }
 
-func (b *Browser) createOptions(url *netURL.URL) WindowOptions {
+func (b *Browser) createOptions(location string) WindowOptions {
 	return WindowOptions{
 		ScriptEngineFactory: b.ScriptEngineFactory,
 		HttpClient:          b.Client,
-		URL:                 url,
+		BaseLocation:        location,
 	}
 }
 

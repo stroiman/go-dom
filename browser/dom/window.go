@@ -39,7 +39,7 @@ type window struct {
 	document     Document
 	scriptEngine ScriptEngine
 	httpClient   http.Client
-	url          *netURL.URL
+	baseLocation string
 }
 
 func NewWindow(windowOptions ...WindowOption) Window {
@@ -48,9 +48,9 @@ func NewWindow(windowOptions ...WindowOption) Window {
 		option.Apply(&options)
 	}
 	result := &window{
-		eventTarget: newEventTarget(),
-		httpClient:  options.HttpClient,
-		url:         options.URL,
+		eventTarget:  newEventTarget(),
+		httpClient:   options.HttpClient,
+		baseLocation: options.BaseLocation,
 	}
 	if options.ScriptEngineFactory != nil {
 		result.scriptEngine = options.ScriptEngineFactory.NewScriptEngine(result)
@@ -74,8 +74,8 @@ func NewWindowReader(reader io.Reader, windowOptions ...WindowOption) (window Wi
 
 type WindowOptions struct {
 	ScriptEngineFactory
-	HttpClient http.Client
-	URL        *netURL.URL
+	HttpClient   http.Client
+	BaseLocation string
 }
 
 type WindowOption interface {
@@ -86,9 +86,9 @@ type WindowOptionFunc func(*WindowOptions)
 
 func (f WindowOptionFunc) Apply(options *WindowOptions) { f(options) }
 
-func WindowOptionUrl(url *netURL.URL) WindowOptionFunc {
+func WindowOptionLocation(location string) WindowOptionFunc {
 	return func(options *WindowOptions) {
-		options.URL = url
+		options.BaseLocation = location
 	}
 }
 
@@ -135,8 +135,10 @@ func (w *window) SetScriptRunner(r ScriptEngine) {
 }
 
 func (w *window) Location() Location {
-	u := w.url
-	if u == nil {
+	var u *netURL.URL
+	if w.baseLocation != "" {
+		u, _ = netURL.Parse(w.baseLocation)
+	} else {
 		u = new(netURL.URL)
 	}
 	return NewLocationFromNetURL(u)

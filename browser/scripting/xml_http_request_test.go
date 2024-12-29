@@ -5,10 +5,11 @@ import (
 	"net/http"
 
 	"github.com/stroiman/go-dom/browser/dom"
+	. "github.com/stroiman/go-dom/browser/internal/http"
+	. "github.com/stroiman/go-dom/browser/scripting"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	// . "github.com/stroiman/go-dom/browser/scripting"
 )
 
 var _ = Describe("V8 XmlHttpRequest", func() {
@@ -30,13 +31,15 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 			}
 			actualPath = req.URL.Path
 		})
-		br := NewTestBrowserFromHandler(server)
 		var err error
-		window, err = br.NewWindow("http://example.com")
+		window = dom.NewWindow(dom.WindowOptions{
+			BaseLocation:        "http://example.com",
+			ScriptEngineFactory: (*Wrapper)(host),
+			HttpClient:          NewHttpClientFromHandler(server),
+		})
 		Expect(err).ToNot(HaveOccurred())
 		DeferCleanup(func() {
 			window.Dispose()
-			br.Dispose()
 			server = nil
 			close(evt)
 			evt = nil
