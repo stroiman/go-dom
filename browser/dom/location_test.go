@@ -4,19 +4,32 @@ import (
 	"net/http"
 
 	. "github.com/stroiman/go-dom/browser/dom"
+	domHTTP "github.com/stroiman/go-dom/browser/internal/http"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Window.Location", func() {
-	It("Should parse a location without a query", func() {
+	OpenWindow := func(location string) Window {
 		handler := http.HandlerFunc(
 			func(res http.ResponseWriter, req *http.Request) { res.Write([]byte("<html></html>")) },
 		)
-		browser := NewBrowserFromHandler(handler)
-		win, err := browser.Open("http://localhost:9999/foo/bar")
+		windowOptions := WindowOptions{
+			HttpClient: domHTTP.NewHttpClientFromHandler(handler),
+		}
+		win, err := OpenWindowFromLocation(location, windowOptions)
 		Expect(err).ToNot(HaveOccurred())
+		DeferCleanup(func() {
+			if win != nil {
+				win.Dispose()
+			}
+		})
+		return win
+	}
+
+	It("Should parse a location without a query", func() {
+		win := OpenWindow("http://localhost:9999/foo/bar")
 		location := win.Location()
 		Expect(location.GetHost()).To(Equal("localhost:9999"), "host")
 		Expect(location.GetHash()).To(Equal(""), "hash")
@@ -30,12 +43,7 @@ var _ = Describe("Window.Location", func() {
 	})
 
 	It("Should parse a location without a query", func() {
-		handler := http.HandlerFunc(
-			func(res http.ResponseWriter, req *http.Request) { res.Write([]byte("<html></html>")) },
-		)
-		browser := NewBrowserFromHandler(handler)
-		win, err := browser.Open("http://localhost:9999/foo#heading-1")
-		Expect(err).ToNot(HaveOccurred())
+		win := OpenWindow("http://localhost:9999/foo#heading-1")
 		location := win.Location()
 		Expect(location.GetHost()).To(Equal("localhost:9999"), "host")
 		Expect(location.GetHash()).To(Equal("#heading-1"), "hash")
@@ -44,12 +52,9 @@ var _ = Describe("Window.Location", func() {
 	})
 
 	It("Should parse a location with a query", func() {
-		handler := http.HandlerFunc(
-			func(res http.ResponseWriter, req *http.Request) { res.Write([]byte("<html></html>")) },
+		win := OpenWindow(
+			"http://localhost:9999/foo/bar?q=baz",
 		)
-		browser := NewBrowserFromHandler(handler)
-		win, err := browser.Open("http://localhost:9999/foo/bar?q=baz")
-		Expect(err).ToNot(HaveOccurred())
 		location := win.Location()
 		Expect(location.GetHost()).To(Equal("localhost:9999"), "host")
 		Expect(location.GetHostname()).To(Equal("localhost"), "hostname")

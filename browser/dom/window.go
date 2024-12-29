@@ -59,6 +59,39 @@ func NewWindow(windowOptions ...WindowOption) Window {
 	return result
 }
 
+func OpenWindowFromLocation(location string, windowOptions ...WindowOption) (Window, error) {
+	var options WindowOptions
+	for _, option := range windowOptions {
+		option.Apply(&options)
+	}
+	if options.BaseLocation != "" {
+		u, err := netURL.Parse(options.BaseLocation)
+		if err == nil {
+			location = u.JoinPath(location).String()
+		}
+	} else {
+		options.BaseLocation = location
+	}
+	result := &window{
+		eventTarget:  newEventTarget(),
+		httpClient:   options.HttpClient,
+		baseLocation: options.BaseLocation,
+	}
+	if options.ScriptEngineFactory != nil {
+		result.scriptEngine = options.ScriptEngineFactory.NewScriptEngine(result)
+	}
+	result.document = NewDocument(result)
+	resp, err := result.httpClient.Get(location)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New("Non-ok Response")
+	}
+	err = result.loadReader(resp.Body)
+	return result, err
+}
+
 func NewWindowReader(reader io.Reader, windowOptions ...WindowOption) (window Window, err error) {
 	window = NewWindow(windowOptions...)
 	document := window.Document()

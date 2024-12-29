@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/stroiman/go-dom/browser/dom"
+	domHTTP "github.com/stroiman/go-dom/browser/internal/http"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -68,8 +69,9 @@ var _ = Describe("Parser", func() {
 			w.Header().Add("Content-Type", "text/html") // For good measure, not used yet"
 			w.Write([]byte("<html></html>"))
 		})
-		browser := dom.NewBrowserFromHandler(handler)
-		result, err := browser.Open("/")
+		result, err := dom.OpenWindowFromLocation("/", dom.WindowOptions{
+			HttpClient: domHTTP.NewHttpClientFromHandler(handler),
+		})
 		Expect(err).ToNot(HaveOccurred())
 		element := result.Document().DocumentElement()
 

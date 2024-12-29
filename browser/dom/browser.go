@@ -10,7 +10,7 @@ import (
 
 // Pretty stupid right now, but should _probably_ allow handling multiple
 // windows/tabs. This used to be the case for _some_ identity providers, but I'm
-// not sure if that even work anymore because of browser sercurity.
+// not sure if that even work anymore because of browser security.
 type Browser struct {
 	Client              http.Client
 	ScriptEngineFactory ScriptEngineFactory
@@ -18,7 +18,8 @@ type Browser struct {
 }
 
 func (b *Browser) Open(location string) (window Window, err error) {
-	slog.Debug("Browser: OpenWindow", "URL", location)
+	// slog.Debug("Browser: OpenWindow", "URL", location)
+	// return OpenWindowFromLocation(location, b.createOptions(location))
 	resp, err := b.Client.Get(location)
 	if err != nil {
 		return nil, err

@@ -54,7 +54,7 @@ var _ = Describe("ScriptHost", func() {
 		Describe("Load document with script", func() {
 			It("Runs the script when connected to DOM", func() {
 				window := ctx.Window()
-				window.LoadHTML(`
+				Expect(window.LoadHTML(`
 <html>
   <body>
     <script>window.sut = document.documentElement.outerHTML</script>
@@ -62,12 +62,11 @@ var _ = Describe("ScriptHost", func() {
   </body>
 </html>
 `,
-				)
+				)).To(Succeed())
 				Expect(
 					ctx.RunTestScript("window.sut"),
 				).To(Equal(`<html><head></head><body>
     <script>window.sut = document.documentElement.outerHTML</script></body></html>`))
-
 			})
 		})
 	})

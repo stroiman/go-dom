@@ -17,8 +17,7 @@ var _ = Describe("Load from server", func() {
 				res.Write([]byte("<body>Hello, World!</body>"))
 			}),
 		)
-		browser := NewTestBrowserFromHandler(server)
-		window, err := browser.Open("/index.html")
+		window, err := OpenTestWindowFromHandler("/index.html", server)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(window.Document().Body().OuterHTML()).To(Equal("<body>Hello, World!</body>"))
 	})
@@ -32,8 +31,7 @@ var _ = Describe("Load from server", func() {
 				res.Write([]byte("<body>Hello, World!</body>"))
 			}),
 		)
-		browser := NewTestBrowserFromHandler(server)
-		Expect(browser.Open("/not-found.html")).Error().To(HaveOccurred())
+		Expect(OpenTestWindowFromHandler("/not-found.html", server)).Error().To(HaveOccurred())
 	})
 
 	It("Should download and execute script from script tags", func() {
@@ -60,8 +58,7 @@ var _ = Describe("Load from server", func() {
 		)
 		// Verify, create a browser communicating with this. Open the HTML file, and
 		// verify the side effect by inspecting global JS scope.
-		browser := NewTestBrowserFromHandler(server)
-		win, err := browser.Open("/index.html")
+		win, err := OpenTestWindowFromHandler("/index.html", server)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(win.Eval("window.scriptLoaded")).To(BeTrue())
 	})
