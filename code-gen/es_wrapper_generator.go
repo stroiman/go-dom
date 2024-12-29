@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode"
 
-	g "github.com/stroiman/go-dom/internal/code-gen/generators"
+	g "github.com/stroiman/go-dom/code-gen/generators"
 
 	"github.com/dave/jennifer/jen"
 )
