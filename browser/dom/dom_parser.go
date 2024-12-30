@@ -20,6 +20,7 @@ type DOMParser interface {
 	// parseing process can e.g. execute script tags that require the document to
 	// be set on the window _before_ the script is executed.
 	ParseReader(window Window, document *Document, reader io.Reader) error
+	ParseFragment(ownerDocument Document, reader io.Reader) (DocumentFragment, error)
 }
 
 // TODO: Remove
@@ -28,6 +29,25 @@ type domParser struct{}
 func (p domParser) ParseReader(window Window, document *Document, reader io.Reader) error {
 	*document = NewDocument(window)
 	return parseIntoDocument(window, *document, reader)
+}
+
+func (p domParser) ParseFragment(
+	ownerDocument Document,
+	reader io.Reader,
+) (DocumentFragment, error) {
+	nodes, err := html.ParseFragment(reader, &html.Node{
+		Type:     html.ElementNode,
+		Data:     "body",
+		DataAtom: atom.Body,
+	})
+	result := ownerDocument.CreateDocumentFragment()
+	if err == nil {
+		for _, child := range nodes {
+			element := createElementFromNode(nil, ownerDocument, nil, child)
+			result.AppendChild(element)
+		}
+	}
+	return result, err
 }
 
 func NewDOMParser() DOMParser { return domParser{} }
