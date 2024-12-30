@@ -3,12 +3,45 @@ package scripting
 import (
 	"errors"
 
+	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
 
 	v8 "github.com/tommie/v8go"
 )
 
 type ESXmlHttpRequest struct{ ESWrapper[XmlHttpRequest] }
+
+func (xhr ESXmlHttpRequest) DecodeDocument(
+	ctx *ScriptContext,
+	val *v8.Value,
+) (*dom.XHRRequestBody, error) {
+	if val.IsNull() {
+		return nil, nil
+	}
+	return nil, errors.New("Not supported yet")
+}
+
+func (xhr ESXmlHttpRequest) DecodeXMLHttpRequestBodyInit(
+	ctx *ScriptContext,
+	val *v8.Value,
+) (*dom.XHRRequestBody, error) {
+	if val.IsString() {
+		return dom.NewXHRRequestBodyOfString(val.String()), nil
+	}
+	if !val.IsObject() {
+		return nil, errors.New("Not supported yet")
+	}
+	obj := val.Object()
+	node, ok := ctx.GetCachedNode(obj)
+	if !ok {
+		return nil, errors.New("Not a node")
+	}
+	formData, ok := node.(*dom.FormData)
+	if ok {
+		return dom.NewXHRRequestBodyOfFormData(formData), nil
+	}
+	return nil, errors.New("Not a node")
+}
 
 func NewESXmlHttpRequest(host *ScriptHost) ESXmlHttpRequest {
 	return ESXmlHttpRequest{NewESWrapper[XmlHttpRequest](host)}

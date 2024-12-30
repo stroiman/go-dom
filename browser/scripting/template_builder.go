@@ -3,7 +3,6 @@ package scripting
 import (
 	"errors"
 
-	"github.com/stroiman/go-dom/browser/dom"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -217,40 +216,18 @@ func TryParseArgs[T interface{}](
 func TryParseArg[T any](
 	args *argumentHelper,
 	index int,
-	parser func(*ScriptContext, *v8.Value) (T, error),
+	parsers ...func(*ScriptContext, *v8.Value) (T, error),
 ) (result T, err error) {
 	value := args.GetArg(index)
 	if value == nil {
 		return
 	}
-	return parser(args.ctx, value)
-}
-
-func GetBodyFromDocument(ctx *ScriptContext, val *v8.Value) (*dom.XHRRequestBody, error) {
-	if val.IsNull() {
-		return nil, nil
+	for _, parser := range parsers {
+		result, err = parser(args.ctx, value)
+		if err == nil {
+			return
+		}
 	}
-	return nil, errors.New("Not supported yet")
-}
-
-func GetBodyFromXMLHttpRequestBodyInit(
-	ctx *ScriptContext,
-	val *v8.Value,
-) (*dom.XHRRequestBody, error) {
-	if val.IsString() {
-		return dom.NewXHRRequestBodyOfString(val.String()), nil
-	}
-	if !val.IsObject() {
-		return nil, errors.New("Not supported yet")
-	}
-	obj := val.Object()
-	node, ok := ctx.GetCachedNode(obj)
-	if !ok {
-		return nil, errors.New("Not a node")
-	}
-	formData, ok := node.(*dom.FormData)
-	if ok {
-		return dom.NewXHRRequestBodyOfFormData(formData), nil
-	}
-	return nil, errors.New("Not a node")
+	err = errors.New("TODO")
+	return
 }

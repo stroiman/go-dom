@@ -79,31 +79,29 @@ func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 2 {
-		return nil, errors.New("Too few arguments")
+	args := newArgumentHelper(xhr.host, info)
+	name, err0 := TryParseArg(args, 0, xhr.DecodeByteString)
+	value, err1 := TryParseArg(args, 1, xhr.DecodeByteString)
+	if args.noOfReadArguments >= 2 {
+		err := errors.Join(err0, err1)
+		if err != nil {
+			return nil, err
+		}
+		instance.SetRequestHeader(name, value)
+		return nil, nil
 	}
-	name, err0 := xhr.GetArgByteString(args, 0)
-	value, err1 := xhr.GetArgByteString(args, 1)
-	err = errors.Join(err0, err1)
-	if err != nil {
-		return nil, err
-	}
-	instance.SetRequestHeader(name, value)
-	return nil, nil
+	return nil, errors.New("Missing arguments")
 }
 
 func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.GetInstance(info)
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen >= 1 {
-		body, err := TryParseArgs(ctx, args, 0, GetBodyFromDocument, GetBodyFromXMLHttpRequestBodyInit)
+	args := newArgumentHelper(xhr.host, info)
+	body, err0 := TryParseArg(args, 0, xhr.DecodeDocument, xhr.DecodeXMLHttpRequestBodyInit)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}
@@ -129,17 +127,17 @@ func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 1 {
-		return nil, errors.New("Too few arguments")
+	args := newArgumentHelper(xhr.host, info)
+	name, err0 := TryParseArg(args, 0, xhr.DecodeByteString)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0)
+		if err != nil {
+			return nil, err
+		}
+		result := instance.GetResponseHeader(name)
+		return xhr.ToNullableByteString(ctx, result)
 	}
-	name, err := xhr.GetArgByteString(args, 0)
-	if err != nil {
-		return nil, err
-	}
-	result := instance.GetResponseHeader(name)
-	return xhr.ToNullableByteString(ctx, result)
+	return nil, errors.New("Missing arguments")
 }
 
 func (xhr ESXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -161,17 +159,17 @@ func (xhr ESXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 1 {
-		return nil, errors.New("Too few arguments")
-	}
-	mime, err := xhr.GetArgDOMString(args, 0)
-	if err != nil {
+	args := newArgumentHelper(xhr.host, info)
+	mime, err0 := TryParseArg(args, 0, xhr.DecodeDOMString)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0)
+		if err != nil {
+			return nil, err
+		}
+		err = instance.OverrideMimeType(mime)
 		return nil, err
 	}
-	err = instance.OverrideMimeType(mime)
-	return nil, err
+	return nil, errors.New("Missing arguments")
 }
 
 func (xhr ESXmlHttpRequest) ReadyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -193,17 +191,17 @@ func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 1 {
-		return nil, errors.New("Too few arguments")
+	args := newArgumentHelper(xhr.host, info)
+	val, err0 := TryParseArg(args, 0, xhr.DecodeUnsignedLong)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0)
+		if err != nil {
+			return nil, err
+		}
+		instance.SetTimeout(val)
+		return nil, nil
 	}
-	val, err := xhr.GetArgUnsignedLong(args, 0)
-	if err != nil {
-		return nil, err
-	}
-	instance.SetTimeout(val)
-	return nil, nil
+	return nil, errors.New("Missing arguments")
 }
 
 func (xhr ESXmlHttpRequest) GetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -221,17 +219,17 @@ func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 1 {
-		return nil, errors.New("Too few arguments")
+	args := newArgumentHelper(xhr.host, info)
+	val, err0 := TryParseArg(args, 0, xhr.DecodeBoolean)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0)
+		if err != nil {
+			return nil, err
+		}
+		instance.SetWithCredentials(val)
+		return nil, nil
 	}
-	val, err := xhr.GetArgBoolean(args, 0)
-	if err != nil {
-		return nil, err
-	}
-	instance.SetWithCredentials(val)
-	return nil, nil
+	return nil, errors.New("Missing arguments")
 }
 
 func (xhr ESXmlHttpRequest) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

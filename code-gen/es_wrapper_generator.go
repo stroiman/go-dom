@@ -259,18 +259,18 @@ func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
 		return IllegalConstructor(data)
 	}
 	var readArgsResult ReadArgumentsResult
-	var constructorArguments []ESOperationArgument
+	var arguments []ESOperationArgument
 	readArgsResult = ReadArguments(data, *data.Constructor)
-	constructorArguments = data.Constructor.Arguments
+	arguments = data.Constructor.Arguments
 	statements := StatementList(readArgsResult)
 	statements.Append(
 		g.Assign(g.Id("ctx"), Stmt{jen.Id(data.Receiver).Dot("host").Dot("MustGetContext").Call(
 			jen.Id("info").Dot("Context").Call(),
 		)}),
 	)
-	for i := len(constructorArguments); i >= 0; i-- {
+	for i := len(arguments); i >= 0; i-- {
 		functionName := "CreateInstance"
-		for j, arg := range constructorArguments {
+		for j, arg := range arguments {
 			if j < i {
 				if arg.Optional {
 					functionName += idlNameToGoName(arg.Name)
@@ -291,7 +291,7 @@ func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
 			),
 		)
 		if i > 0 {
-			arg := constructorArguments[i-1]
+			arg := arguments[i-1]
 			argErrorCheck := StatementList(
 				g.Assign(g.Id("err"),
 					g.Raw(jen.Qual("errors", "Join").CallFunc(func(g *jen.Group) {
@@ -564,7 +564,7 @@ func (s StatementListStmt) Generate() *jen.Statement {
 
 type CallInstance struct {
 	Name string
-	Args []string
+	Args []g.Generator
 	Op   ESOperation
 }
 
@@ -599,7 +599,7 @@ func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResul
 	}
 
 	for _, a := range c.Args {
-		args = append(args, jen.Id(a))
+		args = append(args, a.Generate())
 	}
 	list := StatementListStmt{}
 	var evaluation *jen.Statement
@@ -658,59 +658,6 @@ func getInstance(receiver string) JenGenerator {
 	}
 }
 
-func processOptionalArgs(
-	data ESConstructorData,
-	args []ESOperationArgument,
-	opName string,
-	from int,
-	statements *StatementListStmt,
-	argNames []string,
-	op ESOperation,
-	requireContext *bool,
-) {
-	if from >= len(args) {
-		return
-	}
-	arg := args[from]
-	if len(arg.IdlType.IdlType.IType.Types) > 0 {
-		*requireContext = true
-	}
-	innerStatements := &StatementListStmt{}
-	ifArgs := IfStmt{
-		Condition: Stmt{jen.Id("argsLen").Op(">=").Lit(from + 1)},
-		Block:     innerStatements,
-	}
-	innerStatements.Append(GetArgStmt{
-		Name:     arg.Name,
-		Receiver: data.Receiver,
-		ErrName:  "err",
-		Getter:   "GetArg" + arg.Type,
-		Index:    from,
-		Arg:      arg,
-	})
-	innerStatements.Append(GenReturnOnError())
-
-	argNames = append(argNames, arg.Name)
-	opName = opName + idlNameToGoName(arg.Name)
-	statements.Append(ifArgs)
-	processOptionalArgs(
-		data,
-		args,
-		opName,
-		from+1,
-		innerStatements,
-		argNames,
-		op,
-		requireContext,
-	)
-	genResult := CallInstance{
-		Name: opName,
-		Args: argNames,
-		Op:   op,
-	}.GetGenerator(data.Receiver, "instance")
-	innerStatements.Append(genResult.Generator)
-}
-
 type ReadArgumentsResult struct {
 	ArgNames  []g.Generator
 	ErrNames  []g.Generator
@@ -746,12 +693,27 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res ReadArgumentsRes
 		errName := g.Id(fmt.Sprintf("err%d", i))
 		res.ArgNames[i] = argName
 		res.ErrNames[i] = errName
-		converterName := fmt.Sprintf("Decode%s", arg.Type)
-		converter := g.Raw(jen.Id(data.Receiver).Dot(converterName))
+
+		var convertNames []string
+		if arg.Type != "" {
+			convertNames = []string{fmt.Sprintf("Decode%s", idlNameToGoName(arg.Type))}
+		} else {
+			types := arg.IdlType.IdlType.IType.Types
+			convertNames = make([]string, len(types))
+			for i, t := range types {
+				convertNames[i] = fmt.Sprintf("Decode%s", t.IType.TypeName)
+			}
+		}
+
+		converters := make([]jen.Code, 0)
+		converters = append(converters, jen.Id("args"))
+		converters = append(converters, jen.Lit(i))
+		for _, n := range convertNames {
+			converters = append(converters, g.Raw(jen.Id(data.Receiver).Dot(n)).Generate())
+		}
 		statements.Append(g.Assign(
 			g.Raw(jen.List(argName.Generate(), errName.Generate())),
-			Stmt{jen.Id("TryParseArg").Call(jen.Id("args"), jen.Lit(i), converter)}))
-		// Stmt{jen.Id("args").Dot("GetArg").Call(jen.Lit(i), converter)}))
+			Stmt{jen.Id("TryParseArg").Call(converters...)}))
 	}
 	res.Generator = statements
 	return
@@ -765,85 +727,78 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 		errMsg := fmt.Sprintf("Not implemented: %s.%s", data.Name, op.Name)
 		return g.Return(g.Nil, g.Raw(jen.Qual("errors", "New").Call(jen.Lit(errMsg))))
 	}
-	requireContext := new(bool)
+	arguments := op.Arguments
+	readArgsResult := ReadArguments(data, op)
 	statements := &StatementListStmt{}
-	statements.Append(getInstance(data.Receiver))
+	statements.Append(
+		g.AssignMany(
+			g.List(g.Id("instance"), g.Id("err")),
+			g.Raw(jen.Id(data.Receiver).Dot("GetInstance").Call(jen.Id("info"))),
+		),
+	)
 	statements.Append(GenReturnOnError())
+	statements.Append(readArgsResult)
+	for i := len(arguments); i >= 0; i-- {
+		functionName := idlNameToGoName(op.Name)
+		for j, arg := range arguments {
+			if j < i {
+				if arg.Optional {
+					functionName += idlNameToGoName(arg.Name)
+				}
+			}
+		}
+		argnames := readArgsResult.ArgNames[0:i]
+		errNames := readArgsResult.ErrNames[0:i]
+		callInstance := CallInstance{
+			Name: functionName,
+			Args: argnames,
+			Op:   op,
+		}.GetGenerator(data.Receiver, "instance")
+		if callInstance.RequireContext {
+			statements.Prepend(
+				g.Assign(
+					g.Id("ctx"),
+					Stmt{jen.Id(data.Receiver).Dot("host").Dot("MustGetContext").Call(
+						jen.Id("info").Dot("Context").Call(),
+					)},
+				),
+			)
+		}
+		if i > 0 {
+			arg := arguments[i-1]
+			argErrorCheck := StatementList(
+				g.Assign(g.Id("err"),
+					g.Raw(jen.Qual("errors", "Join").CallFunc(func(g *jen.Group) {
+						for _, e := range errNames {
+							g.Add(e.Generate())
+						}
+					})),
+				),
+				GenReturnOnError(),
+			)
 
-	firstOptionalArg := slices.IndexFunc(
-		op.Arguments,
-		func(arg ESOperationArgument) bool {
-			return arg.Optional
-		},
-	)
-	argCount := len(op.Arguments)
-	if firstOptionalArg == -1 {
-		firstOptionalArg = argCount
-	}
-	requiredArgs := op.Arguments[0:firstOptionalArg]
-	if argCount > 0 {
-		statements.AppendJen(jen.Id("args").Op(":=").Id("info").Dot("Args").Call())
-		statements.Append(AssignmentStmt{
-			VarNames:   []string{"argsLen"},
-			Expression: GetSliceLength(Stmt{jen.Id("args")}),
-		})
-	}
-	if len(requiredArgs) > 0 {
-		statements.Append(IfStmt{
-			Condition: Stmt{jen.Id("argsLen").Op("<").Lit(len(requiredArgs))},
-			Block: Stmt{jen.Return(
-				jen.Nil(),
-				jen.Qual("errors", "New").Call(jen.Lit("Too few arguments")),
-			)},
-		})
-	}
-	argNames := make([]string, 0, len(op.Arguments))
-	for i, arg := range requiredArgs {
-		var errName string
-		if len(requiredArgs) > 1 {
-			errName = fmt.Sprintf("err%d", i)
+			statements.Append(StatementList(
+				IfStmt{
+					Condition: g.Raw(jen.Id("args").Dot("noOfReadArguments").Op(">=").Lit(i)),
+					Block: StatementList(
+						argErrorCheck,
+						// construction,
+						callInstance.Generator,
+					),
+				}))
+			if !(arg.Optional) {
+				statements.Append(
+					g.Return(
+						g.Nil,
+						g.Raw(jen.Qual("errors", "New").Call(jen.Lit("Missing arguments"))),
+					),
+				)
+				break
+			}
 		} else {
-			errName = fmt.Sprintf("err")
+			statements.Append(callInstance.Generator)
 		}
-		stmt := GetArgStmt{
-			Name:     arg.Name,
-			ErrName:  errName,
-			Receiver: data.Receiver,
-			Getter:   "GetArg" + idlNameToGoName(arg.Type),
-			Index:    i,
-			Arg:      arg,
-		}
-		statements.Append(stmt)
-		argNames = append(argNames, arg.Name)
 	}
-	statements.Append(genErrorHandler(len(requiredArgs)))
-
-	processOptionalArgs(
-		data,
-		op.Arguments,
-		op.Name,
-		firstOptionalArg,
-		statements,
-		argNames,
-		op,
-		requireContext,
-	)
-
-	genResult := CallInstance{
-		Name: op.Name,
-		Args: argNames,
-		Op:   op,
-	}.GetGenerator(data.Receiver, "instance")
-	if *requireContext || genResult.RequireContext {
-		statements.Prepend(Stmt{
-			jen.Id("ctx").
-				Op(":=").
-				Id(data.Receiver).Dot("host").
-				Dot("MustGetContext").
-				Call(jen.Id("info").Dot("Context").Call()),
-		})
-	}
-	statements.Append(genResult.Generator)
 	return statements
 }
 

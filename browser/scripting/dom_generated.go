@@ -44,17 +44,17 @@ func (u ESDOMTokenList) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 1 {
-		return nil, errors.New("Too few arguments")
+	args := newArgumentHelper(u.host, info)
+	index, err0 := TryParseArg(args, 0, u.DecodeUnsignedLong)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0)
+		if err != nil {
+			return nil, err
+		}
+		result := instance.Item(index)
+		return u.ToNullableDOMString(ctx, result)
 	}
-	index, err := u.GetArgUnsignedLong(args, 0)
-	if err != nil {
-		return nil, err
-	}
-	result := instance.Item(index)
-	return u.ToNullableDOMString(ctx, result)
+	return nil, errors.New("Missing arguments")
 }
 
 func (u ESDOMTokenList) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -63,17 +63,17 @@ func (u ESDOMTokenList) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 1 {
-		return nil, errors.New("Too few arguments")
+	args := newArgumentHelper(u.host, info)
+	token, err0 := TryParseArg(args, 0, u.DecodeDOMString)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0)
+		if err != nil {
+			return nil, err
+		}
+		result := instance.Contains(token)
+		return u.ToBoolean(ctx, result)
 	}
-	token, err := u.GetArgDOMString(args, 0)
-	if err != nil {
-		return nil, err
-	}
-	result := instance.Contains(token)
-	return u.ToBoolean(ctx, result)
+	return nil, errors.New("Missing arguments")
 }
 
 func (u ESDOMTokenList) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -81,17 +81,17 @@ func (u ESDOMTokenList) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 1 {
-		return nil, errors.New("Too few arguments")
-	}
-	tokens, err := u.GetArgDOMString(args, 0)
-	if err != nil {
+	args := newArgumentHelper(u.host, info)
+	tokens, err0 := TryParseArg(args, 0, u.DecodeDOMString)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0)
+		if err != nil {
+			return nil, err
+		}
+		err = instance.Add(tokens)
 		return nil, err
 	}
-	err = instance.Add(tokens)
-	return nil, err
+	return nil, errors.New("Missing arguments")
 }
 
 func (u ESDOMTokenList) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -99,17 +99,17 @@ func (u ESDOMTokenList) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 1 {
-		return nil, errors.New("Too few arguments")
+	args := newArgumentHelper(u.host, info)
+	tokens, err0 := TryParseArg(args, 0, u.DecodeDOMString)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0)
+		if err != nil {
+			return nil, err
+		}
+		instance.Remove(tokens)
+		return nil, nil
 	}
-	tokens, err := u.GetArgDOMString(args, 0)
-	if err != nil {
-		return nil, err
-	}
-	instance.Remove(tokens)
-	return nil, nil
+	return nil, errors.New("Missing arguments")
 }
 
 func (u ESDOMTokenList) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -118,19 +118,18 @@ func (u ESDOMTokenList) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 2 {
-		return nil, errors.New("Too few arguments")
+	args := newArgumentHelper(u.host, info)
+	token, err0 := TryParseArg(args, 0, u.DecodeDOMString)
+	newToken, err1 := TryParseArg(args, 1, u.DecodeDOMString)
+	if args.noOfReadArguments >= 2 {
+		err := errors.Join(err0, err1)
+		if err != nil {
+			return nil, err
+		}
+		result := instance.Replace(token, newToken)
+		return u.ToBoolean(ctx, result)
 	}
-	token, err0 := u.GetArgDOMString(args, 0)
-	newToken, err1 := u.GetArgDOMString(args, 1)
-	err = errors.Join(err0, err1)
-	if err != nil {
-		return nil, err
-	}
-	result := instance.Replace(token, newToken)
-	return u.ToBoolean(ctx, result)
+	return nil, errors.New("Missing arguments")
 }
 
 func (u ESDOMTokenList) Supports(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -162,17 +161,17 @@ func (u ESDOMTokenList) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	if err != nil {
 		return nil, err
 	}
-	args := info.Args()
-	argsLen := len(args)
-	if argsLen < 1 {
-		return nil, errors.New("Too few arguments")
+	args := newArgumentHelper(u.host, info)
+	val, err0 := TryParseArg(args, 0, u.DecodeDOMString)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0)
+		if err != nil {
+			return nil, err
+		}
+		instance.SetValue(val)
+		return nil, nil
 	}
-	val, err := u.GetArgDOMString(args, 0)
-	if err != nil {
-		return nil, err
-	}
-	instance.SetValue(val)
-	return nil, nil
+	return nil, errors.New("Missing arguments")
 }
 func CreateHTMLTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
