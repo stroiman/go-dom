@@ -16,7 +16,7 @@ var _ = Describe("V8 NamedNodeMap", func() {
 	})
 
 	It("Should allow iterating attributes", func() {
-		ctx.Window().LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`)
+		ctx := NewTestContext(LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`))
 		Expect(ctx.RunTestScript(`
 const elm = document.getElementById("foo");
 const attributes = elm.attributes;
@@ -32,7 +32,7 @@ for (let i = 0; i < attributes.length; i++) {
 	})
 
 	It("Should allow indexing by number", func() {
-		ctx.Window().LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`)
+		ctx := NewTestContext(LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`))
 		Expect(ctx.RunTestScript(`
 const elm = document.getElementById("foo");
 const attributes = elm.attributes;
@@ -43,7 +43,7 @@ attributes[2] instanceof Attr
 	})
 
 	It("Should return `null` when indexing outside the elements", func() {
-		ctx.Window().LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`)
+		ctx := NewTestContext(LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`))
 		Expect(ctx.RunTestScript(`
 const elm = document.getElementById("foo");
 const attributes = elm.attributes;
@@ -52,7 +52,7 @@ attributes[3]
 	})
 
 	It("Should have nodeType 2 on attributes", func() {
-		ctx.Window().LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`)
+		ctx := NewTestContext(LoadHTML(`<body><div id="foo" class="bar" hidden></div></body>`))
 		Expect(ctx.RunTestScript(`
 const elm = document.getElementById("foo");
 const attribute = elm.attributes.item(0);
@@ -62,12 +62,10 @@ attribute.nodeType
 
 	Describe("Retrieve bad index", func() {
 		It("Should return undefined when using attributes.[index]", func() {
-			ctx.Window().LoadHTML(`<body></body>`)
 			Expect(ctx.RunTestScript("document.body.attributes[42] === undefined")).To(BeTrue())
 		})
 
 		It("Should return null when using attributes.item(index)", func() {
-			ctx.Window().LoadHTML(`<body></body>`)
 			Expect(ctx.RunTestScript("document.body.attributes.item(42) === null")).To(BeTrue())
 		})
 	})

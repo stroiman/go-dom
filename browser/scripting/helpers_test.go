@@ -47,7 +47,9 @@ var IgnoreUnhandledErrors CreateHook = func(ctx *TestScriptContext) {
 // installs the proper Ginkgo cleanup handler.
 func NewTestContext(hooks ...CreateHook) TestScriptContext {
 	ctx := TestScriptContext{}
-	window := dom.NewWindow()
+	window := dom.NewWindow(dom.WindowOptions{
+		// ScriptEngineFactory: (*Wrapper)(host),
+	})
 	ctx.ScriptContext = host.NewContext(window)
 	DeferCleanup(ctx.Dispose)
 	for _, hook := range hooks {
@@ -81,6 +83,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 		for _, hook := range hooks {
 			hook(&ctx)
 		}
+		// ctx.ScriptContext = window.
 	})
 
 	AfterEach(func() {

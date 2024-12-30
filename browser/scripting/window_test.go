@@ -1,8 +1,12 @@
 package scripting_test
 
 import (
+	"strings"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/scripting"
 )
 
 var _ = Describe("Window", func() {
@@ -37,8 +41,8 @@ var _ = Describe("Window", func() {
 	Describe("Window Events", func() {
 		Describe("DOMContentLoaded", func() {
 			It("Should be fired _after_ script has executed", func() {
-				ctx.Window().SetScriptRunner(ctx.ScriptContext)
-				Expect(ctx.Window().LoadHTML(`<body><script>
+				win, err := dom.NewWindowReader(strings.NewReader(
+					`<body><script>
   scripts = []
   function listener1() {
     scripts.push("DOMContentLoaded")
@@ -48,8 +52,11 @@ var _ = Describe("Window", func() {
   }
   window.document.addEventListener("DOMContentLoaded", listener1);
   window.document.addEventListener("load", listener2);
-</script></body>`)).To(Succeed())
-				Expect(ctx.RunTestScript("scripts.join(',')")).To(Equal("DOMContentLoaded,load"))
+</script></body>`), dom.WindowOptions{ScriptEngineFactory: (*scripting.Wrapper)(host)},
+				)
+				Expect(err).ToNot(HaveOccurred())
+				ctx := win.GetScriptEngine()
+				Expect(ctx.Eval("scripts.join(',')")).To(Equal("DOMContentLoaded,load"))
 			})
 		})
 	})

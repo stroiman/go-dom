@@ -76,7 +76,7 @@ var _ = Describe("V8 Document", func() {
 		})
 
 		It("Should have a documentElement when HTML is loaded", func() {
-			ctx.Window().LoadHTML(` <html> <body> </body> </html>`)
+			ctx := NewTestContext(LoadHTML(` <html> <body> </body> </html>`))
 			Expect(
 				ctx.RunTestScript(
 					"Object.getPrototypeOf(document.documentElement).constructor.name",
@@ -85,7 +85,7 @@ var _ = Describe("V8 Document", func() {
 		})
 
 		It("Should have a documentElement instance of HTMLElement", func() {
-			ctx.Window().LoadHTML(` <html> <body> </body> </html>`)
+			ctx := NewTestContext(LoadHTML(` <html> <body> </body> </html>`))
 			Expect(
 				ctx.RunTestScript("document.documentElement instanceof HTMLElement"),
 			).To(BeTrue())
@@ -104,21 +104,22 @@ var _ = Describe("V8 Document", func() {
 
 	Describe("body and Body", func() {
 		It("document.body Should return a <body>", func() {
-			ctx.Window().LoadHTML(`<html><body></body></html>`)
+			ctx := NewTestContext(LoadHTML(`<html><body></body></html>`))
 			Expect(ctx.RunTestScript("document.body.tagName")).To(Equal("BODY"))
 		})
 		It("document.head Should return a <head>", func() {
-			ctx.Window().LoadHTML(`<html><body></body></html>`)
+			ctx := NewTestContext(LoadHTML(`<html><body></body></html>`))
 			Expect(ctx.RunTestScript("document.head.tagName")).To(Equal("HEAD"))
 		})
 	})
 
 	Describe("querySelector", func() {
 		It("can find the right element", func() {
-			Expect(
-				ctx.Window().
-					LoadHTML(`<body><div>0</div><div data-key="1">1</div><div data-key="2">2</div><body>`),
-			).To(Succeed())
+			ctx := NewTestContext(
+				LoadHTML(
+					`<body><div>0</div><div data-key="1">1</div><div data-key="2">2</div><body>`,
+				),
+			)
 			Expect(
 				ctx.RunTestScript("document.querySelector('[data-key]').outerHTML"),
 			).To(Equal(`<div data-key="1">1</div>`))
@@ -133,10 +134,11 @@ var _ = Describe("V8 Document", func() {
 
 	Describe("querySelectorAll", func() {
 		It("can find the right element", func() {
-			Expect(
-				ctx.Window().
-					LoadHTML(`<body><div>0</div><div data-key="1">1</div><div data-key="2">2</div><body>`),
-			).To(Succeed())
+			ctx := NewTestContext(
+				LoadHTML(
+					`<body><div>0</div><div data-key="1">1</div><div data-key="2">2</div><body>`,
+				),
+			)
 			Expect(
 				ctx.RunTestScript(
 					"Array.from(document.querySelectorAll('[data-key]')).map(x => x.outerHTML).join(',')",

@@ -2,6 +2,7 @@ package dom_test
 
 import (
 	"errors"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -75,8 +76,11 @@ var _ = Describe("EventTarget", func() {
 		)
 
 		BeforeEach(func() {
-			window = NewWindow()
-			Expect(window.LoadHTML(`<body><div id="target"></div></body>`)).To(Succeed())
+			var err error
+			window, err = NewWindowReader(
+				strings.NewReader(`<body><div id="target"></div></body>`),
+			)
+			Expect(err).ToNot(HaveOccurred())
 			target = window.Document().GetElementById("target")
 		})
 

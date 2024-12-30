@@ -1,8 +1,12 @@
 package scripting_test
 
 import (
+	"strings"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/scripting"
 )
 
 var _ = Describe("ScriptHost", func() {
@@ -53,18 +57,16 @@ var _ = Describe("ScriptHost", func() {
 
 		Describe("Load document with script", func() {
 			It("Runs the script when connected to DOM", func() {
-				window := ctx.Window()
-				Expect(window.LoadHTML(`
-<html>
-  <body>
+				win, err := dom.NewWindowReader(strings.NewReader(`<html><body>
     <script>window.sut = document.documentElement.outerHTML</script>
     <div>I should not be in the output</div>
-  </body>
-</html>
-`,
-				)).To(Succeed())
+  </body></html>
+`), dom.WindowOptions{ScriptEngineFactory: (*scripting.Wrapper)(host)},
+				)
+				Expect(err).ToNot(HaveOccurred())
+				ctx := win.GetScriptEngine()
 				Expect(
-					ctx.RunTestScript("window.sut"),
+					ctx.Eval("window.sut"),
 				).To(Equal(`<html><head></head><body>
     <script>window.sut = document.documentElement.outerHTML</script></body></html>`))
 			})
