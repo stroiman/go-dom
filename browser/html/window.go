@@ -7,6 +7,7 @@ import (
 	netURL "net/url"
 	"strings"
 
+	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
 )
 
@@ -36,8 +37,8 @@ type Window interface {
 	GetScriptEngine() ScriptEngine
 	Location() Location
 	NewXmlHttpRequest() XmlHttpRequest
-	DOMParser() DOMParser
 	HTTPClient() http.Client
+	ParseFragment(ownerDocument Document, reader io.Reader) (dom.DocumentFragment, error)
 }
 
 type window struct {
@@ -107,6 +108,12 @@ func (w *window) initScriptEngine() {
 	}
 }
 
+func (w *window) ParseFragment(
+	ownerDocument Document,
+	reader io.Reader,
+) (dom.DocumentFragment, error) {
+	return w.domParser.ParseFragment(ownerDocument, reader)
+}
 func NewWindowReader(reader io.Reader, windowOptions ...WindowOption) (Window, error) {
 	window := newWindow(windowOptions...)
 	err := window.parseReader(reader)
@@ -125,7 +132,6 @@ func (w *window) parseReader(reader io.Reader) error {
 }
 
 func (w *window) HTTPClient() http.Client { return w.httpClient }
-func (w *window) DOMParser() DOMParser    { return w.domParser }
 
 type WindowOptions struct {
 	ScriptEngineFactory

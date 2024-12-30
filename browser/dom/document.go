@@ -15,14 +15,10 @@ const (
 	DocumentEventLoad             DocumentEvent = "load"
 )
 
-type DOMParser interface {
-	ParseFragment(ownerDocument Document, reader io.Reader) (DocumentFragment, error)
-}
-
 type DocumentParentWindow interface {
 	EventTarget
 	Location() Location
-	DOMParser() DOMParser
+	ParseFragment(ownerDocument Document, reader io.Reader) (DocumentFragment, error)
 }
 
 type Document interface {
@@ -34,7 +30,7 @@ type Document interface {
 	DocumentElement() Element
 	Location() Location
 	// unexported
-	domParser() DOMParser
+	parseFragment(reader io.Reader) (DocumentFragment, error)
 }
 
 type elementConstructor func(doc *document) Element
@@ -54,7 +50,9 @@ func NewDocument(window DocumentParentWindow) Document {
 	return result
 }
 
-func (d *document) domParser() DOMParser { return d.ownerWindow.DOMParser() }
+func (d *document) parseFragment(reader io.Reader) (DocumentFragment, error) {
+	return d.ownerWindow.ParseFragment(d, reader)
+}
 
 func (d *document) Body() Element {
 	root := d.DocumentElement()

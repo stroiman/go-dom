@@ -161,8 +161,7 @@ func (n *element) InsertAdjacentHTML(position string, text string) error {
 	default:
 		return errors.New("Invalid position")
 	}
-	p := n.ownerDocument.domParser()
-	fragment, err := p.ParseFragment(n.ownerDocument, strings.NewReader(text))
+	fragment, err := n.ownerDocument.parseFragment(strings.NewReader(text))
 	if err == nil {
 		parent.InsertBefore(fragment, reference)
 	}

@@ -13,31 +13,6 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-// type DOMParser interface {
-// 	// Parses a HTML or XML from an [io.Reader] instance. The parsed nodes will
-// 	// have reference the window, e.g. letting events bubble to the window itself.
-// 	// The document pointer will be replaced by the created document.
-// 	//
-// 	// The document is updated using a pointer rather than returned as a value, as
-// 	// parseing process can e.g. execute script tags that require the document to
-// 	// be set on the window _before_ the script is executed.
-// 	ParseReader(window Window, document *Document, reader io.Reader) error
-// //	ParseFragment(ownerDocument Document, reader io.Reader) (DocumentFragment, error)
-// }
-
-// type DOMParser interface {
-// 	// Parses a HTML or XML from an [io.Reader] instance. The parsed nodes will
-// 	// have reference the window, e.g. letting events bubble to the window itself.
-// 	// The document pointer will be replaced by the created document.
-// 	//
-// 	// The document is updated using a pointer rather than returned as a value, as
-// 	// parseing process can e.g. execute script tags that require the document to
-// 	// be set on the window _before_ the script is executed.
-// 	ParseReader(window Window, document *Document, reader io.Reader) error
-//	ParseFragment(ownerDocument Document, reader io.Reader) (DocumentFragment, error)
-// }
-
-// TODO: Remove
 type domParser struct{}
 
 // Parses a HTML or XML from an [io.Reader] instance. The parsed nodes will
