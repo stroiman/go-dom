@@ -35,31 +35,30 @@ type Node interface {
 	RemoveChild(node Node) error
 	NextSibling() Node
 	FirstChild() Node
+	SetSelf(node Node)
 	// unexported
 	createHtmlNode() *html.Node
-	insertBefore(newNode Node, referenceNode Node) (Node, error)
 	setParent(node Node)
 	nodes() []Node
 }
 
 type node struct {
 	eventTarget
+	self       Node
 	childNodes NodeList
 	parent     Node
 }
 
 func newNode() node {
-	return node{newEventTarget(), NewNodeList(), nil}
+	return node{newEventTarget(), nil, NewNodeList(), nil}
 }
 
-type NodeHelper struct{ Node }
-
-func (n NodeHelper) AppendChild(child Node) Node {
-	n.InsertBefore(child, nil)
+func (n *node) AppendChild(child Node) Node {
+	n.self.InsertBefore(child, nil)
 	return child
 }
 
-func (n NodeHelper) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
+func (n *node) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
 	if fragment, ok := newChild.(DocumentFragment); ok {
 		for fragment.ChildNodes().Length() > 0 {
 			n.InsertBefore(fragment.ChildNodes().Item(0), referenceNode)
@@ -68,7 +67,7 @@ func (n NodeHelper) InsertBefore(newChild Node, referenceNode Node) (Node, error
 	}
 	result, err := n.insertBefore(newChild, referenceNode)
 	if err == nil {
-		newChild.setParent(n.Node)
+		newChild.setParent(n.self)
 	}
 	return result, err
 }
@@ -191,4 +190,8 @@ func (n *node) NextSibling() Node {
 
 func (n *node) nodes() []Node {
 	return n.childNodes.All()
+}
+
+func (n *node) SetSelf(node Node) {
+	n.self = node
 }

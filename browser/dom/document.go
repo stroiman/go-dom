@@ -35,6 +35,7 @@ func NewDocument(window Window) Document {
 	// window they shouldn't?
 	// What about disconnected documents, e.g. `new Document()` in the browser?
 	result.parentTarget = window
+	result.SetSelf(result)
 	return result
 }
 
@@ -78,16 +79,8 @@ func (d *document) CreateDocumentFragment() DocumentFragment {
 }
 
 func (d *document) Append(element Element) Element {
-	NodeHelper{d}.AppendChild(element)
+	d.AppendChild(element)
 	return element
-}
-
-func (d *document) AppendChild(newChild Node) Node {
-	return NodeHelper{d}.AppendChild(newChild)
-}
-
-func (d *document) InsertBefore(newChild Node, reference Node) (Node, error) {
-	return NodeHelper{d}.InsertBefore(newChild, reference)
 }
 
 func (d *document) DocumentElement() Element {

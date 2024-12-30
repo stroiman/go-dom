@@ -12,20 +12,14 @@ type documentFragment struct {
 }
 
 func NewDocumentFragment(ownerDocument Document) DocumentFragment {
-	return &documentFragment{newRootNode(), ownerDocument}
+	result := &documentFragment{newRootNode(), ownerDocument}
+	result.SetSelf(result)
+	return result
 }
 
 func (d *documentFragment) Append(element Element) Element {
-	NodeHelper{d}.AppendChild(element)
+	d.AppendChild(element)
 	return element
-}
-
-func (d *documentFragment) AppendChild(newChild Node) Node {
-	return NodeHelper{d}.AppendChild(newChild)
-}
-
-func (d *documentFragment) InsertBefore(newChild Node, reference Node) (Node, error) {
-	return NodeHelper{d}.InsertBefore(newChild, reference)
 }
 
 func (d *documentFragment) GetElementById(id string) Element {

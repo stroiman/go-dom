@@ -51,7 +51,9 @@ type element struct {
 
 func NewElement(tagName string, ownerDocument Document) Element {
 	// TODO: handle namespace
-	return &element{newNode(), tagName, "", Attributes(nil), ownerDocument}
+	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument}
+	result.SetSelf(result)
+	return result
 }
 
 func (e *element) NodeName() string {
@@ -63,20 +65,12 @@ func (e *element) TagName() string {
 }
 
 func (parent *element) Append(child Element) Element {
-	NodeHelper{parent}.AppendChild(child)
+	parent.AppendChild(child)
 	return child
 }
 
 func (e *element) ClassList() DOMTokenList {
 	return NewClassList(e)
-}
-
-func (parent *element) AppendChild(child Node) Node {
-	return NodeHelper{parent}.AppendChild(child)
-}
-
-func (e *element) InsertBefore(newChild Node, reference Node) (Node, error) {
-	return NodeHelper{e}.InsertBefore(newChild, reference)
 }
 
 func (e *element) OuterHTML() string {

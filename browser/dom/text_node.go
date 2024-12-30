@@ -13,15 +13,9 @@ type textNode struct {
 }
 
 func NewTextNode(node *html.Node, text string) Node {
-	return &textNode{newNode(), text}
-}
-
-func (n *textNode) AppendChild(newChild Node) Node {
-	return NodeHelper{n}.AppendChild(newChild)
-}
-
-func (n *textNode) InsertBefore(newChild Node, reference Node) (Node, error) {
-	return NodeHelper{n}.InsertBefore(newChild, reference)
+	result := &textNode{newNode(), text}
+	result.SetSelf(result)
+	return result
 }
 
 func (n *textNode) Text() string { return n.text }

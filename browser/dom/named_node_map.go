@@ -48,7 +48,9 @@ func (m *namedNodeMap) Item(index int) Attr {
 		return nil
 	}
 
-	return &attr{newNode(), m.ownerElement, attributes[index]}
+	result := &attr{newNode(), m.ownerElement, attributes[index]}
+	result.SetSelf(result)
+	return result
 }
 
 func (a *attr) LocalName() string     { panic("TODO") }

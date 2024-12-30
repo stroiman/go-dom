@@ -151,7 +151,7 @@ func iterate(w Window, d Document, dest Node, source *html.Node) {
 		case html.ElementNode:
 			createElementFromNode(w, d, dest, child)
 		case html.TextNode:
-			NodeHelper{dest}.AppendChild(NewTextNode(cloneNode(child), child.Data))
+			dest.AppendChild(NewTextNode(cloneNode(child), child.Data))
 		default:
 			panic(fmt.Sprintf("Node not yet supported: %v", child))
 		}

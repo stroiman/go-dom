@@ -11,5 +11,7 @@ type htmlDocument struct {
 }
 
 func NewHTMLDocument(window dom.Window) HTMLDocument {
-	return &htmlDocument{dom.NewDocument(window)}
+	result := &htmlDocument{dom.NewDocument(window)}
+	result.SetSelf(result)
+	return result
 }
