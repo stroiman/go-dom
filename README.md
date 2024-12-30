@@ -1,10 +1,5 @@
 # go-dom - Headless browser for Go
 
-> [!WARNING] 
-> 
-> This project is facing a restructure, so be aware that you need to update
-> dependencies, if you depend on this.
-
 > [!NOTE] 
 >
 > This is still in development, and has not reached a level of usability.
@@ -21,6 +16,57 @@
 the MIT license, but as this will most likely depend on v8go, I need to verify
 that the license is compatible).
 
+## Code structure
+
+This is still in early development, and the structure may still change. But I
+believe I am approaching a sensible code structure.
+
+The main library is in a `browser` subfolder. This primarily to separate it from
+the code generator which is used to automatically generate parts of the code
+based on IDL specs. The browser and code generator bases do not have any
+inter-dependencies, and they have different sets of unrelated external
+dependencies.
+
+```sh
+browser/
+  dom/ # Core DOM implementation
+  html/ # Window, HTMLDocument, HTMLElement, 
+  # ...
+  scripting/ # v8 engine, and bindings
+  browser.go # Main module
+code-gen/
+  webref/ # Git submodule -> https://github.com/w3c/webref
+```
+
+The submodules under `browser/` reflect the different standards, and the naming
+reflects the corresponding idl files. E.g., `browser/dom/` will have types
+corresponding to the types specified in `code-gen/webref/ed/idl/dom.idl`.
+`browser/html/` corresponds to `html.idl`, etc.
+
+### Modularisation
+
+Although the code isn't modularised yet, it is an idea that you should be able
+to include the modules relevant to your app. E.g., if your app deals with
+location services, you can add a module implementing location services.
+
+This helps keep the size of the dependencies down for client projects; keeping
+build times down for the TDD loop.
+
+### Building the code generator.
+
+To build the code generator, you need to build a _curated_ set of files first.
+You need [node.js](https://nodejs.org) installed.
+
+```sh
+$ cd webref
+$ npm install # Or your favourite node package manager
+$ npm run curate
+```
+
+This build a set of files in the `curated/` subfolder.
+
+## Project background
+
 While the SPA[^1] dominates the web today, some applications still render
 server-side HTML, and HTMX is gaining in popularity. Go has some popularity as a
 back-end language for HTMX.
@@ -28,7 +74,7 @@ back-end language for HTMX.
 In Go, writing tests for the HTTP handler is easy if all you need to do is
 verify the response.
 
-But if you need to test at a higher lever, for example verify how any JavaScript
+But if you need to test at a higher level, for example verify how any JavaScript
 code effects the page; you would need to use browser automation, like
 [Selenium](https://www.selenium.dev/), and this introduces a significant 
 overhead; not only from out-of-process communication with the browser, but also
@@ -69,35 +115,20 @@ isolated test, e.g. mocking out part of the behaviour;
 
 ## Project status
 
-The current state of the project is, you can start a "browser" connected to a Go
-`http.Handler` (the intention is to use the root handler, that you normally
-expose on a TCP port; not a route, but feel free to do whatever you want).
+The browser is currently capable of loading an simple HTMX app; which can fetch
+new contents and swap as a reaction to simple events, such as click.
 
-The browser can open an HTML file, execute included scripts (remote scripts are
-downloaded). The DOM is exposed as native Go objects, allowing the test code to
-inspect or modify them, and JavaScript can also be executed from Go code.
+The test file [htmx_test.go](./browser/scripting/htmx_test.go) verifies that
+content is updated. The application being tested is [found
+here](./browser/internal/test/README.md).
 
-Only a very minimal subset of the DOM specification is implemented.
-
-
-- HTML parsing is done in 2 steps
-  - Step 1 parsing of HTML using [x/net/html](https://pkg.go.dev/golang.org/x/net/html)
-      - Using `x/net/html` gives HTML rendering (i.e., support for `outerHTML`) out
-        of the box.
-      - Libraries exist implementing XPath on top of this.
-  - 2nd pass into my own structure
-    - `x/net/html` does not have the interface that a Browser wants, so I wrap
-    this to provide the browser DOM both to JavaScript and Go.
-    - The library doesn't support the insertion steps, e.g., when a `<script>` is
-      connected to the DOM, it should be executed (simplified).
-- Embedding of v8 engine.[^4]
-  - Expose the native Go objects to JavaScript
+Client-side script is executed using the v8 engine.[^4]
 
 ### Memory Leaks
 
-The current implementation is leaking memory for the scope of a "Browser". I.e.,
-all DOM nodes created and deleted for the lifetime of the browser will stay in
-memory until the browser is ready for garbage collection.
+The current implementation is leaking memory for the scope of a browser
+`Window`. I.e., all DOM nodes created and deleted for the lifetime of the
+window will stay in memory until the window is actively disposed.
 
 The problem here is that this is a marriage between two garbage collected
 systems, and what is conceptually _one object_ is split into two, a Go object
@@ -114,74 +145,34 @@ Because of that, and because the browser is only intended to be kept alive for
 the scope of a single short lived test, I have postponed dealing with memory
 management.
 
-### Demonstration
+### Next up
 
-An early example showing HTML being loaded with a script. Notice:
+The following two areas are the next focus of attention
 
-- The HTML parser creates a `<head>`, even if missing in the source.
-- Whitespace is not inserted in the DOM outside the body (line break and
-  indentation is only processed in the body.
-- The script is executed when connected to the DOM; which is why it doesn't see
-  the `<div>` element after, as well as whitespace.
-
-```go
-It("Runs the script when connected to DOM", func() {
-    window := ctx.Window()
-    window.SetScriptRunner(ctx)
-    window.LoadHTML(`
-<html>
-  <body>
-    <script>window.sut = document.documentElement.outerHTML</script>
-    <div>I should not be in the output</div>
-  </body>
-</html>
-`,
-    )
-    Expect(
-        ctx.RunTestScript("window.sut"),
-    ).To(Equal(`<html><head></head><body>
-    <script>window.sut = document.documentElement.outerHTML</script></body></html>`))
-})
-```
-
-### Next up - HTMX
-
-The next milestone being worked towards is to have the simplest HTMX application
-running. One that has a button and a counter displayed; which increments
-whenever the user clicks the button.
-
-This drives the need for (not necessarily a complete list, just the parts I know
-that HTMX _does_ depend on)
-
-- `location` API - at least in a read-only version.
-- `XMLHttpRequest` - work is underway.
-- `XPathEvaluator` - I have that in a branch using a polyfill. BUT the necessary
-  DOM methods lack implementation.
-- `setTimeout`, `setInterval`, and friends.
-  - This did surprise me a bit that it's not part of v8. But they're not part of
-    ECMAScript specification (surprise to me). Fortunately Go has excellent
-    concurrency and synchronization mechanisms.
-  - I'm not sure if they are actually necessary for this case, but they
-    represent an uncertainty I need to cover quickly.
-
-Following the simple case, the plan is to have more complex cases, e.g. form
-handling with redirection.
-
-... and eventually websocket and server event support.
+- Navigation. Some actions, e.g. clicking a link, or submitting a normal
+  (non-JS) form should result in a new HTTP reqest, and the response loaded in a
+  new script context (global state reset).
+- Form handling. Add code supporting typeing form values, and submitting the
+  form, building a request body.
+- Replace early hand-written JS wrappers with auto-generated code, helping drive
+  a more complete implementation.
 
 ### Future goals
 
 There is much to do, which includes (but this is not a full list):
 
 - Support all DOM elements, including SVG elements and other namespaces.
-- Handle bad HTML gracefully (browsers don't generate an error if an end tag is
-  missing or misplaced)
+- Support web-sockets and server events.
 - Implement all standard JavaScript classes that a browser should support; but
   not provided by the V8 engine.
-  - JavaScript polyfills would be a good starting point, where some exist.
-  - Conversion to native go implementations would be prioritized on usage, e.g.
-    [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) 
-    would be high in the list of priorities.
+  - JavaScript polyfills would be a good starting point. This is used for xpath
+    evaluator.
+      - Conversion to native go implementations would be prioritized on usage, e.g.
+        [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) 
+        would be high in the list of priorities.
+  - A proper event loop with time travel. `setTimeout` and `setImmediate` are
+    not implemented by v8. When testing code that has to wait, it is very useful
+    to be able to fast forward simulated time.
 - Implement default browser behaviour for user interaction, e.g. pressing 
   <key>enter</key> when an input field has focus should submit the form.
 
@@ -246,7 +237,7 @@ would welcome contributions. Particularly if:
 
 ## Out of scope.
 
-## Full Spec Compliance
+### Full Spec Compliance
 
 > A goal is not always meant to be reached, it often serves simply as something to aim at.
 > 
@@ -255,8 +246,8 @@ would welcome contributions. Particularly if:
 While it is a goal to reach whatwg spec compliance, the primary goal is to have
 a useful tool for testing modern web applications. 
 
-Some specs don't really have an effect modern web applications. For example, you
-generally wouldn't write an application that depends on quirks mode.
+Some specs don't really have any usage in modern web applications. For example,
+you generally wouldn't write an application that depends on quirks mode.
 
 Another example is `document.write`. I've yet to work on any application that
 depends on this. However, implementing support for this feature require a
