@@ -15,3 +15,13 @@ func NewHttpClientFromHandler(handler netHTTP.Handler) netHTTP.Client {
 		Jar:       cookiejar,
 	}
 }
+
+func NewHttpClient() netHTTP.Client {
+	cookiejar, err := cookiejar.New(nil)
+	if err != nil {
+		panic(err)
+	}
+	return netHTTP.Client{
+		Jar: cookiejar,
+	}
+}

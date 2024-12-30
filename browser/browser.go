@@ -34,6 +34,14 @@ func (b *Browser) Open(location string) (window Window, err error) {
 	return
 }
 
+func NewBrowser() *Browser {
+	host := scripting.NewScriptHost()
+	return &Browser{
+		ScriptEngineFactory: (*scripting.Wrapper)(host),
+		Client:              NewHttpClient(),
+	}
+}
+
 func NewBrowserFromHandler(handler http.Handler) *Browser {
 	host := scripting.NewScriptHost()
 	return &Browser{
