@@ -42,6 +42,14 @@ func AssignMany(ids []Generator, expression Generator) Generator {
 	return Raw(jen.List(gs...).Op(":=").Add(expression.Generate()))
 }
 
+func ReAssignMany(ids []Generator, expression Generator) Generator {
+	var gs []jen.Code
+	for _, id := range ids {
+		gs = append(gs, id.Generate())
+	}
+	return Raw(jen.List(gs...).Op("=").Add(expression.Generate()))
+}
+
 type Type struct {
 	RawStatement
 }
@@ -55,3 +63,27 @@ func List(generators ...Generator) []Generator { return generators }
 var Noop = GeneratorFunc(func() *jen.Statement { return nil })
 var Nil Generator = Raw(jen.Nil())
 var Line Generator = Raw(jen.Line())
+
+func Lit(value any) Generator { return Raw(jen.Lit(value)) }
+
+type Value struct{ Generator }
+
+func NewValue(name string) Value {
+	return Value{Id(name)}
+}
+
+func (v Value) Field(name string) Value {
+	return Value{Raw(v.Generate().Dot(name))}
+}
+
+func (v Value) Method(name string) Value {
+	return Value{Raw(v.Generate().Dot(name))}
+}
+
+func (m Value) Call(args ...Generator) Value {
+	return Value{Raw(m.Generate().CallFunc(func(g *jen.Group) {
+		for _, arg := range args {
+			g.Add(arg.Generate())
+		}
+	}))}
+}

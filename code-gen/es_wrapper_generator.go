@@ -218,34 +218,6 @@ func WriteImports(b *builder, imports Imports) {
 	}
 }
 
-type st = *jen.Statement
-
-type JSConstructor struct {
-	argHost          st
-	argInfo          st
-	getThis          st
-	varInstance      st
-	varIso           st
-	varScriptContext st
-}
-
-func CreateJSConstructor() JSConstructor {
-	argInfo := jen.Id("info")
-	argHost := jen.Id("host")
-	getThis := argInfo.Clone().Dot("This").Call()
-	varInstance := jen.Id("instance")
-	varIso := jen.Id("iso")
-	varScriptContext := jen.Id("ctx")
-	return JSConstructor{
-		argHost,
-		argInfo,
-		getThis,
-		varInstance,
-		varIso,
-		varScriptContext,
-	}
-}
-
 func IllegalConstructor(data ESConstructorData) g.Generator {
 	return g.Return(g.Nil,
 		g.Raw(jen.Qual(v8, "NewTypeError").Call(
@@ -254,22 +226,17 @@ func IllegalConstructor(data ESConstructorData) g.Generator {
 	)
 }
 
-func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
-	if data.Constructor == nil {
-		return IllegalConstructor(data)
-	}
-	var readArgsResult ReadArgumentsResult
-	var arguments []ESOperationArgument
-	readArgsResult = ReadArguments(data, *data.Constructor)
-	arguments = data.Constructor.Arguments
-	statements := StatementList(readArgsResult)
-	statements.Append(
-		g.Assign(g.Id("ctx"), Stmt{jen.Id(data.Receiver).Dot("host").Dot("MustGetContext").Call(
-			jen.Id("info").Dot("Context").Call(),
-		)}),
-	)
+func WrapperCalls(
+	op ESOperation,
+	baseFunctionName string,
+	argNames []g.Generator,
+	errorsNames []g.Generator,
+	createCallInstance func(string, []g.Generator, ESOperation) g.Generator,
+) g.Generator {
+	arguments := op.Arguments
+	statements := StatementList()
 	for i := len(arguments); i >= 0; i-- {
-		functionName := "CreateInstance"
+		functionName := baseFunctionName
 		for j, arg := range arguments {
 			if j < i {
 				if arg.Optional {
@@ -277,19 +244,9 @@ func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
 				}
 			}
 		}
-		argnames := readArgsResult.ArgNames[0:i]
-		errNames := readArgsResult.ErrNames[0:i]
-		construction := StatementList(
-			g.Return(
-				g.Raw(jen.Id(data.Receiver).Dot(functionName).CallFunc(func(grp *jen.Group) {
-					grp.Add(jen.Id("ctx"))
-					grp.Add(jen.Id("info").Dot("This").Call())
-					for _, name := range argnames {
-						grp.Add(name.Generate())
-					}
-				})),
-			),
-		)
+		argnames := argNames[0:i]
+		errNames := errorsNames[0:i]
+		callInstance := createCallInstance(functionName, argnames, op)
 		if i > 0 {
 			arg := arguments[i-1]
 			argErrorCheck := StatementList(
@@ -307,7 +264,7 @@ func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
 					Condition: g.Raw(jen.Id("args").Dot("noOfReadArguments").Op(">=").Lit(i)),
 					Block: StatementList(
 						argErrorCheck,
-						construction,
+						callInstance,
 					),
 				}))
 			if !(arg.Optional) {
@@ -320,9 +277,49 @@ func (c JSConstructor) JSConstructorImpl(data ESConstructorData) g.Generator {
 				break
 			}
 		} else {
-			statements.Append(construction)
+			statements.Append(callInstance)
 		}
 	}
+	return statements
+}
+
+func RequireContext(receiver string) g.Generator {
+	return g.Assign(g.Id("ctx"), Stmt{jen.Id(receiver).Dot("host").Dot("MustGetContext").Call(
+		jen.Id("info").Dot("Context").Call(),
+	)})
+}
+
+func JSConstructorImpl(data ESConstructorData) g.Generator {
+	if data.Constructor == nil {
+		return IllegalConstructor(data)
+	}
+	var readArgsResult ReadArgumentsResult
+	readArgsResult = ReadArguments(data, *data.Constructor)
+	statements := StatementList(readArgsResult)
+	statements.Append(RequireContext(data.Receiver))
+	baseFunctionName := "CreateInstance"
+	var CreateCall = func(functionName string, argnames []g.Generator, op ESOperation) g.Generator {
+		return StatementList(
+			g.Return(
+				g.Raw(jen.Id(data.Receiver).Dot(functionName).CallFunc(func(grp *jen.Group) {
+					grp.Add(jen.Id("ctx"))
+					grp.Add(jen.Id("info").Dot("This").Call())
+					for _, name := range argnames {
+						grp.Add(name.Generate())
+					}
+				})),
+			),
+		)
+	}
+	statements.Append(
+		WrapperCalls(
+			*data.Constructor,
+			baseFunctionName,
+			readArgsResult.ArgNames,
+			readArgsResult.ErrNames,
+			CreateCall,
+		),
+	)
 	return statements
 }
 
@@ -333,53 +330,46 @@ func CreateInstance(typeName string, params ...jen.Code) JenGenerator {
 	}
 }
 
-func Id(id string) JenGenerator { return Stmt{jen.Id(id).Clone()} }
-
-func (c JSConstructor) Run(f *jen.File, data ESConstructorData) {
+func Run(f *jen.File, data ESConstructorData) {
 	gen := StatementList(
-		CreateConstructor(c, data),
-		CreateConstructorWrapper(c, data),
-		CreateWrapperMethods(c, data),
+		CreateConstructor(data),
+		CreateConstructorWrapper(data),
+		CreateWrapperMethods(data),
 	)
 	f.Add(gen.Generate())
 }
 
-func CreateConstructor(c JSConstructor, data ESConstructorData) g.Generator {
+func CreateConstructor(data ESConstructorData) g.Generator {
 	return g.FunctionDefinition{
 		Name:     fmt.Sprintf("Create%sPrototype", data.InnerTypeName),
 		Args:     g.Arg(g.Id("host"), scriptHostPtr),
 		RtnTypes: g.List(v8FunctionTemplatePtr),
-		Body:     CreateConstructorBody(c, data),
+		Body:     CreateConstructorBody(data),
 	}
 }
 
-func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator {
-	constructor := g.Id("constructor")
+func CreateConstructorBody(data ESConstructorData) g.Generator {
+	scriptHost := g.NewValue("host")
+	wrapper := g.NewValue("wrapper")
+	constructor := g.NewValue("constructor")
+	instanceTemplate := constructor.Method("GetInstanceTemplate").Call()
+	SetInternalFieldCount := instanceTemplate.Method("SetInternalFieldCount")
 
 	statements := StatementList(
-		g.Assign(Id("iso"),
-			Stmt{jen.Id("host").Dot("iso")},
-		),
+		g.Assign(g.Id("iso"), scriptHost.Field("iso")),
 		g.Assign(
-			Id("wrapper"),
+			wrapper,
 			CreateInstance(data.WrapperTypeName, jen.Id("host")),
 		),
-		g.Assign(constructor,
-			NewFunctionTemplate{g.Id("iso"), Stmt{jen.Id("wrapper").Dot("NewInstance")}},
-		),
-		g.Raw(jen.Id("constructor").
-			Dot("GetInstanceTemplate").
-			Call().
-			Dot("SetInternalFieldCount").
-			Call(jen.Lit(1)),
-		),
+		g.Assign(constructor, NewFunctionTemplate{g.Id("iso"), wrapper.Method("NewInstance")}),
+		SetInternalFieldCount.Call(g.Lit(1)),
 		g.Assign(
-			Id("prototype"),
-			Stmt{jen.Id("constructor").Dot("PrototypeTemplate").Call()},
+			g.Id("prototype"),
+			constructor.Method("PrototypeTemplate").Call(),
 		),
 		NewLine(),
-		InstallFunctionHandlers(c, data),
-		InstallAttributeHandlers(c, data),
+		InstallFunctionHandlers(data),
+		InstallAttributeHandlers(data),
 	)
 	if data.RunCustomCode {
 		statements.Append(
@@ -390,21 +380,21 @@ func CreateConstructorBody(c JSConstructor, data ESConstructorData) g.Generator 
 	return statements
 }
 
-func InstallFunctionHandlers(c JSConstructor, data ESConstructorData) JenGenerator {
+func InstallFunctionHandlers(data ESConstructorData) JenGenerator {
 	generators := make([]JenGenerator, len(data.Operations))
 	for i, op := range data.Operations {
-		generators[i] = InstallFunctionHandler(c, op)
+		generators[i] = InstallFunctionHandler(op)
 	}
 	return StatementList(generators...)
 }
 
-func InstallFunctionHandler(c JSConstructor, op ESOperation) JenGenerator {
+func InstallFunctionHandler(op ESOperation) JenGenerator {
 	f := jen.Id("wrapper").Dot(idlNameToGoName(op.Name))
-	ft := NewFunctionTemplate{Stmt{c.varIso}, Stmt{f}}
+	ft := NewFunctionTemplate{g.Id("iso"), Stmt{f}}
 	return Stmt{(jen.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft.Generate()))}
 }
 
-func InstallAttributeHandlers(c JSConstructor, data ESConstructorData) g.Generator {
+func InstallAttributeHandlers(data ESConstructorData) g.Generator {
 	length := len(data.Attributes)
 	if length == 0 {
 		return g.Noop
@@ -412,23 +402,23 @@ func InstallAttributeHandlers(c JSConstructor, data ESConstructorData) g.Generat
 	generators := make([]JenGenerator, length+1)
 	generators[0] = g.Line
 	for i, op := range data.Attributes {
-		generators[i+1] = InstallAttributeHandler(c, op)
+		generators[i+1] = InstallAttributeHandler(op)
 	}
 	return StatementList(generators...)
 }
 
-func InstallAttributeHandler(c JSConstructor, op ESAttribute) g.Generator {
+func InstallAttributeHandler(op ESAttribute) g.Generator {
 	getter := op.Getter
 	setter := op.Setter
 	list := StatementList()
 	if getter != nil {
 		f := jen.Id("wrapper").Dot(idlNameToGoName(getter.Name))
-		ft := NewFunctionTemplate{Stmt{c.varIso}, Stmt{f}}
+		ft := NewFunctionTemplate{g.Id("iso"), Stmt{f}}
 		var setterFt g.Generator
 		var Attributes = "ReadOnly"
 		if setter != nil {
 			f := Stmt{jen.Id("wrapper").Dot(idlNameToGoName(setter.Name))}
-			setterFt = NewFunctionTemplate{Stmt{c.varIso}, f}
+			setterFt = NewFunctionTemplate{g.Id("iso"), f}
 			Attributes = "None"
 		} else {
 			setterFt = g.Nil
@@ -438,13 +428,6 @@ func InstallAttributeHandler(c JSConstructor, op ESAttribute) g.Generator {
 			(jen.Id("prototype").Dot("SetAccessorProperty").Call(jen.Lit(op.Name), jen.Line().Add(ft.Generate()), jen.Line().Add(setterFt.Generate()), jen.Line().Add(jen.Qual(v8, Attributes)))),
 		})
 	}
-	// if setter != nil {
-	// 	f := jen.Id("wrapper").Dot(idlNameToGoName(setter.Name))
-	// 	ft := NewFunctionTemplate{Stmt{c.varIso}, Stmt{f}}
-	// 	list.Append(Stmt{
-	// 		(jen.Id("prototype").Dot("SetAccessorProperty").Call(jen.Lit(op.Name), ft.Generate())),
-	// 	})
-	// }
 	return list
 }
 
@@ -530,12 +513,6 @@ func GetSliceLength(gen JenGenerator) JenGenerator {
 	return Stmt{jen.Len(gen.Generate())}
 }
 
-type GeneratorFunc func() *jen.Statement
-
-func (g GeneratorFunc) Generate() *jen.Statement {
-	return g.Generate()
-}
-
 func Statements(stmts ...JenGenerator) JenGenerator {
 	return StatementListStmt{stmts}
 }
@@ -563,9 +540,10 @@ func (s StatementListStmt) Generate() *jen.Statement {
 }
 
 type CallInstance struct {
-	Name string
-	Args []g.Generator
-	Op   ESOperation
+	Name     string
+	Args     []g.Generator
+	Op       ESOperation
+	Instance g.Generator
 }
 
 type GetGeneratorResult struct {
@@ -576,7 +554,7 @@ type GetGeneratorResult struct {
 }
 
 func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResult) {
-	args := []jen.Code{}
+	args := []g.Generator{}
 	genRes.HasError = c.Op.GetHasError()
 	genRes.HasValue = c.Op.ReturnType != "undefined"
 	var stmt *jen.Statement
@@ -599,21 +577,19 @@ func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResul
 	}
 
 	for _, a := range c.Args {
-		args = append(args, a.Generate())
+		args = append(args, a)
 	}
 	list := StatementListStmt{}
-	var evaluation *jen.Statement
-	if instanceName == "" {
-		evaluation = jen.Id(idlNameToGoName(c.Name)).Call(args...)
+	var evaluation g.Generator
+	if c.Instance == nil {
+		evaluation = g.NewValue(idlNameToGoName(c.Name)).Call(args...)
 	} else {
-		evaluation = jen.Id(instanceName).Dot(idlNameToGoName(c.Name)).Call(args...)
+		evaluation = g.NewValue(instanceName).Method(idlNameToGoName(c.Name)).Call(args...)
 	}
 	if stmt == nil {
-		list.Append(Stmt{evaluation})
+		list.Append(evaluation)
 	} else {
-		list.Append(Stmt{
-			stmt.Add(evaluation),
-		})
+		list.Append(g.Raw(stmt.Add(evaluation.Generate())))
 	}
 	genRes.Generator = list
 	return
@@ -649,13 +625,6 @@ func (c CallInstance) GetGenerator(receiver string, instanceName string) GetGene
 	}
 	genRes.Generator = list
 	return genRes
-}
-
-func getInstance(receiver string) JenGenerator {
-	return AssignmentStmt{
-		VarNames:   []string{"instance", "err"},
-		Expression: Stmt{jen.Id(receiver).Dot("GetInstance").Call(jen.Id("info"))},
-	}
 }
 
 type ReadArgumentsResult struct {
@@ -719,7 +688,17 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res ReadArgumentsRes
 	return
 }
 
-func (c JSConstructor) FunctionTemplateCallbackBody(
+func GetInstanceAndError(id g.Generator, data ESConstructorData) g.Generator {
+	return StatementList(
+		g.AssignMany(
+			g.List(id, g.Id("err")),
+			g.Raw(jen.Id(data.Receiver).Dot("GetInstance").Call(jen.Id("info"))),
+		),
+		GenReturnOnError(),
+	)
+}
+
+func FunctionTemplateCallbackBody(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
@@ -727,82 +706,36 @@ func (c JSConstructor) FunctionTemplateCallbackBody(
 		errMsg := fmt.Sprintf("Not implemented: %s.%s", data.Name, op.Name)
 		return g.Return(g.Nil, g.Raw(jen.Qual("errors", "New").Call(jen.Lit(errMsg))))
 	}
-	arguments := op.Arguments
+	instance := g.Id("instance")
 	readArgsResult := ReadArguments(data, op)
-	statements := &StatementListStmt{}
+	statements := StatementList(GetInstanceAndError(instance, data), readArgsResult)
+	requireContext := false
+	var CreateCall = func(functionName string, argnames []g.Generator, op ESOperation) g.Generator {
+		callInstance := CallInstance{
+			Name:     functionName,
+			Args:     argnames,
+			Op:       op,
+			Instance: instance,
+		}.GetGenerator(data.Receiver, "instance")
+		requireContext = requireContext || callInstance.RequireContext
+		return callInstance.Generator
+	}
 	statements.Append(
-		g.AssignMany(
-			g.List(g.Id("instance"), g.Id("err")),
-			g.Raw(jen.Id(data.Receiver).Dot("GetInstance").Call(jen.Id("info"))),
+		WrapperCalls(
+			op,
+			idlNameToGoName(op.Name),
+			readArgsResult.ArgNames,
+			readArgsResult.ErrNames,
+			CreateCall,
 		),
 	)
-	statements.Append(GenReturnOnError())
-	statements.Append(readArgsResult)
-	for i := len(arguments); i >= 0; i-- {
-		functionName := idlNameToGoName(op.Name)
-		for j, arg := range arguments {
-			if j < i {
-				if arg.Optional {
-					functionName += idlNameToGoName(arg.Name)
-				}
-			}
-		}
-		argnames := readArgsResult.ArgNames[0:i]
-		errNames := readArgsResult.ErrNames[0:i]
-		callInstance := CallInstance{
-			Name: functionName,
-			Args: argnames,
-			Op:   op,
-		}.GetGenerator(data.Receiver, "instance")
-		if callInstance.RequireContext {
-			statements.Prepend(
-				g.Assign(
-					g.Id("ctx"),
-					Stmt{jen.Id(data.Receiver).Dot("host").Dot("MustGetContext").Call(
-						jen.Id("info").Dot("Context").Call(),
-					)},
-				),
-			)
-		}
-		if i > 0 {
-			arg := arguments[i-1]
-			argErrorCheck := StatementList(
-				g.Assign(g.Id("err"),
-					g.Raw(jen.Qual("errors", "Join").CallFunc(func(g *jen.Group) {
-						for _, e := range errNames {
-							g.Add(e.Generate())
-						}
-					})),
-				),
-				GenReturnOnError(),
-			)
-
-			statements.Append(StatementList(
-				IfStmt{
-					Condition: g.Raw(jen.Id("args").Dot("noOfReadArguments").Op(">=").Lit(i)),
-					Block: StatementList(
-						argErrorCheck,
-						// construction,
-						callInstance.Generator,
-					),
-				}))
-			if !(arg.Optional) {
-				statements.Append(
-					g.Return(
-						g.Nil,
-						g.Raw(jen.Qual("errors", "New").Call(jen.Lit("Missing arguments"))),
-					),
-				)
-				break
-			}
-		} else {
-			statements.Append(callInstance.Generator)
-		}
+	if requireContext {
+		statements.Prepend(RequireContext(data.Receiver))
 	}
 	return statements
 }
 
-func CreateConstructorWrapper(c JSConstructor, data ESConstructorData) JenGenerator {
+func CreateConstructorWrapper(data ESConstructorData) JenGenerator {
 	return StatementList(
 		g.Line,
 		g.FunctionDefinition{
@@ -813,36 +746,35 @@ func CreateConstructorWrapper(c JSConstructor, data ESConstructorData) JenGenera
 			},
 			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
 			RtnTypes: g.List(v8Value, g.Id("error")),
-			Body:     c.JSConstructorImpl(data),
+			Body:     JSConstructorImpl(data),
 		},
 	)
 }
 
-func CreateWrapperMethods(c JSConstructor, data ESConstructorData) JenGenerator {
+func CreateWrapperMethods(data ESConstructorData) JenGenerator {
 	generators := make([]JenGenerator, 0, len(data.Operations))
 	for _, op := range data.Operations {
-		generators = append(generators, c.CreateWrapperMethod(data, op))
+		generators = append(generators, CreateWrapperMethod(data, op))
 	}
 	list := StatementList(generators...)
 	for _, attr := range data.Attributes {
 		if attr.Getter != nil {
-			list.Append(c.CreateWrapperMethod(data, *attr.Getter))
+			list.Append(CreateWrapperMethod(data, *attr.Getter))
 		}
 		if attr.Setter != nil {
-			list.Append(c.CreateWrapperMethod(data, *attr.Setter))
+			list.Append(CreateWrapperMethod(data, *attr.Setter))
 		}
 	}
 	return list
 }
 
-func (c JSConstructor) CreateWrapperMethod(
+func CreateWrapperMethod(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
 	if op.CustomImplementation {
 		return g.Noop
 	}
-	f := c.FunctionTemplateCallbackBody(data, op)
 	return StatementList(
 		NewLine(),
 		g.FunctionDefinition{
@@ -853,7 +785,7 @@ func (c JSConstructor) CreateWrapperMethod(
 			Name:     idlNameToGoName(op.Name),
 			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
 			RtnTypes: g.List(v8Value, g.Id("error")),
-			Body:     f,
+			Body:     FunctionTemplateCallbackBody(data, op),
 		})
 }
 
@@ -927,7 +859,7 @@ func WriteErrorHandler(grp *jen.Group, count int) {
 }
 
 func writeFactory(f *jen.File, data ESConstructorData) {
-	CreateJSConstructor().Run(f, data)
+	Run(f, data)
 }
 
 type Helper struct{ *jen.Group }
