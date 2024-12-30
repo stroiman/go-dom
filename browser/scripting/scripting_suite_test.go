@@ -7,7 +7,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/internal/http"
 	"github.com/stroiman/go-dom/browser/internal/test"
 	"github.com/stroiman/go-dom/browser/scripting"
@@ -21,8 +21,8 @@ func TestScripting(t *testing.T) {
 
 var host *ScriptHost
 
-func OpenTestWindowFromHandler(location string, handler http.Handler) (dom.Window, error) {
-	win, err := dom.OpenWindowFromLocation(location, dom.WindowOptions{
+func OpenTestWindowFromHandler(location string, handler http.Handler) (html.Window, error) {
+	win, err := html.OpenWindowFromLocation(location, html.WindowOptions{
 		ScriptEngineFactory: (*scripting.Wrapper)(host),
 		HttpClient:          NewHttpClientFromHandler(handler),
 	})

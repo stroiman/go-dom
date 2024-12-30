@@ -3,12 +3,12 @@ package scripting_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 )
 
 var _ = Describe("window.location", func() {
 	It("Should have the location of the document", func() {
-		window := dom.NewWindow(dom.WindowOptionLocation("http://example.com/foo"))
+		window := html.NewWindow(html.WindowOptionLocation("http://example.com/foo"))
 		ctx := host.NewContext(window)
 		DeferCleanup(func() {
 			ctx.Dispose()

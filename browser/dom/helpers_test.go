@@ -4,14 +4,17 @@ import (
 	"strings"
 
 	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 )
 
 func ParseHtmlString(s string) dom.Document {
-	parser := dom.NewDOMParser()
-	var doc dom.Document
-	err := parser.ParseReader(nil, &doc, strings.NewReader(s))
+	win, err := html.NewWindowReader(strings.NewReader(s))
 	if err != nil {
 		panic(err)
 	}
-	return doc
+	return win.Document()
+}
+
+func CreateDocument() dom.Document {
+	return dom.NewDocument(nil)
 }

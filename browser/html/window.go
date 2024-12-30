@@ -1,4 +1,4 @@
-package dom
+package html
 
 import (
 	"errors"
@@ -6,6 +6,8 @@ import (
 	"net/http"
 	netURL "net/url"
 	"strings"
+
+	. "github.com/stroiman/go-dom/browser/dom"
 )
 
 type ScriptEngineFactory interface {
@@ -34,16 +36,18 @@ type Window interface {
 	GetScriptEngine() ScriptEngine
 	Location() Location
 	NewXmlHttpRequest() XmlHttpRequest
+	DOMParser() DOMParser
+	HTTPClient() http.Client
 }
 
 type window struct {
-	eventTarget
+	EventTarget
 	document            Document
 	scriptEngineFactory ScriptEngineFactory
 	scriptEngine        ScriptEngine
 	httpClient          http.Client
 	baseLocation        string
-	domParser           DOMParser
+	domParser           domParser
 }
 
 func newWindow(windowOptions ...WindowOption) *window {
@@ -52,15 +56,12 @@ func newWindow(windowOptions ...WindowOption) *window {
 		option.Apply(&options)
 	}
 	result := &window{
-		eventTarget:         newEventTarget(),
+		EventTarget:         NewEventTarget(),
 		httpClient:          options.HttpClient,
 		baseLocation:        options.BaseLocation,
 		scriptEngineFactory: options.ScriptEngineFactory,
-		domParser:           options.DOMParser,
 	}
-	if result.domParser == nil {
-		result.domParser = domParser{}
-	}
+	result.domParser = domParser{}
 	result.initScriptEngine()
 	result.document = NewDocument(result)
 	return result
@@ -123,11 +124,13 @@ func (w *window) parseReader(reader io.Reader) error {
 	return err
 }
 
+func (w *window) HTTPClient() http.Client { return w.httpClient }
+func (w *window) DOMParser() DOMParser    { return w.domParser }
+
 type WindowOptions struct {
 	ScriptEngineFactory
 	HttpClient   http.Client
 	BaseLocation string
-	DOMParser    DOMParser
 }
 
 type WindowOption interface {

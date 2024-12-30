@@ -3,7 +3,7 @@ package dom_test
 import (
 	"net/http"
 
-	. "github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 	domHTTP "github.com/stroiman/go-dom/browser/internal/http"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -11,14 +11,14 @@ import (
 )
 
 var _ = Describe("Window.Location", func() {
-	OpenWindow := func(location string) Window {
+	OpenWindow := func(location string) html.Window {
 		handler := http.HandlerFunc(
 			func(res http.ResponseWriter, req *http.Request) { res.Write([]byte("<html></html>")) },
 		)
-		windowOptions := WindowOptions{
+		windowOptions := html.WindowOptions{
 			HttpClient: domHTTP.NewHttpClientFromHandler(handler),
 		}
-		win, err := OpenWindowFromLocation(location, windowOptions)
+		win, err := html.OpenWindowFromLocation(location, windowOptions)
 		Expect(err).ToNot(HaveOccurred())
 		DeferCleanup(func() {
 			if win != nil {

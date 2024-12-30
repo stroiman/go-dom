@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/scripting"
 )
 
@@ -47,7 +47,7 @@ var IgnoreUnhandledErrors CreateHook = func(ctx *TestScriptContext) {
 // installs the proper Ginkgo cleanup handler.
 func NewTestContext(hooks ...CreateHook) TestScriptContext {
 	ctx := TestScriptContext{}
-	window := dom.NewWindow(dom.WindowOptions{
+	window := html.NewWindow(html.WindowOptions{
 		// ScriptEngineFactory: (*Wrapper)(host),
 	})
 	ctx.ScriptContext = host.NewContext(window)
@@ -77,7 +77,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 	ctx := TestScriptContext{}
 
 	BeforeEach(func() {
-		window := dom.NewWindow()
+		window := html.NewWindow()
 		ctx.ScriptContext = host.NewContext(window)
 		window.SetScriptRunner(ctx)
 		for _, hook := range hooks {

@@ -10,7 +10,7 @@ import (
 var _ = Describe("Element", func() {
 	Describe("SetAttribute", func() {
 		It("Should add a new attribute when not existing", func() {
-			doc := NewWindow().Document()
+			doc := CreateDocument()
 			elm := doc.CreateElement("div")
 			Expect(elm.GetAttributes().Length()).To(Equal(0))
 			elm.SetAttribute("id", "1")
@@ -18,7 +18,7 @@ var _ = Describe("Element", func() {
 		})
 
 		It("Should add overwrite an existing attribute", func() {
-			doc := NewWindow().Document()
+			doc := CreateDocument()
 			elm := doc.CreateElement("div")
 			elm.SetAttribute("id", "1")
 			elm.SetAttribute("id", "2")

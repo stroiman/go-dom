@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/internal/http"
 	. "github.com/stroiman/go-dom/browser/scripting"
 
@@ -14,7 +15,7 @@ import (
 
 var _ = Describe("V8 XmlHttpRequest", func() {
 	var server http.Handler
-	var window dom.Window
+	var window html.Window
 	var evt chan bool
 	var body []byte
 	var actualPath string
@@ -32,7 +33,7 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 			actualPath = req.URL.Path
 		})
 		var err error
-		window = dom.NewWindow(dom.WindowOptions{
+		window = html.NewWindow(html.WindowOptions{
 			BaseLocation:        "http://example.com",
 			ScriptEngineFactory: (*Wrapper)(host),
 			HttpClient:          NewHttpClientFromHandler(server),

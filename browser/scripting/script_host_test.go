@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 	"github.com/stroiman/go-dom/browser/scripting"
 )
 
@@ -57,11 +57,11 @@ var _ = Describe("ScriptHost", func() {
 
 		Describe("Load document with script", func() {
 			It("Runs the script when connected to DOM", func() {
-				win, err := dom.NewWindowReader(strings.NewReader(`<html><body>
+				win, err := html.NewWindowReader(strings.NewReader(`<html><body>
     <script>window.sut = document.documentElement.outerHTML</script>
     <div>I should not be in the output</div>
   </body></html>
-`), dom.WindowOptions{ScriptEngineFactory: (*scripting.Wrapper)(host)},
+`), html.WindowOptions{ScriptEngineFactory: (*scripting.Wrapper)(host)},
 				)
 				Expect(err).ToNot(HaveOccurred())
 				ctx := win.GetScriptEngine()

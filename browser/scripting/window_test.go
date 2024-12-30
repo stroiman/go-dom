@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 	"github.com/stroiman/go-dom/browser/scripting"
 )
 
@@ -41,7 +41,7 @@ var _ = Describe("Window", func() {
 	Describe("Window Events", func() {
 		Describe("DOMContentLoaded", func() {
 			It("Should be fired _after_ script has executed", func() {
-				win, err := dom.NewWindowReader(strings.NewReader(
+				win, err := html.NewWindowReader(strings.NewReader(
 					`<body><script>
   scripts = []
   function listener1() {
@@ -52,7 +52,7 @@ var _ = Describe("Window", func() {
   }
   window.document.addEventListener("DOMContentLoaded", listener1);
   window.document.addEventListener("load", listener2);
-</script></body>`), dom.WindowOptions{ScriptEngineFactory: (*scripting.Wrapper)(host)},
+</script></body>`), html.WindowOptions{ScriptEngineFactory: (*scripting.Wrapper)(host)},
 				)
 				Expect(err).ToNot(HaveOccurred())
 				ctx := win.GetScriptEngine()

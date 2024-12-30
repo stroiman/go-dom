@@ -6,8 +6,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 
 	"github.com/tommie/v8go"
 	v8 "github.com/tommie/v8go"
@@ -46,7 +46,7 @@ func (h *ScriptHost) MustGetContext(v8ctx *v8.Context) *ScriptContext {
 type ScriptContext struct {
 	host      *ScriptHost
 	v8ctx     *v8.Context
-	window    Window
+	window    html.Window
 	pinner    runtime.Pinner
 	v8nodes   map[ObjectId]*v8.Value
 	domNodes  map[ObjectId]Entity
@@ -248,7 +248,7 @@ func (host *ScriptHost) Dispose() {
 
 var global *v8.Object
 
-func (host *ScriptHost) NewContext(window Window) *ScriptContext {
+func (host *ScriptHost) NewContext(window html.Window) *ScriptContext {
 	context := &ScriptContext{
 		host:     host,
 		v8ctx:    v8.NewContext(host.iso, host.windowTemplate),
@@ -276,7 +276,7 @@ func (host *ScriptHost) NewContext(window Window) *ScriptContext {
 
 type Wrapper ScriptHost
 
-func (w *Wrapper) NewScriptEngine(window Window) dom.ScriptEngine {
+func (w *Wrapper) NewScriptEngine(window html.Window) html.ScriptEngine {
 	host := (*ScriptHost)(w)
 	return host.NewContext(window)
 }
@@ -325,7 +325,7 @@ func (ctx *ScriptContext) Eval(script string) (interface{}, error) {
 	return nil, err
 }
 
-func (ctx *ScriptContext) Window() Window {
+func (ctx *ScriptContext) Window() html.Window {
 	return ctx.window
 }
 

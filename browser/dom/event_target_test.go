@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 )
 
 var _ = Describe("EventTarget", func() {
@@ -71,13 +72,13 @@ var _ = Describe("EventTarget", func() {
 
 	Describe("Event propagation", func() {
 		var (
-			window Window
+			window html.Window
 			target Element
 		)
 
 		BeforeEach(func() {
 			var err error
-			window, err = NewWindowReader(
+			window, err = html.NewWindowReader(
 				strings.NewReader(`<body><div id="target"></div></body>`),
 			)
 			Expect(err).ToNot(HaveOccurred())

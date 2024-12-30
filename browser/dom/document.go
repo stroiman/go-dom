@@ -1,6 +1,8 @@
 package dom
 
 import (
+	"io"
+
 	"golang.org/x/net/html"
 )
 
@@ -13,6 +15,16 @@ const (
 	DocumentEventLoad             DocumentEvent = "load"
 )
 
+type DOMParser interface {
+	ParseFragment(ownerDocument Document, reader io.Reader) (DocumentFragment, error)
+}
+
+type DocumentParentWindow interface {
+	EventTarget
+	Location() Location
+	DOMParser() DOMParser
+}
+
 type Document interface {
 	RootNode
 	Body() Element
@@ -21,15 +33,18 @@ type Document interface {
 	CreateElement(string) Element
 	DocumentElement() Element
 	Location() Location
+	// unexported
+	domParser() DOMParser
 }
+
 type elementConstructor func(doc *document) Element
 
 type document struct {
 	rootNode
-	ownerWindow Window
+	ownerWindow DocumentParentWindow
 }
 
-func NewDocument(window Window) Document {
+func NewDocument(window DocumentParentWindow) Document {
 	result := &document{newRootNode(), window}
 	// Hmmm, can document be replaced; and now the old doc's event goes to a
 	// window they shouldn't?
@@ -38,6 +53,8 @@ func NewDocument(window Window) Document {
 	result.SetSelf(result)
 	return result
 }
+
+func (d *document) domParser() DOMParser { return d.ownerWindow.DOMParser() }
 
 func (d *document) Body() Element {
 	root := d.DocumentElement()

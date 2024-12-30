@@ -1,17 +1,19 @@
 package html
 
-import "github.com/stroiman/go-dom/browser/dom"
+import (
+	. "github.com/stroiman/go-dom/browser/dom"
+)
 
 type HTMLDocument interface {
-	dom.Document
+	Document
 }
 
 type htmlDocument struct {
-	dom.Document
+	Document
 }
 
-func NewHTMLDocument(window dom.Window) HTMLDocument {
-	result := &htmlDocument{dom.NewDocument(window)}
+func NewHTMLDocument(window Window) HTMLDocument {
+	result := &htmlDocument{NewDocument(window)}
 	result.SetSelf(result)
 	return result
 }
