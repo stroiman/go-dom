@@ -2,7 +2,6 @@ package dom
 
 import (
 	"golang.org/x/net/html"
-	"golang.org/x/net/html/atom"
 )
 
 type DocumentEvent = string
@@ -22,8 +21,6 @@ type Document interface {
 	CreateElement(string) Element
 	DocumentElement() Element
 	Location() Location
-	// unexported
-	createElement(*html.Node) Element
 }
 type elementConstructor func(doc *document) Element
 
@@ -70,20 +67,10 @@ func (d *document) Head() Element {
 }
 
 func (d *document) CreateElement(name string) Element {
-	node := &html.Node{
-		Type:      html.ElementNode,
-		DataAtom:  atom.Lookup([]byte(name)),
-		Data:      name,
-		Namespace: "",
+	if name == "template" {
+		return NewHTMLTemplateElement(d)
 	}
-	return d.createElement(node)
-}
-
-func (d *document) createElement(node *html.Node) Element {
-	if node.Data == "template" {
-		return NewHTMLTemplateElement(node, d)
-	}
-	return NewHTMLElement(node, d)
+	return NewHTMLElement(name, d)
 }
 
 func (d *document) CreateDocumentFragment() DocumentFragment {

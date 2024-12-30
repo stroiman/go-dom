@@ -125,7 +125,10 @@ func createElementFromNode(w Window, d Document, parent Node, source *html.Node)
 		rules = BaseRules{}
 	}
 	var newNode Node
-	newElm := d.createElement(cloneNode(source))
+	newElm := d.CreateElement(source.Data)
+	for _, a := range source.Attr {
+		newElm.SetAttribute(a.Key, a.Val)
+	}
 	newNode = newElm
 	if parent != nil {
 		newNode = rules.AppendChild(parent, newElm)

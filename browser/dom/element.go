@@ -54,15 +54,6 @@ func NewElement(tagName string, ownerDocument Document) Element {
 	return &element{newNode(), tagName, "", Attributes(nil), ownerDocument}
 }
 
-func newElementFromNode(node *html.Node, ownerDocument Document) *element {
-	attributes := make([]*html.Attribute, len(node.Attr))
-	for i, a := range node.Attr {
-		attributes[i] = new(html.Attribute)
-		*attributes[i] = a
-	}
-	return &element{newNode(), node.Data, node.Namespace, attributes, ownerDocument}
-}
-
 func (e *element) NodeName() string {
 	return e.TagName()
 }

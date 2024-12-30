@@ -10,16 +10,8 @@ type HTMLElement interface {
 	Element
 }
 
-func NewHTMLElement(node *html.Node, ownerDocument Document) Element {
-	return newElementFromNode(node, ownerDocument)
-}
-
-func NewHTMLUnknownElement(node *html.Node, ownerDocument Document) Element {
-	return NewHTMLElement(node, ownerDocument)
-}
-
-func NewHTMLHtmlElement(node *html.Node, ownerDocument Document) Element {
-	return NewHTMLElement(node, ownerDocument)
+func NewHTMLElement(tagName string, ownerDocument Document) Element {
+	return NewElement(tagName, ownerDocument)
 }
 
 type HTMLTemplateElement interface {
@@ -28,13 +20,13 @@ type HTMLTemplateElement interface {
 }
 
 type htmlTemplateElement struct {
-	element
+	HTMLElement
 	content DocumentFragment
 }
 
-func NewHTMLTemplateElement(node *html.Node, ownerDocument Document) HTMLTemplateElement {
+func NewHTMLTemplateElement(ownerDocument Document) HTMLTemplateElement {
 	return &htmlTemplateElement{
-		*(newElementFromNode(node, ownerDocument)),
+		NewHTMLElement("template", ownerDocument),
 		NewDocumentFragment(ownerDocument),
 	}
 }
@@ -42,7 +34,7 @@ func NewHTMLTemplateElement(node *html.Node, ownerDocument Document) HTMLTemplat
 func (e *htmlTemplateElement) Content() DocumentFragment { return e.content }
 
 func (e *htmlTemplateElement) createHtmlNode() *html.Node {
-	node := e.element.createHtmlNode()
+	node := e.HTMLElement.createHtmlNode()
 	for _, child := range e.content.nodes() {
 		node.AppendChild(NodeIterator{child}.toHtmlNode(nil))
 	}
