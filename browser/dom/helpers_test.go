@@ -15,6 +15,6 @@ func ParseHtmlString(s string) dom.Document {
 	return win.Document()
 }
 
-func CreateDocument() dom.Document {
-	return dom.NewDocument(nil)
+func CreateHTMLDocument() dom.Document {
+	return html.NewHTMLDocument(nil)
 }

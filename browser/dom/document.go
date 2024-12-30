@@ -83,10 +83,7 @@ func (d *document) Head() Element {
 }
 
 func (d *document) CreateElement(name string) Element {
-	if name == "template" {
-		return NewHTMLTemplateElement(d)
-	}
-	return NewHTMLElement(name, d)
+	return NewElement(name, d)
 }
 
 func (d *document) CreateDocumentFragment() DocumentFragment {

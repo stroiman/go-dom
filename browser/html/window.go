@@ -64,7 +64,7 @@ func newWindow(windowOptions ...WindowOption) *window {
 	}
 	result.domParser = domParser{}
 	result.initScriptEngine()
-	result.document = NewDocument(result)
+	result.document = NewHTMLDocument(result)
 	return result
 }
 

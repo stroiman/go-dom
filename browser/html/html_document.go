@@ -17,3 +17,10 @@ func NewHTMLDocument(window Window) HTMLDocument {
 	result.SetSelf(result)
 	return result
 }
+
+func (d *htmlDocument) CreateElement(name string) Element {
+	if name == "template" {
+		return NewHTMLTemplateElement(d)
+	}
+	return NewHTMLElement(name, d)
+}
