@@ -2,6 +2,7 @@ package scripting
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/stroiman/go-dom/browser/dom"
 	v8 "github.com/tommie/v8go"
@@ -34,7 +35,9 @@ func CreateDOMParserPrototype(host *ScriptHost) *v8.FunctionTemplate {
 						"DOMParser.parseFromString only supports text/html yet",
 					)
 				}
-				if doc, err := dom.ParseHtmlStringWin(html, window); err == nil {
+				domParser := dom.NewDOMParser()
+				var doc dom.Document
+				if err := domParser.ParseReader(window, &doc, strings.NewReader(html)); err == nil {
 					return ctx.GetInstanceForNode(doc)
 				} else {
 					return nil, err

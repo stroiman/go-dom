@@ -22,6 +22,27 @@ type ScriptEngine interface {
 	Dispose()
 }
 
+type DOMParser interface {
+	// Parses a HTML or XML from an [io.Reader] instance. The parsed nodes will
+	// have reference the window, e.g. letting events bubble to the window itself.
+	// The document pointer will be replaced by the created document.
+	//
+	// The document is updated using a pointer rather than returned as a value, as
+	// parseing process can e.g. execute script tags that require the document to
+	// be set on the window _before_ the script is executed.
+	ParseReader(window Window, document *Document, reader io.Reader) error
+}
+
+// TODO: Remove
+type domParser struct{}
+
+func (p domParser) ParseReader(window Window, document *Document, reader io.Reader) error {
+	*document = NewDocument(window)
+	return parseIntoDocument(window, *document, reader)
+}
+
+func NewDOMParser() DOMParser { return domParser{} }
+
 type Window interface {
 	EventTarget
 	Document() Document
@@ -42,9 +63,10 @@ type window struct {
 	scriptEngine        ScriptEngine
 	httpClient          http.Client
 	baseLocation        string
+	domParser           DOMParser
 }
 
-func NewWindow(windowOptions ...WindowOption) Window {
+func newWindow(windowOptions ...WindowOption) *window {
 	var options WindowOptions
 	for _, option := range windowOptions {
 		option.Apply(&options)
@@ -54,10 +76,18 @@ func NewWindow(windowOptions ...WindowOption) Window {
 		httpClient:          options.HttpClient,
 		baseLocation:        options.BaseLocation,
 		scriptEngineFactory: options.ScriptEngineFactory,
+		domParser:           options.DOMParser,
+	}
+	if result.domParser == nil {
+		result.domParser = domParser{}
 	}
 	result.initScriptEngine()
 	result.document = NewDocument(result)
 	return result
+}
+
+func NewWindow(windowOptions ...WindowOption) Window {
+	return newWindow(windowOptions...)
 }
 
 func OpenWindowFromLocation(location string, windowOptions ...WindowOption) (Window, error) {
@@ -73,14 +103,7 @@ func OpenWindowFromLocation(location string, windowOptions ...WindowOption) (Win
 	} else {
 		options.BaseLocation = location
 	}
-	result := &window{
-		eventTarget:         newEventTarget(),
-		httpClient:          options.HttpClient,
-		baseLocation:        options.BaseLocation,
-		scriptEngineFactory: options.ScriptEngineFactory,
-	}
-	result.initScriptEngine()
-	result.document = NewDocument(result)
+	result := newWindow(options)
 	resp, err := result.httpClient.Get(location)
 	if err != nil {
 		return nil, err
@@ -88,7 +111,7 @@ func OpenWindowFromLocation(location string, windowOptions ...WindowOption) (Win
 	if resp.StatusCode != 200 {
 		return nil, errors.New("Non-ok Response")
 	}
-	err = result.loadReader(resp.Body)
+	err = result.parseReader(resp.Body)
 	return result, err
 }
 
@@ -103,23 +126,28 @@ func (w *window) initScriptEngine() {
 	}
 }
 
-func NewWindowReader(reader io.Reader, windowOptions ...WindowOption) (window Window, err error) {
-	window = NewWindow(windowOptions...)
-	document := window.Document()
-	err = parseIntoDocument(window, document, reader)
+func NewWindowReader(reader io.Reader, windowOptions ...WindowOption) (Window, error) {
+	window := newWindow(windowOptions...)
+	err := window.parseReader(reader)
+	return window, err
+}
+
+func (w *window) parseReader(reader io.Reader) error {
+	err := w.domParser.ParseReader(w, &w.document, reader)
 	if err == nil {
-		document.DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
+		w.document.DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
 		// 'load' is emitted when css and images are loaded, not relevant yet, so
 		// just emit it right await
-		document.DispatchEvent(NewCustomEvent(DocumentEventLoad))
+		w.document.DispatchEvent(NewCustomEvent(DocumentEventLoad))
 	}
-	return
+	return err
 }
 
 type WindowOptions struct {
 	ScriptEngineFactory
 	HttpClient   http.Client
 	BaseLocation string
+	DOMParser    DOMParser
 }
 
 type WindowOption interface {
@@ -145,19 +173,7 @@ func (w *window) Document() Document {
 }
 
 func (w *window) LoadHTML(html string) error {
-	return w.loadReader(strings.NewReader(html))
-}
-
-func (w *window) loadReader(r io.Reader) (err error) {
-	w.document = NewDocument(w)
-	err = parseIntoDocument(w, w.document, r)
-	if err == nil {
-		w.Document().DispatchEvent(NewCustomEvent(DocumentEventDOMContentLoaded))
-		// 'load' is emitted when css and images are loaded, not relevant yet, so
-		// just emit it right await
-		w.Document().DispatchEvent(NewCustomEvent(DocumentEventLoad))
-	}
-	return
+	return w.parseReader(strings.NewReader(html))
 }
 
 func (w *window) Run(script string) error {

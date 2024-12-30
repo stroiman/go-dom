@@ -13,7 +13,7 @@ import (
 
 var _ = Describe("Parser", func() {
 	It("Should be able to parse an empty HTML document", func() {
-		result := dom.ParseHtmlString("<html><head></head><body></body></html>")
+		result := ParseHtmlString("<html><head></head><body></body></html>")
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
@@ -25,7 +25,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should wrap contents in an HTML element if missing", func() {
-		result := dom.ParseHtmlString("<head></head><body></body>")
+		result := ParseHtmlString("<head></head><body></body>")
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
@@ -36,7 +36,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should create a HEAD if missing", func() {
-		result := dom.ParseHtmlString("<html><body></body></html>")
+		result := ParseHtmlString("<html><body></body></html>")
 		Expect(result).To(
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),
@@ -44,7 +44,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should create HTML and HEAD if missing", func() {
-		result := dom.ParseHtmlString("<body></body>")
+		result := ParseHtmlString("<body></body>")
 		Expect(result).To(
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),
@@ -52,7 +52,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should embed a root <div> in an HTML document structure", func() {
-		result := dom.ParseHtmlString("<div></div>")
+		result := ParseHtmlString("<div></div>")
 		Expect(result).To(
 			MatchStructure("HTML",
 				MatchStructure("HEAD"),
@@ -62,7 +62,7 @@ var _ = Describe("Parser", func() {
 	})
 
 	It("Should parse text nodes in body", func() {
-		result := dom.ParseHtmlString(`<html><body><div>
+		result := ParseHtmlString(`<html><body><div>
   <h1>Hello</h1>
   <p>Lorem Ipsum</p>
 </div></body></html>`)

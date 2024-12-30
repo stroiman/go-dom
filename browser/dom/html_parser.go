@@ -88,11 +88,6 @@ func parseIntoDocument(w Window, doc Document, r io.Reader) error {
 	return nil
 }
 
-func parseStream(w Window, r io.Reader) (Document, error) {
-	doc := NewDocument(w)
-	return doc, parseIntoDocument(w, doc, r)
-}
-
 func cloneNode(n *html.Node) *html.Node {
 	return &html.Node{
 		Type:      n.Type,
@@ -137,20 +132,4 @@ func iterate(w Window, d Document, dest Node, source *html.Node) {
 			panic(fmt.Sprintf("Node not yet supported: %v", child))
 		}
 	}
-}
-
-func ParseHtmlStream(s io.Reader) (Document, error) {
-	return parseStream(nil, s)
-}
-
-func ParseHtmlString(s string) Document {
-	doc, err := ParseHtmlStream(strings.NewReader(s))
-	if err != nil {
-		panic(err)
-	}
-	return doc
-}
-
-func ParseHtmlStringWin(s string, win Window) (Document, error) {
-	return parseStream(win, strings.NewReader(s))
 }
