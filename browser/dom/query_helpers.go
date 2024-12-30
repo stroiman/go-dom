@@ -1,12 +1,21 @@
 package dom
 
-import "github.com/ericchiang/css"
+import (
+	"github.com/ericchiang/css"
+)
 
 type CSSHelper struct{ Node }
 
-func (h CSSHelper) QuerySelector(pattern string) (Node, error) {
+func (h CSSHelper) QuerySelector(pattern string) (Element, error) {
 	nodes, err := h.QuerySelectorAll(pattern)
-	return nodes.Item(0), err
+	if err != nil {
+		return nil, err
+	}
+	// TODO, it should be a list of elements, not nodes, then the cast, and
+	// error isn't necessary
+	result := nodes.Item(0)
+	element, _ := result.(Element)
+	return element, nil
 }
 
 func (d CSSHelper) QuerySelectorAll(pattern string) (StaticNodeList, error) {

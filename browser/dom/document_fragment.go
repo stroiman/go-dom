@@ -26,7 +26,7 @@ func (d *documentFragment) GetElementById(id string) Element {
 	return RootNodeHelper{d}.GetElementById(id)
 }
 
-func (d *documentFragment) QuerySelector(pattern string) (Node, error) {
+func (d *documentFragment) QuerySelector(pattern string) (Element, error) {
 	return CSSHelper{d}.QuerySelector(pattern)
 }
 

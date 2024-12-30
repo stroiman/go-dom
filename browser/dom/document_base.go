@@ -7,7 +7,7 @@ package dom
 type ElementContainer interface {
 	Node
 	Append(Element) Element
-	QuerySelector(string) (Node, error)
+	QuerySelector(string) (Element, error)
 	QuerySelectorAll(string) (StaticNodeList, error)
 }
 

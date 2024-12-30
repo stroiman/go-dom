@@ -132,7 +132,7 @@ func (e *element) createHtmlNode() *html.Node {
 	}
 }
 
-func (e *element) QuerySelector(pattern string) (Node, error) {
+func (e *element) QuerySelector(pattern string) (Element, error) {
 	return CSSHelper{e}.QuerySelector(pattern)
 }
 

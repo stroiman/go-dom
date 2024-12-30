@@ -124,7 +124,7 @@ func (d *document) Location() Location {
 	return d.ownerWindow.Location()
 }
 
-func (d *document) QuerySelector(pattern string) (Node, error) {
+func (d *document) QuerySelector(pattern string) (Element, error) {
 	return CSSHelper{d}.QuerySelector(pattern)
 }
 
