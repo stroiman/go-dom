@@ -33,6 +33,14 @@ func getWriter(output string) io.Writer {
 	return file
 }
 
+var generators = map[string]func(io.Writer) error{
+	"html-elements": generateHtmlElements,
+	"xhr":           generateXhr,
+	"url":           generateUrl,
+	"dom":           generateDOMTypes,
+	"html":          generateHTMLTypes,
+}
+
 func main() {
 	debug := flag.Bool("d", false, "Debug")
 	outputFile := flag.String("o", "", "Output file to write")
@@ -48,29 +56,14 @@ func main() {
 		fmt.Println("--------")
 	}
 
-	file := newBuilder(getWriter(*outputFile))
+	file := getWriter(*outputFile)
 
-	var err error
-
-	switch *generatorType {
-	case "html-elements":
-		generateHtmlElements(file)
-	case "xhr":
-		err = generateXhr(file)
-		break
-	case "url":
-		err = generateUrl(file)
-		break
-	case "dom":
-		err = generateDOMTypes(file)
-		break
-	case "html":
-		err = generateHTMLTypes(file)
-		break
-	default:
+	generator, ok := generators[*generatorType]
+	if !ok {
 		fmt.Println("Unrecognised generator type")
 		os.Exit(1)
 	}
+	err := generator(file)
 	if err != nil {
 		fmt.Println("Error!")
 		fmt.Println(err)
