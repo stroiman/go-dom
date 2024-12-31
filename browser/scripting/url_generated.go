@@ -80,9 +80,8 @@ func (u ESURL) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		return u.CreateInstanceBase(ctx, info.This(), url, base)
 	}
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
-		if err != nil {
-			return nil, err
+		if err0 != nil {
+			return nil, err0
 		}
 		return u.CreateInstance(ctx, info.This(), url)
 	}

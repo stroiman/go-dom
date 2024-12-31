@@ -226,6 +226,25 @@ func IllegalConstructor(data ESConstructorData) g.Generator {
 	)
 }
 
+func ReturnOnAnyError(errNames []g.Generator) g.Generator {
+	if len(errNames) == 0 {
+		return g.Noop
+	}
+	if len(errNames) == 1 {
+		return GenReturnOnErrorName(errNames[0])
+	}
+	return Statements(
+		g.Assign(g.Id("err"),
+			g.Raw(jen.Qual("errors", "Join").CallFunc(func(g *jen.Group) {
+				for _, e := range errNames {
+					g.Add(e.Generate())
+				}
+			})),
+		),
+		GenReturnOnError(),
+	)
+}
+
 func WrapperCalls(
 	op ESOperation,
 	baseFunctionName string,
@@ -249,21 +268,11 @@ func WrapperCalls(
 		callInstance := createCallInstance(functionName, argnames, op)
 		if i > 0 {
 			arg := arguments[i-1]
-			argErrorCheck := StatementList(
-				g.Assign(g.Id("err"),
-					g.Raw(jen.Qual("errors", "Join").CallFunc(func(g *jen.Group) {
-						for _, e := range errNames {
-							g.Add(e.Generate())
-						}
-					})),
-				),
-				GenReturnOnError(),
-			)
 			statements.Append(StatementList(
 				IfStmt{
 					Condition: g.Raw(jen.Id("args").Dot("noOfReadArguments").Op(">=").Lit(i)),
 					Block: StatementList(
-						argErrorCheck,
+						ReturnOnAnyError(errNames),
 						callInstance,
 					),
 				}))
@@ -660,6 +669,9 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res ReadArgumentsRes
 	for i, arg := range op.Arguments {
 		argName := g.Id(arg.Name)
 		errName := g.Id(fmt.Sprintf("err%d", i))
+		if len(op.Arguments) == 1 {
+			errName = g.Id("err")
+		}
 		res.ArgNames[i] = argName
 		res.ErrNames[i] = errName
 
@@ -822,13 +834,16 @@ type Stmt struct{ *jen.Statement }
 
 func (s Stmt) Generate() *jen.Statement { return s.Statement }
 
-func GenReturnOnError() JenGenerator {
-	jErr := jen.Id("err")
+func GenReturnOnErrorName(name g.Generator) JenGenerator {
 	stmt := IfStmt{
-		Condition: g.Raw(jErr.Clone().Op("!=").Nil()),
-		Block:     g.Return(g.Raw(jen.Nil()), g.Raw(jErr)),
+		Condition: g.Raw(name.Generate().Op("!=").Nil()),
+		Block:     g.Return(g.Raw(jen.Nil()), name),
 	}
 	return stmt
+}
+
+func GenReturnOnError() JenGenerator {
+	return GenReturnOnErrorName(g.Id("err"))
 }
 
 func WriteReturnOnError(grp *jen.Group) {

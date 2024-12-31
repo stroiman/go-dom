@@ -45,9 +45,8 @@ func (u ESDOMTokenList) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		return nil, err
 	}
 	args := newArgumentHelper(u.host, info)
-	index, err0 := TryParseArg(args, 0, u.DecodeUnsignedLong)
+	index, err := TryParseArg(args, 0, u.DecodeUnsignedLong)
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}
@@ -64,9 +63,8 @@ func (u ESDOMTokenList) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 		return nil, err
 	}
 	args := newArgumentHelper(u.host, info)
-	token, err0 := TryParseArg(args, 0, u.DecodeDOMString)
+	token, err := TryParseArg(args, 0, u.DecodeDOMString)
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}
@@ -82,9 +80,8 @@ func (u ESDOMTokenList) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		return nil, err
 	}
 	args := newArgumentHelper(u.host, info)
-	tokens, err0 := TryParseArg(args, 0, u.DecodeDOMString)
+	tokens, err := TryParseArg(args, 0, u.DecodeDOMString)
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}
@@ -100,9 +97,8 @@ func (u ESDOMTokenList) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 		return nil, err
 	}
 	args := newArgumentHelper(u.host, info)
-	tokens, err0 := TryParseArg(args, 0, u.DecodeDOMString)
+	tokens, err := TryParseArg(args, 0, u.DecodeDOMString)
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}
@@ -162,9 +158,8 @@ func (u ESDOMTokenList) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 		return nil, err
 	}
 	args := newArgumentHelper(u.host, info)
-	val, err0 := TryParseArg(args, 0, u.DecodeDOMString)
+	val, err := TryParseArg(args, 0, u.DecodeDOMString)
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}

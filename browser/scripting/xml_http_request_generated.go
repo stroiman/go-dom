@@ -99,9 +99,8 @@ func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 		return nil, err
 	}
 	args := newArgumentHelper(xhr.host, info)
-	body, err0 := TryParseArg(args, 0, xhr.DecodeDocument, xhr.DecodeXMLHttpRequestBodyInit)
+	body, err := TryParseArg(args, 0, xhr.DecodeDocument, xhr.DecodeXMLHttpRequestBodyInit)
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}
@@ -128,9 +127,8 @@ func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v
 		return nil, err
 	}
 	args := newArgumentHelper(xhr.host, info)
-	name, err0 := TryParseArg(args, 0, xhr.DecodeByteString)
+	name, err := TryParseArg(args, 0, xhr.DecodeByteString)
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}
@@ -160,9 +158,8 @@ func (xhr ESXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8
 		return nil, err
 	}
 	args := newArgumentHelper(xhr.host, info)
-	mime, err0 := TryParseArg(args, 0, xhr.DecodeDOMString)
+	mime, err := TryParseArg(args, 0, xhr.DecodeDOMString)
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}
@@ -192,9 +189,8 @@ func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value
 		return nil, err
 	}
 	args := newArgumentHelper(xhr.host, info)
-	val, err0 := TryParseArg(args, 0, xhr.DecodeUnsignedLong)
+	val, err := TryParseArg(args, 0, xhr.DecodeUnsignedLong)
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}
@@ -220,9 +216,8 @@ func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*
 		return nil, err
 	}
 	args := newArgumentHelper(xhr.host, info)
-	val, err0 := TryParseArg(args, 0, xhr.DecodeBoolean)
+	val, err := TryParseArg(args, 0, xhr.DecodeBoolean)
 	if args.noOfReadArguments >= 1 {
-		err := errors.Join(err0)
 		if err != nil {
 			return nil, err
 		}
