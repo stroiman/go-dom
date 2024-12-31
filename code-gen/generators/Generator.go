@@ -87,3 +87,12 @@ func (m Value) Call(args ...Generator) Value {
 		}
 	}))}
 }
+
+// WrapLine creates a generator that places a new line in front of the generated
+// code. Useful for function function calls or struct initialisation using many
+// members.
+func WrapLine(g Generator) Generator {
+	return GeneratorFunc(func() *jen.Statement {
+		return jen.Line().Add(g.Generate())
+	})
+}

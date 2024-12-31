@@ -17,6 +17,8 @@ var (
 	v8FunctionTemplatePtr     = g.NewTypePackage("FunctionTemplate", v8).Pointer()
 	v8FunctionCallbackInfoPtr = g.NewTypePackage("FunctionCallbackInfo", v8).Pointer()
 	v8Value                   = g.NewTypePackage("Value", v8).Pointer()
+	v8ReadOnly                = g.Raw(jen.Qual(v8, "ReadOnly"))
+	v8None                    = g.Raw(jen.Qual(v8, "None"))
 	scriptHostPtr             = g.NewType("ScriptHost").Pointer()
 )
 
@@ -292,14 +294,6 @@ func WrapperCalls(
 	return statements
 }
 
-type v8ArgInfo g.Value
-
-func (info v8ArgInfo) GetV8Context() g.Generator { return g.Value(info).Method("Context").Call() }
-
-type WrapperInstance struct{ g.Value }
-
-func (i WrapperInstance) GetScriptHost() g.Value { return i.Field("host") }
-
 func RequireContext(wrapper WrapperInstance) g.Generator {
 	info := v8ArgInfo(g.NewValue("info"))
 	return g.Assign(
@@ -406,12 +400,6 @@ func InstallFunctionHandlers(wrapper WrapperInstance, data ESConstructorData) Je
 	return StatementList(generators...)
 }
 
-type v8PrototypeTemplate struct{ g.Value }
-
-func (proto v8PrototypeTemplate) Set(name string, handler g.Generator) g.Generator {
-	return proto.Value.Method("Set").Call(g.Lit(name), handler)
-}
-
 func InstallFunctionHandler(wrapper WrapperInstance, op ESOperation) JenGenerator {
 	ft := NewFunctionTemplate{g.Id("iso"), wrapper.Field(idlNameToGoName(op.Name))}
 	proto := v8PrototypeTemplate{g.NewValue("prototype")}
@@ -434,23 +422,24 @@ func InstallAttributeHandlers(wrapper WrapperInstance, data ESConstructorData) g
 func InstallAttributeHandler(wrapper WrapperInstance, op ESAttribute) g.Generator {
 	getter := op.Getter
 	setter := op.Setter
-	list := StatementList()
-	if getter != nil {
-		ft := NewFunctionTemplate{g.Id("iso"), wrapper.Field(getter.Name)}
-		var setterFt g.Generator
-		var Attributes = "ReadOnly"
-		if setter != nil {
-			setterFt = NewFunctionTemplate{g.Id("iso"), wrapper.Field(setter.Name)}
-			Attributes = "None"
-		} else {
-			setterFt = g.Nil
-		}
-
-		list.Append(Stmt{
-			(jen.Id("prototype").Dot("SetAccessorProperty").Call(jen.Lit(op.Name), jen.Line().Add(ft.Generate()), jen.Line().Add(setterFt.Generate()), jen.Line().Add(jen.Qual(v8, Attributes)))),
-		})
+	if getter == nil {
+		return g.Noop
 	}
-	return list
+	getterFt := NewFunctionTemplate{g.Id("iso"), wrapper.Field(getter.Name)}
+	setterFt := g.Nil
+	var Attributes = v8ReadOnly
+	if setter != nil {
+		setterFt = NewFunctionTemplate{g.Id("iso"), wrapper.Field(setter.Name)}
+		Attributes = v8None
+	}
+
+	proto := v8PrototypeTemplate{g.NewValue("prototype")}
+	return proto.SetAccessorProperty(
+		op.Name,
+		g.WrapLine(getterFt),
+		g.WrapLine(setterFt),
+		g.WrapLine(Attributes),
+	)
 }
 
 type JenGenerator = g.Generator
