@@ -35,6 +35,8 @@ type Node interface {
 	RemoveChild(node Node) error
 	NextSibling() Node
 	FirstChild() Node
+	SetTextContent(value string)
+	//
 	SetSelf(node Node)
 	// unexported
 	createHtmlNode() *html.Node
@@ -194,4 +196,11 @@ func (n *node) nodes() []Node {
 
 func (n *node) SetSelf(node Node) {
 	n.self = node
+}
+
+func (n *node) SetTextContent(val string) {
+	for x := n.FirstChild(); x != nil; x = n.FirstChild() {
+		x.RemoveChild(x)
+	}
+	n.AppendChild(NewTextNode(nil, val))
 }

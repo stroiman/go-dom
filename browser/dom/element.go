@@ -33,7 +33,6 @@ type Element interface {
 	OuterHTML() string
 	InnerHTML() string
 	TagName() string
-	SetTextContent(value string)
 	// unexported
 	getAttributes() Attributes
 }
@@ -172,12 +171,4 @@ func (n *element) NodeType() NodeType { return NodeTypeElement }
 
 func (n *element) Click() bool {
 	return n.DispatchEvent(NewCustomEvent("click", EventCancelable(true), EventBubbles(true)))
-}
-
-func (n *element) SetTextContent(val string) {
-	for x := n.FirstChild(); x != nil; x = n.FirstChild() {
-		x.RemoveChild(x)
-	}
-	n.AppendChild(NewTextNode(nil, val))
-	// return n.DispatchEvent(NewCustomEvent("click", EventCancelable(true), EventBubbles(true)))
 }
