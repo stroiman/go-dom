@@ -28,3 +28,7 @@ func (n *textNode) createHtmlNode() *html.Node {
 		Data: n.text,
 	}
 }
+
+func (n *textNode) GetTextContent() string {
+	return n.text
+}

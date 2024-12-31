@@ -127,4 +127,14 @@ var _ = Describe("Node", func() {
 			Expect(parent.Contains(child)).To(BeFalse())
 		})
 	})
+
+	Describe("TextContents", func() {
+		It("Should return all text", func() {
+			doc := ParseHtmlString(
+				`<body><div style="display: none">Hidden text</div><div>Visible text</div></body>`,
+			)
+			text := doc.Body().GetTextContent()
+			Expect(text).To(Equal("Hidden textVisible text"))
+		})
+	})
 })

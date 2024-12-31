@@ -3,6 +3,7 @@ package dom
 import (
 	"errors"
 	"slices"
+	"strings"
 
 	"golang.org/x/net/html"
 )
@@ -36,6 +37,7 @@ type Node interface {
 	NextSibling() Node
 	FirstChild() Node
 	SetTextContent(value string)
+	GetTextContent() string
 	//
 	SetSelf(node Node)
 	// unexported
@@ -203,4 +205,12 @@ func (n *node) SetTextContent(val string) {
 		x.RemoveChild(x)
 	}
 	n.AppendChild(NewTextNode(nil, val))
+}
+
+func (n *node) GetTextContent() string {
+	b := &strings.Builder{}
+	for _, node := range n.nodes() {
+		b.WriteString(node.GetTextContent())
+	}
+	return b.String()
 }
