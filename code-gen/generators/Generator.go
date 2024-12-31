@@ -1,6 +1,8 @@
 package generators
 
-import "github.com/dave/jennifer/jen"
+import (
+	"github.com/dave/jennifer/jen"
+)
 
 type st = *jen.Statement
 
@@ -70,6 +72,12 @@ type Value struct{ Generator }
 
 func NewValue(name string) Value {
 	return Value{Id(name)}
+}
+
+func (v Value) Assign(expr Generator) Generator {
+	return GeneratorFunc(func() *jen.Statement {
+		return v.Generate().Op(":=").Add(expr.Generate())
+	})
 }
 
 func (v Value) Field(name string) Value {

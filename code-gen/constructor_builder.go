@@ -1,0 +1,78 @@
+package main
+
+import (
+	g "github.com/stroiman/go-dom/code-gen/generators"
+)
+
+// The ConstructorBuilder is the function that creates the ES constructor
+// itself, i.e. starts with a new function template, installs prototypes on the
+// template, etc.
+type ConstructorBuilder struct {
+	v8Iso
+	Proto   v8PrototypeTemplate
+	Wrapper WrapperInstance
+}
+
+func NewConstructorBuilder() ConstructorBuilder {
+	return ConstructorBuilder{
+		v8Iso:   v8Iso{g.NewValue("iso")},
+		Proto:   v8PrototypeTemplate{g.NewValue("prototype")},
+		Wrapper: WrapperInstance{g.NewValue("wrapper")},
+	}
+}
+
+func (builder ConstructorBuilder) NewFunctionTemplateOfWrappedMethod(name string) g.Generator {
+	return builder.NewFunctionTemplate(builder.Wrapper.Method(name))
+}
+
+func (builder ConstructorBuilder) InstallFunctionHandlers(
+	data ESConstructorData,
+) JenGenerator {
+	generators := make([]JenGenerator, len(data.Operations))
+	for i, op := range data.Operations {
+		generators[i] = builder.Proto.Set(
+			op.Name,
+			builder.NewFunctionTemplate(builder.Wrapper.Field(idlNameToGoName(op.Name))),
+		)
+	}
+	return StatementList(generators...)
+}
+
+func (builder ConstructorBuilder) InstallAttributeHandlers(
+	data ESConstructorData,
+) g.Generator {
+	length := len(data.Attributes)
+	if length == 0 {
+		return g.Noop
+	}
+	generators := make([]JenGenerator, length+1)
+	generators[0] = g.Line
+	for i, op := range data.Attributes {
+		generators[i+1] = builder.InstallAttributeHandler(op)
+	}
+	return StatementList(generators...)
+}
+
+func (builder ConstructorBuilder) InstallAttributeHandler(
+	op ESAttribute,
+) g.Generator {
+	wrapper := builder.Wrapper
+	getter := op.Getter
+	setter := op.Setter
+	if getter == nil {
+		return g.Noop
+	}
+	getterFt := builder.NewFunctionTemplate(wrapper.Field(getter.Name))
+	setterFt := g.Nil
+	var Attributes = v8ReadOnly
+	if setter != nil {
+		setterFt = builder.NewFunctionTemplate(wrapper.Field(setter.Name))
+		Attributes = v8None
+	}
+	return builder.Proto.SetAccessorProperty(
+		op.Name,
+		g.WrapLine(getterFt),
+		g.WrapLine(setterFt),
+		g.WrapLine(Attributes),
+	)
+}

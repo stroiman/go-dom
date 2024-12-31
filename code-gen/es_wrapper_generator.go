@@ -337,11 +337,6 @@ func JSConstructorImpl(data ESConstructorData) g.Generator {
 	return statements
 }
 
-func CreateInstance(typeName string, params ...g.Generator) g.Generator {
-	constructorName := fmt.Sprintf("New%s", typeName)
-	return g.NewValue(constructorName).Call(params...)
-}
-
 func Run(f *jen.File, data ESConstructorData) {
 	gen := StatementList(
 		CreateConstructor(data),
@@ -361,27 +356,22 @@ func CreateConstructor(data ESConstructorData) g.Generator {
 }
 
 func CreateConstructorBody(data ESConstructorData) g.Generator {
+	builder := NewConstructorBuilder()
 	scriptHost := g.NewValue("host")
-	wrapper := WrapperInstance{g.NewValue("wrapper")}
-	constructor := g.NewValue("constructor")
-	instanceTemplate := constructor.Method("GetInstanceTemplate").Call()
-	SetInternalFieldCount := instanceTemplate.Method("SetInternalFieldCount")
+	constructor := v8FunctionTemplate{g.NewValue("constructor")}
+	instanceTemplate := constructor.GetInstanceTemplate()
+
+	createWrapperFunction := g.NewValue(fmt.Sprintf("New%s", data.WrapperTypeName))
 
 	statements := StatementList(
-		g.Assign(g.Id("iso"), scriptHost.Field("iso")),
-		g.Assign(
-			wrapper,
-			CreateInstance(data.WrapperTypeName, g.Id("host")),
-		),
-		g.Assign(constructor, NewFunctionTemplate{g.Id("iso"), wrapper.Method("NewInstance")}),
-		SetInternalFieldCount.Call(g.Lit(1)),
-		g.Assign(
-			g.Id("prototype"),
-			constructor.Method("PrototypeTemplate").Call(),
-		),
+		builder.v8Iso.Assign(scriptHost.Field("iso")),
+		g.Assign(builder.Wrapper, createWrapperFunction.Call(scriptHost)),
+		g.Assign(constructor, builder.NewFunctionTemplateOfWrappedMethod("NewInstance")),
+		instanceTemplate.SetInternalFieldCount(1),
+		g.Assign(builder.Proto, constructor.GetPrototypeTemplate()),
 		NewLine(),
-		InstallFunctionHandlers(wrapper, data),
-		InstallAttributeHandlers(wrapper, data),
+		builder.InstallFunctionHandlers(data),
+		builder.InstallAttributeHandlers(data),
 	)
 	if data.RunCustomCode {
 		statements.Append(
@@ -390,56 +380,6 @@ func CreateConstructorBody(data ESConstructorData) g.Generator {
 	}
 	statements.Append(g.Return(constructor))
 	return statements
-}
-
-func InstallFunctionHandlers(wrapper WrapperInstance, data ESConstructorData) JenGenerator {
-	generators := make([]JenGenerator, len(data.Operations))
-	for i, op := range data.Operations {
-		generators[i] = InstallFunctionHandler(wrapper, op)
-	}
-	return StatementList(generators...)
-}
-
-func InstallFunctionHandler(wrapper WrapperInstance, op ESOperation) JenGenerator {
-	ft := NewFunctionTemplate{g.Id("iso"), wrapper.Field(idlNameToGoName(op.Name))}
-	proto := v8PrototypeTemplate{g.NewValue("prototype")}
-	return proto.Set(op.Name, ft)
-}
-
-func InstallAttributeHandlers(wrapper WrapperInstance, data ESConstructorData) g.Generator {
-	length := len(data.Attributes)
-	if length == 0 {
-		return g.Noop
-	}
-	generators := make([]JenGenerator, length+1)
-	generators[0] = g.Line
-	for i, op := range data.Attributes {
-		generators[i+1] = InstallAttributeHandler(wrapper, op)
-	}
-	return StatementList(generators...)
-}
-
-func InstallAttributeHandler(wrapper WrapperInstance, op ESAttribute) g.Generator {
-	getter := op.Getter
-	setter := op.Setter
-	if getter == nil {
-		return g.Noop
-	}
-	getterFt := NewFunctionTemplate{g.Id("iso"), wrapper.Field(getter.Name)}
-	setterFt := g.Nil
-	var Attributes = v8ReadOnly
-	if setter != nil {
-		setterFt = NewFunctionTemplate{g.Id("iso"), wrapper.Field(setter.Name)}
-		Attributes = v8None
-	}
-
-	proto := v8PrototypeTemplate{g.NewValue("prototype")}
-	return proto.SetAccessorProperty(
-		op.Name,
-		g.WrapLine(getterFt),
-		g.WrapLine(setterFt),
-		g.WrapLine(Attributes),
-	)
 }
 
 type JenGenerator = g.Generator
