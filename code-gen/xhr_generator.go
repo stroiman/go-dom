@@ -31,10 +31,8 @@ func generateXhr(b *builder) error {
 	classWrapper.Method("getResponseHeader").HasNoError = true
 	classWrapper.Method("setRequestHeader").HasNoError = true
 
-	data, err := createData(xhrData, classWrapper)
-	if err != nil {
-		return err
-	}
-	writeFactory(file, data)
+	data := createData(xhrData, classWrapper)
+
+	WriteGenerator(file, data)
 	return file.Render(b)
 }

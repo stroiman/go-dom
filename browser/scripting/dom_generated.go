@@ -158,6 +158,7 @@ func (u ESDOMTokenList) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	}
 	return nil, errors.New("Missing arguments")
 }
+
 func CreateHTMLTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewESHTMLTemplateElement(host)

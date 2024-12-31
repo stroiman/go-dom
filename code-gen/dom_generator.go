@@ -4,6 +4,7 @@ import (
 	_ "embed"
 
 	"github.com/dave/jennifer/jen"
+	g "github.com/stroiman/go-dom/code-gen/generators"
 )
 
 //go:embed webref/curated/idlparsed/dom.json
@@ -39,16 +40,13 @@ func generateDOMTypes(b *builder) error {
 	htmlTemplateElement.Method("shadowRootClonable").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootSerializable").SetNotImplemented()
 
-	domTokenListData, err := createData(domData, domTokenList)
-	if err != nil {
-		return err
-	}
-	htmlTemplateData, err := createData(htmlData, htmlTemplateElement)
+	domTokenListData := createData(domData, domTokenList)
+	htmlTemplateData := createData(htmlData, htmlTemplateElement)
 
-	if err != nil {
-		return err
-	}
-	writeFactory(file, domTokenListData)
-	writeFactory(file, htmlTemplateData)
+	WriteGenerator(file, StatementList(
+		domTokenListData,
+		g.Line,
+		htmlTemplateData,
+	))
 	return file.Render(b)
 }

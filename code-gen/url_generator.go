@@ -31,10 +31,8 @@ func generateUrl(b *builder) error {
 		"SetHash",
 		"SetSearch",
 	)
-	data, err := createData(urlData, wrapper)
-	if err != nil {
-		return err
-	}
-	writeFactory(file, data)
+	data := createData(urlData, wrapper)
+
+	WriteGenerator(file, data)
 	return file.Render(b)
 }

@@ -22,7 +22,7 @@ var (
 	scriptHostPtr             = g.NewType("ScriptHost").Pointer()
 )
 
-func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error) {
+func createData(data []byte, dataData ESClassWrapper) ESConstructorData {
 	spec := ParsedIdlFile{}
 	var constructor *ESOperation
 	err := json.Unmarshal(data, &spec)
@@ -153,7 +153,7 @@ func createData(data []byte, dataData ESClassWrapper) (ESConstructorData, error)
 		CreatesInnerType: true,
 		IdlName:          idlName,
 		RunCustomCode:    dataData.RunCustomCode,
-	}, nil
+	}
 }
 
 const br = "github.com/stroiman/go-dom/browser/dom"
@@ -347,13 +347,12 @@ func JSConstructorImpl(data ESConstructorData) g.Generator {
 	return statements
 }
 
-func Run(f *jen.File, data ESConstructorData) {
-	gen := StatementList(
+func (data ESConstructorData) Generate() *jen.Statement {
+	return StatementList(
 		CreateConstructor(data),
 		CreateConstructorWrapper(data),
 		CreateWrapperMethods(data),
-	)
-	f.Add(gen.Generate())
+	).Generate()
 }
 
 func CreateConstructor(data ESConstructorData) g.Generator {
@@ -757,6 +756,6 @@ func (ret ReturnOnError) Generate() *jen.Statement {
 	}.Generate()
 }
 
-func writeFactory(f *jen.File, data ESConstructorData) {
-	Run(f, data)
+func WriteGenerator(f *jen.File, generator g.Generator) {
+	f.Add(generator.Generate())
 }
