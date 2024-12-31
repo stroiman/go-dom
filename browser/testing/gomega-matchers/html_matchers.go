@@ -1,12 +1,15 @@
 package matchers
 
 import (
+	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
 
-	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/format"
+	"github.com/onsi/gomega/gcustom"
+	. "github.com/onsi/gomega/types"
 )
 
-func BeHTMLElement() OmegaMatcher { return HtmlElementMatcher{} }
+func BeHTMLElement() GomegaMatcher { return HtmlElementMatcher{} }
 
 type HtmlElementMatcher struct{}
 
@@ -21,4 +24,22 @@ func (m HtmlElementMatcher) FailureMessage(actual interface{}) (message string) 
 
 func (m HtmlElementMatcher) NegatedFailureMessage(actual interface{}) (message string) {
 	return "Should not be an HTMLElement"
+}
+
+func FormatElement(value any) (result string, ok bool) {
+	var element dom.Element
+	if element, ok = value.(dom.Element); ok {
+		result = element.OuterHTML()
+	}
+	return
+}
+
+func init() {
+	format.RegisterCustomFormatter(FormatElement)
+}
+
+func HaveTextContent(matcher GomegaMatcher) GomegaMatcher {
+	return gcustom.MakeMatcher(func(e dom.Element) (bool, error) {
+		return matcher.Match(e.GetTextContent())
+	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.GetTextContent}}", matcher)
 }
