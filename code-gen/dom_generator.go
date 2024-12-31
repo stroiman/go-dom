@@ -4,14 +4,10 @@ import (
 	_ "embed"
 
 	"github.com/dave/jennifer/jen"
-	g "github.com/stroiman/go-dom/code-gen/generators"
 )
 
 //go:embed webref/curated/idlparsed/dom.json
 var domData []byte
-
-//go:embed webref/curated/idlparsed/html.json
-var htmlData []byte
 
 func generateDOMTypes(b *builder) error {
 	file := jen.NewFilePath(sc)
@@ -31,22 +27,8 @@ func generateDOMTypes(b *builder) error {
 	domTokenList.Method("replace").SetNoError()
 	domTokenList.Method("supports").SetNotImplemented()
 
-	htmlTemplateElement := ESClassWrapper{
-		TypeName: "HTMLTemplateElement",
-		Receiver: "e",
-	}
-	htmlTemplateElement.Method("shadowRootMode").SetNotImplemented()
-	htmlTemplateElement.Method("shadowRootDelegatesFocus").SetNotImplemented()
-	htmlTemplateElement.Method("shadowRootClonable").SetNotImplemented()
-	htmlTemplateElement.Method("shadowRootSerializable").SetNotImplemented()
-
 	domTokenListData := createData(domData, domTokenList)
-	htmlTemplateData := createData(htmlData, htmlTemplateElement)
 
-	WriteGenerator(file, StatementList(
-		domTokenListData,
-		g.Line,
-		htmlTemplateData,
-	))
+	WriteGenerator(file, domTokenListData)
 	return file.Render(b)
 }

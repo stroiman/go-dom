@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func generateHtmlElements(file *builder) {
+func generateHtmlElements(file *builder) error {
 	output := ElementsJSON{}
 	json.Unmarshal(html_defs, &output)
 	WriteHeader(file)
@@ -15,4 +15,5 @@ func generateHtmlElements(file *builder) {
 	for _, element := range output.Elements {
 		file.Printf("\"%s\": \"%s\",\n", element.Name, element.Interface)
 	}
+	return nil
 }
