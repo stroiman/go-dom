@@ -384,46 +384,10 @@ func CreateConstructorBody(data ESConstructorData) g.Generator {
 
 type JenGenerator = g.Generator
 
-type GetArgStmt struct {
-	Name     string
-	Receiver string
-	ErrName  string
-	Getter   string
-	Index    int
-	Arg      ESOperationArgument
-}
-
 type IfStmt struct {
 	Condition JenGenerator
 	Block     JenGenerator
 	Else      JenGenerator
-}
-
-func (s GetArgStmt) Generate() *jen.Statement {
-	if s.Arg.Type != "" {
-		return AssignmentStmt{
-			VarNames: []string{s.Name, s.ErrName},
-			Expression: Stmt{
-				jen.Id(s.Receiver).Dot(s.Getter).Call(jen.Id("args"), jen.Lit(s.Index)),
-			},
-		}.Generate()
-	} else {
-		statements := []jen.Code{jen.Id("ctx"), jen.Id("args"), jen.Lit(s.Index)}
-		for _, t := range s.Arg.IdlType.IdlType.IType.Types {
-			parserName := fmt.Sprintf("Get%sFrom%s", idlNameToGoName(s.Arg.Name), t.IType.TypeName)
-			statements = append(statements, jen.Id(parserName))
-		}
-		return AssignmentStmt{
-			VarNames:   []string{s.Name, s.ErrName},
-			Expression: Stmt{jen.Id("TryParseArgs").Call(statements...)},
-		}.Generate()
-	}
-}
-
-type AssignmentStmt struct {
-	VarNames   []string
-	Expression JenGenerator
-	NoNewVars  bool
 }
 
 type StatementListStmt struct {
@@ -435,18 +399,6 @@ func StatementList(statements ...JenGenerator) StatementListStmt {
 }
 
 func NewLine() JenGenerator { return Stmt{jen.Line()} }
-
-func (s AssignmentStmt) Generate() *jen.Statement {
-	list := make([]jen.Code, 0, len(s.VarNames))
-	for _, n := range s.VarNames {
-		list = append(list, jen.Id(n))
-	}
-	operator := ":="
-	if s.NoNewVars {
-		operator = "="
-	}
-	return jen.List(list...).Op(operator).Add(s.Expression.Generate())
-}
 
 func (s *StatementListStmt) Prepend(stmt JenGenerator) {
 	s.Statements = slices.Insert(s.Statements, 0, stmt)
