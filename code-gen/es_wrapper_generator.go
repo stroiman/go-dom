@@ -231,7 +231,7 @@ func ReturnOnAnyError(errNames []g.Generator) g.Generator {
 		return g.Noop
 	}
 	if len(errNames) == 1 {
-		return GenReturnOnErrorName(errNames[0])
+		return ReturnOnError{err: errNames[0]}
 	}
 	return Statements(
 		g.Assign(g.Id("err"),
@@ -241,7 +241,7 @@ func ReturnOnAnyError(errNames []g.Generator) g.Generator {
 				}
 			})),
 		),
-		GenReturnOnError(),
+		ReturnOnError{},
 	)
 }
 
@@ -292,20 +292,31 @@ func WrapperCalls(
 	return statements
 }
 
-func RequireContext(receiver string) g.Generator {
-	return g.Assign(g.Id("ctx"), Stmt{jen.Id(receiver).Dot("host").Dot("MustGetContext").Call(
-		jen.Id("info").Dot("Context").Call(),
-	)})
+type v8ArgInfo g.Value
+
+func (info v8ArgInfo) GetV8Context() g.Generator { return g.Value(info).Method("Context").Call() }
+
+type WrapperInstance struct{ g.Value }
+
+func (i WrapperInstance) GetScriptHost() g.Value { return i.Field("host") }
+
+func RequireContext(wrapper WrapperInstance) g.Generator {
+	info := v8ArgInfo(g.NewValue("info"))
+	return g.Assign(
+		g.Id("ctx"),
+		wrapper.GetScriptHost().Method("MustGetContext").Call(info.GetV8Context()),
+	)
 }
 
 func JSConstructorImpl(data ESConstructorData) g.Generator {
+	receiver := WrapperInstance{g.NewValue(data.Receiver)}
 	if data.Constructor == nil {
 		return IllegalConstructor(data)
 	}
 	var readArgsResult ReadArgumentsResult
 	readArgsResult = ReadArguments(data, *data.Constructor)
 	statements := StatementList(readArgsResult)
-	statements.Append(RequireContext(data.Receiver))
+	statements.Append(RequireContext(receiver))
 	baseFunctionName := "CreateInstance"
 	var CreateCall = func(functionName string, argnames []g.Generator, op ESOperation) g.Generator {
 		return StatementList(
@@ -332,11 +343,9 @@ func JSConstructorImpl(data ESConstructorData) g.Generator {
 	return statements
 }
 
-func CreateInstance(typeName string, params ...jen.Code) JenGenerator {
+func CreateInstance(typeName string, params ...g.Generator) g.Generator {
 	constructorName := fmt.Sprintf("New%s", typeName)
-	return Stmt{
-		jen.Id(constructorName).Call(params...),
-	}
+	return g.NewValue(constructorName).Call(params...)
 }
 
 func Run(f *jen.File, data ESConstructorData) {
@@ -359,7 +368,7 @@ func CreateConstructor(data ESConstructorData) g.Generator {
 
 func CreateConstructorBody(data ESConstructorData) g.Generator {
 	scriptHost := g.NewValue("host")
-	wrapper := g.NewValue("wrapper")
+	wrapper := WrapperInstance{g.NewValue("wrapper")}
 	constructor := g.NewValue("constructor")
 	instanceTemplate := constructor.Method("GetInstanceTemplate").Call()
 	SetInternalFieldCount := instanceTemplate.Method("SetInternalFieldCount")
@@ -368,7 +377,7 @@ func CreateConstructorBody(data ESConstructorData) g.Generator {
 		g.Assign(g.Id("iso"), scriptHost.Field("iso")),
 		g.Assign(
 			wrapper,
-			CreateInstance(data.WrapperTypeName, jen.Id("host")),
+			CreateInstance(data.WrapperTypeName, g.Id("host")),
 		),
 		g.Assign(constructor, NewFunctionTemplate{g.Id("iso"), wrapper.Method("NewInstance")}),
 		SetInternalFieldCount.Call(g.Lit(1)),
@@ -377,8 +386,8 @@ func CreateConstructorBody(data ESConstructorData) g.Generator {
 			constructor.Method("PrototypeTemplate").Call(),
 		),
 		NewLine(),
-		InstallFunctionHandlers(data),
-		InstallAttributeHandlers(data),
+		InstallFunctionHandlers(wrapper, data),
+		InstallAttributeHandlers(wrapper, data),
 	)
 	if data.RunCustomCode {
 		statements.Append(
@@ -389,21 +398,27 @@ func CreateConstructorBody(data ESConstructorData) g.Generator {
 	return statements
 }
 
-func InstallFunctionHandlers(data ESConstructorData) JenGenerator {
+func InstallFunctionHandlers(wrapper WrapperInstance, data ESConstructorData) JenGenerator {
 	generators := make([]JenGenerator, len(data.Operations))
 	for i, op := range data.Operations {
-		generators[i] = InstallFunctionHandler(op)
+		generators[i] = InstallFunctionHandler(wrapper, op)
 	}
 	return StatementList(generators...)
 }
 
-func InstallFunctionHandler(op ESOperation) JenGenerator {
-	f := jen.Id("wrapper").Dot(idlNameToGoName(op.Name))
-	ft := NewFunctionTemplate{g.Id("iso"), Stmt{f}}
-	return Stmt{(jen.Id("prototype").Dot("Set").Call(jen.Lit(op.Name), ft.Generate()))}
+type v8PrototypeTemplate struct{ g.Value }
+
+func (proto v8PrototypeTemplate) Set(name string, handler g.Generator) g.Generator {
+	return proto.Value.Method("Set").Call(g.Lit(name), handler)
 }
 
-func InstallAttributeHandlers(data ESConstructorData) g.Generator {
+func InstallFunctionHandler(wrapper WrapperInstance, op ESOperation) JenGenerator {
+	ft := NewFunctionTemplate{g.Id("iso"), wrapper.Field(idlNameToGoName(op.Name))}
+	proto := v8PrototypeTemplate{g.NewValue("prototype")}
+	return proto.Set(op.Name, ft)
+}
+
+func InstallAttributeHandlers(wrapper WrapperInstance, data ESConstructorData) g.Generator {
 	length := len(data.Attributes)
 	if length == 0 {
 		return g.Noop
@@ -411,23 +426,21 @@ func InstallAttributeHandlers(data ESConstructorData) g.Generator {
 	generators := make([]JenGenerator, length+1)
 	generators[0] = g.Line
 	for i, op := range data.Attributes {
-		generators[i+1] = InstallAttributeHandler(op)
+		generators[i+1] = InstallAttributeHandler(wrapper, op)
 	}
 	return StatementList(generators...)
 }
 
-func InstallAttributeHandler(op ESAttribute) g.Generator {
+func InstallAttributeHandler(wrapper WrapperInstance, op ESAttribute) g.Generator {
 	getter := op.Getter
 	setter := op.Setter
 	list := StatementList()
 	if getter != nil {
-		f := jen.Id("wrapper").Dot(idlNameToGoName(getter.Name))
-		ft := NewFunctionTemplate{g.Id("iso"), Stmt{f}}
+		ft := NewFunctionTemplate{g.Id("iso"), wrapper.Field(getter.Name)}
 		var setterFt g.Generator
 		var Attributes = "ReadOnly"
 		if setter != nil {
-			f := Stmt{jen.Id("wrapper").Dot(idlNameToGoName(setter.Name))}
-			setterFt = NewFunctionTemplate{g.Id("iso"), f}
+			setterFt = NewFunctionTemplate{g.Id("iso"), wrapper.Field(setter.Name)}
 			Attributes = "None"
 		} else {
 			setterFt = g.Nil
@@ -552,7 +565,8 @@ type CallInstance struct {
 	Name     string
 	Args     []g.Generator
 	Op       ESOperation
-	Instance g.Generator
+	Instance *g.Value
+	Receiver WrapperInstance
 }
 
 type GetGeneratorResult struct {
@@ -562,7 +576,7 @@ type GetGeneratorResult struct {
 	RequireContext bool
 }
 
-func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResult) {
+func (c CallInstance) PerformCall() (genRes GetGeneratorResult) {
 	args := []g.Generator{}
 	genRes.HasError = c.Op.GetHasError()
 	genRes.HasValue = c.Op.ReturnType != "undefined"
@@ -589,11 +603,11 @@ func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResul
 		args = append(args, a)
 	}
 	list := StatementListStmt{}
-	var evaluation g.Generator
+	var evaluation g.Value
 	if c.Instance == nil {
 		evaluation = g.NewValue(idlNameToGoName(c.Name)).Call(args...)
 	} else {
-		evaluation = g.NewValue(instanceName).Method(idlNameToGoName(c.Name)).Call(args...)
+		evaluation = c.Instance.Method(idlNameToGoName(c.Name)).Call(args...)
 	}
 	if stmt == nil {
 		list.Append(evaluation)
@@ -604,8 +618,8 @@ func (c CallInstance) PerformCall(instanceName string) (genRes GetGeneratorResul
 	return
 }
 
-func (c CallInstance) GetGenerator(receiver string, instanceName string) GetGeneratorResult {
-	genRes := c.PerformCall(instanceName)
+func (c CallInstance) GetGenerator() GetGeneratorResult {
+	genRes := c.PerformCall()
 	list := StatementListStmt{}
 	list.Append(genRes.Generator)
 	if !genRes.HasValue {
@@ -621,7 +635,7 @@ func (c CallInstance) GetGenerator(receiver string, instanceName string) GetGene
 		}
 		converter += idlNameToGoName(c.Op.ReturnType)
 		genRes.RequireContext = true
-		valueReturn := Stmt{jen.Return(jen.Id(receiver).Dot(converter).Call(jen.Id("ctx"), jen.Id("result")))}
+		valueReturn := g.Return(c.Receiver.Method(converter).Call(g.Id("ctx"), g.Id("result")))
 		if genRes.HasError {
 			list.Append(IfStmt{
 				Condition: Stmt{jen.Id("err").Op("!=").Nil()},
@@ -700,13 +714,13 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res ReadArgumentsRes
 	return
 }
 
-func GetInstanceAndError(id g.Generator, data ESConstructorData) g.Generator {
+func GetInstanceAndError(id g.Generator, errId g.Generator, data ESConstructorData) g.Generator {
 	return StatementList(
 		g.AssignMany(
-			g.List(id, g.Id("err")),
+			g.List(id, errId),
 			g.Raw(jen.Id(data.Receiver).Dot("GetInstance").Call(jen.Id("info"))),
 		),
-		GenReturnOnError(),
+		ReturnOnError{},
 	)
 }
 
@@ -718,17 +732,20 @@ func FunctionTemplateCallbackBody(
 		errMsg := fmt.Sprintf("Not implemented: %s.%s", data.Name, op.Name)
 		return g.Return(g.Nil, g.Raw(jen.Qual("errors", "New").Call(jen.Lit(errMsg))))
 	}
-	instance := g.Id("instance")
+	receiver := WrapperInstance{g.NewValue(data.Receiver)}
+	instance := g.NewValue("instance")
 	readArgsResult := ReadArguments(data, op)
-	statements := StatementList(GetInstanceAndError(instance, data), readArgsResult)
+	err := g.Id("err")
+	statements := StatementList(GetInstanceAndError(instance, err, data), readArgsResult)
 	requireContext := false
 	var CreateCall = func(functionName string, argnames []g.Generator, op ESOperation) g.Generator {
 		callInstance := CallInstance{
 			Name:     functionName,
 			Args:     argnames,
 			Op:       op,
-			Instance: instance,
-		}.GetGenerator(data.Receiver, "instance")
+			Instance: &instance,
+			Receiver: receiver,
+		}.GetGenerator()
 		requireContext = requireContext || callInstance.RequireContext
 		return callInstance.Generator
 	}
@@ -742,7 +759,7 @@ func FunctionTemplateCallbackBody(
 		),
 	)
 	if requireContext {
-		statements.Prepend(RequireContext(data.Receiver))
+		statements.Prepend(RequireContext(receiver))
 	}
 	return statements
 }
@@ -764,11 +781,10 @@ func CreateConstructorWrapper(data ESConstructorData) JenGenerator {
 }
 
 func CreateWrapperMethods(data ESConstructorData) JenGenerator {
-	generators := make([]JenGenerator, 0, len(data.Operations))
+	list := StatementList()
 	for _, op := range data.Operations {
-		generators = append(generators, CreateWrapperMethod(data, op))
+		list.Append(CreateWrapperMethod(data, op))
 	}
-	list := StatementList(generators...)
 	for _, attr := range data.Attributes {
 		if attr.Getter != nil {
 			list.Append(CreateWrapperMethod(data, *attr.Getter))
@@ -834,64 +850,21 @@ type Stmt struct{ *jen.Statement }
 
 func (s Stmt) Generate() *jen.Statement { return s.Statement }
 
-func GenReturnOnErrorName(name g.Generator) JenGenerator {
-	stmt := IfStmt{
-		Condition: g.Raw(name.Generate().Op("!=").Nil()),
-		Block:     g.Return(g.Raw(jen.Nil()), name),
+type ReturnOnError struct {
+	err g.Generator
+}
+
+func (ret ReturnOnError) Generate() *jen.Statement {
+	err := ret.err
+	if err == nil {
+		err = g.Id("err")
 	}
-	return stmt
-}
-
-func GenReturnOnError() JenGenerator {
-	return GenReturnOnErrorName(g.Id("err"))
-}
-
-func WriteReturnOnError(grp *jen.Group) {
-	grp.Add(GenReturnOnError().Generate())
-}
-
-func genErrorHandler(count int) JenGenerator {
-	if count == 0 {
-		return StatementListStmt{}
-	}
-	jErr := jen.Id("err")
-	result := StatementListStmt{}
-	if count > 1 {
-		var args []jen.Code
-		for i := 0; i < count; i++ {
-			args = append(args, jen.Id(fmt.Sprintf("err%d", i)))
-		}
-		s := Stmt{jErr.Clone().Op("=").Qual("errors", "Join").Call(args...)}
-		result.Append(s)
-	}
-	result.Append(GenReturnOnError())
-	return result
-
-}
-
-func WriteErrorHandler(grp *jen.Group, count int) {
-	grp.Add(genErrorHandler(count).Generate())
+	return IfStmt{
+		Condition: g.Neq{Lhs: err, Rhs: g.Nil}, //g.Raw(err.Generate().Op("!=").Nil()),
+		Block:     g.Return(g.Raw(jen.Nil()), err),
+	}.Generate()
 }
 
 func writeFactory(f *jen.File, data ESConstructorData) {
 	Run(f, data)
-}
-
-type Helper struct{ *jen.Group }
-
-func (h Helper) BuildInstance() *jen.Statement {
-	return h.scriptContext().Dot("Window").Call().Dot("NewXmlHttpRequest").Call()
-}
-
-func (h Helper) v8FunctionCallbackInfoPtr() *jen.Statement {
-	return h.Op("*").Qual(v8, "FunctionCallbackInfo")
-}
-func (h Helper) hostArg() *jen.Statement {
-	return h.Id("info")
-}
-func (h Helper) infoArg() *jen.Statement {
-	return h.Id("info")
-}
-func (h Helper) scriptContext() *jen.Statement {
-	return h.Id("scriptContext")
 }
