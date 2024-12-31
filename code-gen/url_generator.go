@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"io"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -9,7 +10,7 @@ import (
 //go:embed webref/curated/idlparsed/url.json
 var urlData []byte
 
-func generateUrl(b *builder) error {
+func generateUrl(writer io.Writer) error {
 	file := jen.NewFilePath(sc)
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
@@ -34,5 +35,5 @@ func generateUrl(b *builder) error {
 	data := createData(urlData, wrapper)
 
 	WriteGenerator(file, data)
-	return file.Render(b)
+	return file.Render(writer)
 }

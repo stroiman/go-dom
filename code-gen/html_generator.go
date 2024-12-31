@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"io"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -9,7 +10,7 @@ import (
 //go:embed webref/curated/idlparsed/html.json
 var htmlData []byte
 
-func generateHTMLTypes(b *builder) error {
+func generateHTMLTypes(writer io.Writer) error {
 	file := jen.NewFilePath(sc)
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
@@ -27,5 +28,5 @@ func generateHTMLTypes(b *builder) error {
 	htmlTemplateData := createData(htmlData, htmlTemplateElement)
 
 	WriteGenerator(file, htmlTemplateData)
-	return file.Render(b)
+	return file.Render(writer)
 }

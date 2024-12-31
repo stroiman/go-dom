@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"io"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -9,7 +10,7 @@ import (
 //go:embed webref/curated/idlparsed/dom.json
 var domData []byte
 
-func generateDOMTypes(b *builder) error {
+func generateDOMTypes(writer io.Writer) error {
 	file := jen.NewFilePath(sc)
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
@@ -30,5 +31,5 @@ func generateDOMTypes(b *builder) error {
 	domTokenListData := createData(domData, domTokenList)
 
 	WriteGenerator(file, domTokenListData)
-	return file.Render(b)
+	return file.Render(writer)
 }

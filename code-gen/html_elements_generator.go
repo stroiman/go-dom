@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 )
 
-func generateHtmlElements(file *builder) error {
+func generateHtmlElements(writer io.Writer) error {
+	file := newBuilder(writer)
 	output := ElementsJSON{}
 	json.Unmarshal(html_defs, &output)
 	WriteHeader(file)

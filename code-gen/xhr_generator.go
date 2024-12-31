@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"io"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -9,7 +10,7 @@ import (
 //go:embed webref/curated/idlparsed/xhr.json
 var xhrData []byte
 
-func generateXhr(b *builder) error {
+func generateXhr(writer io.Writer) error {
 	file := jen.NewFilePath(sc)
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(br, "browser")
@@ -34,5 +35,5 @@ func generateXhr(b *builder) error {
 	data := createData(xhrData, classWrapper)
 
 	WriteGenerator(file, data)
-	return file.Render(b)
+	return file.Render(writer)
 }
