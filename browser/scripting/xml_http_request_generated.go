@@ -11,61 +11,64 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewESXmlHttpRequest(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
-	constructor.GetInstanceTemplate().SetInternalFieldCount(1)
-	prototype := constructor.PrototypeTemplate()
 
-	prototype.Set("open", v8.NewFunctionTemplateWithError(iso, wrapper.Open))
-	prototype.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, wrapper.SetRequestHeader))
-	prototype.Set("send", v8.NewFunctionTemplateWithError(iso, wrapper.Send))
-	prototype.Set("abort", v8.NewFunctionTemplateWithError(iso, wrapper.Abort))
-	prototype.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseHeader))
-	prototype.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, wrapper.GetAllResponseHeaders))
-	prototype.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, wrapper.OverrideMimeType))
+	instanceTmpl := constructor.GetInstanceTemplate()
+	instanceTmpl.SetInternalFieldCount(1)
 
-	prototype.SetAccessorProperty("readyState",
+	prototypeTmpl := constructor.PrototypeTemplate()
+	prototypeTmpl.Set("open", v8.NewFunctionTemplateWithError(iso, wrapper.Open))
+	prototypeTmpl.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, wrapper.SetRequestHeader))
+	prototypeTmpl.Set("send", v8.NewFunctionTemplateWithError(iso, wrapper.Send))
+	prototypeTmpl.Set("abort", v8.NewFunctionTemplateWithError(iso, wrapper.Abort))
+	prototypeTmpl.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseHeader))
+	prototypeTmpl.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, wrapper.GetAllResponseHeaders))
+	prototypeTmpl.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, wrapper.OverrideMimeType))
+
+	prototypeTmpl.SetAccessorProperty("readyState",
 		v8.NewFunctionTemplateWithError(iso, wrapper.ReadyState),
 		nil,
 		v8.ReadOnly)
-	prototype.SetAccessorProperty("timeout",
+	prototypeTmpl.SetAccessorProperty("timeout",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetTimeout),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetTimeout),
 		v8.None)
-	prototype.SetAccessorProperty("withCredentials",
+	prototypeTmpl.SetAccessorProperty("withCredentials",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetWithCredentials),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetWithCredentials),
 		v8.None)
-	prototype.SetAccessorProperty("upload",
+	prototypeTmpl.SetAccessorProperty("upload",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Upload),
 		nil,
 		v8.ReadOnly)
-	prototype.SetAccessorProperty("responseURL",
+	prototypeTmpl.SetAccessorProperty("responseURL",
 		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseURL),
 		nil,
 		v8.ReadOnly)
-	prototype.SetAccessorProperty("status",
+	prototypeTmpl.SetAccessorProperty("status",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Status),
 		nil,
 		v8.ReadOnly)
-	prototype.SetAccessorProperty("statusText",
+	prototypeTmpl.SetAccessorProperty("statusText",
 		v8.NewFunctionTemplateWithError(iso, wrapper.StatusText),
 		nil,
 		v8.ReadOnly)
-	prototype.SetAccessorProperty("responseType",
+	prototypeTmpl.SetAccessorProperty("responseType",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseType),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetResponseType),
 		v8.None)
-	prototype.SetAccessorProperty("response",
+	prototypeTmpl.SetAccessorProperty("response",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Response),
 		nil,
 		v8.ReadOnly)
-	prototype.SetAccessorProperty("responseText",
+	prototypeTmpl.SetAccessorProperty("responseText",
 		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseText),
 		nil,
 		v8.ReadOnly)
-	prototype.SetAccessorProperty("responseXML",
+	prototypeTmpl.SetAccessorProperty("responseXML",
 		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseXML),
 		nil,
 		v8.ReadOnly)
+
 	return constructor
 }
 
@@ -75,15 +78,12 @@ func (xhr ESXmlHttpRequest) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Valu
 }
 
 func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	instance, err := xhr.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(xhr.host, info)
-	name, err0 := TryParseArg(args, 0, xhr.DecodeByteString)
-	value, err1 := TryParseArg(args, 1, xhr.DecodeByteString)
+	instance, err0 := xhr.GetInstance(info)
+	name, err1 := TryParseArg(args, 0, xhr.DecodeByteString)
+	value, err2 := TryParseArg(args, 1, xhr.DecodeByteString)
 	if args.noOfReadArguments >= 2 {
-		err := errors.Join(err0, err1)
+		err := errors.Join(err0, err1, err2)
 		if err != nil {
 			return nil, err
 		}
@@ -94,21 +94,22 @@ func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8
 }
 
 func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	instance, err := xhr.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(xhr.host, info)
-	body, err := TryParseArg(args, 0, xhr.DecodeDocument, xhr.DecodeXMLHttpRequestBodyInit)
+	instance, err0 := xhr.GetInstance(info)
+	body, err1 := TryParseArg(args, 0, xhr.DecodeDocument, xhr.DecodeXMLHttpRequestBodyInit)
 	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
 		}
-		err = instance.SendBody(body)
-		return nil, err
+		callErr := instance.SendBody(body)
+		return nil, callErr
 	}
-	err = instance.Send()
-	return nil, err
+	if err0 != nil {
+		return nil, err0
+	}
+	callErr := instance.Send()
+	return nil, callErr
 }
 
 func (xhr ESXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -116,19 +117,17 @@ func (xhr ESXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	if err != nil {
 		return nil, err
 	}
-	err = instance.Abort()
-	return nil, err
+	callErr := instance.Abort()
+	return nil, callErr
 }
 
 func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
-	instance, err := xhr.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(xhr.host, info)
-	name, err := TryParseArg(args, 0, xhr.DecodeByteString)
+	instance, err0 := xhr.GetInstance(info)
+	name, err1 := TryParseArg(args, 0, xhr.DecodeByteString)
 	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
 		}
@@ -144,27 +143,25 @@ func (xhr ESXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo)
 	if err != nil {
 		return nil, err
 	}
-	result, err := instance.GetAllResponseHeaders()
-	if err != nil {
-		return nil, err
+	result, callErr := instance.GetAllResponseHeaders()
+	if callErr != nil {
+		return nil, callErr
 	} else {
 		return xhr.ToByteString(ctx, result)
 	}
 }
 
 func (xhr ESXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	instance, err := xhr.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(xhr.host, info)
-	mime, err := TryParseArg(args, 0, xhr.DecodeDOMString)
+	instance, err0 := xhr.GetInstance(info)
+	mime, err1 := TryParseArg(args, 0, xhr.DecodeDOMString)
 	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
 		}
-		err = instance.OverrideMimeType(mime)
-		return nil, err
+		callErr := instance.OverrideMimeType(mime)
+		return nil, callErr
 	}
 	return nil, errors.New("Missing arguments")
 }
@@ -184,13 +181,11 @@ func (xhr ESXmlHttpRequest) GetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value
 }
 
 func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	instance, err := xhr.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(xhr.host, info)
-	val, err := TryParseArg(args, 0, xhr.DecodeUnsignedLong)
+	instance, err0 := xhr.GetInstance(info)
+	val, err1 := TryParseArg(args, 0, xhr.DecodeUnsignedLong)
 	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
 		}
@@ -211,13 +206,11 @@ func (xhr ESXmlHttpRequest) GetWithCredentials(info *v8.FunctionCallbackInfo) (*
 }
 
 func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	instance, err := xhr.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(xhr.host, info)
-	val, err := TryParseArg(args, 0, xhr.DecodeBoolean)
+	instance, err0 := xhr.GetInstance(info)
+	val, err1 := TryParseArg(args, 0, xhr.DecodeBoolean)
 	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
 		}

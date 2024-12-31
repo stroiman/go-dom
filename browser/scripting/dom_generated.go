@@ -11,25 +11,28 @@ func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewESDOMTokenList(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
-	constructor.GetInstanceTemplate().SetInternalFieldCount(1)
-	prototype := constructor.PrototypeTemplate()
 
-	prototype.Set("item", v8.NewFunctionTemplateWithError(iso, wrapper.Item))
-	prototype.Set("contains", v8.NewFunctionTemplateWithError(iso, wrapper.Contains))
-	prototype.Set("add", v8.NewFunctionTemplateWithError(iso, wrapper.Add))
-	prototype.Set("remove", v8.NewFunctionTemplateWithError(iso, wrapper.Remove))
-	prototype.Set("toggle", v8.NewFunctionTemplateWithError(iso, wrapper.Toggle))
-	prototype.Set("replace", v8.NewFunctionTemplateWithError(iso, wrapper.Replace))
-	prototype.Set("supports", v8.NewFunctionTemplateWithError(iso, wrapper.Supports))
+	instanceTmpl := constructor.GetInstanceTemplate()
+	instanceTmpl.SetInternalFieldCount(1)
 
-	prototype.SetAccessorProperty("length",
+	prototypeTmpl := constructor.PrototypeTemplate()
+	prototypeTmpl.Set("item", v8.NewFunctionTemplateWithError(iso, wrapper.Item))
+	prototypeTmpl.Set("contains", v8.NewFunctionTemplateWithError(iso, wrapper.Contains))
+	prototypeTmpl.Set("add", v8.NewFunctionTemplateWithError(iso, wrapper.Add))
+	prototypeTmpl.Set("remove", v8.NewFunctionTemplateWithError(iso, wrapper.Remove))
+	prototypeTmpl.Set("toggle", v8.NewFunctionTemplateWithError(iso, wrapper.Toggle))
+	prototypeTmpl.Set("replace", v8.NewFunctionTemplateWithError(iso, wrapper.Replace))
+	prototypeTmpl.Set("supports", v8.NewFunctionTemplateWithError(iso, wrapper.Supports))
+
+	prototypeTmpl.SetAccessorProperty("length",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Length),
 		nil,
 		v8.ReadOnly)
-	prototype.SetAccessorProperty("value",
+	prototypeTmpl.SetAccessorProperty("value",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetValue),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetValue),
 		v8.None)
+
 	wrapper.CustomInitialiser(constructor)
 	return constructor
 }
@@ -40,13 +43,11 @@ func (u ESDOMTokenList) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, e
 
 func (u ESDOMTokenList) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(u.host, info)
-	index, err := TryParseArg(args, 0, u.DecodeUnsignedLong)
+	instance, err0 := u.GetInstance(info)
+	index, err1 := TryParseArg(args, 0, u.DecodeUnsignedLong)
 	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
 		}
@@ -58,13 +59,11 @@ func (u ESDOMTokenList) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 
 func (u ESDOMTokenList) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(u.host, info)
-	token, err := TryParseArg(args, 0, u.DecodeDOMString)
+	instance, err0 := u.GetInstance(info)
+	token, err1 := TryParseArg(args, 0, u.DecodeDOMString)
 	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
 		}
@@ -75,30 +74,26 @@ func (u ESDOMTokenList) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 }
 
 func (u ESDOMTokenList) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	instance, err := u.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(u.host, info)
-	tokens, err := TryParseArg(args, 0, u.DecodeDOMString)
+	instance, err0 := u.GetInstance(info)
+	tokens, err1 := TryParseArg(args, 0, u.DecodeDOMString)
 	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
 		}
-		err = instance.Add(tokens)
-		return nil, err
+		callErr := instance.Add(tokens)
+		return nil, callErr
 	}
 	return nil, errors.New("Missing arguments")
 }
 
 func (u ESDOMTokenList) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	instance, err := u.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(u.host, info)
-	tokens, err := TryParseArg(args, 0, u.DecodeDOMString)
+	instance, err0 := u.GetInstance(info)
+	tokens, err1 := TryParseArg(args, 0, u.DecodeDOMString)
 	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
 		}
@@ -110,15 +105,12 @@ func (u ESDOMTokenList) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 
 func (u ESDOMTokenList) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(u.host, info)
-	token, err0 := TryParseArg(args, 0, u.DecodeDOMString)
-	newToken, err1 := TryParseArg(args, 1, u.DecodeDOMString)
+	instance, err0 := u.GetInstance(info)
+	token, err1 := TryParseArg(args, 0, u.DecodeDOMString)
+	newToken, err2 := TryParseArg(args, 1, u.DecodeDOMString)
 	if args.noOfReadArguments >= 2 {
-		err := errors.Join(err0, err1)
+		err := errors.Join(err0, err1, err2)
 		if err != nil {
 			return nil, err
 		}
@@ -153,13 +145,11 @@ func (u ESDOMTokenList) GetValue(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 }
 
 func (u ESDOMTokenList) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	instance, err := u.GetInstance(info)
-	if err != nil {
-		return nil, err
-	}
 	args := newArgumentHelper(u.host, info)
-	val, err := TryParseArg(args, 0, u.DecodeDOMString)
+	instance, err0 := u.GetInstance(info)
+	val, err1 := TryParseArg(args, 0, u.DecodeDOMString)
 	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
 		if err != nil {
 			return nil, err
 		}
@@ -172,29 +162,33 @@ func CreateHTMLTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewESHTMLTemplateElement(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
-	constructor.GetInstanceTemplate().SetInternalFieldCount(1)
-	prototype := constructor.PrototypeTemplate()
 
-	prototype.SetAccessorProperty("content",
+	instanceTmpl := constructor.GetInstanceTemplate()
+	instanceTmpl.SetInternalFieldCount(1)
+
+	prototypeTmpl := constructor.PrototypeTemplate()
+
+	prototypeTmpl.SetAccessorProperty("content",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Content),
 		nil,
 		v8.ReadOnly)
-	prototype.SetAccessorProperty("shadowRootMode",
+	prototypeTmpl.SetAccessorProperty("shadowRootMode",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetShadowRootMode),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetShadowRootMode),
 		v8.None)
-	prototype.SetAccessorProperty("shadowRootDelegatesFocus",
+	prototypeTmpl.SetAccessorProperty("shadowRootDelegatesFocus",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetShadowRootDelegatesFocus),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetShadowRootDelegatesFocus),
 		v8.None)
-	prototype.SetAccessorProperty("shadowRootClonable",
+	prototypeTmpl.SetAccessorProperty("shadowRootClonable",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetShadowRootClonable),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetShadowRootClonable),
 		v8.None)
-	prototype.SetAccessorProperty("shadowRootSerializable",
+	prototypeTmpl.SetAccessorProperty("shadowRootSerializable",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetShadowRootSerializable),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetShadowRootSerializable),
 		v8.None)
+
 	return constructor
 }
 

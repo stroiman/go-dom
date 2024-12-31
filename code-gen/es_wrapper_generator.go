@@ -253,6 +253,7 @@ func WrapperCalls(
 	argNames []g.Generator,
 	errorsNames []g.Generator,
 	createCallInstance func(string, []g.Generator, ESOperation) g.Generator,
+	extraError bool,
 ) g.Generator {
 	arguments := op.Arguments
 	statements := StatementList()
@@ -266,7 +267,11 @@ func WrapperCalls(
 			}
 		}
 		argnames := argNames[0:i]
-		errNames := errorsNames[0:i]
+		ei := i
+		if extraError {
+			ei++
+		}
+		errNames := errorsNames[0:ei]
 		callInstance := createCallInstance(functionName, argnames, op)
 		if i > 0 {
 			arg := arguments[i-1]
@@ -288,6 +293,7 @@ func WrapperCalls(
 				break
 			}
 		} else {
+			statements.Append(ReturnOnAnyError(errNames))
 			statements.Append(callInstance)
 		}
 	}
@@ -308,8 +314,11 @@ func JSConstructorImpl(data ESConstructorData) g.Generator {
 		return IllegalConstructor(data)
 	}
 	var readArgsResult ReadArgumentsResult
-	readArgsResult = ReadArguments(data, *data.Constructor)
-	statements := StatementList(readArgsResult)
+	op := *data.Constructor
+	readArgsResult = ReadArguments(data, op)
+	statements := StatementList(
+		AssignArgs(data, op),
+		readArgsResult)
 	statements.Append(RequireContext(receiver))
 	baseFunctionName := "CreateInstance"
 	var CreateCall = func(functionName string, argnames []g.Generator, op ESOperation) g.Generator {
@@ -327,11 +336,12 @@ func JSConstructorImpl(data ESConstructorData) g.Generator {
 	}
 	statements.Append(
 		WrapperCalls(
-			*data.Constructor,
+			op,
 			baseFunctionName,
 			readArgsResult.ArgNames,
 			readArgsResult.ErrNames,
 			CreateCall,
+			false,
 		),
 	)
 	return statements
@@ -359,7 +369,6 @@ func CreateConstructorBody(data ESConstructorData) g.Generator {
 	builder := NewConstructorBuilder()
 	scriptHost := g.NewValue("host")
 	constructor := v8FunctionTemplate{g.NewValue("constructor")}
-	instanceTemplate := constructor.GetInstanceTemplate()
 
 	createWrapperFunction := g.NewValue(fmt.Sprintf("New%s", data.WrapperTypeName))
 
@@ -367,11 +376,14 @@ func CreateConstructorBody(data ESConstructorData) g.Generator {
 		builder.v8Iso.Assign(scriptHost.Field("iso")),
 		g.Assign(builder.Wrapper, createWrapperFunction.Call(scriptHost)),
 		g.Assign(constructor, builder.NewFunctionTemplateOfWrappedMethod("NewInstance")),
-		instanceTemplate.SetInternalFieldCount(1),
+		g.Line,
+		g.Assign(builder.InstanceTmpl, constructor.GetInstanceTemplate()),
+		builder.InstanceTmpl.SetInternalFieldCount(1),
+		g.Line,
 		g.Assign(builder.Proto, constructor.GetPrototypeTemplate()),
-		NewLine(),
 		builder.InstallFunctionHandlers(data),
 		builder.InstallAttributeHandlers(data),
+		g.Line,
 	)
 	if data.RunCustomCode {
 		statements.Append(
@@ -397,8 +409,6 @@ type StatementListStmt struct {
 func StatementList(statements ...JenGenerator) StatementListStmt {
 	return StatementListStmt{statements}
 }
-
-func NewLine() JenGenerator { return Stmt{jen.Line()} }
 
 func (s *StatementListStmt) Prepend(stmt JenGenerator) {
 	s.Statements = slices.Insert(s.Statements, 0, stmt)
@@ -467,17 +477,13 @@ func (c CallInstance) PerformCall() (genRes GetGeneratorResult) {
 	}
 	if genRes.HasError {
 		if stmt != nil {
-			stmt = stmt.Op(",").Id("err")
+			stmt = stmt.Op(",").Id("callErr")
 		} else {
-			stmt = jen.Id("err")
+			stmt = jen.Id("callErr")
 		}
 	}
 	if stmt != nil {
-		if genRes.HasValue {
-			stmt = stmt.Op(":=")
-		} else {
-			stmt = stmt.Op("=")
-		}
+		stmt = stmt.Op(":=")
 	}
 
 	for _, a := range c.Args {
@@ -505,7 +511,7 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 	list.Append(genRes.Generator)
 	if !genRes.HasValue {
 		if genRes.HasError {
-			list.Append(Stmt{jen.Return(jen.Nil(), jen.Id("err"))})
+			list.Append(Stmt{jen.Return(jen.Nil(), jen.Id("callErr"))})
 		} else {
 			list.Append(Stmt{jen.Return(jen.Nil(), jen.Nil())})
 		}
@@ -519,8 +525,8 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 		valueReturn := g.Return(c.Receiver.Method(converter).Call(g.Id("ctx"), g.Id("result")))
 		if genRes.HasError {
 			list.Append(IfStmt{
-				Condition: Stmt{jen.Id("err").Op("!=").Nil()},
-				Block:     Stmt{jen.Return(jen.Nil(), jen.Id("err"))},
+				Condition: Stmt{jen.Id("callErr").Op("!=").Nil()},
+				Block:     Stmt{jen.Return(jen.Nil(), jen.Id("callErr"))},
 				Else:      valueReturn,
 			})
 		} else {
@@ -545,28 +551,27 @@ func (r ReadArgumentsResult) Generate() *jen.Statement {
 	}
 }
 
+func AssignArgs(data ESConstructorData, op ESOperation) g.Generator {
+	if len(op.Arguments) == 0 {
+		return g.Noop
+	}
+	return g.Assign(
+		g.Id("args"),
+		g.Raw(
+			jen.Id("newArgumentHelper").
+				Call(jen.Id(data.Receiver).Dot("host"), jen.Id("info")),
+		),
+	)
+}
+
 func ReadArguments(data ESConstructorData, op ESOperation) (res ReadArgumentsResult) {
 	argCount := len(op.Arguments)
 	res.ArgNames = make([]g.Generator, argCount)
 	res.ErrNames = make([]g.Generator, argCount)
 	statements := &StatementListStmt{}
-	if argCount > 0 {
-		statements.Append(
-			g.Assign(
-				g.Id("args"),
-				g.Raw(
-					jen.Id("newArgumentHelper").
-						Call(jen.Id(data.Receiver).Dot("host"), jen.Id("info")),
-				),
-			),
-		)
-	}
 	for i, arg := range op.Arguments {
 		argName := g.Id(arg.Name)
-		errName := g.Id(fmt.Sprintf("err%d", i))
-		if len(op.Arguments) == 1 {
-			errName = g.Id("err")
-		}
+		errName := g.Id(fmt.Sprintf("err%d", i+1))
 		res.ArgNames[i] = argName
 		res.ErrNames[i] = errName
 
@@ -596,12 +601,9 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res ReadArgumentsRes
 }
 
 func GetInstanceAndError(id g.Generator, errId g.Generator, data ESConstructorData) g.Generator {
-	return StatementList(
-		g.AssignMany(
-			g.List(id, errId),
-			g.Raw(jen.Id(data.Receiver).Dot("GetInstance").Call(jen.Id("info"))),
-		),
-		ReturnOnError{},
+	return g.AssignMany(
+		g.List(id, errId),
+		g.Raw(jen.Id(data.Receiver).Dot("GetInstance").Call(jen.Id("info"))),
 	)
 }
 
@@ -616,8 +618,10 @@ func FunctionTemplateCallbackBody(
 	receiver := WrapperInstance{g.NewValue(data.Receiver)}
 	instance := g.NewValue("instance")
 	readArgsResult := ReadArguments(data, op)
-	err := g.Id("err")
-	statements := StatementList(GetInstanceAndError(instance, err, data), readArgsResult)
+	err := g.Id("err0")
+	if len(op.Arguments) == 0 {
+		err = g.Id("err")
+	}
 	requireContext := false
 	var CreateCall = func(functionName string, argnames []g.Generator, op ESOperation) g.Generator {
 		callInstance := CallInstance{
@@ -630,13 +634,20 @@ func FunctionTemplateCallbackBody(
 		requireContext = requireContext || callInstance.RequireContext
 		return callInstance.Generator
 	}
-	statements.Append(
+	errNames := make([]g.Generator, len(readArgsResult.ErrNames)+1)
+	errNames[0] = err
+	copy(errNames[1:], readArgsResult.ErrNames)
+	statements := StatementList(
+		AssignArgs(data, op),
+		GetInstanceAndError(instance, err, data),
+		readArgsResult,
 		WrapperCalls(
 			op,
 			idlNameToGoName(op.Name),
 			readArgsResult.ArgNames,
-			readArgsResult.ErrNames,
+			errNames,
 			CreateCall,
+			true,
 		),
 	)
 	if requireContext {
@@ -685,7 +696,7 @@ func CreateWrapperMethod(
 		return g.Noop
 	}
 	return StatementList(
-		NewLine(),
+		g.Line,
 		g.FunctionDefinition{
 			Receiver: g.FunctionArgument{
 				Name: g.Id(data.Receiver),
