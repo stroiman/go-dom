@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	. "github.com/stroiman/go-dom/browser"
-	"github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser/html"
+	. "github.com/stroiman/go-dom/browser/dom"
+	. "github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -69,7 +69,7 @@ var _ = Describe("Browser", func() {
 		})
 		Describe("Page A has been loaded", func() {
 			var (
-				window html.Window
+				window Window
 			)
 
 			BeforeEach(func() {
@@ -107,7 +107,7 @@ var _ = Describe("Browser", func() {
 				anchor, _ := window.Document().QuerySelector("a")
 				anchor.AddEventListener(
 					"click",
-					dom.NewEventHandlerFuncWithoutError(dom.Event.PreventDefault),
+					NewEventHandlerFunc(NoError(Event.PreventDefault)),
 				)
 				anchor.Click()
 				heading, _ := window.Document().QuerySelector("h1")

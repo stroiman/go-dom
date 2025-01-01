@@ -235,6 +235,16 @@ func NewEventHandlerFunc(handler HandlerFunc) EventHandler {
 	return eventHandlerFunc{handler, NewObjectId()}
 }
 
+// NoError takes a function accepting a single argument and has no return value,
+// and transforms it into a function that can be used where an error return
+// value is expected.
+func NoError[T func(U), U any](f T) func(U) error {
+	return func(u U) error {
+		f(u)
+		return nil
+	}
+}
+
 func NewEventHandlerFuncWithoutError(handler HandlerFuncWithoutError) EventHandler {
 	return eventHandlerFunc{func(event Event) error {
 		handler(event)
