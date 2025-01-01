@@ -35,4 +35,24 @@ var _ = Describe("Template loaded from body", func() {
 	It("Should render contents in InnerHTML", func() {
 		Expect(template.InnerHTML()).To(Equal(`<div id="d"></div>`))
 	})
+
+	Describe("CSS Queries", func() {
+		It("Should not find it's children from querying document", func() {
+			Expect(doc.QuerySelector("div")).To(BeNil())
+		})
+
+		It("Should not find it's children from querying document", func() {
+			template, err := doc.QuerySelector("template")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(template.QuerySelector("div")).To(BeNil())
+		})
+
+		It("Should not find it's children from querying template content", func() {
+			template, err := doc.QuerySelector("template")
+			Expect(template, err).ToNot(BeNil(), "Template was found")
+			t, ok := template.(HTMLTemplateElement)
+			Expect(ok).To(BeTrue())
+			Expect(t.Content().QuerySelector("div")).ToNot(BeNil(), "Div found in template")
+		})
+	})
 })
