@@ -41,12 +41,11 @@ var _ = Describe("Element", func() {
   </div>
   <div id="3">El 1</div>
 </body>`)
-			node := doc.GetElementById("2")
-			if el, ok := node.(Element); ok {
-				Element(
-					el,
-				).InsertAdjacentHTML("beforebegin", "<div>1st new child</div><div>2nd new child</div>")
-			}
+			el := doc.GetElementById("2")
+			Expect(el.InsertAdjacentHTML(
+				"beforebegin",
+				"<div>1st new child</div><div>2nd new child</div>",
+			)).To(Succeed())
 			Expect(doc.Body()).To(HaveOuterHTML(`<body>
   <div id="1">El 1</div>
   <div>1st new child</div><div>2nd new child</div><div id="2">El 2
@@ -67,13 +66,14 @@ var _ = Describe("Element", func() {
   </div>
   <div id="3">El 1</div>
 </body>`)
-			node, err := (doc.QuerySelector("[id='2']"))
+			el, err := (doc.QuerySelector("[id='2']"))
 			Expect(err).ToNot(HaveOccurred())
-			if el, ok := node.(Element); ok {
-				Element(
-					el,
-				).InsertAdjacentHTML("afterbegin", "<div>1st new child</div><div>2nd new child</div>")
-			}
+			Expect(
+				el.InsertAdjacentHTML(
+					"afterbegin",
+					"<div>1st new child</div><div>2nd new child</div>",
+				),
+			).To(Succeed())
 			Expect(doc.Body()).To(HaveOuterHTML(`<body>
   <div id="1">El 1</div>
   <div id="2"><div>1st new child</div><div>2nd new child</div>El 2
@@ -94,13 +94,14 @@ var _ = Describe("Element", func() {
   </div>
   <div id="3">El 1</div>
 </body>`)
-			node, err := (doc.QuerySelector("[id='2']"))
+			el, err := (doc.QuerySelector("[id='2']"))
 			Expect(err).ToNot(HaveOccurred())
-			if el, ok := node.(Element); ok {
-				Element(
-					el,
-				).InsertAdjacentHTML("beforeend", "<div>1st new child</div><div>2nd new child</div>")
-			}
+			Expect(
+				el.InsertAdjacentHTML(
+					"beforeend",
+					"<div>1st new child</div><div>2nd new child</div>",
+				),
+			).To(Succeed())
 			Expect(doc.Body()).To(HaveOuterHTML(`<body>
   <div id="1">El 1</div>
   <div id="2">El 2
@@ -121,13 +122,14 @@ var _ = Describe("Element", func() {
   </div>
   <div id="3">El 1</div>
 </body>`)
-			node, err := (doc.QuerySelector("[id='2']"))
+			el, err := (doc.QuerySelector("[id='2']"))
 			Expect(err).ToNot(HaveOccurred())
-			if el, ok := node.(Element); ok {
-				Element(
-					el,
-				).InsertAdjacentHTML("afterend", "<div>1st new child</div><div>2nd new child</div>")
-			}
+			Expect(
+				el.InsertAdjacentHTML(
+					"afterend",
+					"<div>1st new child</div><div>2nd new child</div>",
+				),
+			).To(Succeed())
 			Expect(doc.Body()).To(HaveOuterHTML(`<body>
   <div id="1">El 1</div>
   <div id="2">El 2

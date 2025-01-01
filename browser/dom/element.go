@@ -146,8 +146,8 @@ func (n *element) InsertAdjacentHTML(position string, text string) error {
 	)
 	switch position {
 	case "beforebegin":
-		parent = n.Parent()
-		reference = n // NOTE This will not work for subclasses
+		parent = n.GetSelf().Parent()
+		reference = n.GetSelf()
 	case "afterbegin":
 		parent = n
 		reference = n.ChildNodes().Item(0)
@@ -162,7 +162,7 @@ func (n *element) InsertAdjacentHTML(position string, text string) error {
 	}
 	fragment, err := n.ownerDocument.parseFragment(strings.NewReader(text))
 	if err == nil {
-		parent.InsertBefore(fragment, reference)
+		_, err = parent.InsertBefore(fragment, reference)
 	}
 	return err
 }

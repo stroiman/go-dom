@@ -40,6 +40,7 @@ type Node interface {
 	GetTextContent() string
 	//
 	SetSelf(node Node)
+	GetSelf() Node
 	// unexported
 	createHtmlNode() *html.Node
 	setParent(node Node)
@@ -65,7 +66,9 @@ func (n *node) AppendChild(child Node) Node {
 func (n *node) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
 	if fragment, ok := newChild.(DocumentFragment); ok {
 		for fragment.ChildNodes().Length() > 0 {
-			n.InsertBefore(fragment.ChildNodes().Item(0), referenceNode)
+			if _, err := n.InsertBefore(fragment.ChildNodes().Item(0), referenceNode); err != nil {
+				return nil, err
+			}
 		}
 		return fragment, nil
 	}
@@ -196,9 +199,8 @@ func (n *node) nodes() []Node {
 	return n.childNodes.All()
 }
 
-func (n *node) SetSelf(node Node) {
-	n.self = node
-}
+func (n *node) SetSelf(node Node) { n.self = node }
+func (n *node) GetSelf() Node     { return n.self }
 
 func (n *node) SetTextContent(val string) {
 	for x := n.FirstChild(); x != nil; x = n.FirstChild() {
