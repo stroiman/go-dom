@@ -6,21 +6,29 @@ import (
 
 type HTMLDocument interface {
 	Document
+	// unexported
+	getWindow() Window
 }
 
 type htmlDocument struct {
 	Document
+	window Window
 }
 
 func NewHTMLDocument(window Window) HTMLDocument {
-	result := &htmlDocument{NewDocument(window)}
+	result := &htmlDocument{NewDocument(window), window}
 	result.SetSelf(result)
 	return result
 }
 
 func (d *htmlDocument) CreateElement(name string) Element {
-	if name == "template" {
+	switch name {
+	case "template":
 		return NewHTMLTemplateElement(d)
+	case "a":
+		return NewHTMLAnchorElement(d)
 	}
 	return NewHTMLElement(name, d)
 }
+
+func (d *htmlDocument) getWindow() Window { return d.window }

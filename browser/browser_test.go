@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	. "github.com/stroiman/go-dom/browser"
+	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -46,5 +47,40 @@ var _ = Describe("Browser", func() {
 		Expect(err).ToNot(HaveOccurred())
 		target := win.Document().GetElementById("target")
 		Expect(target.OuterHTML()).To(Equal(`<div id="target">42</div>`))
+	})
+
+	Describe("Navigation", func() {
+		var server *http.ServeMux
+
+		BeforeEach(func() {
+			server = http.NewServeMux()
+			server.HandleFunc("GET /a.html", func(res http.ResponseWriter, req *http.Request) {
+				res.Write([]byte(`<body>
+					<h1>Page A</h1>
+					<a href="b.html">Load B</a>
+					<script>loadedA = "PAGE A"</script>
+				</body>`))
+			})
+			server.HandleFunc("GET /b.html", func(res http.ResponseWriter, req *http.Request) {
+				res.Write([]byte(`<body><h1>Page B</h1><script>loadedB = "PAGE B"</script></body>`))
+			})
+		})
+
+		It("Should load a new page when clicking a link", func() {
+			browser := NewBrowserFromHandler(server)
+			window, err := browser.Open("/a.html")
+			Expect(err).ToNot(HaveOccurred())
+			heading, _ := window.Document().QuerySelector("h1")
+			Expect(heading).To(HaveTextContent(Equal("Page A")))
+			Expect(window.GetScriptEngine().Eval("loadedA")).To(Equal("PAGE A"))
+			anchor, _ := window.Document().QuerySelector("a")
+			anchor.Click()
+			// Expect(window.Navigate("b.html")).To(Succeed())
+			// TODO, Wait for load?
+			heading, _ = window.Document().QuerySelector("h1")
+			Expect(heading).To(HaveTextContent(Equal("Page B")))
+			Expect(window.GetScriptEngine().Eval("loadedB")).To(Equal("PAGE B"))
+			Expect(window.GetScriptEngine().Eval("typeof loadedA")).To(Equal("undefined"))
+		})
 	})
 })

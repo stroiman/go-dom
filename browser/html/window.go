@@ -29,8 +29,8 @@ type Window interface {
 	EventTarget
 	Document() Document
 	Dispose()
-	// TODO: Remove, for testing
-	LoadHTML(string) error
+	Navigate(string) error // TODO: Remove, perhaps? for testing
+	LoadHTML(string) error // TODO: Remove, for testing
 	Eval(string) (any, error)
 	Run(string) error
 	SetScriptRunner(ScriptEngine)
@@ -159,6 +159,18 @@ func (o WindowOptions) Apply(options *WindowOptions) {
 
 func (w *window) Document() Document {
 	return w.document
+}
+
+func (w *window) Navigate(href string) error {
+	w.initScriptEngine()
+	resp, err := w.httpClient.Get(href)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return errors.New("Non-ok Response")
+	}
+	return w.parseReader(resp.Body)
 }
 
 func (w *window) LoadHTML(html string) error {
