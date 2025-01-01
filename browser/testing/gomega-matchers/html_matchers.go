@@ -2,7 +2,7 @@ package matchers
 
 import (
 	"github.com/stroiman/go-dom/browser/dom"
-	. "github.com/stroiman/go-dom/browser/dom"
+	. "github.com/stroiman/go-dom/browser/html"
 
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/gcustom"

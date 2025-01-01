@@ -103,7 +103,7 @@ func (r ScriptElementRules) Connected(win Window, node dom.Element) {
 type TemplateElementRules struct{ BaseRules }
 
 func (TemplateElementRules) AppendChild(parent dom.Node, child dom.Node) dom.Node {
-	template, ok := child.(dom.HTMLTemplateElement)
+	template, ok := child.(HTMLTemplateElement)
 	if !ok {
 		panic("Parser error, applying tepmlate rules to non-template element")
 	}

@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 
 	v8 "github.com/tommie/v8go"
 )
@@ -72,11 +73,11 @@ func (l ESDOMTokenList) Toggle(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 }
 
 type ESHTMLTemplateElement struct {
-	ESWrapper[dom.HTMLTemplateElement]
+	ESWrapper[html.HTMLTemplateElement]
 }
 
 func NewESHTMLTemplateElement(host *ScriptHost) ESHTMLTemplateElement {
-	return ESHTMLTemplateElement{NewESWrapper[dom.HTMLTemplateElement](host)}
+	return ESHTMLTemplateElement{NewESWrapper[html.HTMLTemplateElement](host)}
 }
 
 func (e ESHTMLTemplateElement) CreateInstance(

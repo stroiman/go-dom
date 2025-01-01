@@ -1,7 +1,9 @@
-package dom
+package html
 
 import (
 	"strings"
+
+	. "github.com/stroiman/go-dom/browser/dom"
 )
 
 type HTMLElement interface {
@@ -15,10 +17,6 @@ type htmlElement struct {
 }
 
 func NewHTMLElement(tagName string, ownerDocument Document) HTMLElement {
-	return newHTMLElement(tagName, ownerDocument)
-}
-
-func newHTMLElement(tagName string, ownerDocument Document) *htmlElement {
 	element := NewElement(tagName, ownerDocument)
 	renderer, _ := element.(Renderer)
 	childrenRenderer, _ := element.(ChildrenRenderer)
@@ -33,13 +31,13 @@ type HTMLTemplateElement interface {
 }
 
 type htmlTemplateElement struct {
-	*htmlElement
+	HTMLElement
 	content DocumentFragment
 }
 
 func NewHTMLTemplateElement(ownerDocument Document) HTMLTemplateElement {
 	result := &htmlTemplateElement{
-		newHTMLElement("template", ownerDocument),
+		NewHTMLElement("template", ownerDocument),
 		NewDocumentFragment(ownerDocument),
 	}
 	result.SetSelf(result)
