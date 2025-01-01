@@ -11,17 +11,20 @@ type HTMLElement interface {
 }
 
 type htmlElement struct {
-	*element
+	Element
+	Renderer
+	ChildrenRenderer
 }
 
 func NewHTMLElement(tagName string, ownerDocument Document) HTMLElement {
-	result := &htmlElement{newElement(tagName, ownerDocument)}
-	result.SetSelf(result)
-	return result
+	return newHTMLElement(tagName, ownerDocument)
 }
 
 func newHTMLElement(tagName string, ownerDocument Document) *htmlElement {
-	result := &htmlElement{newElement(tagName, ownerDocument)}
+	element := NewElement(tagName, ownerDocument)
+	renderer, _ := element.(Renderer)
+	childrenRenderer, _ := element.(ChildrenRenderer)
+	result := &htmlElement{element, renderer, childrenRenderer}
 	result.SetSelf(result)
 	return result
 }

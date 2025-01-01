@@ -208,5 +208,10 @@ func RenderElement(e Element, writer *strings.Builder) {
 
 func (e *element) String() string {
 	childLen := e.ChildNodes().Length()
-	return fmt.Sprintf("<%s (child count=%d) />", e.tagName, childLen)
+
+	id := e.GetAttribute("id")
+	if id != "" {
+		id = "id='" + id + "'"
+	}
+	return fmt.Sprintf("<%s %s(child count=%d) />", e.tagName, id, childLen)
 }
