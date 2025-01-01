@@ -41,3 +41,5 @@ func (d *documentFragment) createHtmlNode() *html.Node {
 }
 
 func (d *documentFragment) NodeType() NodeType { return NodeTypeDocumentFragment }
+
+func (d *documentFragment) NodeName() string { return "#document-fragment" }
