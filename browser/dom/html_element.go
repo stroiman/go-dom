@@ -2,8 +2,6 @@ package dom
 
 import (
 	"strings"
-
-	"golang.org/x/net/html"
 )
 
 type HTMLElement interface {
@@ -54,12 +52,4 @@ func (e *htmlTemplateElement) RenderChildren(builder *strings.Builder) {
 	if renderer, ok := e.content.(ChildrenRenderer); ok {
 		renderer.RenderChildren(builder)
 	}
-}
-
-func (e *htmlTemplateElement) createHtmlNode() *html.Node {
-	node := e.htmlElement.createHtmlNode()
-	for _, child := range e.content.nodes() {
-		node.AppendChild(NodeIterator{child}.toHtmlNode(nil))
-	}
-	return node
 }
