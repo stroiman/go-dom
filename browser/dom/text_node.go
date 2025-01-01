@@ -1,6 +1,10 @@
 package dom
 
-import "golang.org/x/net/html"
+import (
+	"strings"
+
+	"golang.org/x/net/html"
+)
 
 type TextNode interface {
 	Node
@@ -16,6 +20,10 @@ func NewTextNode(node *html.Node, text string) Node {
 	result := &textNode{newNode(), text}
 	result.SetSelf(result)
 	return result
+}
+
+func (n *textNode) Render(builder *strings.Builder) {
+	builder.WriteString(n.text)
 }
 
 func (n *textNode) Text() string { return n.text }

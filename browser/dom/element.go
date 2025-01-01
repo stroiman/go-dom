@@ -2,6 +2,7 @@ package dom
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 
@@ -49,6 +50,14 @@ type element struct {
 }
 
 func NewElement(tagName string, ownerDocument Document) Element {
+	// return newElement(tagName, ownerDocument)
+	// // TODO: handle namespace
+	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument}
+	result.SetSelf(result)
+	return result
+}
+
+func newElement(tagName string, ownerDocument Document) *element {
 	// TODO: handle namespace
 	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument}
 	result.SetSelf(result)
@@ -74,16 +83,16 @@ func (e *element) ClassList() DOMTokenList {
 
 func (e *element) OuterHTML() string {
 	writer := &strings.Builder{}
-	html.Render(writer, toHtmlNode(e))
-	return string(writer.String())
+	if renderer, ok := e.self.(Renderer); ok {
+		renderer.Render(writer)
+	}
+	return writer.String()
 }
 
 func (e *element) InnerHTML() string {
 	writer := &strings.Builder{}
-	for _, child := range e.ChildNodes().All() {
-		html.Render(writer, toHtmlNode(child))
-	}
-	return string(writer.String())
+	e.renderChildren(writer)
+	return writer.String()
 }
 
 func (e *element) GetAttribute(name string) string {
@@ -171,4 +180,33 @@ func (n *element) NodeType() NodeType { return NodeTypeElement }
 
 func (n *element) Click() bool {
 	return n.DispatchEvent(NewCustomEvent("click", EventCancelable(true), EventBubbles(true)))
+}
+
+func (e *element) Render(writer *strings.Builder) {
+	RenderElement(e, writer)
+}
+
+func RenderElement(e Element, writer *strings.Builder) {
+	tagName := strings.ToLower(e.TagName())
+	writer.WriteRune('<')
+	writer.WriteString(tagName)
+	for a := range e.GetAttributes().All() {
+		writer.WriteRune(' ')
+		writer.WriteString(a.Name())
+		writer.WriteString("=\"")
+		writer.WriteString(a.GetValue())
+		writer.WriteString("\"")
+	}
+	writer.WriteRune('>')
+	if childRenderer, ok := e.GetSelf().(ChildrenRenderer); ok {
+		childRenderer.RenderChildren(writer)
+	}
+	writer.WriteString("</")
+	writer.WriteString(tagName)
+	writer.WriteRune('>')
+}
+
+func (e *element) String() string {
+	childLen := e.ChildNodes().Length()
+	return fmt.Sprintf("<%s (child count=%d) />", e.tagName, childLen)
 }

@@ -22,6 +22,14 @@ const (
 	NodeTypeDocumentFragment      NodeType = 11
 )
 
+type Renderer interface {
+	Render(*strings.Builder)
+}
+
+type ChildrenRenderer interface {
+	RenderChildren(*strings.Builder)
+}
+
 type Node interface {
 	EventTarget
 	AppendChild(node Node) Node
@@ -216,3 +224,19 @@ func (n *node) GetTextContent() string {
 	}
 	return b.String()
 }
+
+func (n *node) renderChildren(builder *strings.Builder) {
+	if childRenderer, ok := n.self.(ChildrenRenderer); ok {
+		childRenderer.RenderChildren(builder)
+	}
+}
+
+func (n *node) RenderChildren(builder *strings.Builder) {
+	for _, child := range n.childNodes.All() {
+		if renderer, ok := child.(Renderer); ok {
+			renderer.Render(builder)
+		}
+	}
+}
+
+func (n *node) String() string { return n.NodeName() }

@@ -10,8 +10,20 @@ type HTMLElement interface {
 	Element
 }
 
-func NewHTMLElement(tagName string, ownerDocument Document) Element {
-	return NewElement(tagName, ownerDocument)
+type htmlElement struct {
+	*element
+}
+
+func NewHTMLElement(tagName string, ownerDocument Document) HTMLElement {
+	result := &htmlElement{newElement(tagName, ownerDocument)}
+	result.SetSelf(result)
+	return result
+}
+
+func newHTMLElement(tagName string, ownerDocument Document) *htmlElement {
+	result := &htmlElement{newElement(tagName, ownerDocument)}
+	result.SetSelf(result)
+	return result
 }
 
 type HTMLTemplateElement interface {
@@ -20,37 +32,31 @@ type HTMLTemplateElement interface {
 }
 
 type htmlTemplateElement struct {
-	HTMLElement
+	*htmlElement
 	content DocumentFragment
 }
 
 func NewHTMLTemplateElement(ownerDocument Document) HTMLTemplateElement {
-	return &htmlTemplateElement{
-		NewHTMLElement("template", ownerDocument),
+	result := &htmlTemplateElement{
+		newHTMLElement("template", ownerDocument),
 		NewDocumentFragment(ownerDocument),
 	}
+	result.SetSelf(result)
+	return result
 }
 
 func (e *htmlTemplateElement) Content() DocumentFragment { return e.content }
 
+func (e *htmlTemplateElement) RenderChildren(builder *strings.Builder) {
+	if renderer, ok := e.content.(ChildrenRenderer); ok {
+		renderer.RenderChildren(builder)
+	}
+}
+
 func (e *htmlTemplateElement) createHtmlNode() *html.Node {
-	node := e.HTMLElement.createHtmlNode()
+	node := e.htmlElement.createHtmlNode()
 	for _, child := range e.content.nodes() {
 		node.AppendChild(NodeIterator{child}.toHtmlNode(nil))
 	}
 	return node
-}
-
-func (e *htmlTemplateElement) OuterHTML() string {
-	writer := &strings.Builder{}
-	html.Render(writer, toHtmlNode(e))
-	return string(writer.String())
-}
-
-func (e *htmlTemplateElement) InnerHTML() string {
-	writer := &strings.Builder{}
-	for _, child := range e.ChildNodes().All() {
-		html.Render(writer, toHtmlNode(child))
-	}
-	return string(writer.String())
 }

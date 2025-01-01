@@ -32,7 +32,7 @@ var _ = Describe("Template loaded from body", func() {
 		Expect(template.OuterHTML()).To(Equal(`<template id="t"><div id="d"></div></template>`))
 	})
 
-	It("Should render contents in InnerHTML", Pending, func() {
+	It("Should render contents in InnerHTML", func() {
 		Expect(template.InnerHTML()).To(Equal(`<div id="d"></div>`))
 	})
 })
