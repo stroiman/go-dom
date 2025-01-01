@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	. "github.com/stroiman/go-dom/browser"
+	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -65,22 +67,52 @@ var _ = Describe("Browser", func() {
 				res.Write([]byte(`<body><h1>Page B</h1><script>loadedB = "PAGE B"</script></body>`))
 			})
 		})
+		Describe("Page A has been loaded", func() {
+			var (
+				window html.Window
+			)
 
-		It("Should load a new page when clicking a link", func() {
-			browser := NewBrowserFromHandler(server)
-			window, err := browser.Open("/a.html")
-			Expect(err).ToNot(HaveOccurred())
-			heading, _ := window.Document().QuerySelector("h1")
-			Expect(heading).To(HaveTextContent(Equal("Page A")))
-			Expect(window.GetScriptEngine().Eval("loadedA")).To(Equal("PAGE A"))
-			anchor, _ := window.Document().QuerySelector("a")
-			anchor.Click()
-			// Expect(window.Navigate("b.html")).To(Succeed())
-			// TODO, Wait for load?
-			heading, _ = window.Document().QuerySelector("h1")
-			Expect(heading).To(HaveTextContent(Equal("Page B")))
-			Expect(window.GetScriptEngine().Eval("loadedB")).To(Equal("PAGE B"))
-			Expect(window.GetScriptEngine().Eval("typeof loadedA")).To(Equal("undefined"))
+			BeforeEach(func() {
+				var err error
+				browser := NewBrowserFromHandler(server)
+				window, err = browser.Open("/a.html")
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			It("Should have Page A loaded", func() {
+				heading, _ := window.Document().QuerySelector("h1")
+				Expect(heading).To(HaveTextContent(Equal("Page A")))
+				Expect(window.GetScriptEngine().Eval("loadedA")).To(Equal("PAGE A"))
+			})
+
+			Describe("Navigate to new page", func() {
+				BeforeEach(func() {
+					anchor, _ := window.Document().QuerySelector("a")
+					anchor.Click()
+					// TODO, Wait for load?
+				})
+
+				It("Should load a new page when clicking a link", func() {
+					heading, _ := window.Document().QuerySelector("h1")
+					Expect(heading).To(HaveTextContent(Equal("Page B")))
+					Expect(window.GetScriptEngine().Eval("loadedB")).To(Equal("PAGE B"))
+				})
+
+				It("Should have cleared global JS state", func() {
+					Expect(window.GetScriptEngine().Eval("typeof loadedA")).To(Equal("undefined"))
+				})
+			})
+
+			It("Should NOT load a new page when an eventhandler aborts", func() {
+				anchor, _ := window.Document().QuerySelector("a")
+				anchor.AddEventListener(
+					"click",
+					dom.NewEventHandlerFuncWithoutError(dom.Event.PreventDefault),
+				)
+				anchor.Click()
+				heading, _ := window.Document().QuerySelector("h1")
+				Expect(heading).To(HaveTextContent(Equal("Page A")))
+			})
 		})
 	})
 })
