@@ -5,7 +5,7 @@ name: Go
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "fix-build" ]
   pull_request:
     branches: [ "main" ]
 
@@ -17,12 +17,16 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
-        go-version: '1.20'
+        go-version: '1.23.2'
+        cache-dependency-path: |
+               browser/go.sum
+               code-gen/go.sum
 
     - name: Build
-      run: go build -v ./...
-
-    - name: Test
-      run: go test -v ./...
+      working-directory: ./browser
+      run: |
+        go get
+        go build -v ./...
+        go test -v ./...
