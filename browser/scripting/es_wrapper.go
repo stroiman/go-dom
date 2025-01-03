@@ -3,7 +3,6 @@ package scripting
 import (
 	"errors"
 	"runtime/cgo"
-	"unsafe"
 
 	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
@@ -144,13 +143,13 @@ func (o HandleReffedObject[T]) Store(value T, ctx *ScriptContext, this *v8.Objec
 	handle := cgo.NewHandle(value)
 	ctx.AddDisposer(HandleDisposable(handle))
 
-	internalField := v8.NewExternalValue(o.host.iso, unsafe.Pointer(&handle))
+	internalField := v8.NewValueExternalHandle(o.host.iso, handle)
 	this.SetInternalField(0, internalField)
 }
 
 func (o HandleReffedObject[T]) GetInstance(info *v8.FunctionCallbackInfo) (dom.URL, error) {
 	h := info.This().GetInternalField(0)
-	handle := *(*cgo.Handle)(h.External())
+	handle := h.ExternalHandle()
 	result := handle.Value().(dom.URL)
 	return result, nil
 }

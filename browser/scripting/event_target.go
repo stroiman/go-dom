@@ -2,6 +2,7 @@ package scripting
 
 import (
 	"errors"
+	"runtime/cgo"
 
 	"github.com/stroiman/go-dom/browser/dom"
 	v8 "github.com/tommie/v8go"
@@ -67,9 +68,9 @@ func CreateCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
 				}
 			}
 			e := dom.NewCustomEvent(args[0].String(), eventOptions...)
-			// TODO: Better memory management
-			ctx.pinner.Pin(e)
-			info.This().SetInternalField(0, v8.NewExternalFromInterface(iso, e))
+			handle := cgo.NewHandle(e)
+			ctx.AddDisposer(HandleDisposable(handle))
+			info.This().SetInternalField(0, v8.NewValueExternalHandle(iso, handle))
 			return v8.Undefined(iso), nil
 		},
 	)
@@ -118,8 +119,8 @@ func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 					return nil, v8.NewTypeError(iso, "Object not an EventTarget")
 				}
 				e := info.Args()[0]
-				intf := e.Object().GetInternalField(0).ExternalInterface()
-				if evt, ok := intf.(dom.Event); ok {
+				handle := e.Object().GetInternalField(0).ExternalHandle()
+				if evt, ok := handle.Value().(dom.Event); ok {
 					return v8.NewValue(iso, target.DispatchEvent(evt))
 				} else {
 					return nil, v8.NewTypeError(iso, "Not an Event")
