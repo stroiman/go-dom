@@ -48,7 +48,7 @@ var _ = Describe("Browser", func() {
 		win, err := browser.Open("/index.html")
 		Expect(err).ToNot(HaveOccurred())
 		target := win.Document().GetElementById("target")
-		Expect(target.OuterHTML()).To(Equal(`<div id="target">42</div>`))
+		Expect(target).To(HaveOuterHTML(Equal(`<div id="target">42</div>`)))
 	})
 
 	Describe("Navigation", func() {

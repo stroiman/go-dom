@@ -43,3 +43,15 @@ func HaveTextContent(matcher GomegaMatcher) GomegaMatcher {
 		return matcher.Match(e.GetTextContent())
 	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.GetTextContent}}", matcher)
 }
+
+func HaveInnerHTML(matcher GomegaMatcher) GomegaMatcher {
+	return gcustom.MakeMatcher(func(e dom.Element) (bool, error) {
+		return matcher.Match(e.InnerHTML())
+	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.GetTextContent}}", matcher)
+}
+
+func HaveOuterHTML(matcher GomegaMatcher) GomegaMatcher {
+	return gcustom.MakeMatcher(func(e dom.Element) (bool, error) {
+		return matcher.Match(e.OuterHTML())
+	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.GetTextContent}}", matcher)
+}
