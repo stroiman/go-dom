@@ -1,14 +1,15 @@
 package html_test
 
 import (
-	. "github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/dom"
+	. "github.com/stroiman/go-dom/browser/html"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Template loaded from body", func() {
-	var doc Document
+	var doc dom.Document
 	var template HTMLTemplateElement
 
 	BeforeEach(func() {

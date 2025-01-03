@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/internal/http"
 	"github.com/stroiman/go-dom/browser/scripting"
@@ -29,7 +30,7 @@ func (b *Browser) Open(location string) (window Window, err error) {
 	if resp.StatusCode != 200 {
 		return nil, errors.New("Non-ok Response")
 	}
-	window, err = NewWindowReader(resp.Body, b.createOptions(location))
+	window, err = html.NewWindowReader(resp.Body, b.createOptions(location))
 	b.windows = append(b.windows, window)
 	return
 }
