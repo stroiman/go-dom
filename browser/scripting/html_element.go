@@ -12,7 +12,7 @@ func CreateHtmlElement(host *ScriptHost) *v8.FunctionTemplate {
 			return nil, v8.NewTypeError(iso, "Illegal Constructor")
 		},
 	)
-	instanceTemplate := res.GetInstanceTemplate()
+	instanceTemplate := res.InstanceTemplate()
 	instanceTemplate.SetInternalFieldCount(1)
 	return res
 }

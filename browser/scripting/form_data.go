@@ -45,7 +45,7 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 		})
 	builder.SetDefaultInstanceLookup()
 	protoBuilder := builder.NewPrototypeBuilder()
-	builder.constructor.GetInstanceTemplate().SetSymbol(
+	builder.constructor.InstanceTemplate().SetSymbol(
 		v8.SymbolIterator(iso),
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(info.Context())

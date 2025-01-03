@@ -14,7 +14,7 @@ func CreateWindowTemplate(host *ScriptHost) *v8.FunctionTemplate {
 			return nil, v8.NewTypeError(iso, "Illegal Constructor")
 		},
 	)
-	windowTemplate := windowTemplateFn.GetInstanceTemplate()
+	windowTemplate := windowTemplateFn.InstanceTemplate()
 	windowTemplate.SetInternalFieldCount(1)
 	windowTemplate.SetAccessorPropertyCallback(
 		"window",
@@ -40,10 +40,10 @@ func installGlobals(
 	host *ScriptHost,
 	globalInstalls []globalInstall,
 ) {
-	windowTemplate := windowFnTemplate.GetInstanceTemplate()
+	windowTemplate := windowFnTemplate.InstanceTemplate()
 	for _, globalInstall := range globalInstalls {
 		windowTemplate.Set(globalInstall.name, globalInstall.constructor)
 	}
 	location := host.globals.namedGlobals["Location"]
-	windowTemplate.Set("location", location.GetInstanceTemplate())
+	windowTemplate.Set("location", location.InstanceTemplate())
 }

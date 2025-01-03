@@ -34,7 +34,7 @@ func (ft v8FunctionTemplate) GetPrototypeTemplate() g.Generator {
 }
 
 func (ft v8FunctionTemplate) GetInstanceTemplate() v8InstanceTemplate {
-	return v8InstanceTemplate{ft.Method("GetInstanceTemplate").Call()}
+	return v8InstanceTemplate{ft.Method("InstanceTemplate").Call()}
 }
 
 func (proto v8PrototypeTemplate) SetAccessorProperty(

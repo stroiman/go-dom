@@ -34,7 +34,7 @@ func (l ESDOMTokenList) GetInstance(
 }
 
 func (l ESDOMTokenList) CustomInitialiser(constructor *v8.FunctionTemplate) {
-	constructor.GetInstanceTemplate().SetSymbol(
+	constructor.InstanceTemplate().SetSymbol(
 		v8.SymbolIterator(l.host.iso),
 		v8.NewFunctionTemplateWithError(l.host.iso, l.GetIterator),
 	)

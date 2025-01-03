@@ -15,7 +15,7 @@ type ESElement struct {
 func (e ESElement) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	tokenList := e.host.globals.namedGlobals["DOMTokenList"]
 	ctx := e.host.MustGetContext(info.Context())
-	instance, err := tokenList.GetInstanceTemplate().NewInstance(ctx.v8ctx)
+	instance, err := tokenList.InstanceTemplate().NewInstance(ctx.v8ctx)
 	if err != nil {
 		return nil, err
 	}

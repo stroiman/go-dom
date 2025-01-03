@@ -73,7 +73,7 @@ func CreateCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
 			return v8.Undefined(iso), nil
 		},
 	)
-	res.GetInstanceTemplate().SetInternalFieldCount(1)
+	res.InstanceTemplate().SetInternalFieldCount(1)
 	return res
 }
 
@@ -125,7 +125,7 @@ func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 					return nil, v8.NewTypeError(iso, "Not an Event")
 				}
 			}), v8.ReadOnly)
-	instanceTemplate := res.GetInstanceTemplate()
+	instanceTemplate := res.InstanceTemplate()
 	instanceTemplate.SetInternalFieldCount(1)
 	return res
 }

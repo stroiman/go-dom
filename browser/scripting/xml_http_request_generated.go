@@ -12,7 +12,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	wrapper := NewESXmlHttpRequest(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
 
-	instanceTmpl := constructor.GetInstanceTemplate()
+	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
 	prototypeTmpl := constructor.PrototypeTemplate()

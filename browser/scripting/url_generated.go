@@ -12,7 +12,7 @@ func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	wrapper := NewESURL(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
 
-	instanceTmpl := constructor.GetInstanceTemplate()
+	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
 	prototypeTmpl := constructor.PrototypeTemplate()

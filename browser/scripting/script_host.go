@@ -111,7 +111,7 @@ func (c *ScriptContext) GetInstanceForNodeByName(
 	if !ok {
 		panic("Bad constructor name")
 	}
-	value, err := prototype.GetInstanceTemplate().NewInstance(c.v8ctx)
+	value, err := prototype.InstanceTemplate().NewInstance(c.v8ctx)
 	if err == nil {
 		objectId := node.ObjectId()
 		if cached, ok := c.v8nodes[objectId]; ok {
@@ -221,7 +221,7 @@ func NewScriptHost() *ScriptHost {
 	}
 	constructors := host.globals.namedGlobals
 	window := constructors["Window"]
-	host.windowTemplate = window.GetInstanceTemplate()
+	host.windowTemplate = window.InstanceTemplate()
 	host.contexts = make(map[*v8.Context]*ScriptContext)
 	installGlobals(window, host, globalInstalls)
 	installEventLoopGlobals(host, host.windowTemplate)

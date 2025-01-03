@@ -20,7 +20,7 @@ func NewConstructorBuilder[T any](
 		host.iso,
 		cb,
 	)
-	constructor.GetInstanceTemplate().SetInternalFieldCount(1)
+	constructor.InstanceTemplate().SetInternalFieldCount(1)
 
 	builder := ConstructorBuilder[T]{host: host,
 		constructor: constructor,
@@ -35,7 +35,7 @@ func NewIllegalConstructorBuilder[T any](host *ScriptHost) ConstructorBuilder[T]
 			return nil, v8.NewTypeError(host.iso, "Illegal Constructor")
 		},
 	)
-	constructor.GetInstanceTemplate().SetInternalFieldCount(1)
+	constructor.InstanceTemplate().SetInternalFieldCount(1)
 
 	builder := ConstructorBuilder[T]{host: host,
 		constructor: constructor,
@@ -86,7 +86,7 @@ func (c ConstructorBuilder[T]) NewInstanceBuilder() PrototypeBuilder[T] {
 	}
 	return PrototypeBuilder[T]{
 		host:   c.host,
-		proto:  c.constructor.GetInstanceTemplate(),
+		proto:  c.constructor.InstanceTemplate(),
 		lookup: c.instanceLookup,
 	}
 }
