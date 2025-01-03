@@ -9,9 +9,14 @@ on:
   pull_request:
     branches: [ "main" ]
 
-jobs:
 
+jobs:
   build:
+    name: Build and test on ${{ matrix.os }} ${{ matrix.arch }}
+    strategy:
+      matrix:
+        os: [darwin, linux]
+        arch: [amd64, arm64]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
