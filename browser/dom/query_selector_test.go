@@ -1,23 +1,11 @@
 package dom_test
 
 import (
-	"fmt"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/types"
 
-	. "github.com/stroiman/go-dom/browser/dom"
+	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 )
-
-func HaveOuterHTML(expected string) types.GomegaMatcher {
-	return WithTransform(func(node Node) (string, error) {
-		if elm, ok := node.(Element); ok {
-			return elm.OuterHTML(), nil
-		}
-		return "", fmt.Errorf("Not an element: %v", node)
-	}, Equal(expected))
-}
 
 var _ = Describe("QuerySelector", func() {
 	It("Should support these cases", func() {

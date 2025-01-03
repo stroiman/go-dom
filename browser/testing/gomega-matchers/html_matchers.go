@@ -4,6 +4,7 @@ import (
 	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/html"
 
+	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/gcustom"
 	. "github.com/onsi/gomega/types"
@@ -50,7 +51,11 @@ func HaveInnerHTML(matcher GomegaMatcher) GomegaMatcher {
 	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.GetTextContent}}", matcher)
 }
 
-func HaveOuterHTML(matcher GomegaMatcher) GomegaMatcher {
+func HaveOuterHTML(expected interface{}) GomegaMatcher {
+	matcher, ok := expected.(GomegaMatcher)
+	if !ok {
+		return HaveOuterHTML(gomega.Equal(expected))
+	}
 	return gcustom.MakeMatcher(func(e dom.Element) (bool, error) {
 		return matcher.Match(e.OuterHTML())
 	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.GetTextContent}}", matcher)

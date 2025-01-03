@@ -2,6 +2,7 @@ package dom_test
 
 import (
 	. "github.com/stroiman/go-dom/browser/dom"
+	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
