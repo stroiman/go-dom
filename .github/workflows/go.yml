@@ -36,6 +36,9 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: stable
+        cache-dependency-path: |
+          browser/go.sum
+          code-gen/go.sum
 
     - name: Add GOPATH to GITHUB_ENV
       run: echo "GOPATH=$(go env GOPATH)" >>"$GITHUB_ENV"
