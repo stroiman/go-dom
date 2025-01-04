@@ -19,6 +19,10 @@ type htmlElement struct {
 }
 
 func NewHTMLElement(tagName string, ownerDocument HTMLDocument) HTMLElement {
+	return newHTMLElement(tagName, ownerDocument)
+}
+
+func newHTMLElement(tagName string, ownerDocument HTMLDocument) *htmlElement {
 	element := NewElement(tagName, ownerDocument)
 	renderer, _ := element.(Renderer)
 	childrenRenderer, _ := element.(ChildrenRenderer)
@@ -35,13 +39,13 @@ type HTMLTemplateElement interface {
 }
 
 type htmlTemplateElement struct {
-	HTMLElement
+	*htmlElement
 	content DocumentFragment
 }
 
 func NewHTMLTemplateElement(ownerDocument HTMLDocument) HTMLTemplateElement {
 	result := &htmlTemplateElement{
-		NewHTMLElement("template", ownerDocument),
+		newHTMLElement("template", ownerDocument),
 		NewDocumentFragment(ownerDocument),
 	}
 	result.SetSelf(result)
