@@ -35,8 +35,6 @@ var _ = Describe("EventLoop", func() {
 
 	It("Dispatches an 'error' event on unhandled error", func() {
 		ctx := NewTestContext(IgnoreUnhandledErrors)
-		c := make(chan bool)
-		defer close(c)
 		Expect(
 			ctx.RunTestScript(`
 				let val;

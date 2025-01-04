@@ -119,6 +119,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 				return nil
 			}))
 			ended := make(chan bool)
+			defer close(ended)
 			xhr.AddEventListener(XHREventLoad, NewEventHandlerFunc(func(e Event) error {
 				loaded = true
 				ended <- true
