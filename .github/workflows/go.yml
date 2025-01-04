@@ -1,0 +1,47 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    branches: [ "main", "fix-build" ]
+  pull_request:
+    branches: [ "main" ]
+
+
+jobs:
+  build:
+    name: Tests on ${{ matrix.os }} ${{ matrix.arch }} with Go ${{ matrix.go-version }}
+    strategy:
+      matrix:
+        os: 
+          - darwin
+          # - linux
+        arch: [amd64, arm64]
+        go-version:
+        # Check the earliest and two trailing versions, to keep
+        # maintainance of this file reasonable.
+        - stable
+        include:
+        - os: darwin
+          platform: macos-latest
+        # - os: linux
+        #   platform: ubuntu-latest
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: stable
+
+    - name: Add GOPATH to GITHUB_ENV
+      run: echo "GOPATH=$(go env GOPATH)" >>"$GITHUB_ENV"
+
+    - name: Build
+      working-directory: ./browser
+      run: |
+        go build -v ./...
+        go test -v ./...
