@@ -35,11 +35,6 @@ func getWriter(output string) io.Writer {
 
 var generators = map[string]func(io.Writer) error{
 	"html-elements": generateHtmlElements,
-	"xhr":           generateXhr,
-	"url":           generateUrl,
-	"dom":           generateDOMTypes,
-	"html":          generateHTMLTypes,
-	// "scripting":     GenerateScriptWrappers,
 }
 
 func main() {
