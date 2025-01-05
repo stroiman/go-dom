@@ -3,18 +3,12 @@ package main
 import (
 	_ "embed"
 	"io"
-
-	"github.com/dave/jennifer/jen"
 )
 
 //go:embed webref/curated/idlparsed/xhr.json
 var xhrData []byte
 
 func generateXhr(writer io.Writer) error {
-	file := jen.NewFilePath(sc)
-	file.HeaderComment("This file is generated. Do not edit.")
-	file.ImportName(br, "browser")
-	file.ImportAlias(v8, "v8")
 	classWrapper := ESClassWrapper{
 		TypeName:        "XMLHttpRequest",
 		InnerTypeName:   "XmlHttpRequest",
@@ -34,6 +28,5 @@ func generateXhr(writer io.Writer) error {
 
 	data := createData(xhrData, classWrapper)
 
-	WriteGenerator(file, data)
-	return file.Render(writer)
+	return writeGenerator(writer, data)
 }

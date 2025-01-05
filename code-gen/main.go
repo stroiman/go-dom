@@ -39,6 +39,7 @@ var generators = map[string]func(io.Writer) error{
 	"url":           generateUrl,
 	"dom":           generateDOMTypes,
 	"html":          generateHTMLTypes,
+	// "scripting":     GenerateScriptWrappers,
 }
 
 func main() {
@@ -46,6 +47,12 @@ func main() {
 	outputFile := flag.String("o", "", "Output file to write")
 	generatorType := flag.String("g", "", "Generator type")
 	flag.Parse()
+	// switch *generatorType {
+	// case "scripting":
+	// 	err := GenerateScriptWrappers()
+	// 	exitOnError(err)
+	// 	return
+	// }
 	if *outputFile == "" || *generatorType == "" {
 		fmt.Println("Internal code generator from IDL definitions")
 		flag.PrintDefaults()
@@ -64,6 +71,14 @@ func main() {
 		os.Exit(1)
 	}
 	err := generator(file)
+	if err != nil {
+		fmt.Println("Error!")
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func exitOnError(err error) {
 	if err != nil {
 		fmt.Println("Error!")
 		fmt.Println(err)

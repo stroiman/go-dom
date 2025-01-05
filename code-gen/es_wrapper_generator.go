@@ -755,7 +755,3 @@ func (ret ReturnOnError) Generate() *jen.Statement {
 		Block:     g.Return(g.Raw(jen.Nil()), err),
 	}.Generate()
 }
-
-func WriteGenerator(f *jen.File, generator g.Generator) {
-	f.Add(generator.Generate())
-}
