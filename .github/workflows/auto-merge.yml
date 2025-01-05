@@ -11,7 +11,8 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
-        ref: ${{ github.event.workflow_run.head_branch }}
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
       - name: Push current head to main. FF-only
         run: |
           git config list --local
