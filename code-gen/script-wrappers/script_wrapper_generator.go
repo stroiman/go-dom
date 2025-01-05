@@ -47,11 +47,15 @@ func writeGenerator(writer io.Writer, generator g.Generator) error {
 	return file.Render(writer)
 }
 
-type Generator struct {
+type ScriptWrapperModulesGenerator struct {
 	IdlSources fs.FS
+	Specs      WrapperGeneratorsSpec
 }
 
-func (gen Generator) writeModule(writer io.Writer, spec *WrapperGeneratorFileSpec) error {
+func (gen ScriptWrapperModulesGenerator) writeModule(
+	writer io.Writer,
+	spec *WrapperGeneratorFileSpec,
+) error {
 	filename := fmt.Sprintf("webref/curated/idlparsed/%s.json", spec.Name)
 	file, err := gen.IdlSources.Open(filename)
 	if err != nil {
@@ -67,7 +71,7 @@ func (gen Generator) writeModule(writer io.Writer, spec *WrapperGeneratorFileSpe
 	return writeGenerator(writer, generators)
 }
 
-func (gen Generator) writeModules(specs WrapperGeneratorsSpec) error {
+func (gen ScriptWrapperModulesGenerator) writeModules(specs WrapperGeneratorsSpec) error {
 	errs := make([]error, 0, len(specs))
 	for name, spec := range specs {
 		outputFileName := fmt.Sprintf("%s_generated.go", name)
@@ -95,7 +99,7 @@ func (s *WrapperGeneratorFileSpec) Type(typeName string) WrapperTypeSpec {
 	return result
 }
 
-func (gen Generator) GenerateScriptWrappers() error {
+func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGenerator {
 	specs := NewWrapperGeneratorsSpec()
 	xhrModule := specs.Module("xhr")
 	xhr := xhrModule.Type("XMLHttpRequest")
@@ -150,5 +154,12 @@ func (gen Generator) GenerateScriptWrappers() error {
 	htmlTemplateElement.Method("shadowRootClonable").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootSerializable").SetNotImplemented()
 
-	return gen.writeModules(specs)
+	return ScriptWrapperModulesGenerator{
+		IdlSources: idlSources,
+		Specs:      specs,
+	}
+}
+
+func (gen ScriptWrapperModulesGenerator) GenerateScriptWrappers() error {
+	return gen.writeModules(gen.Specs)
 }
