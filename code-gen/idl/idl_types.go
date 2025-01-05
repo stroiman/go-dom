@@ -1,4 +1,4 @@
-package main
+package idl
 
 import (
 	"encoding/json"

@@ -1,18 +1,15 @@
-package main
+package wrappers
 
 import (
-	"embed"
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 
 	"github.com/dave/jennifer/jen"
 	g "github.com/stroiman/go-dom/code-gen/generators"
 )
-
-//go:embed webref/*/idlparsed/*.json
-var idlParsedFS embed.FS
 
 // WrapperGeneratorsSpec is a list of specifications for generating ES wrapper
 // code. Each key in the map correspond to a specific IDL file
@@ -50,9 +47,13 @@ func writeGenerator(writer io.Writer, generator g.Generator) error {
 	return file.Render(writer)
 }
 
-func writeModule(writer io.Writer, spec *WrapperGeneratorFileSpec) error {
+type Generator struct {
+	IdlSources fs.FS
+}
+
+func (gen Generator) writeModule(writer io.Writer, spec *WrapperGeneratorFileSpec) error {
 	filename := fmt.Sprintf("webref/curated/idlparsed/%s.json", spec.Name)
-	file, err := idlParsedFS.Open(filename)
+	file, err := gen.IdlSources.Open(filename)
 	if err != nil {
 		return err
 	}
@@ -66,7 +67,7 @@ func writeModule(writer io.Writer, spec *WrapperGeneratorFileSpec) error {
 	return writeGenerator(writer, generators)
 }
 
-func writeModules(specs WrapperGeneratorsSpec) error {
+func (gen Generator) writeModules(specs WrapperGeneratorsSpec) error {
 	errs := make([]error, 0, len(specs))
 	for name, spec := range specs {
 		outputFileName := fmt.Sprintf("%s_generated.go", name)
@@ -75,7 +76,7 @@ func writeModules(specs WrapperGeneratorsSpec) error {
 				return err
 			} else {
 				defer writer.Close()
-				return writeModule(writer, spec)
+				return gen.writeModule(writer, spec)
 			}
 		}()
 		errs = append(errs, err)
@@ -94,7 +95,7 @@ func (s *WrapperGeneratorFileSpec) Type(typeName string) WrapperTypeSpec {
 	return result
 }
 
-func GenerateScriptWrappers() error {
+func (gen Generator) GenerateScriptWrappers() error {
 	specs := NewWrapperGeneratorsSpec()
 	xhrModule := specs.Module("xhr")
 	xhr := xhrModule.Type("XMLHttpRequest")
@@ -149,5 +150,5 @@ func GenerateScriptWrappers() error {
 	htmlTemplateElement.Method("shadowRootClonable").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootSerializable").SetNotImplemented()
 
-	return writeModules(specs)
+	return gen.writeModules(specs)
 }

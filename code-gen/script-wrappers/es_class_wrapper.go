@@ -1,4 +1,4 @@
-package main
+package wrappers
 
 type TypeCustomization []string
 
