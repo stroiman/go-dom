@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Push current head to main. FF-only
-        run: 
-          - git config list --local
-          - git push origin HEAD:refs/heads/main
+        run: |
+          git config list --local
+          git push origin HEAD:refs/heads/main
 
