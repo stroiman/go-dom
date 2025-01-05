@@ -47,12 +47,13 @@ func main() {
 	outputFile := flag.String("o", "", "Output file to write")
 	generatorType := flag.String("g", "", "Generator type")
 	flag.Parse()
-	// switch *generatorType {
-	// case "scripting":
-	// 	err := GenerateScriptWrappers()
-	// 	exitOnError(err)
-	// 	return
-	// }
+	switch *generatorType {
+	case "scripting":
+		err := GenerateScriptWrappers()
+		exitOnError(err)
+		os.Exit(0)
+		return
+	}
 	if *outputFile == "" || *generatorType == "" {
 		fmt.Println("Internal code generator from IDL definitions")
 		flag.PrintDefaults()
@@ -67,20 +68,15 @@ func main() {
 
 	generator, ok := generators[*generatorType]
 	if !ok {
-		fmt.Println("Unrecognised generator type")
 		os.Exit(1)
 	}
 	err := generator(file)
-	if err != nil {
-		fmt.Println("Error!")
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	exitOnError(err)
 }
 
 func exitOnError(err error) {
 	if err != nil {
-		fmt.Println("Error!")
+		fmt.Println("Error running generator")
 		fmt.Println(err)
 		os.Exit(1)
 	}
