@@ -1,0 +1,17 @@
+name: Auto-merge
+on:
+  workflow_run:
+    workflows: ["build", "Build"]
+    branches: ["auto-merge"]
+    types: 
+      - completed
+
+jobs:
+  on-success:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push current head to main. FF-only
+        run: git push origin HEAD:main
+
