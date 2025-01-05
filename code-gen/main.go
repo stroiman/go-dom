@@ -49,9 +49,7 @@ func main() {
 	flag.Parse()
 	switch *generatorType {
 	case "scripting":
-		gen := wrappers.Generator{
-			IdlSources: idlParsedFS,
-		}
+		gen := wrappers.NewScriptWrapperModulesGenerator(idlParsedFS)
 		err := gen.GenerateScriptWrappers()
 		exitOnError(err)
 		os.Exit(0)
