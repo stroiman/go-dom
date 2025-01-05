@@ -16,5 +16,5 @@ jobs:
       - name: Show git config
         run: git config list --local
       - name: Push current head to main. FF-only
-        run: git push origin HEAD:main
+        run: git push -v --porcelain origin HEAD:main
 
