@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	goTypes "github.com/stroiman/go-dom/code-gen/go-type-generators"
 	wrappers "github.com/stroiman/go-dom/code-gen/script-wrappers"
 )
 
@@ -47,12 +48,16 @@ func main() {
 	outputFile := flag.String("o", "", "Output file to write")
 	generatorType := flag.String("g", "", "Generator type")
 	flag.Parse()
+	fmt.Println("Generateor?", *generatorType, *debug)
 	switch *generatorType {
 	case "scripting":
 		gen := wrappers.NewScriptWrapperModulesGenerator(idlParsedFS)
 		err := gen.GenerateScriptWrappers()
-		exitOnError(err)
-		os.Exit(0)
+		exit(err)
+	case "browser-types":
+		gen := goTypes.NewGoTypeGenerators(idlParsedFS)
+		err := gen.GenerateType("html", "HTMLInputElement", os.Stdout)
+		exit(err)
 		return
 	}
 	if *outputFile == "" || *generatorType == "" {
@@ -72,13 +77,15 @@ func main() {
 		os.Exit(1)
 	}
 	err := generator(file)
-	exitOnError(err)
+	exit(err)
 }
 
-func exitOnError(err error) {
+func exit(err error) {
 	if err != nil {
 		fmt.Println("Error running generator")
 		fmt.Println(err)
 		os.Exit(1)
+	} else {
+		os.Exit(0)
 	}
 }
