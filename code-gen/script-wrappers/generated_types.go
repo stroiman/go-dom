@@ -1,7 +1,7 @@
 // The types here are abstractions over concrete types in generated code,
 // helping function lookup code being easier to read.
 
-package main
+package wrappers
 
 import (
 	g "github.com/stroiman/go-dom/code-gen/generators"

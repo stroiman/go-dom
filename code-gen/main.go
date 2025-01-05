@@ -1,16 +1,21 @@
 package main
 
 import (
-	_ "embed"
+	"embed"
 	"flag"
 	"fmt"
 	"io"
 	"os"
 	"strings"
+
+	wrappers "github.com/stroiman/go-dom/code-gen/script-wrappers"
 )
 
 //go:embed webref/ed/elements/html.json
 var html_defs []byte
+
+//go:embed webref/*/idlparsed/*.json
+var idlParsedFS embed.FS
 
 type ElementJSON struct {
 	Name      string `json:"name"`
@@ -44,7 +49,10 @@ func main() {
 	flag.Parse()
 	switch *generatorType {
 	case "scripting":
-		err := GenerateScriptWrappers()
+		gen := wrappers.Generator{
+			IdlSources: idlParsedFS,
+		}
+		err := gen.GenerateScriptWrappers()
 		exitOnError(err)
 		os.Exit(0)
 		return

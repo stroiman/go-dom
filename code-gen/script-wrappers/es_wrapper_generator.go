@@ -1,4 +1,4 @@
-package main
+package wrappers
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"unicode"
 
 	g "github.com/stroiman/go-dom/code-gen/generators"
+	. "github.com/stroiman/go-dom/code-gen/idl"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -202,23 +203,6 @@ type ESConstructorData struct {
 }
 
 type Imports = [][][2]string
-
-func WriteImports(b *builder, imports Imports) {
-	b.Printf("import (\n")
-	b.indent()
-	defer b.unIndentF(")\n\n")
-	for _, grp := range imports {
-		for _, imp := range grp {
-			alias := imp[0]
-			pkg := imp[1]
-			if alias == "" {
-				b.Printf("\"%s\"\n", pkg)
-			} else {
-				b.Printf("%s \"%s\"\n", imp[0], imp[1])
-			}
-		}
-	}
-}
 
 func IllegalConstructor(data ESConstructorData) g.Generator {
 	return g.Return(g.Nil,
