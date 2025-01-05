@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ github.event.workflow_run.head_commit.id }}
       - name: Show git config
         run: git config list --local
       - name: Push current head to main. FF-only
