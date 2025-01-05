@@ -15,6 +15,12 @@ jobs:
           ref: ${{ github.event.workflow_run.head_commit.id }}
       - name: Show git config
         run: git config list --local
+      - name: Fetc local
+        run: git fetch
+      - name: Log local
+        run: git log HEAD~1..HEAD
+      - name: Log remote
+        run: git log origin/main~1..origin/main
       - name: Push current head to main. FF-only
         run: git push -v --porcelain origin ${{ github.event.workflow_run.head_commit.id }}:main
 
