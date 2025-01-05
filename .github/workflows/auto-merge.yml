@@ -13,8 +13,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
+      - name: Show git config
+        run: git config list --local
       - name: Push current head to main. FF-only
-        run: |
-          git config list --local
-          git push origin HEAD:refs/heads/main
+        run: git push origin HEAD:main
 
