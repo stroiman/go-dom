@@ -12,5 +12,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Push current head to main. FF-only
-        run: git push origin HEAD:main
+        run: git push origin HEAD:refs/heads/main
 
