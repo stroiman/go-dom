@@ -9,6 +9,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	g "github.com/stroiman/go-dom/code-gen/generators"
+	"github.com/stroiman/go-dom/code-gen/idl"
 )
 
 // WrapperGeneratorsSpec is a list of specifications for generating ES wrapper
@@ -62,10 +63,13 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 		return err
 	}
 	defer file.Close()
-	bytes, err := io.ReadAll(file)
+	data, err := idl.ParseIdlJsonReader(file)
+	if err != nil {
+		return err
+	}
 	generators := StatementList()
 	for _, specType := range spec.Types {
-		generators.Append(createData(bytes, *specType))
+		generators.Append(createData(data, *specType))
 		generators.Append(g.Line)
 	}
 	return writeGenerator(writer, generators)

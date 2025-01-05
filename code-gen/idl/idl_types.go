@@ -3,6 +3,7 @@ package idl
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 )
 
 type ValueType struct {
@@ -152,4 +153,11 @@ func IsAttribute(member IdlNameMember) bool {
 	}
 	t, ok := FindIdlTypeValue(member.IdlType, "attribute-type")
 	return ok && t.IType.TypeName != "EventHandler"
+}
+
+func ParseIdlJsonReader(reader io.Reader) (ParsedIdlFile, error) {
+	decoder := json.NewDecoder(reader)
+	spec := ParsedIdlFile{}
+	err := decoder.Decode(&spec)
+	return spec, err
 }

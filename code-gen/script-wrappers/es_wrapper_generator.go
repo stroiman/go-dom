@@ -1,7 +1,6 @@
 package wrappers
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"slices"
@@ -23,13 +22,8 @@ var (
 	scriptHostPtr             = g.NewType("ScriptHost").Pointer()
 )
 
-func createData(data []byte, dataData ESClassWrapper) ESConstructorData {
-	spec := ParsedIdlFile{}
+func createData(spec ParsedIdlFile, dataData ESClassWrapper) ESConstructorData {
 	var constructor *ESOperation
-	err := json.Unmarshal(data, &spec)
-	if err != nil {
-		panic(err)
-	}
 	idlName := spec.IdlNames[dataData.TypeName]
 	type tmp struct {
 		Op ESOperation
