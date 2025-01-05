@@ -1,10 +1,9 @@
 name: Auto-merge
 on:
   workflow_run:
-    workflows: ["build", "Build"]
-    branches: ["auto-merge"]
-    types: 
-      - completed
+    workflows: [Build]
+    branches: [auto-merge]
+    types: [completed]
 
 jobs:
   on-success:
