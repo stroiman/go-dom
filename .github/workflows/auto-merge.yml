@@ -12,10 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_commit.id }}
+          ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
-      - name: Show git config
-        run: git config list --local
       - name: Fetc local
         run: git fetch
       - name: Log local
