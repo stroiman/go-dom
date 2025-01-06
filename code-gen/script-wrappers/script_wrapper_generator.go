@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/stroiman/go-dom/code-gen/generators"
 	g "github.com/stroiman/go-dom/code-gen/generators"
 	"github.com/stroiman/go-dom/code-gen/idl"
 )
@@ -99,6 +100,7 @@ func (s *WrapperGeneratorFileSpec) Type(typeName string) WrapperTypeSpec {
 	result := new(ESClassWrapper)
 	result.ensureMap()
 	result.TypeName = typeName
+	result.Receiver = generators.DefaultReceiverName(typeName)
 	s.Types[typeName] = result
 	return result
 }
@@ -152,7 +154,6 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 
 	htmlSpecs := specs.Module("html")
 	htmlTemplateElement := htmlSpecs.Type("HTMLTemplateElement")
-	htmlTemplateElement.Receiver = "e"
 	htmlTemplateElement.Method("shadowRootMode").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootDelegatesFocus").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootClonable").SetNotImplemented()
