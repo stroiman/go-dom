@@ -9,7 +9,7 @@ import (
 
 func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	wrapper := NewESURL(host)
+	wrapper := NewURLV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
 
 	instanceTmpl := constructor.InstanceTemplate()
@@ -70,7 +70,7 @@ func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	return constructor
 }
 
-func (u ESURL) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	url, err1 := TryParseArg(args, 0, u.DecodeUSVString)
 	base, err2 := TryParseArg(args, 1, u.DecodeUSVString)
@@ -91,7 +91,7 @@ func (u ESURL) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Missing arguments")
 }
 
-func (u ESURL) ToJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) ToJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -105,7 +105,7 @@ func (u ESURL) ToJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	}
 }
 
-func (u ESURL) GetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) GetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -115,11 +115,11 @@ func (u ESURL) GetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return u.ToUSVString(ctx, result)
 }
 
-func (u ESURL) SetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SetHref")
 }
 
-func (u ESURL) Origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) Origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -129,7 +129,7 @@ func (u ESURL) Origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return u.ToUSVString(ctx, result)
 }
 
-func (u ESURL) GetProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) GetProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -139,27 +139,27 @@ func (u ESURL) GetProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return u.ToUSVString(ctx, result)
 }
 
-func (u ESURL) SetProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SetProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SetProtocol")
 }
 
-func (u ESURL) GetUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) GetUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.GetUsername")
 }
 
-func (u ESURL) SetUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SetUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SetUsername")
 }
 
-func (u ESURL) GetPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) GetPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.GetPassword")
 }
 
-func (u ESURL) SetPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SetPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SetPassword")
 }
 
-func (u ESURL) GetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) GetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -169,11 +169,11 @@ func (u ESURL) GetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return u.ToUSVString(ctx, result)
 }
 
-func (u ESURL) SetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SetHost")
 }
 
-func (u ESURL) GetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) GetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -183,11 +183,11 @@ func (u ESURL) GetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return u.ToUSVString(ctx, result)
 }
 
-func (u ESURL) SetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SetHostname")
 }
 
-func (u ESURL) GetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) GetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -197,11 +197,11 @@ func (u ESURL) GetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return u.ToUSVString(ctx, result)
 }
 
-func (u ESURL) SetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SetPort")
 }
 
-func (u ESURL) GetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) GetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -211,11 +211,11 @@ func (u ESURL) GetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return u.ToUSVString(ctx, result)
 }
 
-func (u ESURL) SetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SetPathname")
 }
 
-func (u ESURL) GetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) GetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -225,15 +225,15 @@ func (u ESURL) GetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return u.ToUSVString(ctx, result)
 }
 
-func (u ESURL) SetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SetSearch")
 }
 
-func (u ESURL) SearchParams(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SearchParams(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SearchParams")
 }
 
-func (u ESURL) GetHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) GetHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -243,6 +243,6 @@ func (u ESURL) GetHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return u.ToUSVString(ctx, result)
 }
 
-func (u ESURL) SetHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) SetHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: URL.SetHash")
 }

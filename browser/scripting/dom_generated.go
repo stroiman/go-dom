@@ -9,7 +9,7 @@ import (
 
 func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	wrapper := NewESDOMTokenList(host)
+	wrapper := NewDOMTokenListV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
 
 	instanceTmpl := constructor.InstanceTemplate()
@@ -37,11 +37,11 @@ func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	return constructor
 }
 
-func (u ESDOMTokenList) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, v8.NewTypeError(u.host.iso, "Illegal Constructor")
 }
 
-func (u ESDOMTokenList) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.GetInstance(info)
@@ -57,7 +57,7 @@ func (u ESDOMTokenList) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Missing arguments")
 }
 
-func (u ESDOMTokenList) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.GetInstance(info)
@@ -73,7 +73,7 @@ func (u ESDOMTokenList) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	return nil, errors.New("Missing arguments")
 }
 
-func (u ESDOMTokenList) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.GetInstance(info)
 	tokens, err1 := TryParseArg(args, 0, u.DecodeDOMString)
@@ -88,7 +88,7 @@ func (u ESDOMTokenList) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Missing arguments")
 }
 
-func (u ESDOMTokenList) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.GetInstance(info)
 	tokens, err1 := TryParseArg(args, 0, u.DecodeDOMString)
@@ -103,7 +103,7 @@ func (u ESDOMTokenList) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 	return nil, errors.New("Missing arguments")
 }
 
-func (u ESDOMTokenList) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.GetInstance(info)
@@ -120,11 +120,11 @@ func (u ESDOMTokenList) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error
 	return nil, errors.New("Missing arguments")
 }
 
-func (u ESDOMTokenList) Supports(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) Supports(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: DOMTokenList.supports")
 }
 
-func (u ESDOMTokenList) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -134,7 +134,7 @@ func (u ESDOMTokenList) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 	return u.ToUnsignedLong(ctx, result)
 }
 
-func (u ESDOMTokenList) GetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) GetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
@@ -144,7 +144,7 @@ func (u ESDOMTokenList) GetValue(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	return u.ToDOMString(ctx, result)
 }
 
-func (u ESDOMTokenList) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.GetInstance(info)
 	val, err1 := TryParseArg(args, 0, u.DecodeDOMString)

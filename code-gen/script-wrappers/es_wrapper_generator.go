@@ -137,7 +137,7 @@ func createData(spec ParsedIdlFile, dataData ESClassWrapper) ESConstructorData {
 	}
 	wrapperTypeName := dataData.WrapperTypeName
 	if wrapperTypeName == "" {
-		wrapperTypeName = "ES" + wrappedTypeName
+		wrapperTypeName = fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
 	}
 	return ESConstructorData{
 		InnerTypeName:    wrappedTypeName,

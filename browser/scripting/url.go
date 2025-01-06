@@ -8,19 +8,23 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type ESURL struct {
+type URLV8Wrapper struct {
 	HandleReffedObject[dom.URL]
 }
 
-func NewESURL(host *ScriptHost) ESURL {
-	return ESURL{NewHandleReffedObject[dom.URL](host)}
+func NewURLV8Wrapper(host *ScriptHost) URLV8Wrapper {
+	return URLV8Wrapper{NewHandleReffedObject[dom.URL](host)}
 }
 
 type HandleDisposable cgo.Handle
 
 func (h HandleDisposable) Dispose() { cgo.Handle(h).Delete() }
 
-func (u ESURL) CreateInstance(ctx *ScriptContext, this *v8.Object, url string) (*v8.Value, error) {
+func (u URLV8Wrapper) CreateInstance(
+	ctx *ScriptContext,
+	this *v8.Object,
+	url string,
+) (*v8.Value, error) {
 	value, err := dom.NewUrl(url)
 	if err != nil {
 		return nil, err
@@ -29,7 +33,7 @@ func (u ESURL) CreateInstance(ctx *ScriptContext, this *v8.Object, url string) (
 	return nil, nil
 }
 
-func (u ESURL) CreateInstanceBase(
+func (u URLV8Wrapper) CreateInstanceBase(
 	ctx *ScriptContext,
 	this *v8.Object,
 	url string,
