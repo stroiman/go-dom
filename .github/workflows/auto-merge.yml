@@ -12,16 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_commit.id }}
-          fetch-depth: 0
-      - name: Show git config
-        run: git config list --local
-      - name: Fetc local
-        run: git fetch
-      - name: Log local
-        run: git rev-parse HEAD
-      - name: Log remote
-        run: git rev-parse origin/main
-      - name: Push current head to main. FF-only
-        run: git push -v origin ${{ github.event.workflow_run.head_commit.id }}:main
+          ref: ${{ github.event.workflow_run.head_branch }}
+      - name: Fetch new commits - fetch refs
+        run: git remote set-branches origin '*'
+      - name: Fetch commits to shallow clone
+        run: git fetch --shallow-since="`git show --no-patch --format=%ci origin/main`"
+      - name: Push current head to main
+        run: git push -v origin HEAD:main
 
