@@ -156,7 +156,6 @@ func createGlobals(host *ScriptHost) []globalInstall {
 			}
 			superClassConstructor = iter(superClassSpec)
 		}
-		fmt.Printf("Create class: %s\n", class.name)
 		constructor := class.factory(host)
 		if superClassConstructor != nil {
 			constructor.Inherit(superClassConstructor)
