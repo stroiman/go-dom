@@ -14,8 +14,6 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
-      - name: Log local
-        run: git rev-parse HEAD
       - name: Log remote
         run: git rev-parse origin/main
       - name: Push current head to main. FF-only
