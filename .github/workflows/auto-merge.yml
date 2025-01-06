@@ -11,12 +11,11 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_branch }}
-      - name: Fetch new commits - fetch refs
-        run: git remote set-branches origin '*'
-      - name: Fetch commits to shallow clone
-        run: git fetch --shallow-since="`git show --no-patch --format=%ci origin/main`"
+        run: git remote set-branches --add origin ${{ github.event.workflow_run.head_branch }}
+      - name: Fetch the target branch
+        run: git fetch --shallow-since="`git show --no-patch --format=%ci HEAD`"
+      - name: Checkout target branch
+        run: git checkout ${{ github.event.workflow_run.head_branch }}
       - name: Push current head to main
         run: git push -v origin HEAD:main
 
