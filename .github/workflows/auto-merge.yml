@@ -18,9 +18,9 @@ jobs:
       - name: Fetc local
         run: git fetch
       - name: Log local
-        run: git log HEAD~1..HEAD
+        run: git rev-parse HEAD
       - name: Log remote
-        run: git log origin/main~1..origin/main
+        run: git rev-parse origin/main
       - name: Push current head to main. FF-only
-        run: git push -v --porcelain origin ${{ github.event.workflow_run.head_commit.id }}:main
+        run: git push -v origin ${{ github.event.workflow_run.head_commit.id }}:main
 
