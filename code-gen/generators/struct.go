@@ -3,8 +3,9 @@ package generators
 import "github.com/dave/jennifer/jen"
 
 type Struct struct {
-	Name    string
-	Members []StructMember
+	Name            string
+	Members         []StructMember
+	DefaultReceiver string
 }
 
 type StructMember struct {
@@ -20,6 +21,32 @@ func (s *Struct) Field(name Generator, fieldType Generator) {
 
 func (s *Struct) Embed(fieldType Generator) {
 	s.Field(nil, fieldType)
+}
+
+// SetDefaultReceiver sets the name of the receiver when generating methods
+// using [Struct.CreateMethod].
+func (s *Struct) SetDefaultReceiver(name string) {
+	s.DefaultReceiver = name
+}
+
+func (s *Struct) MethodName(name string) FunctionDefinition {
+	return FunctionDefinition{
+		Name: name,
+		Receiver: FunctionArgument{
+			Name: Id(s.DefaultReceiver),
+			Type: Id(s.Name),
+		},
+	}
+}
+
+func (s *Struct) PointerMethodName(name string) *FunctionDefinition {
+	return &FunctionDefinition{
+		Name: name,
+		Receiver: FunctionArgument{
+			Name: Id(s.DefaultReceiver),
+			Type: NewType(s.Name).Pointer(),
+		},
+	}
 }
 
 func (s Struct) Generate() *jen.Statement {

@@ -30,6 +30,25 @@ type FunctionDefinition struct {
 	Body     Generator
 }
 
+func (f *FunctionDefinition) AddArgument(arg FunctionArgument) *FunctionDefinition {
+	f.Args = append(f.Args, arg)
+	return f
+}
+
+func (f *FunctionDefinition) WithReturnValues(values []Generator) *FunctionDefinition {
+	f.RtnTypes = values
+	return f
+}
+
+func (f *FunctionDefinition) WithReturnValue(value Generator) *FunctionDefinition {
+	return f.WithReturnValues([]Generator{value})
+}
+
+func (f *FunctionDefinition) WithBody(body Generator) *FunctionDefinition {
+	f.Body = body
+	return f
+}
+
 func (f FunctionDefinition) Generate() *jen.Statement {
 	var (
 		args     []jen.Code

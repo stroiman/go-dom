@@ -49,3 +49,16 @@ func TestStructGenerator(t *testing.T) {
 	IntValue    int
 }`))
 }
+
+func TestStructMethodGenerators(t *testing.T) {
+	expect := NewWithT(t).Expect
+	s := NewStruct("StructWithMembers")
+	s.SetDefaultReceiver("rec")
+	foo := s.PointerMethodName("Foo").AddArgument(FunctionArgument{
+		Name: Id("str"),
+		Type: Id("string"),
+	}).WithReturnValue(Id("string")).WithBody(Return(Lit("Foo")))
+	expect(render(foo)).To(Equal(`func (rec *StructWithMembers) Foo(str string) string {
+	return "Foo"
+}`))
+}
