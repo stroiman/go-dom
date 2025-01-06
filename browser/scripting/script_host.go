@@ -168,16 +168,16 @@ func createGlobals(host *ScriptHost) []globalInstall {
 		iter(class)
 	}
 
-	if htmlElement, ok := uniqueNames["HTMLElement"]; ok {
-		for _, cls := range htmlElements {
-			if _, ok := uniqueNames[cls]; !ok {
-				fn := NewIllegalConstructorBuilder[Element](host).constructor
-				fn.Inherit(htmlElement)
-				uniqueNames[cls] = fn
-				result = append(result, globalInstall{cls, fn})
-			}
-		}
-	}
+	// if htmlElement, ok := uniqueNames["HTMLElement"]; ok {
+	// 	for _, cls := range htmlElements {
+	// 		if _, ok := uniqueNames[cls]; !ok {
+	// 			fn := NewIllegalConstructorBuilder[Element](host).constructor
+	// 			fn.Inherit(htmlElement)
+	// 			uniqueNames[cls] = fn
+	// 			result = append(result, globalInstall{cls, fn})
+	// 		}
+	// 	}
+	// }
 	return result
 }
 
@@ -253,6 +253,12 @@ func init() {
 	RegisterJSClass("URL", "", CreateURLPrototype)
 	RegisterJSClass("DOMTokenList", "", CreateDOMTokenListPrototype)
 	RegisterJSClass("DOMParser", "", CreateDOMParserPrototype)
+
+	for _, cls := range htmlElements {
+		if _, found := classes[cls]; !found {
+			RegisterJSClass(cls, "HTMLElement", CreateIllegalConstructor)
+		}
+	}
 }
 
 func NewScriptHost() *ScriptHost {

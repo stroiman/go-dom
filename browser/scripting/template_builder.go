@@ -12,6 +12,17 @@ type ConstructorBuilder[T any] struct {
 	instanceLookup func(*ScriptContext, *v8.Object) (T, error)
 }
 
+func CreateIllegalConstructor(host *ScriptHost) *v8.FunctionTemplate {
+	result := v8.NewFunctionTemplateWithError(
+		host.iso,
+		func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			return nil, v8.NewTypeError(host.iso, "Illegal Constructor")
+		},
+	)
+	result.InstanceTemplate().SetInternalFieldCount(1)
+	return result
+}
+
 func NewConstructorBuilder[T any](
 	host *ScriptHost,
 	cb v8.FunctionCallbackWithError,
@@ -29,13 +40,7 @@ func NewConstructorBuilder[T any](
 }
 
 func NewIllegalConstructorBuilder[T any](host *ScriptHost) ConstructorBuilder[T] {
-	constructor := v8.NewFunctionTemplateWithError(
-		host.iso,
-		func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			return nil, v8.NewTypeError(host.iso, "Illegal Constructor")
-		},
-	)
-	constructor.InstanceTemplate().SetInternalFieldCount(1)
+	constructor := CreateIllegalConstructor(host)
 
 	builder := ConstructorBuilder[T]{host: host,
 		constructor: constructor,
