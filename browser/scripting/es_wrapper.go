@@ -137,6 +137,13 @@ func (w Converters) ToBoolean(ctx *ScriptContext, val bool) (*v8.Value, error) {
 
 type HandleReffedObject[T any] struct {
 	host *ScriptHost
+	Converters
+}
+
+func NewHandleReffedObject[T any](host *ScriptHost) HandleReffedObject[T] {
+	return HandleReffedObject[T]{
+		host: host,
+	}
 }
 
 func (o HandleReffedObject[T]) Store(value T, ctx *ScriptContext, this *v8.Object) {

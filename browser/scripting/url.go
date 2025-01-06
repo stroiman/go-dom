@@ -10,11 +10,10 @@ import (
 
 type ESURL struct {
 	HandleReffedObject[dom.URL]
-	Converters
 }
 
 func NewESURL(host *ScriptHost) ESURL {
-	return ESURL{HandleReffedObject[dom.URL]{host}, Converters{}}
+	return ESURL{NewHandleReffedObject[dom.URL](host)}
 }
 
 type HandleDisposable cgo.Handle
