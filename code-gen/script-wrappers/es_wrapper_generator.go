@@ -53,7 +53,8 @@ func createData(spec ParsedIdlFile, dataData ESClassWrapper) ESConstructorData {
 			MethodCustomization:  methodCustomization,
 			Arguments:            []ESOperationArgument{},
 		}, true}
-		if member.Type == "operation" {
+		if member.Type == "operation" && member.Name != "" {
+			// Empty name seems to indicate a named property getter. Not sure yet.
 			operation.Op.HasError = !operation.Op.MethodCustomization.HasNoError
 			ops = append(ops, operation)
 		}
