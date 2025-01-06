@@ -11,6 +11,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
+      - name: Tell git we want the `auto-merge` branch
         run: git remote set-branches --add origin ${{ github.event.workflow_run.head_branch }}
       - name: Fetch the target branch
         run: git fetch --shallow-since="`git show --no-patch --format=%ci HEAD`"
