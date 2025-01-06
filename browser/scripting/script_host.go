@@ -127,31 +127,47 @@ func (c *ScriptContext) GetCachedNode(this *v8.Object) (Entity, bool) {
 	return result, ok
 }
 
+type JSConstructorFactory = func(*ScriptHost) *v8.FunctionTemplate
+
 type class struct {
 	globalIdentifier string
-	constructor      func(*ScriptHost) *v8.FunctionTemplate
+	constructor      JSConstructorFactory
 	subClasses       []class
 }
 
 // createGlobals returns an ordered list of constructors to be created in global
 // scope. They must be installed in "order", as base classes must be installed
 // before subclasses
-func createGlobals(host *ScriptHost, classes []class) []globalInstall {
+func createGlobals(host *ScriptHost) []globalInstall {
 	result := make([]globalInstall, 0)
-	var iter func(*v8.FunctionTemplate, []class)
+	var iter func(class classSpec) *v8.FunctionTemplate
 	uniqueNames := make(map[string]*v8.FunctionTemplate)
-	iter = func(superClass *v8.FunctionTemplate, classes []class) {
-		for _, class := range classes {
-			constructor := class.constructor(host)
-			result = append(result, globalInstall{class.globalIdentifier, constructor})
-			uniqueNames[class.globalIdentifier] = constructor
-			if superClass != nil {
-				constructor.Inherit(superClass)
-			}
-			iter(constructor, class.subClasses)
+	iter = func(class classSpec) *v8.FunctionTemplate {
+		if constructor, found := uniqueNames[class.name]; found {
+			return constructor
 		}
+		var superClassConstructor *v8.FunctionTemplate
+		if class.superClassName != "" {
+			superClassSpec, found := classes[class.superClassName]
+			if !found {
+				panic(
+					"Missing super class spec. Class: " + class.name + ". Super: " + class.superClassName,
+				)
+			}
+			superClassConstructor = iter(superClassSpec)
+		}
+		fmt.Printf("Create class: %s\n", class.name)
+		constructor := class.factory(host)
+		if superClassConstructor != nil {
+			constructor.Inherit(superClassConstructor)
+		}
+		uniqueNames[class.name] = constructor
+		result = append(result, globalInstall{class.name, constructor})
+		return constructor
 	}
-	iter(nil, classes)
+	for _, class := range classes {
+		iter(class)
+	}
 
 	if htmlElement, ok := uniqueNames["HTMLElement"]; ok {
 		for _, cls := range htmlElements {
@@ -181,40 +197,71 @@ func (host *ScriptHost) ConsoleAPIMessage(message v8.ConsoleAPIMessage) {
 	}
 }
 
+type classSpec struct {
+	name           string
+	superClassName string
+	factory        JSConstructorFactory
+}
+
+var classes map[string]classSpec = make(map[string]classSpec)
+
+func RegisterJSClass(
+	className string,
+	superClassName string,
+	constructorFactory JSConstructorFactory,
+) {
+	spec := classSpec{
+		className, superClassName, constructorFactory,
+	}
+	if _, ok := classes[className]; ok {
+		panic("Same class added twice")
+	}
+	if superClassName == "" {
+		classes[className] = spec
+		return
+	}
+	parent, parentFound := classes[superClassName]
+	for parentFound {
+		if parent.superClassName == className {
+			panic("Recursive class parents" + className)
+		}
+		parent, parentFound = classes[parent.superClassName]
+	}
+	classes[className] = spec
+}
+
+func init() {
+	RegisterJSClass("Event", "", CreateEvent)
+	RegisterJSClass("CustomEvent", "Event", CreateCustomEvent)
+	RegisterJSClass("NamedNodeMap", "", CreateNamedNodeMap)
+	RegisterJSClass("Location", "", CreateLocationPrototype)
+	RegisterJSClass("NodeList", "", CreateNodeList)
+	RegisterJSClass("EventTarget", "", CreateEventTarget)
+
+	RegisterJSClass("XMLHttpRequest", "EventTarget", CreateXmlHttpRequestPrototype)
+	RegisterJSClass("Window", "EventTarget", CreateWindowTemplate)
+	RegisterJSClass("Node", "EventTarget", CreateNode)
+
+	RegisterJSClass("Document", "Node", CreateDocumentPrototype)
+	RegisterJSClass("DocumentFragment", "Node", CreateDocumentFragmentPrototype)
+	RegisterJSClass("ShadowRoot", "DocumentFragment", CreateShadowRootPrototype)
+	RegisterJSClass("Element", "Node", CreateElement)
+	RegisterJSClass("HTMLElement", "Element", CreateHtmlElement)
+	RegisterJSClass("HTMLTemplateElement", "HTMLElement", CreateHTMLTemplateElementPrototype)
+	RegisterJSClass("Attr", "Node", CreateAttr)
+
+	RegisterJSClass("FormData", "", CreateFormData)
+	RegisterJSClass("URL", "", CreateURLPrototype)
+	RegisterJSClass("DOMTokenList", "", CreateDOMTokenListPrototype)
+	RegisterJSClass("DOMParser", "", CreateDOMParserPrototype)
+}
+
 func NewScriptHost() *ScriptHost {
 	host := &ScriptHost{iso: v8.NewIsolate()}
 	host.inspectorClient = v8.NewInspectorClient(host)
 	host.inspector = v8.NewInspector(host.iso, host.inspectorClient)
-	classes := []class{
-		{"Event", CreateEvent, []class{
-			{"CustomEvent", CreateCustomEvent, nil},
-		}},
-		{"NamedNodeMap", CreateNamedNodeMap, nil},
-		{"Location", CreateLocationPrototype, nil},
-		{"NodeList", CreateNodeList, nil},
-		{"EventTarget", CreateEventTarget, []class{
-			{"XMLHttpRequest", CreateXmlHttpRequestPrototype, nil},
-			{"Window", CreateWindowTemplate, nil},
-			{"Node", CreateNode, []class{
-				{"Document", CreateDocumentPrototype, nil},
-				{"DocumentFragment", CreateDocumentFragmentPrototype, []class{
-					{"ShadowRoot", CreateShadowRootPrototype, nil},
-				}},
-				{"Element", CreateElement, []class{
-					{"HTMLElement", CreateHtmlElement, []class{
-						{"HTMLTemplateElement", CreateHTMLTemplateElementPrototype, nil},
-					}},
-				}},
-				{"Attr", CreateAttr, nil},
-			}},
-		}},
-		{"FormData", CreateFormData, nil},
-		{"URL", CreateURLPrototype, nil},
-		{"DOMTokenList", CreateDOMTokenListPrototype, nil},
-		{"DOMParser", CreateDOMParserPrototype, nil},
-	}
 
-	globalInstalls := createGlobals(host, classes)
+	globalInstalls := createGlobals(host)
 	host.globals = globals{make(map[string]*v8.FunctionTemplate)}
 	for _, globalInstall := range globalInstalls {
 		host.globals.namedGlobals[globalInstall.name] = globalInstall.constructor
