@@ -1,10 +1,13 @@
 package dom
 
 import (
+	"io"
 	"slices"
 )
 
 type FormDataValue string // TODO Blob/file
+
+func NewFormDataValueString(value string) FormDataValue { return FormDataValue(value) }
 
 type FormDataEntry struct {
 	Name  string
@@ -89,4 +92,9 @@ func (d *FormData) GetAll(name string) []FormDataValue {
 
 func (d *FormData) Has(name string) bool {
 	return slices.IndexFunc(d.Entries, elementByName(name)) != -1
+}
+
+func (d *FormData) GetReader() io.Reader {
+	data := NewXHRRequestBodyOfFormData(d)
+	return data.getReader()
 }

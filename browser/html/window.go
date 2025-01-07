@@ -39,6 +39,8 @@ type Window interface {
 	NewXmlHttpRequest() XmlHttpRequest
 	HTTPClient() http.Client
 	ParseFragment(ownerDocument Document, reader io.Reader) (dom.DocumentFragment, error)
+	// unexported
+	fetchRequest(req *http.Request) error
 }
 
 type window struct {
@@ -161,16 +163,29 @@ func (w *window) Document() Document {
 	return w.document
 }
 
+func (w *window) handleResponse(resp *http.Response) error {
+	if resp.StatusCode != 200 {
+		return errors.New("Non-ok Response")
+	}
+	return w.parseReader(resp.Body)
+
+}
+
 func (w *window) Navigate(href string) error {
 	w.initScriptEngine()
 	resp, err := w.httpClient.Get(href)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != 200 {
-		return errors.New("Non-ok Response")
+	return w.handleResponse(resp)
+}
+
+func (w *window) fetchRequest(req *http.Request) error {
+	resp, err := w.httpClient.Do(req)
+	if err == nil {
+		err = w.handleResponse(resp)
 	}
-	return w.parseReader(resp.Body)
+	return err
 }
 
 func (w *window) LoadHTML(html string) error {

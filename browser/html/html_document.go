@@ -42,6 +42,8 @@ func (d *htmlDocument) CreateElement(name string) Element {
 	switch name {
 	case "template":
 		return NewHTMLTemplateElement(d)
+	case "form":
+		return NewHtmlFormElement(d)
 	case "a":
 		return NewHTMLAnchorElement(d)
 	}
