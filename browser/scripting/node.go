@@ -7,17 +7,17 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type ESNode struct {
+type NodeV8Wrapper struct {
 	NodeV8WrapperBase[dom.Node]
 }
 
-func NewESNode(host *ScriptHost) ESNode {
-	return ESNode{NewNodeV8WrapperBase[dom.Node](host)}
+func NewNodeV8Wrapper(host *ScriptHost) NodeV8Wrapper {
+	return NodeV8Wrapper{NewNodeV8WrapperBase[dom.Node](host)}
 }
 
 func CreateNode(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	wrapper := NewESNode(host)
+	wrapper := NewNodeV8Wrapper(host)
 	builder := NewConstructorBuilder[dom.Node](
 		host,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -90,7 +90,7 @@ func CreateNode(host *ScriptHost) *v8.FunctionTemplate {
 	return builder.constructor
 }
 
-func (n ESNode) GetFirstChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (n NodeV8Wrapper) GetFirstChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.host.MustGetContext(info.Context())
 	node, err := n.GetInstance(info)
 	if err != nil {
@@ -100,7 +100,7 @@ func (n ESNode) GetFirstChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 	return ctx.GetInstanceForNode(result)
 }
 
-func (n ESNode) RemoveChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (n NodeV8Wrapper) RemoveChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(n.host, info)
 	child, err0 := args.GetNodeArg(0)
 	parent, err1 := n.GetInstance(info)
