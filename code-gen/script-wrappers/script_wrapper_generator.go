@@ -163,6 +163,46 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	htmlTemplateElement.Method("shadowRootClonable").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootSerializable").SetNotImplemented()
 
+	window := htmlSpecs.Type("Window")
+	window.CreateWrapper()
+
+	window.Method("window").SetCustomImplementation()
+	window.Method("location").Ignore()
+	window.Method("parent").Ignore() // On `Node`
+
+	window.Method("prompt").SetNotImplemented()
+	window.Method("close").SetNotImplemented()
+	window.Method("stop").SetNotImplemented()
+	window.Method("focus").SetNotImplemented()
+	window.Method("blur").SetNotImplemented()
+	window.Method("open").SetNotImplemented()
+	window.Method("alert").SetNotImplemented()
+	window.Method("confirm").SetNotImplemented()
+	window.Method("postMessage").SetNotImplemented()
+	window.Method("print").SetNotImplemented()
+	window.Method("self").SetNotImplemented()
+	window.Method("name").SetNotImplemented()
+	window.Method("personalbar").SetNotImplemented()
+	window.Method("locationbar").SetNotImplemented()
+	window.Method("menubar").SetNotImplemented()
+	window.Method("scrollbars").SetNotImplemented()
+	window.Method("statusbar").SetNotImplemented()
+	window.Method("status").SetNotImplemented()
+	window.Method("toolbar").SetNotImplemented()
+	window.Method("history").SetNotImplemented()
+	window.Method("navigation").SetNotImplemented()
+	window.Method("customElements").SetNotImplemented()
+	window.Method("closed").SetNotImplemented()
+	window.Method("frames").SetNotImplemented()
+	window.Method("navigator").SetNotImplemented()
+	window.Method("frames").SetNotImplemented()
+	window.Method("top").SetNotImplemented()
+	window.Method("opener").SetNotImplemented()
+	window.Method("frameElement").SetNotImplemented()
+	window.Method("clientInformation").SetNotImplemented()
+	window.Method("originAgentCluster").SetNotImplemented()
+	window.Method("length").SetNotImplemented()
+
 	return ScriptWrapperModulesGenerator{
 		IdlSources: idlSources,
 		Specs:      specs,

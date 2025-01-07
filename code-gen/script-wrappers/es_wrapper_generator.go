@@ -83,7 +83,7 @@ func createData(spec ParsedIdlFile, dataData *ESClassWrapper) ESConstructorData 
 		if member.Type == "constructor" {
 			constructor = &operation.Op
 		}
-		if IsAttribute(member) {
+		if IsAttribute(member) && !methodCustomization.Ignored {
 			op := operation.Op
 			var (
 				getter *ESOperation
@@ -517,6 +517,23 @@ func (c CallInstance) PerformCall() (genRes GetGeneratorResult) {
 	return
 }
 
+func IsNodeType(typeName string) bool {
+	switch typeName {
+	case "Node":
+		return true
+	case "Element":
+		return true
+	case "Document":
+		return true
+	case "DocumentFragment":
+		return true
+	}
+	if strings.Contains(typeName, "HTMLElement") {
+		return true
+	}
+	return false
+}
+
 func (c CallInstance) GetGenerator() GetGeneratorResult {
 	genRes := c.PerformCall()
 	list := StatementListStmt{}
@@ -528,21 +545,26 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 			list.Append(Stmt{jen.Return(jen.Nil(), jen.Nil())})
 		}
 	} else {
-		converter := "To"
-		if c.Op.Nullable {
-			converter += "Nullable"
-		}
-		converter += idlNameToGoName(c.Op.ReturnType)
-		genRes.RequireContext = true
-		valueReturn := g.Return(c.Receiver.Method(converter).Call(g.Id("ctx"), g.Id("result")))
-		if genRes.HasError {
-			list.Append(IfStmt{
-				Condition: Stmt{jen.Id("callErr").Op("!=").Nil()},
-				Block:     Stmt{jen.Return(jen.Nil(), jen.Id("callErr"))},
-				Else:      valueReturn,
-			})
+		if IsNodeType(idlNameToGoName(c.Op.ReturnType)) {
+			genRes.RequireContext = true
+			list.Append(g.Return(g.Raw(jen.Id("ctx").Dot("GetInstanceForNode").Call(jen.Id("result")))))
 		} else {
-			list.Append(valueReturn)
+			converter := "To"
+			if c.Op.Nullable {
+				converter += "Nullable"
+			}
+			converter += idlNameToGoName(c.Op.ReturnType)
+			genRes.RequireContext = true
+			valueReturn := g.Return(c.Receiver.Method(converter).Call(g.Id("ctx"), g.Id("result")))
+			if genRes.HasError {
+				list.Append(IfStmt{
+					Condition: Stmt{jen.Id("callErr").Op("!=").Nil()},
+					Block:     Stmt{jen.Return(jen.Nil(), jen.Id("callErr"))},
+					Else:      valueReturn,
+				})
+			} else {
+				list.Append(valueReturn)
+			}
 		}
 	}
 	genRes.Generator = list
@@ -687,6 +709,9 @@ func CreateConstructorWrapper(data ESConstructorData) JenGenerator {
 func CreateWrapperMethods(data ESConstructorData) JenGenerator {
 	list := StatementList()
 	for _, op := range data.Operations {
+		if op.MethodCustomization.Ignored {
+			continue
+		}
 		list.Append(CreateWrapperMethod(data, op))
 	}
 	for _, attr := range data.Attributes {
