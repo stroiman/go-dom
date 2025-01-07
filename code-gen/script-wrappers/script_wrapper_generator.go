@@ -23,6 +23,10 @@ func NewWrapperGeneratorsSpec() WrapperGeneratorsSpec {
 
 type WrapperTypeSpec = *ESClassWrapper
 
+func (s *ESClassWrapper) CreateWrapper() {
+	s.WrapperStruct = true
+}
+
 type WrapperGeneratorFileSpec struct {
 	Name  string
 	Types map[string]WrapperTypeSpec
@@ -70,7 +74,7 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 	}
 	generators := StatementList()
 	for _, specType := range spec.Types {
-		generators.Append(createData(data, *specType))
+		generators.Append(createData(data, specType))
 		generators.Append(g.Line)
 	}
 	return writeGenerator(writer, generators)

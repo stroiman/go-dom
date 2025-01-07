@@ -26,6 +26,7 @@ type ESClassWrapper struct {
 	WrapperTypeName string
 	Receiver        string
 	RunCustomCode   bool
+	WrapperStruct   bool
 	Customization   map[string]*ESMethodWrapper
 }
 

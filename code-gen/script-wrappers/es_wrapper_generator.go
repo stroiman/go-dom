@@ -22,7 +22,7 @@ var (
 	scriptHostPtr             = g.NewType("ScriptHost").Pointer()
 )
 
-func createData(spec ParsedIdlFile, dataData ESClassWrapper) ESConstructorData {
+func createData(spec ParsedIdlFile, dataData *ESClassWrapper) ESConstructorData {
 	var constructor *ESOperation
 	idlName := spec.IdlNames[dataData.TypeName]
 	type tmp struct {
@@ -140,6 +140,7 @@ func createData(spec ParsedIdlFile, dataData ESClassWrapper) ESConstructorData {
 		wrapperTypeName = fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
 	}
 	return ESConstructorData{
+		Spec:             dataData,
 		InnerTypeName:    wrappedTypeName,
 		WrapperTypeName:  wrapperTypeName,
 		Receiver:         dataData.Receiver,
@@ -153,6 +154,7 @@ func createData(spec ParsedIdlFile, dataData ESClassWrapper) ESConstructorData {
 }
 
 const br = "github.com/stroiman/go-dom/browser/dom"
+const html = "github.com/stroiman/go-dom/browser/html"
 const sc = "github.com/stroiman/go-dom/browser/scripting"
 const v8 = "github.com/tommie/v8go"
 
@@ -186,6 +188,7 @@ type ESAttribute struct {
 }
 
 type ESConstructorData struct {
+	Spec             *ESClassWrapper
 	CreatesInnerType bool
 	InnerTypeName    string
 	WrapperTypeName  string
@@ -327,11 +330,42 @@ func JSConstructorImpl(data ESConstructorData) g.Generator {
 }
 
 func (data ESConstructorData) Generate() *jen.Statement {
-	return StatementList(
+
+	generator := StatementList(
 		CreateConstructor(data),
 		CreateConstructorWrapper(data),
 		CreateWrapperMethods(data),
-	).Generate()
+	)
+
+	if data.Spec.WrapperStruct {
+		generator = StatementList(
+			data.generateWrapperType(),
+			generator,
+		)
+	}
+
+	return generator.Generate()
+}
+
+func (data ESConstructorData) generateWrapperType() g.Generator {
+	typeName := fmt.Sprintf("%sV8Wrapper", data.Name)
+	constructorName := fmt.Sprintf("New%s", typeName)
+	innerType := g.Raw(jen.Qual(html, data.Name))
+	wrapperStruct := g.NewStruct(typeName)
+	wrapperStruct.Embed(g.Raw(jen.Id("NodeV8WrapperBase").Index(innerType)))
+
+	wrapperConstructor := g.FunctionDefinition{
+		Name:     constructorName,
+		Args:     g.Arg(g.Id("host"), g.NewType("ScriptHost").Pointer()),
+		RtnTypes: g.List(g.NewType(typeName).Pointer()),
+		Body: g.Return(g.Raw(
+			jen.Op("&").Id(typeName).Values(
+				jen.Id("NewNodeV8WrapperBase").Index(innerType.Generate()).Call(jen.Id("host")),
+			),
+		)),
+	}
+
+	return StatementList(wrapperStruct, wrapperConstructor, g.Line)
 }
 
 func CreateConstructor(data ESConstructorData) g.Generator {
