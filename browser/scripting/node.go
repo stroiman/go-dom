@@ -8,11 +8,11 @@ import (
 )
 
 type ESNode struct {
-	ESWrapper[dom.Node]
+	NodeV8WrapperBase[dom.Node]
 }
 
 func NewESNode(host *ScriptHost) ESNode {
-	return ESNode{NewESWrapper[dom.Node](host)}
+	return ESNode{NewNodeV8WrapperBase[dom.Node](host)}
 }
 
 func CreateNode(host *ScriptHost) *v8.FunctionTemplate {

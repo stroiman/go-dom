@@ -10,13 +10,13 @@ import (
 )
 
 type DOMTokenListV8Wrapper struct {
-	ESWrapper[dom.Element]
+	NodeV8WrapperBase[dom.Element]
 	Iterator Iterator[string]
 }
 
 func NewDOMTokenListV8Wrapper(host *ScriptHost) DOMTokenListV8Wrapper {
 	return DOMTokenListV8Wrapper{
-		NewESWrapper[dom.Element](host),
+		NewNodeV8WrapperBase[dom.Element](host),
 		NewIterator(host, func(item string, ctx *ScriptContext) (*v8.Value, error) {
 			return v8.NewValue(host.iso, item)
 		}),
@@ -26,7 +26,7 @@ func NewDOMTokenListV8Wrapper(host *ScriptHost) DOMTokenListV8Wrapper {
 func (l DOMTokenListV8Wrapper) GetInstance(
 	info *v8.FunctionCallbackInfo,
 ) (result dom.DOMTokenList, err error) {
-	element, err := l.ESWrapper.GetInstance(info)
+	element, err := l.NodeV8WrapperBase.GetInstance(info)
 	if err == nil {
 		result = dom.NewClassList(element)
 	}
@@ -73,11 +73,11 @@ func (l DOMTokenListV8Wrapper) Toggle(info *v8.FunctionCallbackInfo) (*v8.Value,
 }
 
 type HTMLTemplateElementV8Wrapper struct {
-	ESWrapper[html.HTMLTemplateElement]
+	NodeV8WrapperBase[html.HTMLTemplateElement]
 }
 
 func NewHTMLTemplateElementV8Wrapper(host *ScriptHost) HTMLTemplateElementV8Wrapper {
-	return HTMLTemplateElementV8Wrapper{NewESWrapper[html.HTMLTemplateElement](host)}
+	return HTMLTemplateElementV8Wrapper{NewNodeV8WrapperBase[html.HTMLTemplateElement](host)}
 }
 
 func (e HTMLTemplateElementV8Wrapper) CreateInstance(

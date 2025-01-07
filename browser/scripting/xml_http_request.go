@@ -9,7 +9,9 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type ESXmlHttpRequest struct{ ESWrapper[XmlHttpRequest] }
+type ESXmlHttpRequest struct {
+	NodeV8WrapperBase[XmlHttpRequest]
+}
 
 func (xhr ESXmlHttpRequest) DecodeDocument(
 	ctx *ScriptContext,
@@ -44,7 +46,7 @@ func (xhr ESXmlHttpRequest) DecodeXMLHttpRequestBodyInit(
 }
 
 func NewESXmlHttpRequest(host *ScriptHost) ESXmlHttpRequest {
-	return ESXmlHttpRequest{NewESWrapper[XmlHttpRequest](host)}
+	return ESXmlHttpRequest{NewNodeV8WrapperBase[XmlHttpRequest](host)}
 }
 
 func (xhr ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) (*v8.Value, error) {
