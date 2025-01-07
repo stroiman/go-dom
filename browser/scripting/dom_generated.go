@@ -10,7 +10,7 @@ import (
 func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewDOMTokenListV8Wrapper(host)
-	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
+	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
@@ -37,7 +37,7 @@ func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	return constructor
 }
 
-func (u DOMTokenListV8Wrapper) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, v8.NewTypeError(u.host.iso, "Illegal Constructor")
 }
 

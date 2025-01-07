@@ -10,7 +10,7 @@ import (
 func CreateHTMLTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewHTMLTemplateElementV8Wrapper(host)
-	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
+	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
@@ -41,7 +41,7 @@ func CreateHTMLTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	return constructor
 }
 
-func (e HTMLTemplateElementV8Wrapper) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e HTMLTemplateElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.host.MustGetContext(info.Context())
 	return e.CreateInstance(ctx, info.This())
 }

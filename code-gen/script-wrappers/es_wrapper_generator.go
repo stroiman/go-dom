@@ -353,7 +353,7 @@ func CreateConstructorBody(data ESConstructorData) g.Generator {
 	statements := StatementList(
 		builder.v8Iso.Assign(scriptHost.Field("iso")),
 		g.Assign(builder.Wrapper, createWrapperFunction.Call(scriptHost)),
-		g.Assign(constructor, builder.NewFunctionTemplateOfWrappedMethod("NewInstance")),
+		g.Assign(constructor, builder.NewFunctionTemplateOfWrappedMethod("Constructor")),
 		g.Line,
 		g.Assign(builder.InstanceTmpl, constructor.GetInstanceTemplate()),
 		builder.InstanceTmpl.SetInternalFieldCount(1),
@@ -638,7 +638,7 @@ func CreateConstructorWrapper(data ESConstructorData) JenGenerator {
 	return StatementList(
 		g.Line,
 		g.FunctionDefinition{
-			Name: "NewInstance",
+			Name: "Constructor",
 			Receiver: g.FunctionArgument{
 				Name: g.Id(data.Receiver),
 				Type: g.Id(data.WrapperTypeName),

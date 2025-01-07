@@ -10,7 +10,7 @@ import (
 func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewESXmlHttpRequest(host)
-	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
+	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
@@ -72,7 +72,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	return constructor
 }
 
-func (xhr ESXmlHttpRequest) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	return xhr.CreateInstance(ctx, info.This())
 }

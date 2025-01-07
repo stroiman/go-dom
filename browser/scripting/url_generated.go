@@ -10,7 +10,7 @@ import (
 func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewURLV8Wrapper(host)
-	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.NewInstance)
+	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
@@ -70,7 +70,7 @@ func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	return constructor
 }
 
-func (u URLV8Wrapper) NewInstance(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u URLV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	url, err1 := TryParseArg(args, 0, u.DecodeUSVString)
 	base, err2 := TryParseArg(args, 1, u.DecodeUSVString)
