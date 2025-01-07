@@ -518,17 +518,16 @@ func (c CallInstance) PerformCall() (genRes GetGeneratorResult) {
 }
 
 func IsNodeType(typeName string) bool {
-	switch typeName {
-	case "Node":
+	loweredName := strings.ToLower(typeName)
+	switch loweredName {
+	case "node":
 		return true
-	case "Element":
+	case "document":
 		return true
-	case "Document":
-		return true
-	case "DocumentFragment":
+	case "documentfragment":
 		return true
 	}
-	if strings.Contains(typeName, "HTMLElement") {
+	if strings.HasSuffix(loweredName, "element") {
 		return true
 	}
 	return false
@@ -691,6 +690,12 @@ func FunctionTemplateCallbackBody(
 }
 
 func CreateConstructorWrapper(data ESConstructorData) JenGenerator {
+	var body g.Generator
+	if IsNodeType(data.InnerTypeName) {
+		body = IllegalConstructor(data)
+	} else {
+		body = JSConstructorImpl(data)
+	}
 	return StatementList(
 		g.Line,
 		g.FunctionDefinition{
@@ -701,7 +706,7 @@ func CreateConstructorWrapper(data ESConstructorData) JenGenerator {
 			},
 			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
 			RtnTypes: g.List(v8Value, g.Id("error")),
-			Body:     JSConstructorImpl(data),
+			Body:     body,
 		},
 	)
 }

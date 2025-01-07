@@ -43,8 +43,7 @@ func CreateHTMLTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
 }
 
 func (e HTMLTemplateElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := e.host.MustGetContext(info.Context())
-	return e.CreateInstance(ctx, info.This())
+	return nil, v8.NewTypeError(e.host.iso, "Illegal Constructor")
 }
 
 func (e HTMLTemplateElementV8Wrapper) Content(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
