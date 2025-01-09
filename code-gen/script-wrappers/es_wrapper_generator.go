@@ -22,118 +22,111 @@ var (
 	scriptHostPtr             = g.NewType("ScriptHost").Pointer()
 )
 
-func createData(spec IdlSpec, dataData *ESClassWrapper) ESConstructorData {
+const (
+	dom  = "github.com/stroiman/go-dom/browser/dom"
+	html = "github.com/stroiman/go-dom/browser/html"
+	sc   = "github.com/stroiman/go-dom/browser/scripting"
+	v8   = "github.com/tommie/v8go"
+)
+
+func createOperation(typeSpec WrapperTypeSpec, member MemberSpec) ESOperation {
+	methodCustomization := typeSpec.GetMethodCustomization(member.Name)
+	op := ESOperation{
+		Name:                 member.Name,
+		NotImplemented:       methodCustomization.NotImplemented,
+		CustomImplementation: methodCustomization.CustomImplementation,
+		RetType:              member.ReturnType(),
+		MethodCustomization:  methodCustomization,
+		// HasError:             !methodCustomization.HasNoError,
+		Arguments: []ESOperationArgument{},
+	}
+	for _, arg := range member.Arguments {
+		esArg := ESOperationArgument{
+			Name:     arg.Name,
+			Optional: arg.Optional,
+			IdlType:  arg.IdlType,
+		}
+		if len(arg.IdlType.Types) > 0 {
+			slog.Warn(
+				"Multiple argument types",
+				"Operation",
+				member.Name,
+				"Argument",
+				arg.Name,
+			)
+		}
+		if arg.IdlType.IdlType != nil {
+			esArg.Type = arg.IdlType.IdlType.IType.TypeName
+		}
+		op.Arguments = append(op.Arguments, esArg)
+	}
+	return op
+}
+
+func createData(spec IdlSpec, dataData WrapperTypeSpec) ESConstructorData {
 	var constructor *ESOperation
 	idlName, ok := spec.GetType(dataData.TypeName)
 	if !ok {
 		panic("Missing type")
 	}
-	type tmp struct {
-		Op ESOperation
-		Ok bool
-	}
-	ops := []*tmp{}
+	instanceMethods := []ESOperation{}
 	attributes := []ESAttribute{}
-	for _, member := range idlName.Members() {
-		if member.Special == "static" {
+
+	if c, ok := idlName.Constructor(); ok {
+		cons := createOperation(dataData, c)
+		constructor = &cons
+	}
+	for instanceMethod := range idlName.InstanceMethods() {
+		op := createOperation(dataData, instanceMethod)
+		op.HasError = !op.MethodCustomization.HasNoError
+		instanceMethods = append(instanceMethods, op)
+	}
+	for attribute := range idlName.Attributes() {
+		methodCustomization := dataData.GetMethodCustomization(attribute.Name)
+		if methodCustomization.Ignored {
 			continue
 		}
-		if -1 != slices.IndexFunc(
-			ops,
-			func(op *tmp) bool { return op.Op.Name == member.Name },
-		) {
-			slog.Warn("Function overloads", "Name", member.Name)
-			continue
-		}
-		returnType, nullable := FindMemberReturnType(member)
-		methodCustomization := dataData.GetMethodCustomization(member.Name)
-		operation := &tmp{ESOperation{
-			Name:                 member.Name,
+
+		var (
+			getter *ESOperation
+			setter *ESOperation
+		)
+		r := attribute.AttributeType()
+		rtnType := r.TypeName
+		getter = &ESOperation{
+			Name:                 attribute.Name,
 			NotImplemented:       methodCustomization.NotImplemented,
 			CustomImplementation: methodCustomization.CustomImplementation,
-			ReturnType:           returnType,
-			Nullable:             nullable,
+			RetType:              attribute.AttributeType(),
 			MethodCustomization:  methodCustomization,
-			Arguments:            []ESOperationArgument{},
-		}, true}
-		if member.Type == "operation" && member.Name != "" {
-			// Empty name seems to indicate a named property getter. Not sure yet.
-			operation.Op.HasError = !operation.Op.MethodCustomization.HasNoError
-			ops = append(ops, operation)
 		}
-		for _, arg := range member.Arguments {
-			esArg := ESOperationArgument{
-				Name:     arg.Name,
-				Optional: arg.Optional,
-				IdlType:  arg.IdlType,
-			}
-			if len(arg.IdlType.Types) > 0 {
-				slog.Warn(
-					"Multiple argument types",
-					"Operation",
-					member.Name,
-					"Argument",
-					arg.Name,
-				)
-				operation.Ok = false
-				break
-			}
-			if arg.IdlType.IdlType != nil {
-				esArg.Type = arg.IdlType.IdlType.IType.TypeName
-			}
-			operation.Op.Arguments = append(operation.Op.Arguments, esArg)
+		name := idlNameToGoName(getter.Name)
+		if attribute.Readonly {
+			getter.Name = name
+		} else {
+			getter.Name = fmt.Sprintf("Get%s", name)
+
+			setter = new(ESOperation)
+			*setter = *getter
+			setter.Name = fmt.Sprintf("Set%s", name)
+			methodCustomization := dataData.GetMethodCustomization(setter.Name)
+			setter.NotImplemented = setter.NotImplemented || methodCustomization.NotImplemented
+			setter.CustomImplementation = setter.CustomImplementation || methodCustomization.CustomImplementation
+			setter.RetType = NewRetTypeUndefined()
+			setter.Arguments = []ESOperationArgument{{
+				Name:     "val",
+				Type:     idlNameToGoName(rtnType),
+				Optional: false,
+				Variadic: false,
+			}}
 		}
-		if member.Type == "constructor" {
-			constructor = &operation.Op
-		}
-		if IsAttribute(member) && !methodCustomization.Ignored {
-			op := operation.Op
-			var (
-				getter *ESOperation
-				setter *ESOperation
-			)
-			rtnType, nullable := FindMemberAttributeType(member)
-			getter = new(ESOperation)
-			*getter = op
-			getterName := idlNameToGoName(op.Name)
-			if !member.Readonly {
-				getterName = fmt.Sprintf("Get%s", getterName)
-			}
-			getter.Name = getterName
-			getter.ReturnType = rtnType
-			getter.Nullable = nullable
-			getterCustomization := dataData.GetMethodCustomization(getter.Name)
-			getter.NotImplemented = getterCustomization.NotImplemented || op.NotImplemented
-			getter.CustomImplementation = getterCustomization.CustomImplementation ||
-				op.CustomImplementation
-			if !member.Readonly {
-				setter = new(ESOperation)
-				*setter = op
-				setter.Name = fmt.Sprintf("Set%s", idlNameToGoName(op.Name))
-				methodCustomization := dataData.GetMethodCustomization(setter.Name)
-				setter.NotImplemented = methodCustomization.NotImplemented ||
-					op.NotImplemented
-				setter.CustomImplementation = methodCustomization.CustomImplementation ||
-					op.CustomImplementation
-				setter.ReturnType = "undefined"
-				setter.Arguments = []ESOperationArgument{{
-					Name:     "val",
-					Type:     idlNameToGoName(rtnType),
-					Optional: false,
-					Variadic: false,
-					// IdlType  IdlTypes
-				}}
-			}
-			attributes = append(attributes, ESAttribute{op.Name, getter, setter})
-		}
+		getterCustomization := dataData.GetMethodCustomization(getter.Name)
+		getter.NotImplemented = getterCustomization.NotImplemented || getter.NotImplemented
+		getter.CustomImplementation = getterCustomization.CustomImplementation ||
+			getter.CustomImplementation
+		attributes = append(attributes, ESAttribute{attribute.Name, getter, setter})
 	}
 
-	operations := make([]ESOperation, 0, len(ops))
-	for _, op := range ops {
-		if op.Ok {
-			operations = append(operations, op.Op)
-		}
-	}
 	wrappedTypeName := dataData.InnerTypeName
 	if wrappedTypeName == "" {
 		wrappedTypeName = idlName.Type.Name
@@ -143,23 +136,17 @@ func createData(spec IdlSpec, dataData *ESClassWrapper) ESConstructorData {
 		wrapperTypeName = fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
 	}
 	return ESConstructorData{
-		Spec:             dataData,
-		InnerTypeName:    wrappedTypeName,
-		WrapperTypeName:  wrapperTypeName,
-		Receiver:         dataData.Receiver,
-		Operations:       operations,
-		Attributes:       attributes,
-		Constructor:      constructor,
-		CreatesInnerType: true,
-		IdlName:          idlName.Type,
-		RunCustomCode:    dataData.RunCustomCode,
+		Spec:            dataData,
+		InnerTypeName:   wrappedTypeName,
+		WrapperTypeName: wrapperTypeName,
+		Receiver:        dataData.Receiver,
+		Operations:      instanceMethods,
+		Attributes:      attributes,
+		Constructor:     constructor,
+		IdlName:         idlName.Type,
+		RunCustomCode:   dataData.RunCustomCode,
 	}
 }
-
-const br = "github.com/stroiman/go-dom/browser/dom"
-const html = "github.com/stroiman/go-dom/browser/html"
-const sc = "github.com/stroiman/go-dom/browser/scripting"
-const v8 = "github.com/tommie/v8go"
 
 type ESOperationArgument struct {
 	Name     string
@@ -172,8 +159,7 @@ type ESOperationArgument struct {
 type ESOperation struct {
 	Name                 string
 	NotImplemented       bool
-	ReturnType           string
-	Nullable             bool
+	RetType              RetType
 	HasError             bool
 	CustomImplementation bool
 	MethodCustomization  ESMethodWrapper
@@ -191,15 +177,14 @@ type ESAttribute struct {
 }
 
 type ESConstructorData struct {
-	Spec             *ESClassWrapper
-	CreatesInnerType bool
-	InnerTypeName    string
-	WrapperTypeName  string
-	Receiver         string
-	Operations       []ESOperation
-	Attributes       []ESAttribute
-	Constructor      *ESOperation
-	RunCustomCode    bool
+	Spec            *ESClassWrapper
+	InnerTypeName   string
+	WrapperTypeName string
+	Receiver        string
+	Operations      []ESOperation
+	Attributes      []ESAttribute
+	Constructor     *ESOperation
+	RunCustomCode   bool
 	IdlName
 }
 
@@ -485,7 +470,7 @@ type GetGeneratorResult struct {
 func (c CallInstance) PerformCall() (genRes GetGeneratorResult) {
 	args := []g.Generator{}
 	genRes.HasError = c.Op.GetHasError()
-	genRes.HasValue = c.Op.ReturnType != "undefined"
+	genRes.HasValue = c.Op.RetType.IsDefined() // != "undefined"
 	var stmt *jen.Statement
 	if genRes.HasValue {
 		stmt = jen.Id("result")
@@ -547,15 +532,16 @@ func (c CallInstance) GetGenerator() GetGeneratorResult {
 			list.Append(Stmt{jen.Return(jen.Nil(), jen.Nil())})
 		}
 	} else {
-		if IsNodeType(idlNameToGoName(c.Op.ReturnType)) {
+		retType := c.Op.RetType
+		if retType.IsNode() {
 			genRes.RequireContext = true
 			list.Append(g.Return(g.Raw(jen.Id("ctx").Dot("GetInstanceForNode").Call(jen.Id("result")))))
 		} else {
 			converter := "To"
-			if c.Op.Nullable {
+			if retType.Nullable {
 				converter += "Nullable"
 			}
-			converter += idlNameToGoName(c.Op.ReturnType)
+			converter += idlNameToGoName(retType.TypeName)
 			genRes.RequireContext = true
 			valueReturn := g.Return(c.Receiver.Method(converter).Call(g.Id("ctx"), g.Id("result")))
 			if genRes.HasError {

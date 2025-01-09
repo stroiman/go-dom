@@ -158,7 +158,7 @@ func FindMemberAttributeType(member IdlNameMember) (string, bool) {
 	return FindIdlType(member.IdlType, "attribute-type")
 }
 
-func IsAttribute(member IdlNameMember) bool {
+func (member IdlNameMember) IsAttribute() bool {
 	if member.Type != "attribute" {
 		return false
 	}
