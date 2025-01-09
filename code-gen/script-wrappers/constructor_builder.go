@@ -66,15 +66,13 @@ func (builder ConstructorBuilder) InstallAttributeHandler(
 	}
 	getterFt := builder.NewFunctionTemplate(wrapper.Field(getter.Name))
 	setterFt := g.Nil
-	var Attributes = v8ReadOnly
 	if setter != nil {
 		setterFt = builder.NewFunctionTemplate(wrapper.Field(setter.Name))
-		Attributes = v8None
 	}
 	return builder.Proto.SetAccessorProperty(
 		op.Name,
 		g.WrapLine(getterFt),
 		g.WrapLine(setterFt),
-		g.WrapLine(Attributes),
+		g.WrapLine(v8None),
 	)
 }

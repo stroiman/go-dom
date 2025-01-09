@@ -27,7 +27,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("readyState",
 		v8.NewFunctionTemplateWithError(iso, wrapper.ReadyState),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("timeout",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetTimeout),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetTimeout),
@@ -39,19 +39,19 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("upload",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Upload),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseURL",
 		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseURL),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("status",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Status),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("statusText",
 		v8.NewFunctionTemplateWithError(iso, wrapper.StatusText),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseType",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseType),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetResponseType),
@@ -59,15 +59,15 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("response",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Response),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseText",
 		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseText),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseXML",
 		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseXML),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 
 	return constructor
 }

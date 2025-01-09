@@ -21,7 +21,7 @@ func CreateHTMLTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("content",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Content),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("shadowRootMode",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetShadowRootMode),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetShadowRootMode),
@@ -119,11 +119,11 @@ func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("window",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Window),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("self",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Self),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("document",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Document),
 		nil,
@@ -135,39 +135,39 @@ func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("history",
 		v8.NewFunctionTemplateWithError(iso, wrapper.History),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("navigation",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Navigation),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("customElements",
 		v8.NewFunctionTemplateWithError(iso, wrapper.CustomElements),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("locationbar",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Locationbar),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("menubar",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Menubar),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("personalbar",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Personalbar),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("scrollbars",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Scrollbars),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("statusbar",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Statusbar),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("toolbar",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Toolbar),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("status",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetStatus),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetStatus),
@@ -175,19 +175,19 @@ func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("closed",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Closed),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("frames",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Frames),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("length",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Length),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("top",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Top),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("opener",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetOpener),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetOpener),
@@ -195,19 +195,19 @@ func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("frameElement",
 		v8.NewFunctionTemplateWithError(iso, wrapper.FrameElement),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("navigator",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Navigator),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("clientInformation",
 		v8.NewFunctionTemplateWithError(iso, wrapper.ClientInformation),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("originAgentCluster",
 		v8.NewFunctionTemplateWithError(iso, wrapper.OriginAgentCluster),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 
 	return constructor
 }

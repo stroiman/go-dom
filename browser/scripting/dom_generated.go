@@ -27,7 +27,7 @@ func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("length",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Length),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("value",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetValue),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetValue),

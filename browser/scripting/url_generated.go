@@ -25,7 +25,7 @@ func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("origin",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Origin),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("protocol",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetProtocol),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetProtocol),
@@ -61,7 +61,7 @@ func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("searchParams",
 		v8.NewFunctionTemplateWithError(iso, wrapper.SearchParams),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("hash",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetHash),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetHash),
