@@ -127,7 +127,7 @@ func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.SetAccessorProperty("document",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Document),
 		nil,
-		v8.ReadOnly)
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("name",
 		v8.NewFunctionTemplateWithError(iso, wrapper.GetName),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetName),

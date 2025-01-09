@@ -14,6 +14,22 @@ func NewDocumentWrapper(host *ScriptHost) ESDocumentWrapper {
 	return ESDocumentWrapper{NewESContainerWrapper[Document](host)}
 }
 
+func (w ESDocumentWrapper) BuildInstanceTemplate(constructor *v8.FunctionTemplate) {
+	tmpl := constructor.InstanceTemplate()
+	tmpl.SetAccessorProperty(
+		"location",
+		v8.NewFunctionTemplateWithError(
+			w.host.iso,
+			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				ctx := w.host.MustGetContext(info.Context())
+				return ctx.v8ctx.Global().Get("location")
+			},
+		),
+		nil,
+		v8.None,
+	)
+}
+
 func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewDocumentWrapper(host)
@@ -27,13 +43,8 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	wrapper.Install(builder.constructor)
 	builder.SetDefaultInstanceLookup()
 	protoBuilder := builder.NewPrototypeBuilder()
-	protoBuilder.CreateReadonlyProp2(
-		"location",
-		func(instance Document, ctx *ScriptContext) (*v8.Value, error) {
-			return ctx.v8ctx.Global().Get("location")
-		},
-	)
 	instanceBuilder := builder.NewInstanceBuilder()
+	wrapper.BuildInstanceTemplate(builder.constructor)
 	instanceTemplate := instanceBuilder.proto
 	instanceTemplate.SetInternalFieldCount(1)
 	proto := builder.constructor.PrototypeTemplate()

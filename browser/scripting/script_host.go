@@ -84,6 +84,8 @@ func (c *ScriptContext) GetInstanceForNode(
 			return c.GetInstanceForNodeByName(constructor, n)
 		}
 		return c.GetInstanceForNodeByName("Element", n)
+	case html.HTMLDocument:
+		return c.GetInstanceForNodeByName("HTMLDocument", n)
 	case Document:
 		return c.GetInstanceForNodeByName("Document", n)
 	case DocumentFragment:
@@ -242,6 +244,7 @@ func init() {
 	RegisterJSClass("Node", "EventTarget", CreateNode)
 
 	RegisterJSClass("Document", "Node", CreateDocumentPrototype)
+	RegisterJSClass("HTMLDocument", "Document", CreateHTMLDocumentPrototype)
 	RegisterJSClass("DocumentFragment", "Node", CreateDocumentFragmentPrototype)
 	RegisterJSClass("ShadowRoot", "DocumentFragment", CreateShadowRootPrototype)
 	RegisterJSClass("Element", "Node", CreateElement)

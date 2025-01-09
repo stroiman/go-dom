@@ -13,7 +13,7 @@ var _ = Describe("DOM Parser", func() {
 			const doc = parser.parseFromString("<div id='target'></div>", "text/html")
 		`)).Error().ToNot(HaveOccurred())
 		Expect(
-			ctx.RunTestScript("Object.getPrototypeOf(doc) === Document.prototype"),
+			ctx.RunTestScript("Object.getPrototypeOf(doc) === HTMLDocument.prototype"),
 		).To(BeTrue(), "result is a Document")
 		Expect(
 			ctx.RunTestScript("doc === window.document"),
