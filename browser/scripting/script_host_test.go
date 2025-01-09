@@ -57,12 +57,14 @@ var _ = Describe("ScriptHost", func() {
 
 		Describe("Load document with script", func() {
 			It("Runs the script when connected to DOM", func() {
-				win, err := html.NewWindowReader(strings.NewReader(`<html><body>
+				reader := strings.NewReader(`<html><body>
     <script>window.sut = document.documentElement.outerHTML</script>
     <div>I should not be in the output</div>
   </body></html>
-`), html.WindowOptions{ScriptEngineFactory: (*scripting.Wrapper)(host)},
-				)
+`)
+				options := html.WindowOptions{ScriptEngineFactory: (*scripting.Wrapper)(host)}
+				win, err := html.NewWindowReader(reader, options)
+				defer win.Dispose()
 				Expect(err).ToNot(HaveOccurred())
 				ctx := win.GetScriptEngine()
 				Expect(
