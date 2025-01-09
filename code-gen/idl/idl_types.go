@@ -3,7 +3,7 @@ package idl
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+	"strings"
 )
 
 type ValueType struct {
@@ -111,8 +111,19 @@ type IdlName struct {
 	Href    string          `json:"href"`
 }
 
+type IdlExtendedName struct {
+	Fragment string
+	Type     string
+	ExtAttrs []ExtAttr `json:"extAttrs"`
+	Target   string
+	Includes string
+}
+
+type IdlExtendedNames []IdlExtendedName
+
 type IdlParsed struct {
-	IdlNames map[string]IdlName
+	IdlNames         map[string]IdlName
+	IdlExtendedNames map[string]IdlExtendedNames
 }
 
 type ParsedIdlFile struct {
@@ -152,12 +163,5 @@ func IsAttribute(member IdlNameMember) bool {
 		return false
 	}
 	t, ok := FindIdlTypeValue(member.IdlType, "attribute-type")
-	return ok && t.IType.TypeName != "EventHandler"
-}
-
-func ParseIdlJsonReader(reader io.Reader) (ParsedIdlFile, error) {
-	decoder := json.NewDecoder(reader)
-	spec := ParsedIdlFile{}
-	err := decoder.Decode(&spec)
-	return spec, err
+	return ok && !strings.HasSuffix(t.IType.TypeName, "EventHandler")
 }

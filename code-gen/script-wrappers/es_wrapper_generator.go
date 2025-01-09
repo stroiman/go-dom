@@ -22,16 +22,19 @@ var (
 	scriptHostPtr             = g.NewType("ScriptHost").Pointer()
 )
 
-func createData(spec ParsedIdlFile, dataData *ESClassWrapper) ESConstructorData {
+func createData(spec IdlSpec, dataData *ESClassWrapper) ESConstructorData {
 	var constructor *ESOperation
-	idlName := spec.IdlNames[dataData.TypeName]
+	idlName, ok := spec.GetType(dataData.TypeName)
+	if !ok {
+		panic("Missing type")
+	}
 	type tmp struct {
 		Op ESOperation
 		Ok bool
 	}
 	ops := []*tmp{}
 	attributes := []ESAttribute{}
-	for _, member := range idlName.Members {
+	for _, member := range idlName.Members() {
 		if member.Special == "static" {
 			continue
 		}
@@ -133,7 +136,7 @@ func createData(spec ParsedIdlFile, dataData *ESClassWrapper) ESConstructorData 
 	}
 	wrappedTypeName := dataData.InnerTypeName
 	if wrappedTypeName == "" {
-		wrappedTypeName = idlName.Name
+		wrappedTypeName = idlName.Type.Name
 	}
 	wrapperTypeName := dataData.WrapperTypeName
 	if wrapperTypeName == "" {
@@ -148,7 +151,7 @@ func createData(spec ParsedIdlFile, dataData *ESClassWrapper) ESConstructorData 
 		Attributes:       attributes,
 		Constructor:      constructor,
 		CreatesInnerType: true,
-		IdlName:          idlName,
+		IdlName:          idlName.Type,
 		RunCustomCode:    dataData.RunCustomCode,
 	}
 }
