@@ -5,7 +5,7 @@ name: Build
 
 on:
   push:
-    branches: [ "main", "auto-merge" ]
+    branches: [ "main", "auto-merge", "goja" ]
   pull_request:
     branches: [ "main" ]
 
