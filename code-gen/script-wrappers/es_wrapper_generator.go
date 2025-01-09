@@ -238,6 +238,19 @@ func IsNodeType(typeName string) bool {
 	return false
 }
 
+// sanitizeVarName create a valid go variable name from a variable to avoid
+// invalid generated code due to
+//
+//   - The name is a reserved word, e.g. `type`.
+//   - The name already an identifiers in scope (not yet implemented)
+func sanitizeVarName(name string) string {
+	switch name {
+	case "type":
+		return "type_"
+	}
+	return name
+}
+
 func idlNameToGoName(s string) string {
 	words := strings.Split(s, " ")
 	for i, word := range words {

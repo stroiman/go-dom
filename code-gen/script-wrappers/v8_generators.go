@@ -436,7 +436,7 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments)
 	res.ErrNames = make([]g.Generator, argCount)
 	statements := g.StatementList()
 	for i, arg := range op.Arguments {
-		argName := g.Id(arg.Name)
+		argName := g.Id(sanitizeVarName(arg.Name))
 		errName := g.Id(fmt.Sprintf("err%d", i+1))
 		res.ArgNames[i] = argName
 		res.ErrNames[i] = errName
