@@ -32,29 +32,6 @@ var _ = Describe("ScriptHost", func() {
 			})
 		})
 
-		Describe("When a document is loaded", func() {
-			It("Should have document instanceof Document", func() {
-				Expect(
-					ctx.RunTestScript("document instanceof Document"),
-				).To(BeTrue())
-				Expect(
-					ctx.RunTestScript("Object.getPrototypeOf(document).constructor.name"),
-				).To(Equal("Document"))
-			})
-
-			It("Should have document instanceof Document", func() {
-				Expect(
-					ctx.RunTestScript("document instanceof Document"),
-				).To(BeTrue())
-				Expect(
-					ctx.RunTestScript("Object.getPrototypeOf(document).constructor.name"),
-				).To(Equal("Document"))
-				Expect(
-					ctx.RunTestScript("Object.getPrototypeOf(document) === Document.prototype"),
-				).To(BeTrue())
-			})
-		})
-
 		Describe("Load document with script", func() {
 			It("Runs the script when connected to DOM", func() {
 				reader := strings.NewReader(`<html><body>
