@@ -20,7 +20,6 @@ func (suite *ScriptTestSuite) CreateWindowTests() {
 
 		Describe("window.document", func() {
 			It("Should have a document property", func() {
-				Expect(suite.NewWindow().Eval("document")).ToNot(BeNil())
 				Expect(suite.NewWindow().Eval("document instanceof Document")).To(BeTrue())
 			})
 
@@ -32,8 +31,8 @@ func (suite *ScriptTestSuite) CreateWindowTests() {
 							for (let key in window) {
 								keys.push(key);
 							}
-							keys.includes('document')
-						`)).To(BeTrue())
+							keys.join(", ")
+						`)).To(ContainSubstring("document"))
 			})
 
 			It("Should return the same instance on multiple calls", func() {

@@ -1,6 +1,9 @@
 package suite
 
-import "github.com/stroiman/go-dom/browser/html"
+import (
+	"github.com/onsi/ginkgo/v2"
+	"github.com/stroiman/go-dom/browser/html"
+)
 
 type ScriptTestSuite struct {
 	Engine html.ScriptEngineFactory
@@ -29,7 +32,9 @@ func (suite *ScriptTestSuite) NewWindow() html.Window {
 	options := html.WindowOptions{
 		ScriptEngineFactory: suite.Engine,
 	}
-	return html.NewWindow(options)
+	result := html.NewWindow(options)
+	ginkgo.DeferCleanup(func() { result.Dispose() })
+	return result
 }
 
 func (suite *ScriptTestSuite) CreateAllGinkgoTests() {
