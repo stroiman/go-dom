@@ -2,7 +2,10 @@ package goja_driver
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 
+	"github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
 
 	"github.com/dop251/goja"
@@ -71,6 +74,26 @@ func (d *GojaInstance) GetObject(obj any, class string) *Object {
 	return result
 }
 
+type PropertyNameMapper struct{}
+
+func (_ PropertyNameMapper) FieldName(t reflect.Type, f reflect.StructField) string {
+	return ""
+}
+
+func uncapitalize(s string) string {
+	return strings.ToLower(s[0:1]) + s[1:]
+}
+
+func (_ PropertyNameMapper) MethodName(t reflect.Type, m reflect.Method) string {
+	var doc dom.Document
+	var document = reflect.TypeOf(&doc).Elem()
+	if t.Implements(document) && m.Name == "Location" {
+		return uncapitalize(m.Name)
+	} else {
+		return ""
+	}
+}
+
 func (d *GojaInstance) installGlobals(classes ClassMap) {
 	d.globals = make(map[string]Function)
 	var assertGlobal func(Class) Function
@@ -114,6 +137,7 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 
 func (d *GojaDriver) NewContext(window html.Window) html.ScriptContext {
 	vm := goja.New()
+	vm.SetFieldNameMapper(PropertyNameMapper{})
 	result := &GojaInstance{
 		vm: vm,
 	}
