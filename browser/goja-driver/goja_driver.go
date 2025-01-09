@@ -58,14 +58,17 @@ func init() {
 	InstallClass("EventTarget", "", EventTargetWrapper{})
 }
 
-type Function *Object
+type Function struct {
+	Constructor *Object
+	Prototype   *Object
+}
 
 func (d *GojaInstance) installGlobals(classes ClassMap) {
-	globals := make(map[string]Function)
-	var installGlobal func(Class) *Object
-	installGlobal = func(class Class) *Object {
+	d.globals = make(map[string]Function)
+	var assertGlobal func(Class) Function
+	assertGlobal = func(class Class) Function {
 		name := class.Name
-		if constructor, alreadyInstalled := globals[name]; alreadyInstalled {
+		if constructor, alreadyInstalled := d.globals[name]; alreadyInstalled {
 			return constructor
 		}
 		constructor := d.vm.ToValue(class.Wrapper.Constructor).(*goja.Object)
@@ -76,24 +79,24 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 			FLAG_NOT_SET,
 			FLAG_NOT_SET,
 		)
+		prototype := constructor.Get("prototype").(*Object)
+		result := Function{constructor, constructor.Get("prototype").(*Object)}
+		d.vm.Set(name, constructor)
+		d.globals[name] = result
 
 		if super := class.SuperClassName; super != "" {
 			if superclass, found := classes[super]; found {
-				superClassConstructor := installGlobal(superclass)
-				superPrototype := superClassConstructor.Get("prototype").(*Object)
-				prototype := constructor.Get("prototype").(*Object)
+				superPrototype := assertGlobal(superclass).Prototype
 				prototype.SetPrototype(superPrototype)
 			} else {
 				panic(fmt.Sprintf("Superclass not installed for %s. Superclass: %s", name, super))
 			}
 		}
 
-		d.vm.Set(name, constructor)
-		globals[name] = constructor
-		return constructor
+		return result
 	}
 	for _, class := range classes {
-		installGlobal(class)
+		assertGlobal(class)
 	}
 }
 
@@ -105,8 +108,7 @@ func (d *GojaDriver) NewContext(window html.Window) html.ScriptContext {
 	result.installGlobals(Globals)
 	globalThis := vm.GlobalObject()
 	globalThis.Set("window", globalThis)
-	windowPrototype := globalThis.Get("Window").(*Object).Get("prototype").(*goja.Object)
-	globalThis.SetPrototype(windowPrototype)
+	globalThis.SetPrototype(result.globals["Window"].Prototype)
 	return result
 }
 
@@ -114,7 +116,8 @@ func (d *GojaDriver) Close() {
 }
 
 type GojaInstance struct {
-	vm *goja.Runtime
+	vm      *goja.Runtime
+	globals map[string]Function
 }
 
 func (i *GojaInstance) Close() {
