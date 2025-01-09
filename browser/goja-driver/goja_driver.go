@@ -24,6 +24,10 @@ type Wrapper interface {
 	Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object
 }
 
+type WrapperPrototypeInitializer interface {
+	InitializePrototype(prototype *Object, r *goja.Runtime)
+}
+
 type Class struct {
 	Name           string
 	SuperClassName string
@@ -50,8 +54,9 @@ func InstallClass(name string, superClassName string, wrapper Wrapper) {
 func init() {
 	InstallClass("Window", "EventTarget", WindowWrapper{})
 	InstallClass("Node", "EventTarget", WindowWrapper{})
-	InstallClass("Document", "Node", WindowWrapper{})
+	InstallClass("Document", "Node", DocumentWrapper{})
 	InstallClass("EventTarget", "", EventTargetWrapper{})
+
 }
 
 type Function struct {
@@ -94,6 +99,10 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 			} else {
 				panic(fmt.Sprintf("Superclass not installed for %s. Superclass: %s", name, super))
 			}
+		}
+
+		if initializer, ok := class.Wrapper.(WrapperPrototypeInitializer); ok {
+			initializer.InitializePrototype(prototype, d.vm)
 		}
 
 		return result

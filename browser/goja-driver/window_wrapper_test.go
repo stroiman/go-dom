@@ -8,20 +8,28 @@ import (
 )
 
 type ScriptTestSuite struct {
-	Engine html.ScriptEngineFactory
+	Engine html.ScriptHost
 	Prefix string
 }
 
 func (suite *ScriptTestSuite) NewWindow() html.Window {
-	options := html.WindowOptions{
-		ScriptEngineFactory: suite.Engine,
-	}
+	options := html.WindowOptions{ScriptHost: suite.Engine}
 	return html.NewWindow(options)
 }
 
 func (suite *ScriptTestSuite) CreateWindowTests() {
 	prefix := suite.Prefix
-	Describe(prefix+" - Window wrapper", func() {
+	Describe(prefix+" - Window object", func() {
+		It("Should throw a TypeError when constructed", func() {
+			Expect(suite.NewWindow().Eval(
+				`let error;
+				try { new Window() } catch(err) { 
+					error = err;
+				}
+				error && Object.getPrototypeOf(error).constructor.name
+				`)).To(Equal("TypeError"))
+		})
+
 		Describe("window.document", func() {
 			It("Should have a document property", func() {
 				Expect(suite.NewWindow().Eval("document")).ToNot(BeNil())
