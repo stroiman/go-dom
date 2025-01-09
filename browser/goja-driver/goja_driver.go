@@ -30,12 +30,6 @@ type Class struct {
 	Wrapper        Wrapper
 }
 
-type WindowWrapper struct{}
-
-func (w WindowWrapper) Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
-	panic(r.NewTypeError("Illegal Constructor"))
-}
-
 type EventTargetWrapper struct{}
 
 func (w EventTargetWrapper) Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
@@ -55,12 +49,21 @@ func InstallClass(name string, superClassName string, wrapper Wrapper) {
 
 func init() {
 	InstallClass("Window", "EventTarget", WindowWrapper{})
+	InstallClass("Node", "EventTarget", WindowWrapper{})
+	InstallClass("Document", "Node", WindowWrapper{})
 	InstallClass("EventTarget", "", EventTargetWrapper{})
 }
 
 type Function struct {
 	Constructor *Object
 	Prototype   *Object
+}
+
+func (d *GojaInstance) GetObject(obj any, class string) *Object {
+	result := d.vm.ToValue(obj).(*Object)
+	g := d.globals[class]
+	result.SetPrototype(g.Prototype)
+	return result
 }
 
 func (d *GojaInstance) installGlobals(classes ClassMap) {
@@ -108,7 +111,11 @@ func (d *GojaDriver) NewContext(window html.Window) html.ScriptContext {
 	result.installGlobals(Globals)
 	globalThis := vm.GlobalObject()
 	globalThis.Set("window", globalThis)
+	globalThis.DefineAccessorProperty("document", vm.ToValue(func(c *FunctionCall) Value {
+		return result.GetObject(window.Document(), "Document")
+	}), nil, FLAG_FALSE, FLAG_TRUE)
 	globalThis.SetPrototype(result.globals["Window"].Prototype)
+
 	return result
 }
 
@@ -127,7 +134,7 @@ func (i *GojaInstance) Run(string) error {
 	return nil
 }
 
-func (i *GojaInstance) Eval(str string) (any, error) {
+func (i *GojaInstance) Eval(str string) (res any, err error) {
 	if gojaVal, err := i.vm.RunString(str); err == nil {
 		return gojaVal.Export(), nil
 	} else {
