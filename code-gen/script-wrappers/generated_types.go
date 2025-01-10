@@ -51,5 +51,5 @@ func (proto v8PrototypeTemplate) SetAccessorProperty(
 type v8Iso struct{ g.Value }
 
 func (iso v8Iso) NewFunctionTemplate(cb g.Generator) g.Generator {
-	return NewFunctionTemplate{iso.Value, cb}
+	return NewV8FunctionTemplate{iso.Value, cb}
 }
