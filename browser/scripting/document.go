@@ -6,15 +6,15 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type ESDocumentWrapper struct {
+type DocumentV8Wrapper struct {
 	ESElementContainerWrapper[Document]
 }
 
-func NewDocumentWrapper(host *ScriptHost) ESDocumentWrapper {
-	return ESDocumentWrapper{NewESContainerWrapper[Document](host)}
+func NewDocumentV8Wrapper(host *ScriptHost) DocumentV8Wrapper {
+	return DocumentV8Wrapper{NewESContainerWrapper[Document](host)}
 }
 
-func (w ESDocumentWrapper) BuildInstanceTemplate(constructor *v8.FunctionTemplate) {
+func (w DocumentV8Wrapper) BuildInstanceTemplate(constructor *v8.FunctionTemplate) {
 	tmpl := constructor.InstanceTemplate()
 	tmpl.SetAccessorProperty(
 		"location",
@@ -32,7 +32,7 @@ func (w ESDocumentWrapper) BuildInstanceTemplate(constructor *v8.FunctionTemplat
 
 func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	wrapper := NewDocumentWrapper(host)
+	wrapper := NewDocumentV8Wrapper(host)
 	builder := NewConstructorBuilder[Document](
 		host,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
