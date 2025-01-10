@@ -272,10 +272,6 @@ func upperCaseFirstLetter(s string) string {
 	return string(buffer)
 }
 
-type Stmt struct{ *jen.Statement }
-
-func (s Stmt) Generate() *jen.Statement { return s.Statement }
-
 type ReturnOnError struct {
 	err g.Generator
 }

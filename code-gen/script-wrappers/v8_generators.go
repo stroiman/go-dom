@@ -365,7 +365,7 @@ func (c V8InstanceInvocation) GetGenerator() V8InstanceInvocationResult {
 		if genRes.HasError {
 			list.Append(g.Return(g.Nil, g.Id("callErr")))
 		} else {
-			list.Append(Stmt{jen.Return(jen.Nil(), jen.Nil())})
+			list.Append(g.Return(g.Nil, g.Nil))
 		}
 	} else {
 		retType := c.Op.RetType
@@ -382,8 +382,8 @@ func (c V8InstanceInvocation) GetGenerator() V8InstanceInvocationResult {
 			valueReturn := g.Return(c.Receiver.Method(converter).Call(g.Id("ctx"), g.Id("result")))
 			if genRes.HasError {
 				list.Append(IfStmt{
-					Condition: Stmt{jen.Id("callErr").Op("!=").Nil()},
-					Block:     Stmt{jen.Return(jen.Nil(), jen.Id("callErr"))},
+					Condition: g.Neq{Lhs: g.Id("callErr"), Rhs: g.Nil},
+					Block:     g.Return(g.Nil, g.Id("callErr")),
 					Else:      valueReturn,
 				})
 			} else {
@@ -452,15 +452,13 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments)
 			}
 		}
 
-		converters := make([]jen.Code, 0)
-		converters = append(converters, jen.Id("args"))
-		converters = append(converters, jen.Lit(i))
+		gConverters := []g.Generator{g.Id("args"), g.Lit(i)}
 		for _, n := range convertNames {
-			converters = append(converters, g.Raw(jen.Id(data.Receiver).Dot(n)).Generate())
+			gConverters = append(gConverters, g.NewValue(data.Receiver).Field(n))
 		}
 		statements.Append(g.Assign(
 			g.Raw(jen.List(argName.Generate(), errName.Generate())),
-			Stmt{jen.Id("TryParseArg").Call(converters...)}))
+			g.NewValue("TryParseArg").Call(gConverters...)))
 	}
 	res.Generator = statements
 	return
