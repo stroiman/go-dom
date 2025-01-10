@@ -143,7 +143,8 @@ func (d *GojaDriver) NewContext(window html.Window) html.ScriptContext {
 	vm := goja.New()
 	vm.SetFieldNameMapper(PropertyNameMapper{})
 	result := &GojaInstance{
-		vm: vm,
+		vm:     vm,
+		window: window,
 	}
 	result.installGlobals(Globals)
 	globalThis := vm.GlobalObject()
@@ -161,6 +162,7 @@ func (d *GojaDriver) Close() {
 
 type GojaInstance struct {
 	vm      *goja.Runtime
+	window  html.Window
 	globals map[string]Function
 }
 

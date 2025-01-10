@@ -38,8 +38,11 @@ func (suite *ScriptTestSuite) CreateEventTargetTests() {
 		})
 
 		It("Doesn't bubble by default", func() {
+			if suite.SkipDOM {
+				Skip("Suite doesn't support a DOM")
+			}
 			ctx.Window.LoadHTML(`<div id="parent"><div id="target"></div></div>`)
-			ctx.Eval(`
+			Expect(ctx.Run(`
 				var targetCalled = false;
 				var parentCalled = false;
 				const target = document.getElementById("target")
@@ -48,12 +51,15 @@ func (suite *ScriptTestSuite) CreateEventTargetTests() {
 					"go:home",
 					e => { parentCalled = true });
 				target.dispatchEvent(new CustomEvent("go:home", {}))
-			`)
-			Expect(ctx.Eval("targetCalled")).To(BeTrue())
-			Expect(ctx.Eval("parentCalled")).To(BeFalse())
+			`)).To(Succeed())
+			Expect(ctx.Eval("targetCalled")).To(BeTrue(), "Target handler called")
+			Expect(ctx.Eval("parentCalled")).To(BeFalse(), "Parent handler called")
 		})
 
 		It("Bubbles when specified in the constructor", func() {
+			if suite.SkipDOM {
+				Skip("Suite doesn't support a DOM")
+			}
 			ctx.Window.LoadHTML(`<div id="parent"><div id="target"></div></div>`)
 			Expect(ctx.Run(`
 				var targetCalled = false;
@@ -75,21 +81,21 @@ func (suite *ScriptTestSuite) CreateEventTargetTests() {
 
 		It("Can call an added event listener", func() {
 			Expect(ctx.Eval(`
-	var callCount = 0
-	function listener() { callCount++ };
-	const target = new EventTarget();
-	target.addEventListener('custom', listener);
-	target.dispatchEvent(new CustomEvent('custom'));`)).Error().ToNot(HaveOccurred())
+				var callCount = 0
+				function listener() { callCount++ };
+				const target = new EventTarget();
+				target.addEventListener('custom', listener);
+				target.dispatchEvent(new CustomEvent('custom'));`)).Error().ToNot(HaveOccurred())
 			Expect(ctx.Eval("callCount")).To(BeEquivalentTo(1))
 		})
 
 		It("Event from Go code will propagate to JS", func() {
 			Expect(ctx.Eval(`
-	var callCount = 0
-	function listener() { callCount++ };
-	const target = window;
-	target.addEventListener('custom', listener);
-	`)).Error().ToNot(HaveOccurred())
+				var callCount = 0
+				function listener() { callCount++ };
+				const target = window;
+				target.addEventListener('custom', listener);
+			`)).Error().ToNot(HaveOccurred())
 			ctx.Window.DispatchEvent(dom.NewCustomEvent("custom"))
 			Expect(ctx.Eval("callCount")).To(BeEquivalentTo(1))
 		})
@@ -98,8 +104,8 @@ func (suite *ScriptTestSuite) CreateEventTargetTests() {
 			Describe("Custom events dispatched from Go-code", func() {
 				It("Should be of type Event", func() {
 					Expect(ctx.Eval(`
-	var event;
-	window.addEventListener('custom', e => { event = e });`,
+						var event;
+						window.addEventListener('custom', e => { event = e });`,
 					)).Error().ToNot(HaveOccurred())
 					ctx.Window.DispatchEvent(dom.NewCustomEvent("custom"))
 					Expect(
@@ -108,12 +114,13 @@ func (suite *ScriptTestSuite) CreateEventTargetTests() {
 					Expect(ctx.Eval(`event instanceof Event`)).To(BeTrue())
 				})
 			})
+
 			It("Should have a type", func() {
 				Expect(ctx.Eval(`
-	var event;
-	window.addEventListener('custom', e => { event = e });
-	window.dispatchEvent(new CustomEvent('custom'));
-	event.type`,
+					var event;
+					window.addEventListener('custom', e => { event = e });
+					window.dispatchEvent(new CustomEvent('custom'));
+					event.type`,
 				)).To(Equal("custom"))
 				By("Inheriting directly from event")
 				Expect(

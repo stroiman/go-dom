@@ -13,16 +13,20 @@ type GojaEvent[T dom.Event] struct {
 	Event T
 }
 
+func ToBoolean(value Value) bool {
+	return value != nil && value.ToBoolean()
+}
+
 func (w EventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
 	arg1 := call.Argument(0).String()
 	options := make([]dom.CustomEventOption, 0, 2)
 	if arg2 := call.Argument(1); !IsUndefined(arg2) {
 		if obj, ok := arg2.(*Object); ok {
-			options = append(options, dom.EventCancelable(obj.Get("cancelable").ToBoolean()))
-			options = append(options, dom.EventBubbles(obj.Get("bubbles").ToBoolean()))
+			options = append(options, dom.EventCancelable(ToBoolean(obj.Get("cancelable"))))
+			options = append(options, dom.EventBubbles(ToBoolean(obj.Get("bubbles"))))
 		}
 	}
-	result := r.ToValue(dom.NewCustomEvent(arg1)).(*Object)
+	result := r.ToValue(dom.NewCustomEvent(arg1, options...)).(*Object)
 	result.SetPrototype(call.This.Prototype())
 	return result
 }

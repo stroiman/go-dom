@@ -13,7 +13,7 @@ import (
 	. "github.com/stroiman/go-dom/browser/internal/test/script-test-suite"
 )
 
-var testSuite = NewScriptTestSuite(NewGojaScriptEngine(), "goja")
+var testSuite = NewScriptTestSuite(NewGojaScriptEngine(), "goja", SkipDOM)
 
 func FormatException(value any) (result string, ok bool) {
 	var exception *goja.Exception

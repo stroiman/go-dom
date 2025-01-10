@@ -51,31 +51,34 @@ func (w EventTargetWrapper) Constructor(call goja.ConstructorCall, r *goja.Runti
 	return result
 }
 
+func (w EventTargetWrapper) GetEventTarget(c FunctionCall) dom.EventTarget {
+	if c.This == nil {
+		panic("No this pointer")
+	}
+	if c.This == w.instance.vm.GlobalObject() {
+		return w.instance.window
+	}
+	instance, ok := c.This.Export().(dom.EventTarget)
+	if !ok {
+		panic(w.instance.vm.NewTypeError("Not an event target"))
+	}
+	return instance
+
+}
+
 func (w EventTargetWrapper) InitializePrototype(prototype *Object,
 	vm *Runtime) {
 	createElement := vm.ToValue(func(c FunctionCall) Value {
-		if c.This == nil {
-			panic("No this pointer")
-		}
-		doc, ok := c.This.Export().(dom.EventTarget)
-		if !ok {
-			panic(vm.NewTypeError("Not an event target"))
-		}
+		instance := w.GetEventTarget(c)
 		name := c.Argument(0).String()
-		doc.AddEventListener(name, NewGojaEventListener(w.instance, c.Argument(1)))
+		instance.AddEventListener(name, NewGojaEventListener(w.instance, c.Argument(1)))
 		return nil
 	})
 
 	dispatchEvent := vm.ToValue(func(c FunctionCall) Value {
-		if c.This == nil {
-			panic("No this pointer.")
-		}
-		doc, ok := c.This.Export().(dom.EventTarget)
-		if !ok {
-			panic(vm.NewTypeError("Not an event target"))
-		}
+		instance := w.GetEventTarget(c)
 		if event, ok := c.Argument(0).Export().(dom.Event); ok {
-			return vm.ToValue(doc.DispatchEvent(event))
+			return vm.ToValue(instance.DispatchEvent(event))
 		} else {
 			panic(vm.NewTypeError("Not an event"))
 		}

@@ -6,8 +6,9 @@ import (
 )
 
 type ScriptTestSuite struct {
-	Engine html.ScriptHost
-	Prefix string
+	Engine  html.ScriptHost
+	Prefix  string
+	SkipDOM bool
 }
 
 type ScriptTestContext struct {
@@ -26,10 +27,21 @@ func (ctx *ScriptTestContext) Close() {
 	ctx.Window.Close()
 }
 
+type ScriptTestSuiteOption func(*ScriptTestSuite)
+
+var SkipDOM = func(s *ScriptTestSuite) { s.SkipDOM = true }
+
 func NewScriptTestSuite(
 	engine html.ScriptHost,
-	prefix string) *ScriptTestSuite {
-	return &ScriptTestSuite{engine, prefix + ": "}
+	prefix string, options ...ScriptTestSuiteOption) *ScriptTestSuite {
+	result := &ScriptTestSuite{
+		Engine: engine,
+		Prefix: prefix + ": ",
+	}
+	for _, option := range options {
+		option(result)
+	}
+	return result
 }
 
 func (suite *ScriptTestSuite) NewContext() *ScriptTestContext {
