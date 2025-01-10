@@ -8,6 +8,8 @@ import (
 type DocumentWrapper struct {
 }
 
+func NewDocumentWrapper(instance *GojaInstance) Wrapper { return DocumentWrapper{} }
+
 func (w DocumentWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
 	panic(r.NewTypeError("Illegal Constructor"))
 }

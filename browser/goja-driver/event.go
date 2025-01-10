@@ -8,6 +8,9 @@ import (
 type EventWrapper struct {
 }
 
+func NewEventWrapper(instance *GojaInstance) Wrapper      { return newEventWrapper(instance) }
+func newEventWrapper(instance *GojaInstance) EventWrapper { return EventWrapper{} }
+
 type GojaEvent[T dom.Event] struct {
 	Value *Object
 	Event T
@@ -42,10 +45,21 @@ func (w EventWrapper) InitializePrototype(prototype *Object,
 		return nil
 	})
 	prototype.Set("preventDefault", preventDefault)
+	prototype.DefineAccessorProperty("type", vm.ToValue(func(c FunctionCall) Value {
+		event, ok := c.This.Export().(dom.Event)
+		if !ok {
+			panic(vm.NewTypeError("Instance is not an Event"))
+		}
+		return vm.ToValue(event.Type())
+	}), nil, FLAG_TRUE, FLAG_TRUE)
 }
 
 type CustomEventWrapper struct {
 	Base EventWrapper
+}
+
+func NewCustomEventWrapper(instance *GojaInstance) Wrapper {
+	return CustomEventWrapper{newEventWrapper(instance)}
 }
 
 func (w CustomEventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {

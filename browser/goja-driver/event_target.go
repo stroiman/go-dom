@@ -11,7 +11,7 @@ type EventTargetWrapper struct {
 	instance *GojaInstance
 }
 
-func (w EventTargetWrapper) CreateWrapper(instance *GojaInstance) Wrapper {
+func NewEventTargetWrapper(instance *GojaInstance) Wrapper {
 	return EventTargetWrapper{instance}
 }
 

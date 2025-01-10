@@ -27,9 +27,7 @@ type Wrapper interface {
 	Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object
 }
 
-type CreateWrapper interface {
-	CreateWrapper(instance *GojaInstance) Wrapper
-}
+type CreateWrapper func(instance *GojaInstance) Wrapper
 
 type WrapperPrototypeInitializer interface {
 	InitializePrototype(prototype *Object, r *goja.Runtime)
@@ -38,14 +36,14 @@ type WrapperPrototypeInitializer interface {
 type Class struct {
 	Name           string
 	SuperClassName string
-	Wrapper        Wrapper
+	Wrapper        CreateWrapper
 }
 
 type ClassMap map[string]Class
 
 var Globals ClassMap = make(ClassMap)
 
-func InstallClass(name string, superClassName string, wrapper Wrapper) {
+func InstallClass(name string, superClassName string, wrapper CreateWrapper) {
 	if _, found := Globals[name]; found {
 		panic("Class already installed")
 	}
@@ -53,12 +51,12 @@ func InstallClass(name string, superClassName string, wrapper Wrapper) {
 }
 
 func init() {
-	InstallClass("Window", "EventTarget", WindowWrapper{})
-	InstallClass("Node", "EventTarget", WindowWrapper{})
-	InstallClass("Event", "", EventWrapper{})
-	InstallClass("CustomEvent", "Event", CustomEventWrapper{})
-	InstallClass("Document", "Node", DocumentWrapper{})
-	InstallClass("EventTarget", "", EventTargetWrapper{})
+	InstallClass("EventTarget", "", NewEventTargetWrapper)
+	InstallClass("Node", "EventTarget", NewNodeWrapper)
+	InstallClass("Window", "Node", NewWindowWrapper)
+	InstallClass("Document", "Node", NewDocumentWrapper)
+	InstallClass("Event", "", NewEventWrapper)
+	InstallClass("CustomEvent", "Event", NewCustomEventWrapper)
 
 }
 
@@ -99,10 +97,7 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 	var assertGlobal func(Class) Function
 	assertGlobal = func(class Class) Function {
 		name := class.Name
-		wrapper := class.Wrapper
-		if creator, ok := wrapper.(CreateWrapper); ok {
-			wrapper = creator.CreateWrapper(d)
-		}
+		wrapper := class.Wrapper(d)
 		if constructor, alreadyInstalled := d.globals[name]; alreadyInstalled {
 			return constructor
 		}
@@ -147,6 +142,7 @@ func (d *GojaDriver) NewContext(window html.Window) html.ScriptContext {
 		window: window,
 	}
 	result.installGlobals(Globals)
+
 	globalThis := vm.GlobalObject()
 	globalThis.Set("window", globalThis)
 	globalThis.DefineAccessorProperty("document", vm.ToValue(func(c *FunctionCall) Value {
