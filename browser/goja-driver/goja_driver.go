@@ -27,6 +27,10 @@ type Wrapper interface {
 	Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object
 }
 
+type CreateWrapper interface {
+	CreateWrapper(instance *GojaInstance) Wrapper
+}
+
 type WrapperPrototypeInitializer interface {
 	InitializePrototype(prototype *Object, r *goja.Runtime)
 }
@@ -35,12 +39,6 @@ type Class struct {
 	Name           string
 	SuperClassName string
 	Wrapper        Wrapper
-}
-
-type EventTargetWrapper struct{}
-
-func (w EventTargetWrapper) Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
-	panic(r.NewTypeError("Illegal Constructor"))
 }
 
 type ClassMap map[string]Class
@@ -57,6 +55,8 @@ func InstallClass(name string, superClassName string, wrapper Wrapper) {
 func init() {
 	InstallClass("Window", "EventTarget", WindowWrapper{})
 	InstallClass("Node", "EventTarget", WindowWrapper{})
+	InstallClass("Event", "", EventWrapper{})
+	InstallClass("CustomEvent", "Event", CustomEventWrapper{})
 	InstallClass("Document", "Node", DocumentWrapper{})
 	InstallClass("EventTarget", "", EventTargetWrapper{})
 
@@ -99,10 +99,14 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 	var assertGlobal func(Class) Function
 	assertGlobal = func(class Class) Function {
 		name := class.Name
+		wrapper := class.Wrapper
+		if creator, ok := wrapper.(CreateWrapper); ok {
+			wrapper = creator.CreateWrapper(d)
+		}
 		if constructor, alreadyInstalled := d.globals[name]; alreadyInstalled {
 			return constructor
 		}
-		constructor := d.vm.ToValue(class.Wrapper.Constructor).(*goja.Object)
+		constructor := d.vm.ToValue(wrapper.Constructor).(*goja.Object)
 		constructor.DefineDataProperty(
 			"name",
 			d.vm.ToValue(name),
@@ -111,7 +115,7 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 			FLAG_NOT_SET,
 		)
 		prototype := constructor.Get("prototype").(*Object)
-		result := Function{constructor, constructor.Get("prototype").(*Object)}
+		result := Function{constructor, prototype}
 		d.vm.Set(name, constructor)
 		d.globals[name] = result
 
@@ -124,7 +128,7 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 			}
 		}
 
-		if initializer, ok := class.Wrapper.(WrapperPrototypeInitializer); ok {
+		if initializer, ok := wrapper.(WrapperPrototypeInitializer); ok {
 			initializer.InitializePrototype(prototype, d.vm)
 		}
 
