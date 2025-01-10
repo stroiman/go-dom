@@ -1,11 +1,13 @@
 package wrappers
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"os"
+	"slices"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/stroiman/go-dom/code-gen/generators"
@@ -30,6 +32,19 @@ func (s *ESClassWrapper) CreateWrapper() {
 type WrapperGeneratorFileSpec struct {
 	Name  string
 	Types map[string]WrapperTypeSpec
+}
+
+func (spec WrapperGeneratorFileSpec) GetTypesSorted() []WrapperTypeSpec {
+	types := make([]WrapperTypeSpec, len(spec.Types))
+	idx := 0
+	for _, t := range spec.Types {
+		types[idx] = t
+		idx++
+	}
+	slices.SortFunc(types, func(x, y WrapperTypeSpec) int {
+		return cmp.Compare(x.TypeName, y.TypeName)
+	})
+	return types
 }
 
 func (g WrapperGeneratorsSpec) Module(spec string) *WrapperGeneratorFileSpec {
@@ -73,7 +88,7 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 		return err
 	}
 	generators := g.StatementList()
-	for _, specType := range spec.Types {
+	for _, specType := range spec.GetTypesSorted() {
 		typeGenerationInformation := createData(data, specType)
 		generators.Append(CreateV8Generator(typeGenerationInformation))
 		generators.Append(g.Line)
