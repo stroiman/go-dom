@@ -16,6 +16,11 @@ func (suite *ScriptTestSuite) CreateEventTargetTests() {
 			ctx = suite.NewContext()
 		})
 
+		It("New event target is an EventTarget", func() {
+			Expect(ctx.Eval("typeof (new EventTarget())")).To(Equal("object"))
+			Expect(ctx.Eval("(new EventTarget()) instanceof EventTarget")).To(BeTrue())
+		})
+
 		It("Isn't cancellable by default", func() {
 			Expect(ctx.Eval(`
 				const target = new EventTarget();
