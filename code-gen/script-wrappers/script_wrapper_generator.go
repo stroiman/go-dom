@@ -74,7 +74,8 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 	}
 	generators := StatementList()
 	for _, specType := range spec.Types {
-		generators.Append(createData(data, specType))
+		typeGenerationInformation := createData(data, specType)
+		generators.Append(CreateV8Generator(typeGenerationInformation))
 		generators.Append(g.Line)
 	}
 	return writeGenerator(writer, generators)

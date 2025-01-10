@@ -29,58 +29,56 @@ const (
 	v8   = "github.com/tommie/v8go"
 )
 
-func createOperation(typeSpec WrapperTypeSpec, member MemberSpec) ESOperation {
-	methodCustomization := typeSpec.GetMethodCustomization(member.Name)
-	op := ESOperation{
-		Name:                 member.Name,
-		NotImplemented:       methodCustomization.NotImplemented,
-		CustomImplementation: methodCustomization.CustomImplementation,
-		RetType:              member.ReturnType(),
-		MethodCustomization:  methodCustomization,
-		// HasError:             !methodCustomization.HasNoError,
-		Arguments: []ESOperationArgument{},
-	}
-	for _, arg := range member.Arguments {
-		esArg := ESOperationArgument{
-			Name:     arg.Name,
-			Optional: arg.Optional,
-			IdlType:  arg.IdlType,
-		}
-		if len(arg.IdlType.Types) > 0 {
-			slog.Warn(
-				"Multiple argument types",
-				"Operation",
-				member.Name,
-				"Argument",
-				arg.Name,
-			)
-		}
-		if arg.IdlType.IdlType != nil {
-			esArg.Type = arg.IdlType.IdlType.IType.TypeName
-		}
-		op.Arguments = append(op.Arguments, esArg)
-	}
-	return op
-}
-
 func createData(spec IdlSpec, dataData WrapperTypeSpec) ESConstructorData {
-	var constructor *ESOperation
 	idlName, ok := spec.GetType(dataData.TypeName)
 	if !ok {
 		panic("Missing type")
 	}
-	instanceMethods := []ESOperation{}
-	attributes := []ESAttribute{}
-
-	if c, ok := idlName.Constructor(); ok {
-		cons := createOperation(dataData, c)
-		constructor = &cons
+	wrappedTypeName := dataData.InnerTypeName
+	if wrappedTypeName == "" {
+		wrappedTypeName = idlName.Type.Name
 	}
+	wrapperTypeName := dataData.WrapperTypeName
+	if wrapperTypeName == "" {
+		wrapperTypeName = fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
+	}
+	return ESConstructorData{
+		Spec:            dataData,
+		InnerTypeName:   wrappedTypeName,
+		WrapperTypeName: wrapperTypeName,
+		Receiver:        dataData.Receiver,
+		RunCustomCode:   dataData.RunCustomCode,
+		Constructor:     CreateConstructor(dataData, idlName),
+		Operations:      CreateInstanceMethods(dataData, idlName),
+		Attributes:      CreateAttributes(dataData, idlName),
+	}
+}
+
+func CreateConstructor(
+	dataData WrapperTypeSpec,
+	idlName IdlTypeSpec) *ESOperation {
+	if c, ok := idlName.Constructor(); ok {
+		result := createOperation(dataData, c)
+		return &result
+	} else {
+		return nil
+	}
+}
+
+func CreateInstanceMethods(
+	dataData WrapperTypeSpec,
+	idlName IdlTypeSpec) (result []ESOperation) {
 	for instanceMethod := range idlName.InstanceMethods() {
 		op := createOperation(dataData, instanceMethod)
-		op.HasError = !op.MethodCustomization.HasNoError
-		instanceMethods = append(instanceMethods, op)
+		result = append(result, op)
 	}
+	return
+}
+
+func CreateAttributes(
+	dataData WrapperTypeSpec,
+	idlName IdlTypeSpec,
+) (res []ESAttribute) {
 	for attribute := range idlName.Attributes() {
 		methodCustomization := dataData.GetMethodCustomization(attribute.Name)
 		if methodCustomization.Ignored {
@@ -124,28 +122,43 @@ func createData(spec IdlSpec, dataData WrapperTypeSpec) ESConstructorData {
 		getter.NotImplemented = getterCustomization.NotImplemented || getter.NotImplemented
 		getter.CustomImplementation = getterCustomization.CustomImplementation ||
 			getter.CustomImplementation
-		attributes = append(attributes, ESAttribute{attribute.Name, getter, setter})
+		res = append(res, ESAttribute{attribute.Name, getter, setter})
 	}
+	return
+}
 
-	wrappedTypeName := dataData.InnerTypeName
-	if wrappedTypeName == "" {
-		wrappedTypeName = idlName.Type.Name
+func createOperation(typeSpec WrapperTypeSpec, member MemberSpec) ESOperation {
+	methodCustomization := typeSpec.GetMethodCustomization(member.Name)
+	op := ESOperation{
+		Name:                 member.Name,
+		NotImplemented:       methodCustomization.NotImplemented,
+		CustomImplementation: methodCustomization.CustomImplementation,
+		RetType:              member.ReturnType(),
+		MethodCustomization:  methodCustomization,
+		HasError:             !methodCustomization.HasNoError,
+		Arguments:            []ESOperationArgument{},
 	}
-	wrapperTypeName := dataData.WrapperTypeName
-	if wrapperTypeName == "" {
-		wrapperTypeName = fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
+	for _, arg := range member.Arguments {
+		esArg := ESOperationArgument{
+			Name:     arg.Name,
+			Optional: arg.Optional,
+			IdlType:  arg.IdlType,
+		}
+		if len(arg.IdlType.Types) > 0 {
+			slog.Warn(
+				"Multiple argument types",
+				"Operation",
+				member.Name,
+				"Argument",
+				arg.Name,
+			)
+		}
+		if arg.IdlType.IdlType != nil {
+			esArg.Type = arg.IdlType.IdlType.IType.TypeName
+		}
+		op.Arguments = append(op.Arguments, esArg)
 	}
-	return ESConstructorData{
-		Spec:            dataData,
-		InnerTypeName:   wrappedTypeName,
-		WrapperTypeName: wrapperTypeName,
-		Receiver:        dataData.Receiver,
-		Operations:      instanceMethods,
-		Attributes:      attributes,
-		Constructor:     constructor,
-		IdlName:         idlName.Type,
-		RunCustomCode:   dataData.RunCustomCode,
-	}
+	return op
 }
 
 type ESOperationArgument struct {
@@ -185,8 +198,9 @@ type ESConstructorData struct {
 	Attributes      []ESAttribute
 	Constructor     *ESOperation
 	RunCustomCode   bool
-	IdlName
 }
+
+func (d ESConstructorData) Name() string { return d.Spec.TypeName }
 
 type Imports = [][][2]string
 
@@ -317,28 +331,27 @@ func JSConstructorImpl(data ESConstructorData) g.Generator {
 	return statements
 }
 
-func (data ESConstructorData) Generate() *jen.Statement {
-
+func CreateV8Generator(data ESConstructorData) g.Generator {
 	generator := StatementList(
-		CreateConstructor(data),
+		CreateConstructorGenerator(data),
 		CreateConstructorWrapper(data),
 		CreateWrapperMethods(data),
 	)
 
 	if data.Spec.WrapperStruct {
 		generator = StatementList(
-			data.generateWrapperType(),
+			CreateV8WrapperTypeGenerator(data),
 			generator,
 		)
 	}
 
-	return generator.Generate()
+	return generator
 }
 
-func (data ESConstructorData) generateWrapperType() g.Generator {
-	typeName := fmt.Sprintf("%sV8Wrapper", data.Name)
+func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
+	typeName := fmt.Sprintf("%sV8Wrapper", data.Name())
 	constructorName := fmt.Sprintf("New%s", typeName)
-	innerType := g.Raw(jen.Qual(html, data.Name))
+	innerType := g.Raw(jen.Qual(html, data.Name()))
 	wrapperStruct := g.NewStruct(typeName)
 	wrapperStruct.Embed(g.Raw(jen.Id("NodeV8WrapperBase").Index(innerType)))
 
@@ -356,7 +369,7 @@ func (data ESConstructorData) generateWrapperType() g.Generator {
 	return StatementList(wrapperStruct, wrapperConstructor, g.Line)
 }
 
-func CreateConstructor(data ESConstructorData) g.Generator {
+func CreateConstructorGenerator(data ESConstructorData) g.Generator {
 	return g.FunctionDefinition{
 		Name:     fmt.Sprintf("Create%sPrototype", data.InnerTypeName),
 		Args:     g.Arg(g.Id("host"), scriptHostPtr),
@@ -634,7 +647,7 @@ func FunctionTemplateCallbackBody(
 	op ESOperation,
 ) JenGenerator {
 	if op.NotImplemented {
-		errMsg := fmt.Sprintf("Not implemented: %s.%s", data.Name, op.Name)
+		errMsg := fmt.Sprintf("Not implemented: %s.%s", data.Name(), op.Name)
 		return g.Return(g.Nil, g.Raw(jen.Qual("errors", "New").Call(jen.Lit(errMsg))))
 	}
 	receiver := WrapperInstance{g.NewValue(data.Receiver)}
