@@ -25,7 +25,7 @@ var _ = Describe("EventTarget", func() {
 			const target = new EventTarget();
 			target.addEventListener("custom", e => { e.preventDefault() });
 			target.dispatchEvent(new CustomEvent("custom", {cancelable: true }))
-		`)).To(BeTrue())
+		`)).To(BeFalse())
 	})
 
 	It("Doesn't bubble by default", func() {

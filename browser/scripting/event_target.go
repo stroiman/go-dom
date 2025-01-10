@@ -39,6 +39,13 @@ func CreateEvent(host *ScriptHost) *v8.FunctionTemplate {
 	result.SetDefaultInstanceLookup()
 	protoBuilder := result.NewPrototypeBuilder()
 	protoBuilder.CreateReadonlyProp("type", dom.Event.Type)
+	protoBuilder.CreateFunction(
+		"preventDefault",
+		func(instance dom.Event, a argumentHelper) (*v8.Value, error) {
+			instance.PreventDefault()
+			return nil, nil
+		},
+	)
 	return result.constructor
 }
 
