@@ -222,20 +222,6 @@ func ReturnOnAnyError(errNames []g.Generator) g.Generator {
 
 type JenGenerator = g.Generator
 
-type IfStmt struct {
-	Condition g.Generator
-	Block     g.Generator
-	Else      g.Generator
-}
-
-func (s IfStmt) Generate() *jen.Statement {
-	result := jen.If(s.Condition.Generate()).Block(s.Block.Generate())
-	if s.Else != nil {
-		result.Else().Block(s.Else.Generate())
-	}
-	return result
-}
-
 func IsNodeType(typeName string) bool {
 	loweredName := strings.ToLower(typeName)
 	switch loweredName {
@@ -281,7 +267,7 @@ func (ret ReturnOnError) Generate() *jen.Statement {
 	if err == nil {
 		err = g.Id("err")
 	}
-	return IfStmt{
+	return g.IfStmt{
 		Condition: g.Neq{Lhs: err, Rhs: g.Nil}, //g.Raw(err.Generate().Op("!=").Nil()),
 		Block:     g.Return(g.Nil, err),
 	}.Generate()

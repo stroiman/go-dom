@@ -272,7 +272,7 @@ func CreateV8WrapperMethodInstanceInvocations(
 		if i > 0 {
 			arg := arguments[i-1]
 			statements.Append(g.StatementList(
-				IfStmt{
+				g.IfStmt{
 					Condition: g.Raw(jen.Id("args").Dot("noOfReadArguments").Op(">=").Lit(i)),
 					Block: g.StatementList(
 						ReturnOnAnyError(errNames),
@@ -381,7 +381,7 @@ func (c V8InstanceInvocation) GetGenerator() V8InstanceInvocationResult {
 			genRes.RequireContext = true
 			valueReturn := g.Return(c.Receiver.Method(converter).Call(g.Id("ctx"), g.Id("result")))
 			if genRes.HasError {
-				list.Append(IfStmt{
+				list.Append(g.IfStmt{
 					Condition: g.Neq{Lhs: g.Id("callErr"), Rhs: g.Nil},
 					Block:     g.Return(g.Nil, g.Id("callErr")),
 					Else:      valueReturn,

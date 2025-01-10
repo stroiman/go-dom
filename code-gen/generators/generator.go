@@ -137,3 +137,17 @@ func (s StatementListStmt) Generate() *jen.Statement {
 	jenStmt := jen.Statement(result)
 	return &jenStmt
 }
+
+type IfStmt struct {
+	Condition Generator
+	Block     Generator
+	Else      Generator
+}
+
+func (s IfStmt) Generate() *jen.Statement {
+	result := jen.If(s.Condition.Generate()).Block(s.Block.Generate())
+	if s.Else != nil {
+		result.Else().Block(s.Else.Generate())
+	}
+	return result
+}
