@@ -7,16 +7,19 @@ import (
 
 func (suite *ScriptTestSuite) CreateDocumentTests() {
 	prefix := suite.Prefix
-	Describe(prefix+" - Document wrapper", func() {
-		It("Prototype", func() {
-			window := suite.NewWindow()
-			Expect(window.Eval(`
+	Describe(prefix+"Document", func() {
+		Describe("prototype", func() {
+
+			It("Has a `createElement`", func() {
+				window := suite.NewWindow()
+				Expect(window.Eval(`
 				Object.getOwnPropertyNames(Document.prototype).includes("createElement")
 			`)).To(BeTrue())
-			Expect(window.Eval(`
+				Expect(window.Eval(`
 				const e = Document.prototype.createElement.call(document, "div")
 				typeof e
 			`)).To(Equal("object"))
+			})
 		})
 	})
 }
