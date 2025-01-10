@@ -13,7 +13,7 @@ import (
 
 var _ = Describe("Parser", func() {
 	It("Should be able to parse an empty HTML document", func() {
-		result := ParseHtmlString("<html><head></head><body></body></html>")
+		result := ParseHtmlString("<!DOCTYPE HTML><html><head></head><body></body></html>")
 		element := result.DocumentElement()
 		Expect(element.NodeName()).To(Equal("HTML"))
 		Expect(element.TagName()).To(Equal("HTML"))
