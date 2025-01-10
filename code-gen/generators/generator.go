@@ -1,6 +1,8 @@
 package generators
 
 import (
+	"slices"
+
 	"github.com/dave/jennifer/jen"
 )
 
@@ -103,4 +105,35 @@ func WrapLine(g Generator) Generator {
 	return GeneratorFunc(func() *jen.Statement {
 		return jen.Line().Add(g.Generate())
 	})
+}
+
+type StatementListStmt struct {
+	Statements []Generator
+}
+
+func StatementList(statements ...Generator) StatementListStmt {
+	return StatementListStmt{statements}
+}
+
+func (s *StatementListStmt) Prepend(stmt Generator) {
+	s.Statements = slices.Insert(s.Statements, 0, stmt)
+}
+
+func (s *StatementListStmt) Append(stmt ...Generator) {
+	s.Statements = append(s.Statements, stmt...)
+}
+
+func (s StatementListStmt) Generate() *jen.Statement {
+	result := []jen.Code{}
+	for _, s := range s.Statements {
+		jenStatement := s.Generate()
+		if jenStatement != nil && len(*jenStatement) != 0 {
+			if len(result) != 0 {
+				result = append(result, jen.Line())
+			}
+			result = append(result, jenStatement)
+		}
+	}
+	jenStmt := jen.Statement(result)
+	return &jenStmt
 }

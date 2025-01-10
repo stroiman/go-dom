@@ -3,7 +3,6 @@ package wrappers
 import (
 	"fmt"
 	"log/slog"
-	"slices"
 	"strings"
 	"unicode"
 
@@ -209,7 +208,7 @@ func ReturnOnAnyError(errNames []g.Generator) g.Generator {
 	if len(errNames) == 1 {
 		return ReturnOnError{err: errNames[0]}
 	}
-	return Statements(
+	return g.StatementList(
 		g.Assign(g.Id("err"),
 			g.Raw(jen.Qual("errors", "Join").CallFunc(func(g *jen.Group) {
 				for _, e := range errNames {
@@ -229,54 +228,12 @@ type IfStmt struct {
 	Else      g.Generator
 }
 
-type StatementListStmt struct {
-	Statements []JenGenerator
-}
-
-func StatementList(statements ...JenGenerator) StatementListStmt {
-	return StatementListStmt{statements}
-}
-
-func (s *StatementListStmt) Prepend(stmt JenGenerator) {
-	s.Statements = slices.Insert(s.Statements, 0, stmt)
-}
-
 func (s IfStmt) Generate() *jen.Statement {
 	result := jen.If(s.Condition.Generate()).Block(s.Block.Generate())
 	if s.Else != nil {
 		result.Else().Block(s.Else.Generate())
 	}
 	return result
-}
-
-func GetSliceLength(gen JenGenerator) JenGenerator {
-	return Stmt{jen.Len(gen.Generate())}
-}
-
-func Statements(stmts ...JenGenerator) JenGenerator {
-	return StatementListStmt{stmts}
-}
-
-func (s *StatementListStmt) Append(stmt ...JenGenerator) {
-	s.Statements = append(s.Statements, stmt...)
-}
-func (s *StatementListStmt) AppendJen(stmt *jen.Statement) {
-	s.Statements = append(s.Statements, Stmt{stmt})
-}
-
-func (s StatementListStmt) Generate() *jen.Statement {
-	result := []jen.Code{}
-	for _, s := range s.Statements {
-		jenStatement := s.Generate()
-		if jenStatement != nil && len(*jenStatement) != 0 {
-			if len(result) != 0 {
-				result = append(result, jen.Line())
-			}
-			result = append(result, jenStatement)
-		}
-	}
-	jenStmt := jen.Statement(result)
-	return &jenStmt
 }
 
 func IsNodeType(typeName string) bool {
@@ -293,76 +250,6 @@ func IsNodeType(typeName string) bool {
 		return true
 	}
 	return false
-}
-
-type V8ReadArguments struct {
-	ArgNames  []g.Generator
-	ErrNames  []g.Generator
-	Generator g.Generator
-}
-
-func (r V8ReadArguments) Generate() *jen.Statement {
-	if r.Generator != nil {
-		return r.Generator.Generate()
-	} else {
-		return g.Noop.Generate()
-	}
-}
-
-func AssignArgs(data ESConstructorData, op ESOperation) g.Generator {
-	if len(op.Arguments) == 0 {
-		return g.Noop
-	}
-	return g.Assign(
-		g.Id("args"),
-		g.Raw(
-			jen.Id("newArgumentHelper").
-				Call(jen.Id(data.Receiver).Dot("host"), jen.Id("info")),
-		),
-	)
-}
-
-func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments) {
-	argCount := len(op.Arguments)
-	res.ArgNames = make([]g.Generator, argCount)
-	res.ErrNames = make([]g.Generator, argCount)
-	statements := &StatementListStmt{}
-	for i, arg := range op.Arguments {
-		argName := g.Id(arg.Name)
-		errName := g.Id(fmt.Sprintf("err%d", i+1))
-		res.ArgNames[i] = argName
-		res.ErrNames[i] = errName
-
-		var convertNames []string
-		if arg.Type != "" {
-			convertNames = []string{fmt.Sprintf("Decode%s", idlNameToGoName(arg.Type))}
-		} else {
-			types := arg.IdlType.IdlType.IType.Types
-			convertNames = make([]string, len(types))
-			for i, t := range types {
-				convertNames[i] = fmt.Sprintf("Decode%s", t.IType.TypeName)
-			}
-		}
-
-		converters := make([]jen.Code, 0)
-		converters = append(converters, jen.Id("args"))
-		converters = append(converters, jen.Lit(i))
-		for _, n := range convertNames {
-			converters = append(converters, g.Raw(jen.Id(data.Receiver).Dot(n)).Generate())
-		}
-		statements.Append(g.Assign(
-			g.Raw(jen.List(argName.Generate(), errName.Generate())),
-			Stmt{jen.Id("TryParseArg").Call(converters...)}))
-	}
-	res.Generator = statements
-	return
-}
-
-func GetInstanceAndError(id g.Generator, errId g.Generator, data ESConstructorData) g.Generator {
-	return g.AssignMany(
-		g.List(id, errId),
-		g.Raw(jen.Id(data.Receiver).Dot("GetInstance").Call(jen.Id("info"))),
-	)
 }
 
 func idlNameToGoName(s string) string {

@@ -30,14 +30,14 @@ func (builder ConstructorBuilder) NewFunctionTemplateOfWrappedMethod(name string
 func (builder ConstructorBuilder) InstallFunctionHandlers(
 	data ESConstructorData,
 ) JenGenerator {
-	generators := make([]JenGenerator, len(data.Operations))
+	generators := make([]g.Generator, len(data.Operations))
 	for i, op := range data.Operations {
 		generators[i] = builder.Proto.Set(
 			op.Name,
 			builder.NewFunctionTemplate(builder.Wrapper.Field(idlNameToGoName(op.Name))),
 		)
 	}
-	return StatementList(generators...)
+	return g.StatementList(generators...)
 }
 
 func (builder ConstructorBuilder) InstallAttributeHandlers(
@@ -52,7 +52,7 @@ func (builder ConstructorBuilder) InstallAttributeHandlers(
 	for i, op := range data.Attributes {
 		generators[i+1] = builder.InstallAttributeHandler(op)
 	}
-	return StatementList(generators...)
+	return g.StatementList(generators...)
 }
 
 func (builder ConstructorBuilder) InstallAttributeHandler(
