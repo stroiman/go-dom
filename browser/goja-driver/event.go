@@ -32,9 +32,8 @@ func (w EventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
 			options = append(options, dom.EventBubbles(ToBoolean(obj.Get("bubbles"))))
 		}
 	}
-	result := r.ToValue(dom.NewCustomEvent(arg1, options...)).(*Object)
-	result.SetPrototype(call.This.Prototype())
-	return result
+	newInstance := dom.NewCustomEvent(arg1, options...)
+	return w.StoreInternal(newInstance, call.This)
 }
 
 func (w EventWrapper) PreventDefault(c FunctionCall) Value {
@@ -59,13 +58,13 @@ func (w EventWrapper) InitializePrototype(prototype *Object,
 }
 
 type CustomEventWrapper struct {
-	Base EventWrapper
+	EventWrapper
 }
 
 func NewCustomEventWrapper(instance *GojaInstance) Wrapper {
 	return CustomEventWrapper{newEventWrapper(instance)}
 }
 
-func (w CustomEventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
-	return w.Base.Constructor(call, r)
-}
+// func (w CustomEventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
+// 	return w.Constructor(call, r)
+// }

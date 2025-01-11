@@ -7,31 +7,6 @@ import (
 	. "github.com/dop251/goja"
 )
 
-type BaseInstanceWrapper[T any] struct {
-	instance *GojaInstance
-}
-
-func (w BaseInstanceWrapper[T]) GetInstance(c FunctionCall) T {
-	if c.This == nil {
-		panic("No this pointer")
-	}
-	var instance any
-	if c.This == w.instance.vm.GlobalObject() {
-		instance = w.instance.window
-	} else {
-		instance = c.This.(*Object).Export()
-	}
-	if result, ok := instance.(T); ok {
-		return result
-	} else {
-		panic(w.instance.vm.NewTypeError("Not an event target"))
-	}
-}
-
-func NewBaseInstanceWrapper[T any](instance *GojaInstance) BaseInstanceWrapper[T] {
-	return BaseInstanceWrapper[T]{instance}
-}
-
 type EventTargetWrapper struct {
 	BaseInstanceWrapper[dom.EventTarget]
 }
@@ -71,9 +46,8 @@ func (h *GojaEventListener) Equals(e dom.EventHandler) bool {
 }
 
 func (w EventTargetWrapper) Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
-	result := r.ToValue(dom.NewEventTarget()).(*Object)
-	result.SetPrototype(call.This.Prototype())
-	return result
+	newInstance := dom.NewEventTarget()
+	return w.StoreInternal(newInstance, call.This)
 }
 
 func (w EventTargetWrapper) GetEventTarget(c FunctionCall) dom.EventTarget {

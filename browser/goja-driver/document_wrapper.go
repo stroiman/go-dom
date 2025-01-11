@@ -6,9 +6,12 @@ import (
 )
 
 type DocumentWrapper struct {
+	BaseInstanceWrapper[dom.Document]
 }
 
-func NewDocumentWrapper(instance *GojaInstance) Wrapper { return DocumentWrapper{} }
+func NewDocumentWrapper(instance *GojaInstance) Wrapper {
+	return DocumentWrapper{NewBaseInstanceWrapper[dom.Document](instance)}
+}
 
 func (w DocumentWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
 	panic(r.NewTypeError("Illegal Constructor"))

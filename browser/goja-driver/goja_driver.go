@@ -25,6 +25,7 @@ func WindowConstructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object 
 
 type Wrapper interface {
 	Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object
+	StoreInternal(value any, this *Object) *Object
 }
 
 type CreateWrapper func(instance *GojaInstance) Wrapper
@@ -63,6 +64,7 @@ func init() {
 type Function struct {
 	Constructor *Object
 	Prototype   *Object
+	Wrapper     Wrapper
 }
 
 func (d *GojaInstance) GetObject(obj any, class string) *Object {
@@ -110,7 +112,7 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 			FLAG_NOT_SET,
 		)
 		prototype := constructor.Get("prototype").(*Object)
-		result := Function{constructor, prototype}
+		result := Function{constructor, prototype, wrapper}
 		d.vm.Set(name, constructor)
 		d.globals[name] = result
 
