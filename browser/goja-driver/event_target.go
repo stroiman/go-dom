@@ -31,9 +31,9 @@ func NewGojaEventListener(r *GojaInstance, v goja.Value) dom.EventHandler {
 
 func (h *GojaEventListener) HandleEvent(e dom.Event) error {
 	customEvent := h.instance.globals["CustomEvent"]
-	value := h.instance.vm.ToValue(e).(*Object)
-	value.SetPrototype(customEvent.Prototype)
-	_, err := h.f(value, value)
+	obj := h.instance.vm.CreateObject(customEvent.Prototype)
+	customEvent.Wrapper.StoreInternal(e, obj)
+	_, err := h.f(obj, obj)
 	return err
 }
 
@@ -47,7 +47,8 @@ func (h *GojaEventListener) Equals(e dom.EventHandler) bool {
 
 func (w EventTargetWrapper) Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
 	newInstance := dom.NewEventTarget()
-	return w.StoreInternal(newInstance, call.This)
+	w.StoreInternal(newInstance, call.This)
+	return nil
 }
 
 func (w EventTargetWrapper) GetEventTarget(c FunctionCall) dom.EventTarget {
@@ -73,7 +74,8 @@ func (w EventTargetWrapper) AddEventListener(c FunctionCall) Value {
 
 func (w EventTargetWrapper) DispatchEvent(c FunctionCall) Value {
 	instance := w.GetInstance(c)
-	if event, ok := c.Argument(0).Export().(dom.Event); ok {
+	internal := c.Argument(0).(*Object).GetSymbol(w.instance.wrappedGoObj).Export()
+	if event, ok := internal.(dom.Event); ok {
 		return w.instance.vm.ToValue(instance.DispatchEvent(event))
 	} else {
 		panic(w.instance.vm.NewTypeError("Not an event"))

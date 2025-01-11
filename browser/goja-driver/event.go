@@ -33,7 +33,8 @@ func (w EventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
 		}
 	}
 	newInstance := dom.NewCustomEvent(arg1, options...)
-	return w.StoreInternal(newInstance, call.This)
+	w.StoreInternal(newInstance, call.This)
+	return nil
 }
 
 func (w EventWrapper) PreventDefault(c FunctionCall) Value {
@@ -64,7 +65,3 @@ type CustomEventWrapper struct {
 func NewCustomEventWrapper(instance *GojaInstance) Wrapper {
 	return CustomEventWrapper{newEventWrapper(instance)}
 }
-
-// func (w CustomEventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
-// 	return w.Constructor(call, r)
-// }

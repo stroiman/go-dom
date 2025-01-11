@@ -12,6 +12,8 @@ import (
 	. "github.com/dop251/goja"
 )
 
+const INTERNAL_SYMBOL_NAME = "__go_dom_internal_value__"
+
 func NewGojaScriptEngine() html.ScriptHost {
 	return &GojaDriver{}
 }
@@ -25,7 +27,7 @@ func WindowConstructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object 
 
 type Wrapper interface {
 	Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object
-	StoreInternal(value any, this *Object) *Object
+	StoreInternal(value any, this *Object)
 }
 
 type CreateWrapper func(instance *GojaInstance) Wrapper
@@ -140,12 +142,20 @@ func (d *GojaDriver) NewContext(window html.Window) html.ScriptContext {
 	vm := goja.New()
 	vm.SetFieldNameMapper(PropertyNameMapper{})
 	result := &GojaInstance{
-		vm:     vm,
-		window: window,
+		vm:           vm,
+		window:       window,
+		wrappedGoObj: NewSymbol(INTERNAL_SYMBOL_NAME),
 	}
 	result.installGlobals(Globals)
 
 	globalThis := vm.GlobalObject()
+	globalThis.DefineDataPropertySymbol(
+		result.wrappedGoObj,
+		vm.ToValue(window),
+		FLAG_FALSE,
+		FLAG_FALSE,
+		FLAG_FALSE,
+	)
 	globalThis.Set("window", globalThis)
 	globalThis.DefineAccessorProperty("document", vm.ToValue(func(c *FunctionCall) Value {
 		return result.GetObject(window.Document(), "Document")
@@ -159,9 +169,10 @@ func (d *GojaDriver) Close() {
 }
 
 type GojaInstance struct {
-	vm      *goja.Runtime
-	window  html.Window
-	globals map[string]Function
+	vm           *goja.Runtime
+	window       html.Window
+	globals      map[string]Function
+	wrappedGoObj *goja.Symbol
 }
 
 func (i *GojaInstance) Close() {

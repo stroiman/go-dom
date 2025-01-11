@@ -12,23 +12,22 @@ func NewBaseInstanceWrapper[T any](instance *GojaInstance) BaseInstanceWrapper[T
 	return BaseInstanceWrapper[T]{instance}
 }
 
-func (w BaseInstanceWrapper[T]) StoreInternal(value any, obj *Object) *Object {
-	result := w.instance.vm.ToValue(value).(*Object)
-	result.SetPrototype(obj.Prototype())
-	return result
+func (w BaseInstanceWrapper[T]) StoreInternal(value any, obj *Object) {
+	obj.DefineDataPropertySymbol(
+		w.instance.wrappedGoObj,
+		w.instance.vm.ToValue(value),
+		FLAG_FALSE,
+		FLAG_FALSE,
+		FLAG_FALSE,
+	)
+	// obj.SetSymbol(w.instance.wrappedGoObj, w.instance.vm.ToValue(value))
 }
 
 func (w BaseInstanceWrapper[T]) GetInstance(c FunctionCall) T {
 	if c.This == nil {
 		panic("No this pointer")
 	}
-	var instance any
-	if c.This == w.instance.vm.GlobalObject() {
-		instance = w.instance.window
-	} else {
-		instance = c.This.(*Object).Export()
-	}
-	if result, ok := instance.(T); ok {
+	if result, ok := c.This.(*Object).GetSymbol(w.instance.wrappedGoObj).Export().(T); ok {
 		return result
 	} else {
 		panic(w.instance.vm.NewTypeError("Not an event target"))
