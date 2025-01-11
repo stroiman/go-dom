@@ -6,10 +6,13 @@ import (
 )
 
 type EventWrapper struct {
+	BaseInstanceWrapper[dom.Event]
 }
 
-func NewEventWrapper(instance *GojaInstance) Wrapper      { return newEventWrapper(instance) }
-func newEventWrapper(instance *GojaInstance) EventWrapper { return EventWrapper{} }
+func NewEventWrapper(instance *GojaInstance) Wrapper { return newEventWrapper(instance) }
+func newEventWrapper(instance *GojaInstance) EventWrapper {
+	return EventWrapper{NewBaseInstanceWrapper[dom.Event](instance)}
+}
 
 type GojaEvent[T dom.Event] struct {
 	Value *Object
@@ -34,24 +37,25 @@ func (w EventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
 	return result
 }
 
+func (w EventWrapper) PreventDefault(c FunctionCall) Value {
+	w.GetInstance(c).PreventDefault()
+	return nil
+}
+
+func (w EventWrapper) GetType(c FunctionCall) Value {
+	return w.instance.vm.ToValue(w.GetInstance(c).Type())
+}
+
 func (w EventWrapper) InitializePrototype(prototype *Object,
 	vm *Runtime) {
-	preventDefault := vm.ToValue(func(c FunctionCall) Value {
-		event, ok := c.This.Export().(dom.Event)
-		if !ok {
-			panic(vm.NewTypeError("Instance is not an Event"))
-		}
-		event.PreventDefault()
-		return nil
-	})
-	prototype.Set("preventDefault", preventDefault)
-	prototype.DefineAccessorProperty("type", vm.ToValue(func(c FunctionCall) Value {
-		event, ok := c.This.Export().(dom.Event)
-		if !ok {
-			panic(vm.NewTypeError("Instance is not an Event"))
-		}
-		return vm.ToValue(event.Type())
-	}), nil, FLAG_TRUE, FLAG_TRUE)
+	prototype.Set("preventDefault", w.PreventDefault)
+	prototype.DefineAccessorProperty(
+		"type",
+		w.instance.vm.ToValue(w.GetType),
+		nil,
+		FLAG_TRUE,
+		FLAG_TRUE,
+	)
 }
 
 type CustomEventWrapper struct {
