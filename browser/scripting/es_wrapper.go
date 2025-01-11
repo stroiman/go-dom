@@ -58,6 +58,17 @@ func (w Converters) DecodeUnsignedLong(ctx *ScriptContext, val *v8.Value) (int, 
 	return int(val.Int32()), nil
 }
 
+func (w Converters) DecodeNode(ctx *ScriptContext, val *v8.Value) (dom.Node, error) {
+	if val.IsObject() {
+		o := val.Object()
+		cached, ok_1 := ctx.GetCachedNode(o)
+		if node, ok_2 := cached.(dom.Node); ok_1 && ok_2 {
+			return node, nil
+		}
+	}
+	return nil, v8.NewTypeError(ctx.host.iso, "Must be a node")
+}
+
 func (w Converters) GetArgDOMString(args []*v8.Value, idx int) (result string, err error) {
 	if idx >= len(args) {
 		err = errors.New("Index out of range")
@@ -133,6 +144,10 @@ func (w Converters) ToUnsignedShort(ctx *ScriptContext, val int) (*v8.Value, err
 
 func (w Converters) ToBoolean(ctx *ScriptContext, val bool) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
+}
+
+func (w Converters) ToNodeList(ctx *ScriptContext, val NodeList) (*v8.Value, error) {
+	return ctx.GetInstanceForNodeByName("NodeList", val)
 }
 
 type HandleReffedObject[T any] struct {

@@ -241,7 +241,7 @@ func init() {
 
 	RegisterJSClass("XMLHttpRequest", "EventTarget", CreateXmlHttpRequestPrototype)
 	RegisterJSClass("Window", "EventTarget", CreateWindowPrototype)
-	RegisterJSClass("Node", "EventTarget", CreateNode)
+	RegisterJSClass("Node", "EventTarget", CreateNodePrototype)
 
 	RegisterJSClass("Document", "Node", CreateDocumentPrototype)
 	RegisterJSClass("HTMLDocument", "Document", CreateHTMLDocumentPrototype)
