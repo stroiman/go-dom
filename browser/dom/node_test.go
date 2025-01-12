@@ -176,4 +176,20 @@ var _ = Describe("Node", func() {
 			Expect(node1.RemoveChild(node2)).Error().To(BeADOMError())
 		})
 	})
+
+	Describe("GetRootNode", func() {
+		It("Should return the document", func() {
+			doc := ParseHtmlString(
+				`<body><div id="parent"><div id="child">child</div></div></body>`,
+			)
+			root := doc.GetElementById("child").GetRootNode()
+			Expect(root).To(Equal(doc))
+		})
+
+		It("Should return itself if not connected", func() {
+			doc := CreateHTMLDocument()
+			div := doc.CreateElement("div")
+			Expect(div.GetRootNode()).To(Equal(div))
+		})
+	})
 })

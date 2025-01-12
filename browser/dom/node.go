@@ -2,6 +2,7 @@ package dom
 
 import (
 	"errors"
+	"log/slog"
 	"slices"
 	"strings"
 
@@ -30,9 +31,12 @@ type ChildrenRenderer interface {
 	RenderChildren(*strings.Builder)
 }
 
+type GetRootNodeOptions bool
+
 type Node interface {
 	EventTarget
 	AppendChild(node Node) (Node, error)
+	GetRootNode(options ...GetRootNodeOptions) Node
 	ChildNodes() NodeList
 	IsConnected() bool
 	Contains(node Node) bool
@@ -88,6 +92,17 @@ func (n *node) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
 }
 
 func (n *node) ChildNodes() NodeList { return n.childNodes }
+
+func (n *node) GetRootNode(options ...GetRootNodeOptions) Node {
+	if len(options) > 1 {
+		slog.Warn("Node.GetRootNode: composed not yet implemented")
+	}
+	if n.parent == nil {
+		return n.self
+	} else {
+		return n.parent.GetRootNode(options...)
+	}
+}
 
 func (n *node) Contains(node Node) bool {
 	for _, c := range n.ChildNodes().All() {
