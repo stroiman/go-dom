@@ -23,7 +23,7 @@ type domParser struct{}
 // parseing process can e.g. execute script tags that require the document to
 // be set on the window _before_ the script is executed.
 func (p domParser) ParseReader(window Window, document *dom.Document, reader io.Reader) error {
-	*document = NewHTMLDocument(window)
+	*document = newHTMLDocument(window)
 	return parseIntoDocument(window, *document, reader)
 }
 

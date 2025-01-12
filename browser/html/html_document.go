@@ -15,7 +15,24 @@ type htmlDocument struct {
 	window Window
 }
 
+// NewHTMLDocument creates an HTML document with no content. The response is
+// equivalent to parsing an empty string using a DOMParser in client script.
+//
+// The resulting document has the outer HTML
+//
+//	<html><head></head><body></body></html>
 func NewHTMLDocument(window Window) HTMLDocument {
+	doc := newHTMLDocument(window)
+	docEl := doc.CreateElement("html")
+	docEl.AppendChild(doc.CreateElement("head"))
+	docEl.AppendChild(doc.CreateElement("body"))
+	doc.AppendChild(docEl)
+	return doc
+}
+
+// newHTMLDocument is used internally to create an empty HTML when parsing an
+// HTML input.
+func newHTMLDocument(window Window) HTMLDocument {
 	result := &htmlDocument{NewDocument(window), window}
 	result.SetSelf(result)
 	return result

@@ -48,7 +48,7 @@ func HaveTextContent(matcher GomegaMatcher) GomegaMatcher {
 func HaveInnerHTML(matcher GomegaMatcher) GomegaMatcher {
 	return gcustom.MakeMatcher(func(e dom.Element) (bool, error) {
 		return matcher.Match(e.InnerHTML())
-	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.GetTextContent}}", matcher)
+	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.InnerHTML}}", matcher)
 }
 
 func HaveOuterHTML(expected interface{}) GomegaMatcher {
@@ -58,5 +58,12 @@ func HaveOuterHTML(expected interface{}) GomegaMatcher {
 	}
 	return gcustom.MakeMatcher(func(e dom.Element) (bool, error) {
 		return matcher.Match(e.OuterHTML())
-	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.GetTextContent}}", matcher)
+	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.OuterHTML}}", matcher)
+}
+
+func HaveTag(expected string) GomegaMatcher {
+	matcher := gomega.Equal(expected)
+	return gcustom.MakeMatcher(func(e dom.Element) (bool, error) {
+		return matcher.Match(e.TagName())
+	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have tag {{.Data.FailureMessage .Actual.TagName}}", matcher)
 }
