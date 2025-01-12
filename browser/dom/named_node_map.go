@@ -75,8 +75,8 @@ func (a *attr) GetValue() string      { return a.attr.Val }
 func (a *attr) SetValue(val string)   { a.attr.Val = val }
 func (a *attr) NodeType() NodeType    { return NodeTypeAttribute }
 
-func (a *attr) AppendChild(newChild Node) Node {
-	return nil //, newDomError("Atrribute cannot have a child")
+func (a *attr) AppendChild(newChild Node) (Node, error) {
+	return nil, newDomError("Atrribute cannot have a child")
 }
 
 func (a *attr) InsertBefore(newChild Node, ref Node) (Node, error) {

@@ -32,7 +32,7 @@ type ChildrenRenderer interface {
 
 type Node interface {
 	EventTarget
-	AppendChild(node Node) Node
+	AppendChild(node Node) (Node, error)
 	ChildNodes() NodeList
 	IsConnected() bool
 	Contains(node Node) bool
@@ -66,9 +66,9 @@ func newNode() node {
 	return node{newEventTarget(), nil, NewNodeList(), nil}
 }
 
-func (n *node) AppendChild(child Node) Node {
-	n.self.InsertBefore(child, nil)
-	return child
+func (n *node) AppendChild(child Node) (Node, error) {
+	_, err := n.self.InsertBefore(child, nil)
+	return child, err
 }
 
 func (n *node) InsertBefore(newChild Node, referenceNode Node) (Node, error) {

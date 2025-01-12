@@ -25,7 +25,6 @@ type MouseEvents interface {
 type Element interface {
 	ElementContainer
 	MouseEvents
-	Append(Element) Element
 	ClassList() DOMTokenList
 	GetAttribute(name string) string
 	SetAttribute(name string, value string)
@@ -72,9 +71,9 @@ func (e *element) TagName() string {
 	return strings.ToUpper(e.tagName)
 }
 
-func (parent *element) Append(child Element) Element {
-	parent.AppendChild(child)
-	return child
+func (parent *element) Append(child Element) (Element, error) {
+	_, err := parent.AppendChild(child)
+	return child, err
 }
 
 func (e *element) ClassList() DOMTokenList {

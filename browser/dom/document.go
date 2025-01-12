@@ -90,9 +90,9 @@ func (d *document) CreateDocumentFragment() DocumentFragment {
 	return NewDocumentFragment(d)
 }
 
-func (d *document) Append(element Element) Element {
-	d.AppendChild(element)
-	return element
+func (d *document) Append(element Element) (Element, error) {
+	_, err := d.AppendChild(element)
+	return element, err
 }
 
 func (d *document) DocumentElement() Element {

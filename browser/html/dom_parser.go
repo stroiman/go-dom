@@ -56,7 +56,11 @@ type ElementSteps interface {
 type BaseRules struct{}
 
 func (r BaseRules) AppendChild(parent dom.Node, child dom.Node) dom.Node {
-	return parent.AppendChild(child)
+	res, err := parent.AppendChild(child)
+	if err != nil {
+		panic(err)
+	}
+	return res
 }
 
 func (r BaseRules) Connected(w Window, n dom.Element) {}

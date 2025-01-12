@@ -17,9 +17,9 @@ func NewDocumentFragment(ownerDocument Document) DocumentFragment {
 	return result
 }
 
-func (d *documentFragment) Append(element Element) Element {
-	d.AppendChild(element)
-	return element
+func (d *documentFragment) Append(element Element) (Element, error) {
+	_, err := d.AppendChild(element)
+	return element, err
 }
 
 func (d *documentFragment) GetElementById(id string) Element {

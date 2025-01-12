@@ -148,7 +148,8 @@ var _ = Describe("Node", func() {
 
 		It("Should return true when node is inserted in document", func() {
 			doc := ParseHtmlString(`<body></body>`)
-			div := doc.DocumentElement().AppendChild(doc.CreateElement("div"))
+			div, err := doc.DocumentElement().AppendChild(doc.CreateElement("div"))
+			Expect(err).ToNot(HaveOccurred())
 			Expect(div.IsConnected()).To(BeTrue())
 		})
 	})
