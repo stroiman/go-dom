@@ -138,4 +138,18 @@ var _ = Describe("Node", func() {
 			Expect(text).To(Equal("Hidden textVisible text"))
 		})
 	})
+
+	Describe("IsConnected", func() {
+		It("Returns false for a new node", func() {
+			doc := ParseHtmlString(`<body></body>`)
+			div := doc.CreateElement("div")
+			Expect(div.IsConnected()).To(BeFalse())
+		})
+
+		It("Should return true when node is inserted in document", func() {
+			doc := ParseHtmlString(`<body></body>`)
+			div := doc.DocumentElement().AppendChild(doc.CreateElement("div"))
+			Expect(div.IsConnected()).To(BeTrue())
+		})
+	})
 })

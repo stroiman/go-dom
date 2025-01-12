@@ -106,7 +106,7 @@ func (d *document) DocumentElement() Element {
 
 func (d *document) NodeName() string { return "#document" }
 
-func (d *document) Connected() bool {
+func (d *document) IsConnected() bool {
 	return true
 }
 

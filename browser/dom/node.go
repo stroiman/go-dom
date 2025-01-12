@@ -34,7 +34,7 @@ type Node interface {
 	EventTarget
 	AppendChild(node Node) Node
 	ChildNodes() NodeList
-	Connected() bool
+	IsConnected() bool
 	Contains(node Node) bool
 	InsertBefore(newNode Node, referenceNode Node) (Node, error)
 	NodeName() string
@@ -106,9 +106,9 @@ func (n *node) setParent(parent Node) {
 	n.parentTarget = parent
 }
 
-func (n *node) Connected() (result bool) {
+func (n *node) IsConnected() (result bool) {
 	if n.parent != nil {
-		result = n.parent.Connected()
+		result = n.parent.IsConnected()
 	}
 	return
 }

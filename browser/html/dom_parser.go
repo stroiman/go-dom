@@ -157,7 +157,7 @@ func createElementFromNode(
 	iterate(w, d, newNode, source)
 	// ?
 	if rules != nil {
-		if newElm.Connected() {
+		if newElm.IsConnected() {
 			if w != nil {
 				rules.Connected(w, newElm)
 			}
