@@ -109,7 +109,7 @@ func (n NodeV8Wrapper) RemoveChild(info *v8.FunctionCallbackInfo) (*v8.Value, er
 	if err != nil {
 		return nil, err
 	}
-	if result, err := parent.RemoveChild(child); err != nil {
+	if result, err := parent.RemoveChild(child); err == nil {
 		return ctx.GetInstanceForNode(result)
 	} else {
 		return nil, err

@@ -28,11 +28,11 @@ var _ = Describe("V8 Node", func() {
 	})
 	It("Should support removeChild", func() {
 		ctx := NewTestContext(LoadHTML(`<div id="parent-1"><div id="child">child</div></div>`))
-		Expect(ctx.RunTestScript(`
+		Expect(ctx.Run(`
 			const child = document.getElementById('child');
 			const parent = document.getElementById('parent-1')
 			parent.removeChild(child)
-		`)).Error().ToNot(HaveOccurred())
+		`)).To(Succeed())
 		Expect(
 			ctx.Window().Document().GetElementById("parent-1").ChildNodes().Length(),
 		).To(Equal(0))
