@@ -257,7 +257,7 @@ func CreateV8WrapperMethodInstanceInvocations(
 		functionName := baseFunctionName
 		for j, arg := range arguments {
 			if j < i {
-				if arg.Optional {
+				if arg.OptionalInGo() {
 					functionName += idlNameToGoName(arg.Name)
 				}
 			}
@@ -462,12 +462,22 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments)
 		}
 
 		gConverters := []g.Generator{g.Id("args"), g.Lit(i)}
+		defaultName, hasDefault := arg.DefaultValueInGo()
+		if hasDefault {
+			gConverters = append(gConverters, g.NewValue(data.Receiver).Field(defaultName))
+		}
 		for _, n := range convertNames {
 			gConverters = append(gConverters, g.NewValue(data.Receiver).Field(n))
 		}
-		statements.Append(g.Assign(
-			g.Raw(jen.List(argName.Generate(), errName.Generate())),
-			g.NewValue("TryParseArg").Call(gConverters...)))
+		if hasDefault {
+			statements.Append(g.Assign(
+				g.Raw(jen.List(argName.Generate(), errName.Generate())),
+				g.NewValue("TryParseArgWithDefault").Call(gConverters...)))
+		} else {
+			statements.Append(g.Assign(
+				g.Raw(jen.List(argName.Generate(), errName.Generate())),
+				g.NewValue("TryParseArg").Call(gConverters...)))
+		}
 	}
 	res.Generator = statements
 	return

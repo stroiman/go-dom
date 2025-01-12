@@ -2,6 +2,14 @@ package wrappers
 
 type TypeCustomization []string
 
+type ESMethodArgument struct {
+	required   bool
+	hasDefault bool
+}
+
+func (a *ESMethodArgument) Required()   { a.required = true }
+func (a *ESMethodArgument) HasDefault() { a.hasDefault = true }
+
 // ESMethodWrapper contains information about how to generate ES wrapper code
 // around a single class method.
 type ESMethodWrapper struct {
@@ -15,6 +23,7 @@ type ESMethodWrapper struct {
 	// Code generator will still install a function on the prototype template
 	// referencing the custom function
 	CustomImplementation bool
+	Arguments            map[string]*ESMethodArgument
 }
 
 // ESClassWrapper contains information about how to generate ES wrapper code
@@ -84,4 +93,20 @@ func (w *ESMethodWrapper) SetNoError() *ESMethodWrapper {
 func (w *ESMethodWrapper) SetCustomImplementation() *ESMethodWrapper {
 	w.CustomImplementation = true
 	return w
+}
+
+func (w *ESMethodWrapper) ensureMap() {
+	if w.Arguments == nil {
+		w.Arguments = make(map[string]*ESMethodArgument)
+	}
+}
+
+func (w *ESMethodWrapper) Argument(name string) (result *ESMethodArgument) {
+	w.ensureMap()
+	var ok bool
+	if result, ok = w.Arguments[name]; !ok {
+		result = new(ESMethodArgument)
+		w.Arguments[name] = result
+	}
+	return result
 }

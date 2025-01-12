@@ -20,3 +20,14 @@ func (n NodeV8Wrapper) NodeType(info *v8.FunctionCallbackInfo) (*v8.Value, error
 	}
 	return v8.NewValue(n.host.iso, int32(instance.NodeType()))
 }
+
+func (n NodeV8Wrapper) DecodeGetRootNodeOptions(
+	ctx *ScriptContext,
+	value *v8.Value,
+) (dom.GetRootNodeOptions, error) {
+	return dom.GetRootNodeOptions(value.Boolean()), nil
+}
+
+func (n NodeV8Wrapper) DefaultGetRootNodeOptions() dom.GetRootNodeOptions {
+	return false
+}

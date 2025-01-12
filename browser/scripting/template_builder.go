@@ -236,3 +236,16 @@ func TryParseArg[T any](
 	err = errors.New("TODO")
 	return
 }
+
+func TryParseArgWithDefault[T any](
+	args *argumentHelper,
+	index int,
+	defaultValue func() T,
+	parsers ...func(*ScriptContext, *v8.Value) (T, error),
+) (result T, err error) {
+	if index >= len(args.Args()) {
+		return defaultValue(), nil
+	} else {
+		return TryParseArg(args, index, parsers...)
+	}
+}

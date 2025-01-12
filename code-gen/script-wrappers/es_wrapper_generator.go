@@ -138,10 +138,12 @@ func createOperation(typeSpec WrapperTypeSpec, member MemberSpec) ESOperation {
 		Arguments:            []ESOperationArgument{},
 	}
 	for _, arg := range member.Arguments {
+		esArgumentSpec := methodCustomization.Argument(arg.Name)
 		esArg := ESOperationArgument{
-			Name:     arg.Name,
-			Optional: arg.Optional,
-			IdlType:  arg.IdlType,
+			Name:         arg.Name,
+			Optional:     arg.Optional && !esArgumentSpec.required,
+			IdlType:      arg.IdlType,
+			ArgumentSpec: esArgumentSpec,
 		}
 		if len(arg.IdlType.Types) > 0 {
 			slog.Warn(
@@ -161,11 +163,22 @@ func createOperation(typeSpec WrapperTypeSpec, member MemberSpec) ESOperation {
 }
 
 type ESOperationArgument struct {
-	Name     string
-	Type     string
-	Optional bool
-	Variadic bool
-	IdlType  IdlTypes
+	Name         string
+	Type         string
+	Optional     bool
+	Variadic     bool
+	IdlType      IdlTypes
+	ArgumentSpec *ESMethodArgument
+}
+
+func (a ESOperationArgument) OptionalInGo() bool {
+	hasDefault := a.ArgumentSpec != nil && a.ArgumentSpec.hasDefault
+	return a.Optional && !hasDefault
+}
+
+func (a ESOperationArgument) DefaultValueInGo() (string, bool) {
+	hasDefaultInGo := a.Optional && a.ArgumentSpec != nil && a.ArgumentSpec.hasDefault
+	return fmt.Sprintf("Default%s", a.Type), hasDefaultInGo
 }
 
 type ESOperation struct {

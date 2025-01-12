@@ -168,6 +168,7 @@ func CreateNodePrototype(host *ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl.SetInternalFieldCount(1)
 
 	prototypeTmpl := constructor.PrototypeTemplate()
+	prototypeTmpl.Set("getRootNode", v8.NewFunctionTemplateWithError(iso, wrapper.GetRootNode))
 	prototypeTmpl.Set("contains", v8.NewFunctionTemplateWithError(iso, wrapper.Contains))
 	prototypeTmpl.Set("insertBefore", v8.NewFunctionTemplateWithError(iso, wrapper.InsertBefore))
 	prototypeTmpl.Set("appendChild", v8.NewFunctionTemplateWithError(iso, wrapper.AppendChild))
@@ -203,6 +204,26 @@ func CreateNodePrototype(host *ScriptHost) *v8.FunctionTemplate {
 
 func (n NodeV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, v8.NewTypeError(n.host.iso, "Illegal Constructor")
+}
+
+func (n NodeV8Wrapper) GetRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := n.host.MustGetContext(info.Context())
+	args := newArgumentHelper(n.host, info)
+	instance, err0 := n.GetInstance(info)
+	options, err1 := TryParseArgWithDefault(args, 0, n.DefaultGetRootNodeOptions, n.DecodeGetRootNodeOptions)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
+		if err != nil {
+			return nil, err
+		}
+		result := instance.GetRootNode(options)
+		return ctx.GetInstanceForNode(result)
+	}
+	if err0 != nil {
+		return nil, err0
+	}
+	result := instance.GetRootNode()
+	return ctx.GetInstanceForNode(result)
 }
 
 func (n NodeV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

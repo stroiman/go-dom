@@ -175,8 +175,8 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	domNode := domSpecs.Type("Node")
 	domNode.Method("nodeType").SetCustomImplementation()
 	domNode.Method("contains").SetNoError()
+	domNode.Method("getRootNode").SetNoError().Argument("options").HasDefault()
 
-	domNode.Method("getRootNode").Ignore()
 	domNode.Method("hasChildNodes").Ignore()
 	domNode.Method("normalize").Ignore()
 	domNode.Method("cloneNode").Ignore()
