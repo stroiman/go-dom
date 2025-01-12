@@ -198,6 +198,14 @@ func CreateNodePrototype(host *ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso, wrapper.FirstChild),
 		nil,
 		v8.None)
+	prototypeTmpl.SetAccessorProperty("previousSibling",
+		v8.NewFunctionTemplateWithError(iso, wrapper.PreviousSibling),
+		nil,
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("nextSibling",
+		v8.NewFunctionTemplateWithError(iso, wrapper.NextSibling),
+		nil,
+		v8.None)
 
 	return constructor
 }
@@ -350,5 +358,25 @@ func (n NodeV8Wrapper) FirstChild(info *v8.FunctionCallbackInfo) (*v8.Value, err
 		return nil, err
 	}
 	result := instance.FirstChild()
+	return ctx.GetInstanceForNode(result)
+}
+
+func (n NodeV8Wrapper) PreviousSibling(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := n.host.MustGetContext(info.Context())
+	instance, err := n.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.PreviousSibling()
+	return ctx.GetInstanceForNode(result)
+}
+
+func (n NodeV8Wrapper) NextSibling(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := n.host.MustGetContext(info.Context())
+	instance, err := n.GetInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.NextSibling()
 	return ctx.GetInstanceForNode(result)
 }

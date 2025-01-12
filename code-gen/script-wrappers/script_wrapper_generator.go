@@ -176,6 +176,8 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	domNode.Method("nodeType").SetCustomImplementation()
 	domNode.Method("contains").SetNoError()
 	domNode.Method("getRootNode").SetNoError().Argument("options").HasDefault()
+	domNode.Method("previousSibling").SetNoError()
+	domNode.Method("nextSibling").SetNoError()
 
 	domNode.Method("hasChildNodes").Ignore()
 	domNode.Method("normalize").Ignore()
@@ -191,8 +193,6 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	domNode.Method("parentNode").Ignore()
 	domNode.Method("parentElement").Ignore()
 	domNode.Method("lastChild").Ignore()
-	domNode.Method("previousSibling").Ignore()
-	domNode.Method("nextSibling").Ignore()
 	domNode.Method("nodeValue").Ignore()
 	domNode.Method("textContent").Ignore()
 

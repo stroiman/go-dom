@@ -47,6 +47,7 @@ type Node interface {
 	Parent() Node
 	RemoveChild(node Node) (Node, error)
 	NextSibling() Node
+	PreviousSibling() Node
 	FirstChild() Node
 	SetTextContent(value string)
 	GetTextContent() string
@@ -215,6 +216,20 @@ func (n *node) NextSibling() Node {
 		panic("We should exist in our parent's collection")
 	}
 	if idx >= len(children) {
+		return nil
+	}
+	return children[idx]
+}
+func (n *node) PreviousSibling() Node {
+	children := n.Parent().nodes()
+	idx := slices.IndexFunc(
+		children,
+		func(child Node) bool { return n.ObjectId() == child.ObjectId() },
+	) - 1
+	if idx == -2 {
+		panic("We should exist in our parent's collection")
+	}
+	if idx < 0 {
 		return nil
 	}
 	return children[idx]
