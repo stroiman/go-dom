@@ -152,4 +152,27 @@ var _ = Describe("Node", func() {
 			Expect(div.IsConnected()).To(BeTrue())
 		})
 	})
+
+	Describe("RemoveChild", func() {
+		It("Should return the removed element", func() {
+			doc := ParseHtmlString(
+				`<body><div id="parent"><div id="child">child</div></div></body>`,
+			)
+			parent := doc.GetElementById("parent")
+			child := doc.GetElementById("child")
+			removed, err := parent.RemoveChild(child)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(parent).To(HaveOuterHTML(`<div id="parent"></div>`))
+			Expect(removed).To(HaveOuterHTML(`<div id="child">child</div>`))
+		})
+
+		It("Should generate a DOMError if node is not a child of parent", func() {
+			doc := ParseHtmlString(
+				`<body><div id="sibling-1"></div><div id="sibling-2"></div></body>`,
+			)
+			node1 := doc.GetElementById("sibling-1")
+			node2 := doc.GetElementById("sibling-2")
+			Expect(node1.RemoveChild(node2)).Error().To(BeADOMError())
+		})
+	})
 })

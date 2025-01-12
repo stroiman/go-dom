@@ -101,6 +101,7 @@ func (n NodeV8Wrapper) GetFirstChild(info *v8.FunctionCallbackInfo) (*v8.Value, 
 }
 
 func (n NodeV8Wrapper) RemoveChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := n.host.MustGetContext(info.Context())
 	args := newArgumentHelper(n.host, info)
 	child, err0 := args.GetNodeArg(0)
 	parent, err1 := n.GetInstance(info)
@@ -108,5 +109,9 @@ func (n NodeV8Wrapper) RemoveChild(info *v8.FunctionCallbackInfo) (*v8.Value, er
 	if err != nil {
 		return nil, err
 	}
-	return nil, parent.RemoveChild(child)
+	if result, err := parent.RemoveChild(child); err != nil {
+		return ctx.GetInstanceForNode(result)
+	} else {
+		return nil, err
+	}
 }

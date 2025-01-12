@@ -41,7 +41,7 @@ type Node interface {
 	NodeType() NodeType
 	OwnerDocument() Document
 	Parent() Node
-	RemoveChild(node Node) error
+	RemoveChild(node Node) (Node, error)
 	NextSibling() Node
 	FirstChild() Node
 	SetTextContent(value string)
@@ -126,13 +126,15 @@ func removeNodeFromParent(node Node) {
 	}
 }
 
-func (n *node) RemoveChild(node Node) error {
+func (n *node) RemoveChild(node Node) (Node, error) {
 	idx := slices.Index(n.childNodes.All(), node)
 	if idx == -1 {
-		return errors.New("Not found")
+		return nil, newDomError(
+			"Node.removeChild: The node to be removed is not a child of this node",
+		)
 	}
 	n.childNodes.setNodes(slices.Delete(n.childNodes.All(), idx, idx+1))
-	return nil
+	return node, nil
 }
 
 func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
