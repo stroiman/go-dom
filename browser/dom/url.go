@@ -2,6 +2,7 @@ package dom
 
 import (
 	netURL "net/url"
+	"strings"
 )
 
 type URL interface {
@@ -29,12 +30,33 @@ func NewUrl(url string) (URL, error) {
 	return ParseURL(url)
 }
 
-func NewUrlBase(relativeUrl string, base string) (URL, error) {
-	if u, err := netURL.Parse(base); err == nil {
-		return NewURLFromNetURL(u.JoinPath(relativeUrl)), nil
-	} else {
-		return nil, err
+func NewUrlBase(relativeUrl string, base string) (result URL, err error) {
+	var u *netURL.URL
+	if u, err = netURL.Parse(base); err != nil {
+		return
 	}
+	if strings.HasPrefix(relativeUrl, "/") {
+		// Find the root path; as the native URL.JoinPath doesn't handle absolute
+		// paths.
+		// Recursively joining with ".." may not be as effective as constructing the
+		// right URL, but we don't have to deal with protocols of opaque urls, nor
+		// credentials in the origin.
+		for u.Path != "/" && u.Path != "" {
+			u = u.JoinPath("..")
+		}
+	}
+	base = u.String()
+	lastSlashIdx := strings.LastIndex(base, "/")
+	hasPath := u.Path != ""
+	// A DOM Url treats the relative path from the last slash in the base URL,
+	// Go's URL doesnt. Trim away from there.
+	if hasPath && lastSlashIdx > 0 {
+		u, err = netURL.Parse(base[0:lastSlashIdx])
+	}
+	if err == nil {
+		result = NewURLFromNetURL(u.JoinPath(relativeUrl))
+	}
+	return
 }
 
 func ParseURL(rawUrl string) (URL, error) {
@@ -43,6 +65,14 @@ func ParseURL(rawUrl string) (URL, error) {
 	} else {
 		return nil, err
 	}
+}
+
+func ParseURLBase(relativeUrl string, base string) URL {
+	res, err := NewUrlBase(relativeUrl, base)
+	if err != nil {
+		res = nil
+	}
+	return res
 }
 
 func CanParseURL(rawUrl string) bool {

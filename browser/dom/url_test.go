@@ -1,10 +1,13 @@
 package dom_test
 
 import (
+	"errors"
+
 	. "github.com/stroiman/go-dom/browser/dom"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gcustom"
 	"github.com/onsi/gomega/types"
 )
 
@@ -33,10 +36,60 @@ var _ = Describe("URL", func() {
 	})
 
 	Describe("Constructing with a base", func() {
-		It("Has the right URL", func() {
-			u, err := NewUrlBase("foo/bar", "http://example.com/")
-			Expect(err).ToNot(HaveOccurred())
-			Expect(u.GetHref()).To(Equal("http://example.com/foo/bar"))
+		// Following examples are taken from MDN documentation
+		// https://developer.mozilla.org/en-US/docs/Web/API/URL_API/Resolving_relative_references
+		It("Should handle example 1", func() {
+			url := "articles"
+			base := "https://developer.mozilla.org/some/path"
+			Expect(
+				NewUrlBase(url, base),
+			).To(HaveHref("https://developer.mozilla.org/some/articles"), "new URL")
+			Expect(
+				ParseURLBase(url, base),
+			).To(HaveHref("https://developer.mozilla.org/some/articles"), "URL.parse")
+		})
+
+		It("Should handle example 2", func() {
+			Expect(NewUrlBase(
+				"./article",
+				"https://test.example.org/api/",
+			)).To(HaveHref("https://test.example.org/api/article"))
+			Expect(
+				NewUrlBase("article", "https://test.example.org/api/v1")).To(HaveHref(
+				"https://test.example.org/api/article"))
+		})
+
+		It("Should handle example 3", func() {
+			Expect(
+				NewUrlBase("./story/", "https://test.example.org/api/v2/"),
+			).To(HaveHref("https://test.example.org/api/v2/story/"))
+			Expect(
+				NewUrlBase("./story", "https://test.example.org/api/v2/v3"),
+			).To(HaveHref("https://test.example.org/api/v2/story"))
+
+		})
+		It("Should handle example 4 - parent directory relative", func() {
+			Expect(
+				NewUrlBase("../path", "https://test.example.org/api/v1/v2/"),
+			).To(HaveHref("https://test.example.org/api/v1/path"))
+			Expect(
+				NewUrlBase("../../path", "https://test.example.org/api/v1/v2/v3"),
+			).To(HaveHref("https://test.example.org/api/path"))
+			Expect(
+				NewUrlBase("../../../../path", "https://test.example.org/api/v1/v2/"),
+			).To(HaveHref("https://test.example.org/path"))
+		})
+
+		It("Should handle example 5 - root relative", func() {
+			Expect(
+				NewUrlBase("/some/path", "https://test.example.org/api/"),
+			).To(HaveHref("https://test.example.org/some/path"))
+			Expect(
+				NewUrlBase("/", "https://test.example.org/api/v1/"),
+			).To(HaveHref("https://test.example.org/"))
+			Expect(
+				NewUrlBase("/article", "https://example.com/api/v1/"),
+			).To(HaveHref("https://example.com/article"))
 		})
 	})
 
@@ -54,6 +107,19 @@ var _ = Describe("URL", func() {
 	})
 })
 
-func HaveHRef(matcher types.GomegaMatcher) types.GomegaMatcher {
-	return WithTransform(func(u URL) string { return u.GetHref() }, matcher)
+func HaveHRef(expected interface{}) types.GomegaMatcher {
+	if m, ok := expected.(types.GomegaMatcher); ok {
+		return WithTransform(func(u URL) string { return u.GetHref() }, m)
+	} else {
+		return HaveHRef(Equal(expected))
+	}
+}
+
+func HaveHref(expected string) types.GomegaMatcher {
+	return gcustom.MakeMatcher(func(u URL) (bool, error) {
+		if u == nil {
+			return false, errors.New("URL is nil")
+		}
+		return u.GetHref() == expected, nil
+	})
 }
