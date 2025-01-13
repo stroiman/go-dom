@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/stroiman/go-dom/browser/dom"
 )
@@ -14,6 +15,8 @@ type GetReader interface {
 
 type HTMLFormElement interface {
 	HTMLElement
+	GetMethod() string
+	SetMethod(value string)
 	Submit() error
 }
 
@@ -67,6 +70,18 @@ func (e *htmlFormElement) Submit() error {
 		return err
 	}
 	return window.fetchRequest(req)
+}
+
+func (e *htmlFormElement) GetMethod() string {
+	if strings.ToLower(e.GetAttribute("method")) == "post" {
+		return "post"
+	} else {
+		return "get"
+	}
+}
+
+func (e *htmlFormElement) SetMethod(value string) {
+	e.SetAttribute("method", value)
 }
 
 func replaceSearchParams(location dom.URL, searchParams string) string {

@@ -26,6 +26,7 @@ type Element interface {
 	ElementContainer
 	MouseEvents
 	ClassList() DOMTokenList
+	HasAttribute(name string) bool
 	GetAttribute(name string) string
 	SetAttribute(name string, value string)
 	GetAttributes() NamedNodeMap
@@ -92,6 +93,15 @@ func (e *element) InnerHTML() string {
 	writer := &strings.Builder{}
 	e.renderChildren(writer)
 	return writer.String()
+}
+
+func (e *element) HasAttribute(name string) bool {
+	for _, a := range e.attributes {
+		if a.Key == name {
+			return true
+		}
+	}
+	return false
 }
 
 func (e *element) GetAttribute(name string) string {
