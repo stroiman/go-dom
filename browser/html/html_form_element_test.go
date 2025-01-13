@@ -39,7 +39,7 @@ var _ = Describe("HTML Form", func() {
 					actualBody = string(data)
 				}),
 			),
-			BaseLocation: "http://example.com/forms/example-form.html",
+			BaseLocation: "http://example.com/forms/example-form.html?original-query=original-value",
 		})
 
 		Expect(
@@ -67,6 +67,15 @@ var _ = Describe("HTML Form", func() {
 				actualRequest.URL.String(),
 			).To(Equal("http://example.com/forms/example-form.html?foo=bar"))
 		})
+
+		It("Should handle path lookup for relative paths", func() {
+			form.SetAttribute("action", "submit-target")
+			form.Submit()
+			Expect(actualRequest.Method).To(Equal("GET"))
+			Expect(
+				actualRequest.URL.String(),
+			).To(Equal("http://example.com/forms/submit-target?foo=bar"))
+		})
 	})
 
 	Describe("The form is a POST", func() {
@@ -79,7 +88,7 @@ var _ = Describe("HTML Form", func() {
 			Expect(actualRequest.Method).To(Equal("POST"))
 			Expect(
 				actualRequest.URL.String(),
-			).To(Equal("http://example.com/forms/example-form.html"))
+			).To(Equal("http://example.com/forms/example-form.html?original-query=original-value"))
 		})
 
 		It("Should store the values in the form body", func() {

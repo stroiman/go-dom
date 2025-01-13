@@ -50,28 +50,26 @@ func (e *htmlFormElement) Submit() error {
 		method = "GET"
 	}
 	action := e.GetAttribute("action")
-	if action == "" {
-		window := e.getWindow()
-		searchParams := ""
-		if method == "GET" {
-			searchParams = formData.QueryString()
-		}
-		action = replaceSearchParams(window.Location(), searchParams)
-	} else {
-		if u, err := dom.NewUrlBase(action, window.Location().GetHref()); err != nil {
+	var target dom.URL = window.Location()
+	if action != "" {
+		var err error
+		if target, err = dom.NewUrlBase(action, window.Location().GetHref()); err != nil {
 			return err
-		} else {
-			action = u.GetHref()
 		}
 	}
-	req, err := http.NewRequest(method, action, reader)
+	targetURL := target.GetHref()
+	if method == "GET" {
+		searchParams := formData.QueryString()
+		targetURL = replaceSearchParams(target, searchParams)
+	}
+	req, err := http.NewRequest(method, targetURL, reader)
 	if err != nil {
 		return err
 	}
 	return window.fetchRequest(req)
 }
 
-func replaceSearchParams(location dom.Location, searchParams string) string {
+func replaceSearchParams(location dom.URL, searchParams string) string {
 	if searchParams == "" {
 		return fmt.Sprintf("%s%s", location.Origin(), location.GetPathname())
 	} else {
