@@ -1,6 +1,7 @@
 package html_test
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -72,6 +73,9 @@ var _ = Describe("HTML Form", func() {
 					http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 						actualRequest = req
 						requests = append(requests, req)
+						if req.Body == nil {
+							fmt.Println("******** BODY IS NIL********")
+						}
 						data, err := io.ReadAll(req.Body)
 						Expect(err).ToNot(HaveOccurred())
 						actualBody = string(data)
@@ -95,6 +99,27 @@ var _ = Describe("HTML Form", func() {
 			f, ok := el.(HTMLFormElement)
 			Expect(ok).To(BeTrue())
 			form = f
+		})
+
+		Describe("Action", func() {
+			Describe("Get", func() {
+				It("Should return the document location when not set", func() {
+					Expect(form.GetAction()).To(Equal(window.Location().GetHref()))
+				})
+			})
+
+			Describe("Set", func() {
+				It(
+					"Should update the action attribute, and update action property to relative url",
+					func() {
+						form.SetAction("/foo-bar")
+						Expect(
+							form,
+						).To(matchers.HaveAttribute("action", "/foo-bar"))
+						Expect(form.GetAction()).To(Equal("http://example.com/foo-bar"))
+					},
+				)
+			})
 		})
 
 		Describe("No method of action specified", func() {

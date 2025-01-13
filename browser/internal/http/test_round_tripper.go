@@ -1,6 +1,7 @@
 package http
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 )
@@ -18,6 +19,18 @@ func (h TestRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	// 	return http.DefaultTransport.RoundTrip(req)
 	// }
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, req)
+	serverReq := new(http.Request)
+	*serverReq = *req
+	if serverReq.Body == nil {
+		serverReq.Body = nullReader{}
+	}
+	h.ServeHTTP(rec, serverReq)
 	return rec.Result(), nil
 }
+
+type nullReader struct{}
+
+func (_ nullReader) Read(b []byte) (int, error) {
+	return 0, io.EOF
+}
+func (_ nullReader) Close() error { return nil }

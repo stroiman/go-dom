@@ -15,6 +15,8 @@ type GetReader interface {
 
 type HTMLFormElement interface {
 	HTMLElement
+	GetAction() string
+	SetAction(val string)
 	GetMethod() string
 	SetMethod(value string)
 	Submit() error
@@ -35,7 +37,7 @@ func NewHtmlFormElement(ownerDocument HTMLDocument) HTMLFormElement {
 func (e *htmlFormElement) Submit() error {
 	inputs, err := e.QuerySelectorAll("input")
 	if err != nil {
-		return err
+		return err // Shouldn't happen, only an invalid DOM string should generate this error
 	}
 	formData := dom.NewFormData()
 	for _, input := range inputs.All() {
@@ -45,30 +47,20 @@ func (e *htmlFormElement) Submit() error {
 			formData.Append(name, dom.NewFormDataValueString(value))
 		}
 	}
-	window := e.htmlDocument.getWindow()
-	getReader := GetReader(formData)
-	reader := getReader.GetReader()
-	method := e.GetAttribute("method")
-	if method == "" {
-		method = "GET"
-	}
-	action := e.GetAttribute("action")
-	target := dom.URL(window.Location())
-	if action != "" {
-		if target, err = dom.NewUrlBase(action, window.Location().GetHref()); err != nil {
-			return err
-		}
-	}
-	targetURL := target.GetHref()
+
+	var req *http.Request
 	if e.GetMethod() == "get" {
 		searchParams := formData.QueryString()
-		targetURL = replaceSearchParams(target, searchParams)
+		targetURL := replaceSearchParams(e.getAction(), searchParams)
+		req, err = http.NewRequest("GET", targetURL, nil)
+	} else {
+		getReader := GetReader(formData)
+		req, err = http.NewRequest("POST", e.GetAction(), getReader.GetReader())
 	}
-	req, err := http.NewRequest(method, targetURL, reader)
 	if err != nil {
 		return err
 	}
-	return window.fetchRequest(req)
+	return e.htmlDocument.getWindow().fetchRequest(req)
 }
 
 func (e *htmlFormElement) GetMethod() string {
@@ -77,6 +69,38 @@ func (e *htmlFormElement) GetMethod() string {
 	} else {
 		return "get"
 	}
+}
+
+func (e *htmlFormElement) SetAction(val string) { e.SetAttribute("action", val) }
+
+func (e *htmlFormElement) getAction() dom.URL {
+	window := e.getWindow()
+	action := e.GetAttribute("action")
+	target := dom.URL(window.Location())
+	var err error
+	if action != "" {
+		if target, err = dom.NewUrlBase(action, window.Location().GetHref()); err != nil {
+			// This _shouldn't_ happen. But let's refactor code, so err isn't a
+			// possible return value
+			panic(err)
+		}
+	}
+	return target
+}
+func (e *htmlFormElement) GetAction() string {
+	return e.getAction().GetHref()
+	// window := e.getWindow()
+	// action := e.GetAttribute("action")
+	// target := dom.URL(window.Location())
+	// var err error
+	// if action != "" {
+	// 	if target, err = dom.NewUrlBase(action, window.Location().GetHref()); err != nil {
+	// 		// This _shouldn't_ happen. But let's refactor code, so err isn't a
+	// 		// possible return value
+	// 		panic(err)
+	// 	}
+	// }
+	// return target.GetHref()
 }
 
 func (e *htmlFormElement) SetMethod(value string) {
