@@ -8,14 +8,31 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+type FormDataV8Wrapper struct {
+	HandleReffedObject[*dom.FormData]
+}
+
+func NewFormDataV8Wrapper(host *ScriptHost) FormDataV8Wrapper {
+	return FormDataV8Wrapper{NewHandleReffedObject[*dom.FormData](host)}
+}
+
+func (w FormDataV8Wrapper) CreateInstance(
+	ctx *ScriptContext,
+	this *v8.Object,
+) (*v8.Value, error) {
+	var value = dom.NewFormData()
+	w.Store(value, ctx, this)
+	return nil, nil
+}
+
 func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
+	wrapper := NewFormDataV8Wrapper(host)
 	builder := NewConstructorBuilder[*dom.FormData](
 		host,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(info.Context())
-			var e dom.Entity = dom.NewFormData()
-			return ctx.CacheNode(info.This(), e)
+			return wrapper.CreateInstance(ctx, info.This())
 		},
 	)
 	stringIterator := NewIterator(
@@ -45,54 +62,87 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 		})
 	builder.SetDefaultInstanceLookup()
 	protoBuilder := builder.NewPrototypeBuilder()
+	prototype := protoBuilder.proto
 	builder.constructor.InstanceTemplate().SetSymbol(
 		v8.SymbolIterator(iso),
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(info.Context())
-			data, err := builder.instanceLookup(ctx, info.This())
+			data, err := wrapper.GetInstance(info)
 			if err != nil {
 				return nil, err
 			}
 			return stringIterator.NewIteratorInstance(ctx, data.Keys())
 		},
 	)
-	protoBuilder.CreateFunction(
+	// protoBuilder.CreateFunction(
+	// 	"append",
+	// 	func(instance *dom.FormData, args argumentHelper) (res *v8.Value, err error) {
+	// 		key, err1 := args.GetStringArg(0)
+	// 		value, err2 := args.GetStringArg(1)
+	// 		err = errors.Join(err1, err2)
+	// 		if err != nil {
+	// 			return
+	// 		}
+	// 		instance.Append(key, dom.FormDataValue(value))
+	// 		return
+	// 	},
+	// )
+	prototype.Set(
 		"append",
-		func(instance *dom.FormData, args argumentHelper) (res *v8.Value, err error) {
-			key, err1 := args.GetStringArg(0)
-			value, err2 := args.GetStringArg(1)
-			err = errors.Join(err1, err2)
-			if err != nil {
-				return
-			}
-			instance.Append(key, dom.FormDataValue(value))
-			return
-		},
+		v8.NewFunctionTemplateWithError(
+			iso,
+			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				args := newArgumentHelper(host, info)
+				instance, err0 := wrapper.GetInstance(info)
+				key, err1 := args.GetStringArg(0)
+				value, err2 := args.GetStringArg(1)
+				err := errors.Join(err0, err1, err2)
+				if err != nil {
+					return nil, err
+				}
+				instance.Append(key, dom.FormDataValue(value))
+				return nil, nil
+			},
+		),
 	)
-	protoBuilder.CreateFunction(
+
+	prototype.Set(
 		"get",
-		func(instance *dom.FormData, args argumentHelper) (result *v8.Value, err error) {
-			var key string
-			key, err = args.GetStringArg(0)
-			if err != nil {
-				return
-			}
-			val := string(instance.Get(key))
-			return v8.NewValue(iso, val)
-		},
+		v8.NewFunctionTemplateWithError(
+			iso,
+			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				args := newArgumentHelper(host, info)
+				instance, err0 := wrapper.GetInstance(info)
+				if err0 != nil {
+					return nil, err0
+				}
+				key, err := args.GetStringArg(0)
+				if err != nil {
+					return nil, err
+				}
+				val := string(instance.Get(key))
+				return v8.NewValue(iso, val)
+			},
+		),
 	)
-	protoBuilder.CreateFunction(
+	prototype.Set(
 		"keys",
-		func(instance *dom.FormData, args argumentHelper) (result *v8.Value, err error) {
-			return stringIterator.NewIteratorInstance(args.ctx, instance.Keys())
-		},
+		v8.NewFunctionTemplateWithError(host.iso,
+			func(info *v8.FunctionCallbackInfo) (result *v8.Value, err error) {
+				args := newArgumentHelper(host, info)
+				instance, err0 := wrapper.GetInstance(info)
+				if err0 != nil {
+					return nil, err0
+				}
+				return stringIterator.NewIteratorInstance(args.ctx, instance.Keys())
+			}),
 	)
 
 	getEntries := v8.NewFunctionTemplateWithError(
 		iso,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(info.Context())
-			instance, err := builder.instanceLookup(ctx, info.This())
+			instance, err := wrapper.GetInstance(info)
 			if err != nil {
 				return nil, err
 			}

@@ -15,12 +15,11 @@ type FormDataEntry struct {
 }
 
 type FormData struct {
-	base
 	Entries []FormDataEntry
 }
 
 func NewFormData() *FormData {
-	return &FormData{newBase(), nil}
+	return &FormData{nil}
 }
 
 func (d *FormData) Append(name string, value FormDataValue) {

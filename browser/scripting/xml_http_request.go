@@ -34,15 +34,11 @@ func (xhr ESXmlHttpRequest) DecodeXMLHttpRequestBodyInit(
 		return nil, errors.New("Not supported yet")
 	}
 	obj := val.Object()
-	node, ok := ctx.GetCachedNode(obj)
-	if !ok {
-		return nil, errors.New("Not a node")
-	}
-	formData, ok := node.(*dom.FormData)
-	if ok {
-		return dom.NewXHRRequestBodyOfFormData(formData), nil
-	}
-	return nil, errors.New("Not a node")
+	formData := getWrappedInstance[*dom.FormData](obj)
+	// if ok {
+	return dom.NewXHRRequestBodyOfFormData(formData), nil
+	// }
+	// return nil, errors.New("Not a node")
 }
 
 func NewESXmlHttpRequest(host *ScriptHost) ESXmlHttpRequest {

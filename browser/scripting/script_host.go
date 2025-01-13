@@ -94,8 +94,6 @@ func (c *ScriptContext) GetInstanceForNode(
 		return c.GetInstanceForNodeByName("Node", n)
 	case Attr:
 		return c.GetInstanceForNodeByName("Attr", n)
-	case FormData:
-		return c.GetInstanceForNodeByName("FormData", n)
 	default:
 		panic("Cannot lookup node")
 	}
