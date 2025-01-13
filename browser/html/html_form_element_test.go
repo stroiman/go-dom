@@ -86,5 +86,13 @@ var _ = Describe("HTML Form", func() {
 			form.Submit()
 			Expect(actualBody).To(Equal("foo=bar"))
 		})
+
+		It("Should resolve a relative 'action' without a ./.. prefix", func() {
+			form.SetAttribute("action", "example-form-post-target")
+			form.Submit()
+			Expect(
+				actualRequest.URL.String(),
+			).To(Equal("http://example.com/forms/example-form-post-target"))
+		})
 	})
 })

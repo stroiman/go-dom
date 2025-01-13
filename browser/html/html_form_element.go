@@ -57,6 +57,12 @@ func (e *htmlFormElement) Submit() error {
 			searchParams = formData.QueryString()
 		}
 		action = replaceSearchParams(window.Location(), searchParams)
+	} else {
+		if u, err := dom.NewUrlBase(action, window.Location().GetHref()); err != nil {
+			return err
+		} else {
+			action = u.GetHref()
+		}
 	}
 	req, err := http.NewRequest(method, action, reader)
 	if err != nil {
