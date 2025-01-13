@@ -98,3 +98,9 @@ func (d *FormData) GetReader() io.Reader {
 	data := NewXHRRequestBodyOfFormData(d)
 	return data.getReader()
 }
+
+// QueryString returns the formdata as a &-separated URL encoded key-value pair.
+func (d *FormData) QueryString() string {
+	data := NewXHRRequestBodyOfFormData(d)
+	return data.string()
+}

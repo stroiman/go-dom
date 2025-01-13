@@ -1,6 +1,7 @@
 package html
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -45,10 +46,29 @@ func (e *htmlFormElement) Submit() error {
 	getReader := GetReader(formData)
 	reader := getReader.GetReader()
 	method := e.GetAttribute("method")
+	if method == "" {
+		method = "GET"
+	}
 	action := e.GetAttribute("action")
+	if action == "" {
+		window := e.getWindow()
+		searchParams := ""
+		if method == "GET" {
+			searchParams = formData.QueryString()
+		}
+		action = replaceSearchParams(window.Location(), searchParams)
+	}
 	req, err := http.NewRequest(method, action, reader)
 	if err != nil {
 		return err
 	}
 	return window.fetchRequest(req)
+}
+
+func replaceSearchParams(location dom.Location, searchParams string) string {
+	if searchParams == "" {
+		return fmt.Sprintf("%s%s", location.Origin(), location.GetPathname())
+	} else {
+		return fmt.Sprintf("%s%s?%s", location.Origin(), location.GetPathname(), searchParams)
+	}
 }

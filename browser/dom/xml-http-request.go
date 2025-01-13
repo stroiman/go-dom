@@ -254,3 +254,7 @@ func NewXHRRequestBodyOfFormData(data *FormData) *XHRRequestBody {
 func (b XHRRequestBody) getReader() io.Reader {
 	return bytes.NewReader(b.data)
 }
+
+func (b XHRRequestBody) string() string {
+	return string(b.data)
+}

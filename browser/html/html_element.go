@@ -9,6 +9,7 @@ import (
 type HTMLElement interface {
 	Element
 	getHTMLDocument() HTMLDocument
+	getWindow() Window
 }
 
 type htmlElement struct {
@@ -32,6 +33,8 @@ func newHTMLElement(tagName string, ownerDocument HTMLDocument) *htmlElement {
 }
 
 func (e *htmlElement) getHTMLDocument() HTMLDocument { return e.htmlDocument }
+
+func (e *htmlElement) getWindow() Window { return e.getHTMLDocument().getWindow() }
 
 type HTMLTemplateElement interface {
 	HTMLElement
