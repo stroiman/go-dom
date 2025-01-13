@@ -53,15 +53,14 @@ func (e *htmlFormElement) Submit() error {
 		method = "GET"
 	}
 	action := e.GetAttribute("action")
-	var target dom.URL = window.Location()
+	target := dom.URL(window.Location())
 	if action != "" {
-		var err error
 		if target, err = dom.NewUrlBase(action, window.Location().GetHref()); err != nil {
 			return err
 		}
 	}
 	targetURL := target.GetHref()
-	if method == "GET" {
+	if e.GetMethod() == "get" {
 		searchParams := formData.QueryString()
 		targetURL = replaceSearchParams(target, searchParams)
 	}
