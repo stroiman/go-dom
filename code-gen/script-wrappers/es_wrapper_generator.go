@@ -47,6 +47,7 @@ func createData(spec IdlSpec, dataData WrapperTypeSpec) ESConstructorData {
 		WrapperTypeName: wrapperTypeName,
 		Receiver:        dataData.Receiver,
 		RunCustomCode:   dataData.RunCustomCode,
+		Inheritance:     idlName.Inheritance(),
 		Constructor:     CreateConstructor(dataData, idlName),
 		Operations:      CreateInstanceMethods(dataData, idlName),
 		Attributes:      CreateAttributes(dataData, idlName),
@@ -206,6 +207,7 @@ type ESConstructorData struct {
 	InnerTypeName   string
 	WrapperTypeName string
 	Receiver        string
+	Inheritance     string
 	Operations      []ESOperation
 	Attributes      []ESAttribute
 	Constructor     *ESOperation

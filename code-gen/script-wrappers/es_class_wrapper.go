@@ -32,13 +32,14 @@ type ESMethodWrapper struct {
 // All classes will be generated using a set of defaults. Data in this structure
 // will allow deviating from the defaults.
 type ESClassWrapper struct {
-	TypeName        string
-	InnerTypeName   string
-	WrapperTypeName string
-	Receiver        string
-	RunCustomCode   bool
-	WrapperStruct   bool
-	Customization   map[string]*ESMethodWrapper
+	TypeName                  string
+	InnerTypeName             string
+	WrapperTypeName           string
+	Receiver                  string
+	RunCustomCode             bool
+	WrapperStruct             bool
+	SkipPrototypeRegistration bool
+	Customization             map[string]*ESMethodWrapper
 }
 
 func (w *ESClassWrapper) ensureMap() {

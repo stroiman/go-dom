@@ -7,6 +7,10 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+func init() {
+	RegisterJSClass("URL", "", CreateURLPrototype)
+}
+
 func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewURLV8Wrapper(host)

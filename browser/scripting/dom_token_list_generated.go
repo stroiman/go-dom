@@ -7,6 +7,10 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+func init() {
+	RegisterJSClass("DOMTokenList", "", CreateDOMTokenListPrototype)
+}
+
 func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewDOMTokenListV8Wrapper(host)

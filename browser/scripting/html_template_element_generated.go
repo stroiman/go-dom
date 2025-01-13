@@ -7,6 +7,10 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+func init() {
+	RegisterJSClass("HTMLTemplateElement", "HTMLElement", CreateHTMLTemplateElementPrototype)
+}
+
 func CreateHTMLTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewHTMLTemplateElementV8Wrapper(host)

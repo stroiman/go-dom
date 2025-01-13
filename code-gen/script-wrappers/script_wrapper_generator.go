@@ -196,7 +196,7 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	specs := NewWrapperGeneratorsSpec()
 	xhrModule := specs.Module("xhr")
 	xhr := xhrModule.Type("XMLHttpRequest")
-
+	xhr.SkipPrototypeRegistration = true
 	xhr.InnerTypeName = "XmlHttpRequest"
 	xhr.WrapperTypeName = "ESXmlHttpRequest"
 	xhr.Receiver = "xhr"
@@ -230,6 +230,7 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 
 	domSpecs := specs.Module("dom")
 	domSpecs.SetMultipleFiles(true)
+
 	domTokenList := domSpecs.Type("DOMTokenList")
 	domTokenList.Receiver = "u"
 	domTokenList.RunCustomCode = true

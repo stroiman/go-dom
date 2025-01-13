@@ -43,6 +43,10 @@ func (t *IdlTypeSpec) Constructor() (res MemberSpec, found bool) {
 	return
 }
 
+func (t *IdlTypeSpec) Inheritance() string {
+	return t.Type.Inheritance
+}
+
 func (t *IdlTypeSpec) InstanceMethods() iter.Seq[MemberSpec] {
 	return func(yield func(v MemberSpec) bool) {
 		for i, member := range t.Type.Members {

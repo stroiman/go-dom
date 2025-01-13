@@ -215,7 +215,7 @@ func RegisterJSClass(
 		className, superClassName, constructorFactory,
 	}
 	if _, ok := classes[className]; ok {
-		panic("Same class added twice")
+		panic("Same class added twice: " + className)
 	}
 	if superClassName == "" {
 		classes[className] = spec
@@ -240,8 +240,6 @@ func init() {
 	RegisterJSClass("EventTarget", "", CreateEventTarget)
 
 	RegisterJSClass("XMLHttpRequest", "EventTarget", CreateXmlHttpRequestPrototype)
-	RegisterJSClass("Window", "EventTarget", CreateWindowPrototype)
-	RegisterJSClass("Node", "EventTarget", CreateNodePrototype)
 
 	RegisterJSClass("Document", "Node", CreateDocumentPrototype)
 	RegisterJSClass("HTMLDocument", "Document", CreateHTMLDocumentPrototype)
@@ -249,12 +247,9 @@ func init() {
 	RegisterJSClass("ShadowRoot", "DocumentFragment", CreateShadowRootPrototype)
 	RegisterJSClass("Element", "Node", CreateElement)
 	RegisterJSClass("HTMLElement", "Element", CreateHtmlElement)
-	RegisterJSClass("HTMLTemplateElement", "HTMLElement", CreateHTMLTemplateElementPrototype)
 	RegisterJSClass("Attr", "Node", CreateAttr)
 
 	RegisterJSClass("FormData", "", CreateFormData)
-	RegisterJSClass("URL", "", CreateURLPrototype)
-	RegisterJSClass("DOMTokenList", "", CreateDOMTokenListPrototype)
 	RegisterJSClass("DOMParser", "", CreateDOMParserPrototype)
 
 	for _, cls := range htmlElements {

@@ -104,11 +104,12 @@ type IdlNameMember struct {
 }
 
 type IdlName struct {
-	Type    string          `json:"type"`
-	Name    string          `json:"name"`
-	Members []IdlNameMember `json:"members"`
-	Partial bool            `json:"partial"`
-	Href    string          `json:"href"`
+	Type        string          `json:"type"`
+	Name        string          `json:"name"`
+	Members     []IdlNameMember `json:"members"`
+	Partial     bool            `json:"partial"`
+	Href        string          `json:"href"`
+	Inheritance string          `json:"Inheritance"`
 }
 
 type IdlExtendedName struct {

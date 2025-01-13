@@ -18,7 +18,15 @@ func (t NewV8FunctionTemplate) Generate() *jen.Statement {
 }
 
 func CreateV8Generator(data ESConstructorData) g.Generator {
-	generator := g.StatementList(
+	generator := g.StatementList()
+	if !data.Spec.SkipPrototypeRegistration {
+		generator.Append(
+			CreateInitFunction(data),
+			g.Line,
+		)
+	}
+
+	generator.Append(
 		CreateV8Constructor(data),
 		CreateV8ConstructorWrapper(data),
 		CreateV8WrapperMethods(data),
@@ -32,6 +40,16 @@ func CreateV8Generator(data ESConstructorData) g.Generator {
 	}
 
 	return generator
+}
+
+func CreateInitFunction(data ESConstructorData) g.Generator {
+	return g.FunctionDefinition{
+		Name: "init",
+		Body: g.NewValue("RegisterJSClass").Call(
+			g.Lit(data.Spec.TypeName),
+			g.Lit(data.Inheritance),
+			g.Id(prototypeFactoryFunctionName(data))),
+	}
 }
 
 func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
@@ -166,9 +184,13 @@ func CreateV8FunctionTemplateCallbackBody(
 	return statements
 }
 
+func prototypeFactoryFunctionName(data ESConstructorData) string {
+	return fmt.Sprintf("Create%sPrototype", data.InnerTypeName)
+}
+
 func CreateV8Constructor(data ESConstructorData) g.Generator {
 	return g.FunctionDefinition{
-		Name:     fmt.Sprintf("Create%sPrototype", data.InnerTypeName),
+		Name:     prototypeFactoryFunctionName(data),
 		Args:     g.Arg(g.Id("host"), scriptHostPtr),
 		RtnTypes: g.List(v8FunctionTemplatePtr),
 		Body:     CreateV8ConstructorBody(data),

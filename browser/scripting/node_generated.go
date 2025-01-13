@@ -7,6 +7,10 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+func init() {
+	RegisterJSClass("Node", "EventTarget", CreateNodePrototype)
+}
+
 func CreateNodePrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewNodeV8Wrapper(host)
