@@ -26,8 +26,12 @@ type url struct {
 	url *netURL.URL
 }
 
-func NewUrl(url string) (URL, error) {
-	return ParseURL(url)
+func NewUrl(rawUrl string) (URL, error) {
+	if res, err := netURL.Parse(rawUrl); err == nil {
+		return &url{res}, nil
+	} else {
+		return nil, err
+	}
 }
 
 func NewUrlBase(relativeUrl string, base string) (result URL, err error) {
@@ -59,12 +63,12 @@ func NewUrlBase(relativeUrl string, base string) (result URL, err error) {
 	return
 }
 
-func ParseURL(rawUrl string) (URL, error) {
-	if res, err := netURL.Parse(rawUrl); err == nil {
-		return &url{res}, nil
-	} else {
-		return nil, err
+func ParseURL(rawUrl string) URL {
+	res, err := NewUrl(rawUrl)
+	if err != nil {
+		res = nil
 	}
+	return res
 }
 
 func ParseURLBase(relativeUrl string, base string) URL {
@@ -76,7 +80,7 @@ func ParseURLBase(relativeUrl string, base string) URL {
 }
 
 func CanParseURL(rawUrl string) bool {
-	_, err := ParseURL(rawUrl)
+	_, err := NewUrl(rawUrl)
 	return err == nil
 }
 

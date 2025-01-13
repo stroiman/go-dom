@@ -15,8 +15,7 @@ var _ = Describe("URL", func() {
 	// Most of this is implicitly tested through Location tests.
 	Describe("Parsing valid url", func() {
 		It("ParseURL return no error on a valid URL", func() {
-			result, err := ParseURL("http://example.com")
-			Expect(err).ToNot(HaveOccurred())
+			result := ParseURL("http://example.com")
 			Expect(result).To(HaveHRef(Equal("http://example.com")))
 		})
 
@@ -26,8 +25,12 @@ var _ = Describe("URL", func() {
 	})
 
 	Describe("Parsing invalid url", func() {
-		It("ParseURL returns error on an invalid URL", func() {
-			Expect(ParseURL(":foo")).Error().To(HaveOccurred())
+		It("NewUrlBase returns error on an invalid URL", func() {
+			Expect(NewUrl(":foo")).Error().To(HaveOccurred())
+		})
+
+		It("ParseURL returns nil", func() {
+			Expect(ParseURL(":foo")).To(BeNil())
 		})
 
 		It("CanParseURL returns false", func() {
