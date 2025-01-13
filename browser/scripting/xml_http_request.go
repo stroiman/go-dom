@@ -3,20 +3,20 @@ package scripting
 import (
 	"errors"
 
-	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 
 	v8 "github.com/tommie/v8go"
 )
 
 type ESXmlHttpRequest struct {
-	NodeV8WrapperBase[XmlHttpRequest]
+	NodeV8WrapperBase[html.XmlHttpRequest]
 }
 
 func (xhr ESXmlHttpRequest) DecodeDocument(
 	ctx *ScriptContext,
 	val *v8.Value,
-) (*dom.XHRRequestBody, error) {
+) (*html.XHRRequestBody, error) {
 	if val.IsNull() {
 		return nil, nil
 	}
@@ -26,23 +26,23 @@ func (xhr ESXmlHttpRequest) DecodeDocument(
 func (xhr ESXmlHttpRequest) DecodeXMLHttpRequestBodyInit(
 	ctx *ScriptContext,
 	val *v8.Value,
-) (*dom.XHRRequestBody, error) {
+) (*html.XHRRequestBody, error) {
 	if val.IsString() {
-		return dom.NewXHRRequestBodyOfString(val.String()), nil
+		return html.NewXHRRequestBodyOfString(val.String()), nil
 	}
 	if !val.IsObject() {
 		return nil, errors.New("Not supported yet")
 	}
 	obj := val.Object()
-	formData := getWrappedInstance[*dom.FormData](obj)
+	formData := getWrappedInstance[*html.FormData](obj)
 	// if ok {
-	return dom.NewXHRRequestBodyOfFormData(formData), nil
+	return html.NewXHRRequestBodyOfFormData(formData), nil
 	// }
 	// return nil, errors.New("Not a node")
 }
 
 func NewESXmlHttpRequest(host *ScriptHost) ESXmlHttpRequest {
-	return ESXmlHttpRequest{NewNodeV8WrapperBase[XmlHttpRequest](host)}
+	return ESXmlHttpRequest{NewNodeV8WrapperBase[html.XmlHttpRequest](host)}
 }
 
 func (xhr ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) (*v8.Value, error) {
@@ -75,7 +75,7 @@ func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (result *v8.Valu
 		if err = errors.Join(err0, err1, err2, errInstance); err != nil {
 			return
 		}
-		instance.Open(method, url, RequestOptionAsync(async))
+		instance.Open(method, url, html.RequestOptionAsync(async))
 		return
 	}
 	if args.noOfReadArguments < 2 {

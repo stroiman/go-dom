@@ -1,4 +1,4 @@
-package dom
+package html
 
 import (
 	"io"

@@ -3,24 +3,24 @@ package scripting
 import (
 	"errors"
 
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 
 	v8 "github.com/tommie/v8go"
 )
 
 type FormDataV8Wrapper struct {
-	HandleReffedObject[*dom.FormData]
+	HandleReffedObject[*html.FormData]
 }
 
 func NewFormDataV8Wrapper(host *ScriptHost) FormDataV8Wrapper {
-	return FormDataV8Wrapper{NewHandleReffedObject[*dom.FormData](host)}
+	return FormDataV8Wrapper{NewHandleReffedObject[*html.FormData](host)}
 }
 
 func (w FormDataV8Wrapper) CreateInstance(
 	ctx *ScriptContext,
 	this *v8.Object,
 ) (*v8.Value, error) {
-	var value = dom.NewFormData()
+	var value = html.NewFormData()
 	w.Store(value, ctx, this)
 	return nil, nil
 }
@@ -28,7 +28,7 @@ func (w FormDataV8Wrapper) CreateInstance(
 func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewFormDataV8Wrapper(host)
-	builder := NewConstructorBuilder[*dom.FormData](
+	builder := NewConstructorBuilder[*html.FormData](
 		host,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(info.Context())
@@ -44,7 +44,7 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 
 	entryIterator := NewIterator(
 		host,
-		func(instance dom.FormDataEntry, ctx *ScriptContext) (*v8.Value, error) {
+		func(instance html.FormDataEntry, ctx *ScriptContext) (*v8.Value, error) {
 			// TODO, no option to create an array, totally a hack!
 			arr, e1 := ctx.RunScript("(k,v) => [k,v]")
 			if e1 != nil {
@@ -100,7 +100,7 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 				if err != nil {
 					return nil, err
 				}
-				instance.Append(key, dom.FormDataValue(value))
+				instance.Append(key, html.FormDataValue(value))
 				return nil, nil
 			},
 		),

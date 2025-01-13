@@ -1,4 +1,4 @@
-package dom
+package html
 
 import (
 	"bytes"
@@ -8,6 +8,8 @@ import (
 	"net/http"
 	netURL "net/url"
 	"strings"
+
+	"github.com/stroiman/go-dom/browser/dom"
 )
 
 // TODO: Events for async
@@ -29,7 +31,7 @@ const (
 )
 
 type XmlHttpRequest interface {
-	EventTarget
+	dom.EventTarget
 	Abort() error
 	Open(string, string, ...RequestOption)
 	Send() error
@@ -50,7 +52,7 @@ type XmlHttpRequest interface {
 }
 
 type xmlHttpRequest struct {
-	eventTarget
+	dom.EventTarget
 	client   http.Client
 	async    bool
 	status   int
@@ -63,7 +65,7 @@ type xmlHttpRequest struct {
 
 func NewXmlHttpRequest(client http.Client) XmlHttpRequest {
 	return &xmlHttpRequest{
-		eventTarget: newEventTarget(),
+		EventTarget: dom.NewEventTarget(),
 		client:      client,
 		headers:     make(map[string][]string),
 	}
@@ -102,7 +104,7 @@ func (req *xmlHttpRequest) send(body io.Reader) error {
 	b := new(bytes.Buffer) // TODO, branch out depending on content-type
 	_, err = b.ReadFrom(res.Body)
 	req.response = b.Bytes()
-	req.DispatchEvent(NewCustomEvent(XHREventLoad))
+	req.DispatchEvent(dom.NewCustomEvent(XHREventLoad))
 	return err
 }
 
@@ -118,7 +120,7 @@ func (req *xmlHttpRequest) SendBody(body *XHRRequestBody) error {
 		reader = body.getReader()
 	}
 	if req.async {
-		req.DispatchEvent(NewCustomEvent((XHREventLoadstart)))
+		req.DispatchEvent(dom.NewCustomEvent((XHREventLoadstart)))
 		go req.send(reader)
 		return nil
 	}

@@ -1,4 +1,4 @@
-package dom_test
+package html_test
 
 import (
 	"io"
@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	. "github.com/stroiman/go-dom/browser/dom"
+	. "github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/internal/http"
 
 	. "github.com/onsi/ginkgo/v2"

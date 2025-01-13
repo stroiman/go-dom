@@ -39,12 +39,12 @@ func (e *htmlFormElement) Submit() error {
 	if err != nil {
 		return err // Shouldn't happen, only an invalid DOM string should generate this error
 	}
-	formData := dom.NewFormData()
+	formData := NewFormData()
 	for _, input := range inputs.All() {
 		if inputElement, ok := input.(HTMLInputElement); ok {
 			name := inputElement.GetAttribute("name")
 			value := inputElement.GetAttribute("value")
-			formData.Append(name, dom.NewFormDataValueString(value))
+			formData.Append(name, NewFormDataValueString(value))
 		}
 	}
 
