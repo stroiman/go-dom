@@ -169,9 +169,12 @@ func (o HandleReffedObject[T]) Store(value T, ctx *ScriptContext, this *v8.Objec
 	this.SetInternalField(0, internalField)
 }
 
-func (o HandleReffedObject[T]) GetInstance(info *v8.FunctionCallbackInfo) (dom.URL, error) {
-	h := info.This().GetInternalField(0)
-	handle := h.ExternalHandle()
-	result := handle.Value().(dom.URL)
-	return result, nil
+func getWrappedInstance[T any](object *v8.Object) T {
+	field := object.GetInternalField(0)
+	handle := field.ExternalHandle()
+	return handle.Value().(T)
+}
+
+func (o HandleReffedObject[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, error) {
+	return getWrappedInstance[T](info.This()), nil
 }
