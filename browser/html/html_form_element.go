@@ -35,20 +35,11 @@ func NewHtmlFormElement(ownerDocument HTMLDocument) HTMLFormElement {
 }
 
 func (e *htmlFormElement) Submit() error {
-	inputs, err := e.QuerySelectorAll("input")
-	if err != nil {
-		return err // Shouldn't happen, only an invalid DOM string should generate this error
-	}
-	formData := NewFormData()
-	for _, input := range inputs.All() {
-		if inputElement, ok := input.(HTMLInputElement); ok {
-			name := inputElement.GetAttribute("name")
-			value := inputElement.GetAttribute("value")
-			formData.Append(name, NewFormDataValueString(value))
-		}
-	}
-
-	var req *http.Request
+	var (
+		req *http.Request
+		err error
+	)
+	formData := NewFormDataForm(e)
 	if e.GetMethod() == "get" {
 		searchParams := formData.QueryString()
 		targetURL := replaceSearchParams(e.getAction(), searchParams)

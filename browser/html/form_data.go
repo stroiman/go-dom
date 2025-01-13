@@ -22,6 +22,23 @@ func NewFormData() *FormData {
 	return &FormData{nil}
 }
 
+func NewFormDataForm(form HTMLFormElement) *FormData {
+	inputs, err := form.QuerySelectorAll("input")
+	if err != nil {
+		// Shouldn't happen, only an invalid DOM string should generate this error
+		panic(err)
+	}
+	formData := NewFormData()
+	for _, input := range inputs.All() {
+		if inputElement, ok := input.(HTMLInputElement); ok {
+			name := inputElement.GetAttribute("name")
+			value := inputElement.GetAttribute("value")
+			formData.Append(name, NewFormDataValueString(value))
+		}
+	}
+	return formData
+}
+
 func (d *FormData) Append(name string, value FormDataValue) {
 	d.Entries = append(d.Entries, FormDataEntry{name, value})
 }
