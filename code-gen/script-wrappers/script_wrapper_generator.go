@@ -7,7 +7,9 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/stroiman/go-dom/code-gen/generators"
@@ -30,8 +32,9 @@ func (s *ESClassWrapper) CreateWrapper() {
 }
 
 type WrapperGeneratorFileSpec struct {
-	Name  string
-	Types map[string]WrapperTypeSpec
+	Name          string
+	MultipleFiles bool
+	Types         map[string]WrapperTypeSpec
 }
 
 func (spec WrapperGeneratorFileSpec) GetTypesSorted() []WrapperTypeSpec {
@@ -46,6 +49,12 @@ func (spec WrapperGeneratorFileSpec) GetTypesSorted() []WrapperTypeSpec {
 	})
 	return types
 }
+
+func (spec WrapperGeneratorFileSpec) UseMultipleFiles() bool {
+	return spec.MultipleFiles == true
+}
+
+func (spec *WrapperGeneratorFileSpec) SetMultipleFiles(value bool) { spec.MultipleFiles = value }
 
 func (g WrapperGeneratorsSpec) Module(spec string) *WrapperGeneratorFileSpec {
 	if mod, ok := g[spec]; ok {
@@ -96,22 +105,80 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 	return writeGenerator(writer, generators)
 }
 
-func (gen ScriptWrapperModulesGenerator) writeModules(specs WrapperGeneratorsSpec) error {
-	errs := make([]error, 0, len(specs))
-	for name, spec := range specs {
-		outputFileName := fmt.Sprintf("%s_generated.go", name)
-		err := func() error {
-			if writer, err := os.Create(outputFileName); err != nil {
-				return err
-			} else {
-				defer writer.Close()
-				return gen.writeModule(writer, spec)
-			}
-		}()
-		errs = append(errs, err)
+func (gen ScriptWrapperModulesGenerator) writeModuleTypes(
+	spec *WrapperGeneratorFileSpec,
+) error {
+	filename := fmt.Sprintf("webref/curated/idlparsed/%s.json", spec.Name)
+	file, err := gen.IdlSources.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	data, err := idl.ParseIdlJsonReader(file)
+	if err != nil {
+		return err
+	}
+	// generators := g.StatementList()
+	types := spec.GetTypesSorted()
+	errs := make([]error, len(types))
+	for i, specType := range types {
+		outputFileName := fmt.Sprintf("%s_generated.go", typeNameToFileName(specType.TypeName))
+		if writer, err := os.Create(outputFileName); err != nil {
+			errs[i] = err
+		} else {
+			typeGenerationInformation := createData(data, specType)
+			errs[i] = writeGenerator(writer, CreateV8Generator(typeGenerationInformation))
+		}
 	}
 	return errors.Join(errs...)
 }
+
+var matchKnownWord = regexp.MustCompile("(HTML|URL|DOM)([A-Z][a-z]+)")
+var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+
+// var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+
+func typeNameToFileName(name string) string {
+	snake := matchKnownWord.ReplaceAllString(name, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	return strings.ToLower(snake)
+}
+
+func (gen ScriptWrapperModulesGenerator) writeModules(specs WrapperGeneratorsSpec) error {
+	errs := make([]error, len(specs))
+	i := 0
+	for _, spec := range specs {
+		if spec.UseMultipleFiles() {
+			errs[i] = gen.writeModuleTypes(spec)
+		} else {
+			errs[i] = gen.writeModuleSingleFile(spec)
+		}
+		i++
+	}
+	return errors.Join(errs...)
+}
+
+func (gen ScriptWrapperModulesGenerator) writeModuleSingleFile(
+	spec *WrapperGeneratorFileSpec,
+) error {
+	outputFileName := fmt.Sprintf("%s_generated.go", spec.Name)
+	if writer, err := os.Create(outputFileName); err != nil {
+		return err
+	} else {
+		defer writer.Close()
+		return gen.writeModule(writer, spec)
+	}
+}
+
+// func (gen ScriptWrapperModulesGenerator) writeModuleMultipleFiles(
+// 	specs WrapperGeneratorsSpec,
+// ) error {
+// 	errs := make([]error, 0, len(specs))
+// 	for _, spec := range specs {
+// 		return gen.writeModuleTypes(spec)
+// 	}
+// 	return errors.Join(errs...)
+// }
 
 func (s *WrapperGeneratorFileSpec) Type(typeName string) WrapperTypeSpec {
 	if result, ok := s.Types[typeName]; ok {
@@ -162,6 +229,7 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	)
 
 	domSpecs := specs.Module("dom")
+	domSpecs.SetMultipleFiles(true)
 	domTokenList := domSpecs.Type("DOMTokenList")
 	domTokenList.Receiver = "u"
 	domTokenList.RunCustomCode = true
@@ -197,6 +265,8 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	domNode.Method("textContent").Ignore()
 
 	htmlSpecs := specs.Module("html")
+	htmlSpecs.SetMultipleFiles(true)
+
 	htmlTemplateElement := htmlSpecs.Type("HTMLTemplateElement")
 	htmlTemplateElement.Method("shadowRootMode").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootDelegatesFocus").SetNotImplemented()
