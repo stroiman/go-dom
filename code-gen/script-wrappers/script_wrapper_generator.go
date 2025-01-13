@@ -170,16 +170,6 @@ func (gen ScriptWrapperModulesGenerator) writeModuleSingleFile(
 	}
 }
 
-// func (gen ScriptWrapperModulesGenerator) writeModuleMultipleFiles(
-// 	specs WrapperGeneratorsSpec,
-// ) error {
-// 	errs := make([]error, 0, len(specs))
-// 	for _, spec := range specs {
-// 		return gen.writeModuleTypes(spec)
-// 	}
-// 	return errors.Join(errs...)
-// }
-
 func (s *WrapperGeneratorFileSpec) Type(typeName string) WrapperTypeSpec {
 	if result, ok := s.Types[typeName]; ok {
 		return result
