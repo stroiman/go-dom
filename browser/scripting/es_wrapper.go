@@ -69,52 +69,52 @@ func (w converters) decodeNode(ctx *ScriptContext, val *v8.Value) (dom.Node, err
 	return nil, v8.NewTypeError(ctx.host.iso, "Must be a node")
 }
 
-func (w converters) ToNullableByteString(ctx *ScriptContext, str *string) (*v8.Value, error) {
+func (w converters) toNullableByteString(ctx *ScriptContext, str *string) (*v8.Value, error) {
 	if str == nil {
 		return v8.Null(ctx.host.iso), nil
 	}
 	return v8.NewValue(ctx.host.iso, *str)
 }
 
-func (w converters) ToByteString(ctx *ScriptContext, str string) (*v8.Value, error) {
+func (w converters) toByteString(ctx *ScriptContext, str string) (*v8.Value, error) {
 	if str == "" {
 		return v8.Null(ctx.host.iso), nil
 	}
 	return v8.NewValue(ctx.host.iso, str)
 }
 
-func (w converters) ToDOMString(ctx *ScriptContext, str string) (*v8.Value, error) {
+func (w converters) toDOMString(ctx *ScriptContext, str string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, str)
 }
 
-func (w converters) ToNullableDOMString(ctx *ScriptContext, str *string) (*v8.Value, error) {
+func (w converters) toNullableDOMString(ctx *ScriptContext, str *string) (*v8.Value, error) {
 	if str == nil {
 		return v8.Null(ctx.host.iso), nil
 	}
 	return v8.NewValue(ctx.host.iso, str)
 }
 
-func (w converters) ToUnsignedLong(ctx *ScriptContext, val int) (*v8.Value, error) {
+func (w converters) toUnsignedLong(ctx *ScriptContext, val int) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
 }
 
-func (w converters) ToAny(ctx *ScriptContext, val string) (*v8.Value, error) {
+func (w converters) toAny(ctx *ScriptContext, val string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
 }
 
-func (w converters) ToUSVString(ctx *ScriptContext, str string) (*v8.Value, error) {
+func (w converters) toUSVString(ctx *ScriptContext, str string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, str)
 }
 
-func (w converters) ToUnsignedShort(ctx *ScriptContext, val int) (*v8.Value, error) {
+func (w converters) toUnsignedShort(ctx *ScriptContext, val int) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, uint32(val))
 }
 
-func (w converters) ToBoolean(ctx *ScriptContext, val bool) (*v8.Value, error) {
+func (w converters) toBoolean(ctx *ScriptContext, val bool) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
 }
 
-func (w converters) ToNodeList(ctx *ScriptContext, val NodeList) (*v8.Value, error) {
+func (w converters) toNodeList(ctx *ScriptContext, val NodeList) (*v8.Value, error) {
 	return ctx.GetInstanceForNodeByName("NodeList", val)
 }
 

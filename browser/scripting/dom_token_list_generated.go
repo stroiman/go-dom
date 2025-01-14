@@ -56,7 +56,7 @@ func (u DOMTokenListV8Wrapper) Item(info *v8.FunctionCallbackInfo) (*v8.Value, e
 			return nil, err
 		}
 		result := instance.Item(index)
-		return u.ToNullableDOMString(ctx, result)
+		return u.toNullableDOMString(ctx, result)
 	}
 	return nil, errors.New("Missing arguments")
 }
@@ -72,7 +72,7 @@ func (u DOMTokenListV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Valu
 			return nil, err
 		}
 		result := instance.Contains(token)
-		return u.ToBoolean(ctx, result)
+		return u.toBoolean(ctx, result)
 	}
 	return nil, errors.New("Missing arguments")
 }
@@ -119,7 +119,7 @@ func (u DOMTokenListV8Wrapper) Replace(info *v8.FunctionCallbackInfo) (*v8.Value
 			return nil, err
 		}
 		result := instance.Replace(token, newToken)
-		return u.ToBoolean(ctx, result)
+		return u.toBoolean(ctx, result)
 	}
 	return nil, errors.New("Missing arguments")
 }
@@ -135,7 +135,7 @@ func (u DOMTokenListV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value,
 		return nil, err
 	}
 	result := instance.Length()
-	return u.ToUnsignedLong(ctx, result)
+	return u.toUnsignedLong(ctx, result)
 }
 
 func (u DOMTokenListV8Wrapper) Value(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -145,7 +145,7 @@ func (u DOMTokenListV8Wrapper) Value(info *v8.FunctionCallbackInfo) (*v8.Value, 
 		return nil, err
 	}
 	result := instance.Value()
-	return u.ToDOMString(ctx, result)
+	return u.toDOMString(ctx, result)
 }
 
 func (u DOMTokenListV8Wrapper) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

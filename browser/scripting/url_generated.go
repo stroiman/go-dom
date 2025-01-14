@@ -105,7 +105,7 @@ func (u URLV8Wrapper) ToJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	if callErr != nil {
 		return nil, callErr
 	} else {
-		return u.ToUSVString(ctx, result)
+		return u.toUSVString(ctx, result)
 	}
 }
 
@@ -116,7 +116,7 @@ func (u URLV8Wrapper) Href(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		return nil, err
 	}
 	result := instance.Href()
-	return u.ToUSVString(ctx, result)
+	return u.toUSVString(ctx, result)
 }
 
 func (u URLV8Wrapper) SetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -130,7 +130,7 @@ func (u URLV8Wrapper) Origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		return nil, err
 	}
 	result := instance.Origin()
-	return u.ToUSVString(ctx, result)
+	return u.toUSVString(ctx, result)
 }
 
 func (u URLV8Wrapper) Protocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -140,7 +140,7 @@ func (u URLV8Wrapper) Protocol(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 		return nil, err
 	}
 	result := instance.Protocol()
-	return u.ToUSVString(ctx, result)
+	return u.toUSVString(ctx, result)
 }
 
 func (u URLV8Wrapper) SetProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -170,7 +170,7 @@ func (u URLV8Wrapper) Host(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		return nil, err
 	}
 	result := instance.Host()
-	return u.ToUSVString(ctx, result)
+	return u.toUSVString(ctx, result)
 }
 
 func (u URLV8Wrapper) SetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -184,7 +184,7 @@ func (u URLV8Wrapper) Hostname(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 		return nil, err
 	}
 	result := instance.Hostname()
-	return u.ToUSVString(ctx, result)
+	return u.toUSVString(ctx, result)
 }
 
 func (u URLV8Wrapper) SetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -198,7 +198,7 @@ func (u URLV8Wrapper) Port(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		return nil, err
 	}
 	result := instance.Port()
-	return u.ToUSVString(ctx, result)
+	return u.toUSVString(ctx, result)
 }
 
 func (u URLV8Wrapper) SetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -212,7 +212,7 @@ func (u URLV8Wrapper) Pathname(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 		return nil, err
 	}
 	result := instance.Pathname()
-	return u.ToUSVString(ctx, result)
+	return u.toUSVString(ctx, result)
 }
 
 func (u URLV8Wrapper) SetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -226,7 +226,7 @@ func (u URLV8Wrapper) Search(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		return nil, err
 	}
 	result := instance.Search()
-	return u.ToUSVString(ctx, result)
+	return u.toUSVString(ctx, result)
 }
 
 func (u URLV8Wrapper) SetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -244,7 +244,7 @@ func (u URLV8Wrapper) Hash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 		return nil, err
 	}
 	result := instance.Hash()
-	return u.ToUSVString(ctx, result)
+	return u.toUSVString(ctx, result)
 }
 
 func (u URLV8Wrapper) SetHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

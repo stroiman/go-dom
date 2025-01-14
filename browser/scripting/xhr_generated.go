@@ -132,7 +132,7 @@ func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v
 			return nil, err
 		}
 		result := instance.GetResponseHeader(name)
-		return xhr.ToNullableByteString(ctx, result)
+		return xhr.toNullableByteString(ctx, result)
 	}
 	return nil, errors.New("Missing arguments")
 }
@@ -147,7 +147,7 @@ func (xhr ESXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo)
 	if callErr != nil {
 		return nil, callErr
 	} else {
-		return xhr.ToByteString(ctx, result)
+		return xhr.toByteString(ctx, result)
 	}
 }
 
@@ -177,7 +177,7 @@ func (xhr ESXmlHttpRequest) Timeout(info *v8.FunctionCallbackInfo) (*v8.Value, e
 		return nil, err
 	}
 	result := instance.Timeout()
-	return xhr.ToUnsignedLong(ctx, result)
+	return xhr.toUnsignedLong(ctx, result)
 }
 
 func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -202,7 +202,7 @@ func (xhr ESXmlHttpRequest) WithCredentials(info *v8.FunctionCallbackInfo) (*v8.
 		return nil, err
 	}
 	result := instance.WithCredentials()
-	return xhr.ToBoolean(ctx, result)
+	return xhr.toBoolean(ctx, result)
 }
 
 func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -227,7 +227,7 @@ func (xhr ESXmlHttpRequest) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Valu
 		return nil, err
 	}
 	result := instance.ResponseURL()
-	return xhr.ToUSVString(ctx, result)
+	return xhr.toUSVString(ctx, result)
 }
 
 func (xhr ESXmlHttpRequest) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -237,7 +237,7 @@ func (xhr ESXmlHttpRequest) Status(info *v8.FunctionCallbackInfo) (*v8.Value, er
 		return nil, err
 	}
 	result := instance.Status()
-	return xhr.ToUnsignedShort(ctx, result)
+	return xhr.toUnsignedShort(ctx, result)
 }
 
 func (xhr ESXmlHttpRequest) StatusText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -247,7 +247,7 @@ func (xhr ESXmlHttpRequest) StatusText(info *v8.FunctionCallbackInfo) (*v8.Value
 		return nil, err
 	}
 	result := instance.StatusText()
-	return xhr.ToByteString(ctx, result)
+	return xhr.toByteString(ctx, result)
 }
 
 func (xhr ESXmlHttpRequest) ResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -265,7 +265,7 @@ func (xhr ESXmlHttpRequest) Response(info *v8.FunctionCallbackInfo) (*v8.Value, 
 		return nil, err
 	}
 	result := instance.Response()
-	return xhr.ToAny(ctx, result)
+	return xhr.toAny(ctx, result)
 }
 
 func (xhr ESXmlHttpRequest) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -275,7 +275,7 @@ func (xhr ESXmlHttpRequest) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Val
 		return nil, err
 	}
 	result := instance.ResponseText()
-	return xhr.ToUSVString(ctx, result)
+	return xhr.toUSVString(ctx, result)
 }
 
 func (xhr ESXmlHttpRequest) ResponseXML(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

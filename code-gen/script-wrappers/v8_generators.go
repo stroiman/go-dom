@@ -404,7 +404,7 @@ func (c V8InstanceInvocation) GetGenerator() V8InstanceInvocationResult {
 				list.Append(valueReturn)
 			}
 		} else {
-			converter := "To"
+			converter := "to"
 			if retType.Nullable {
 				converter += "Nullable"
 			}

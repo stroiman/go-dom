@@ -97,7 +97,7 @@ func (n NodeV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error
 			return nil, err
 		}
 		result := instance.Contains(other)
-		return n.ToBoolean(ctx, result)
+		return n.toBoolean(ctx, result)
 	}
 	return nil, errors.New("Missing arguments")
 }
@@ -170,7 +170,7 @@ func (n NodeV8Wrapper) NodeName(info *v8.FunctionCallbackInfo) (*v8.Value, error
 		return nil, err
 	}
 	result := instance.NodeName()
-	return n.ToDOMString(ctx, result)
+	return n.toDOMString(ctx, result)
 }
 
 func (n NodeV8Wrapper) IsConnected(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -180,7 +180,7 @@ func (n NodeV8Wrapper) IsConnected(info *v8.FunctionCallbackInfo) (*v8.Value, er
 		return nil, err
 	}
 	result := instance.IsConnected()
-	return n.ToBoolean(ctx, result)
+	return n.toBoolean(ctx, result)
 }
 
 func (n NodeV8Wrapper) OwnerDocument(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -200,7 +200,7 @@ func (n NodeV8Wrapper) ChildNodes(info *v8.FunctionCallbackInfo) (*v8.Value, err
 		return nil, err
 	}
 	result := instance.ChildNodes()
-	return n.ToNodeList(ctx, result)
+	return n.toNodeList(ctx, result)
 }
 
 func (n NodeV8Wrapper) FirstChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
