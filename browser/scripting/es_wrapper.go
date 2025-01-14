@@ -69,32 +69,6 @@ func (w converters) decodeNode(ctx *ScriptContext, val *v8.Value) (dom.Node, err
 	return nil, v8.NewTypeError(ctx.host.iso, "Must be a node")
 }
 
-func (w converters) getArgDOMString(args []*v8.Value, idx int) (result string, err error) {
-	if idx >= len(args) {
-		err = errors.New("Index out of range")
-		return
-	}
-	result = args[idx].String()
-	return
-}
-
-func (w converters) GetArgByteString(args []*v8.Value, idx int) (result string, err error) {
-	return w.getArgDOMString(args, idx)
-}
-
-func (w converters) GetArgUSVString(args []*v8.Value, idx int) (result string, err error) {
-	return w.getArgDOMString(args, idx)
-}
-
-func (w converters) GetArgBoolean(args []*v8.Value, idx int) (result bool, err error) {
-	if idx >= len(args) {
-		err = errors.New("Index out of range")
-		return
-	}
-	result = args[idx].Boolean()
-	return
-}
-
 func (w converters) ToNullableByteString(ctx *ScriptContext, str *string) (*v8.Value, error) {
 	if str == nil {
 		return v8.Null(ctx.host.iso), nil
