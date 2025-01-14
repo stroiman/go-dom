@@ -51,7 +51,7 @@ func (e HTMLTemplateElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo)
 
 func (e HTMLTemplateElementV8Wrapper) Content(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.host.MustGetContext(info.Context())
-	instance, err := e.GetInstance(info)
+	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
 	}

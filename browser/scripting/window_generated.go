@@ -9,11 +9,11 @@ import (
 )
 
 type WindowV8Wrapper struct {
-	NodeV8WrapperBase[html.Window]
+	nodeV8WrapperBase[html.Window]
 }
 
 func NewWindowV8Wrapper(host *ScriptHost) *WindowV8Wrapper {
-	return &WindowV8Wrapper{NewNodeV8WrapperBase[html.Window](host)}
+	return &WindowV8Wrapper{newNodeV8WrapperBase[html.Window](host)}
 }
 
 func init() {
@@ -186,7 +186,7 @@ func (w WindowV8Wrapper) Self(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 
 func (w WindowV8Wrapper) Document(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.host.MustGetContext(info.Context())
-	instance, err := w.GetInstance(info)
+	instance, err := w.getInstance(info)
 	if err != nil {
 		return nil, err
 	}

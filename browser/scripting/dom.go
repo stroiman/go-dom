@@ -10,23 +10,23 @@ import (
 )
 
 type DOMTokenListV8Wrapper struct {
-	NodeV8WrapperBase[dom.Element]
+	nodeV8WrapperBase[dom.Element]
 	Iterator Iterator[string]
 }
 
 func NewDOMTokenListV8Wrapper(host *ScriptHost) DOMTokenListV8Wrapper {
 	return DOMTokenListV8Wrapper{
-		NewNodeV8WrapperBase[dom.Element](host),
+		newNodeV8WrapperBase[dom.Element](host),
 		NewIterator(host, func(item string, ctx *ScriptContext) (*v8.Value, error) {
 			return v8.NewValue(host.iso, item)
 		}),
 	}
 }
 
-func (l DOMTokenListV8Wrapper) GetInstance(
+func (l DOMTokenListV8Wrapper) getInstance(
 	info *v8.FunctionCallbackInfo,
 ) (result dom.DOMTokenList, err error) {
-	element, err := l.NodeV8WrapperBase.GetInstance(info)
+	element, err := l.nodeV8WrapperBase.getInstance(info)
 	if err == nil {
 		result = dom.NewClassList(element)
 	}
@@ -42,7 +42,7 @@ func (l DOMTokenListV8Wrapper) CustomInitialiser(constructor *v8.FunctionTemplat
 
 func (l DOMTokenListV8Wrapper) GetIterator(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := l.host.MustGetContext(info.Context())
-	instance, err := l.GetInstance(info)
+	instance, err := l.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -51,9 +51,9 @@ func (l DOMTokenListV8Wrapper) GetIterator(info *v8.FunctionCallbackInfo) (*v8.V
 
 func (l DOMTokenListV8Wrapper) Toggle(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(l.host, info)
-	token, err0 := TryParseArg(args, 0, l.DecodeUSVString)
-	force, err1 := TryParseArg(args, 1, l.DecodeBoolean)
-	instance, errInstance := l.GetInstance(info)
+	token, err0 := TryParseArg(args, 0, l.decodeUSVString)
+	force, err1 := TryParseArg(args, 1, l.decodeBoolean)
+	instance, errInstance := l.getInstance(info)
 	if args.noOfReadArguments >= 2 {
 		if err := errors.Join(err0, err1, errInstance); err != nil {
 			return nil, err
@@ -73,11 +73,11 @@ func (l DOMTokenListV8Wrapper) Toggle(info *v8.FunctionCallbackInfo) (*v8.Value,
 }
 
 type HTMLTemplateElementV8Wrapper struct {
-	NodeV8WrapperBase[html.HTMLTemplateElement]
+	nodeV8WrapperBase[html.HTMLTemplateElement]
 }
 
 func NewHTMLTemplateElementV8Wrapper(host *ScriptHost) HTMLTemplateElementV8Wrapper {
-	return HTMLTemplateElementV8Wrapper{NewNodeV8WrapperBase[html.HTMLTemplateElement](host)}
+	return HTMLTemplateElementV8Wrapper{newNodeV8WrapperBase[html.HTMLTemplateElement](host)}
 }
 
 func (e HTMLTemplateElementV8Wrapper) CreateInstance(

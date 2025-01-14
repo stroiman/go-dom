@@ -10,10 +10,10 @@ import (
 )
 
 type ESXmlHttpRequest struct {
-	NodeV8WrapperBase[html.XmlHttpRequest]
+	nodeV8WrapperBase[html.XmlHttpRequest]
 }
 
-func (xhr ESXmlHttpRequest) DecodeDocument(
+func (xhr ESXmlHttpRequest) decodeDocument(
 	ctx *ScriptContext,
 	val *v8.Value,
 ) (*html.XHRRequestBody, error) {
@@ -23,7 +23,7 @@ func (xhr ESXmlHttpRequest) DecodeDocument(
 	return nil, errors.New("Not supported yet")
 }
 
-func (xhr ESXmlHttpRequest) DecodeXMLHttpRequestBodyInit(
+func (xhr ESXmlHttpRequest) decodeXMLHttpRequestBodyInit(
 	ctx *ScriptContext,
 	val *v8.Value,
 ) (*html.XHRRequestBody, error) {
@@ -42,7 +42,7 @@ func (xhr ESXmlHttpRequest) DecodeXMLHttpRequestBodyInit(
 }
 
 func NewESXmlHttpRequest(host *ScriptHost) ESXmlHttpRequest {
-	return ESXmlHttpRequest{NewNodeV8WrapperBase[html.XmlHttpRequest](host)}
+	return ESXmlHttpRequest{newNodeV8WrapperBase[html.XmlHttpRequest](host)}
 }
 
 func (xhr ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) (*v8.Value, error) {
@@ -65,12 +65,12 @@ func (xhr ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) 
 
 func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (result *v8.Value, err error) {
 	args := newArgumentHelper(xhr.host, info)
-	method, err0 := TryParseArg(args, 0, xhr.DecodeUSVString)
-	url, err1 := TryParseArg(args, 1, xhr.DecodeUSVString)
-	async, err2 := TryParseArg(args, 1, xhr.DecodeBoolean)
+	method, err0 := TryParseArg(args, 0, xhr.decodeUSVString)
+	url, err1 := TryParseArg(args, 1, xhr.decodeUSVString)
+	async, err2 := TryParseArg(args, 1, xhr.decodeBoolean)
 	// username, err3 := TryParseArg(args, 1, u.DecodeUSVString)
 	// password, err4 := TryParseArg(args, 1, u.DecodeUSVString)
-	instance, errInstance := xhr.GetInstance(info)
+	instance, errInstance := xhr.getInstance(info)
 	if args.noOfReadArguments > 2 {
 		if err = errors.Join(err0, err1, err2, errInstance); err != nil {
 			return

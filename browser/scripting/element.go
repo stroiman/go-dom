@@ -19,7 +19,7 @@ func (e ESElement) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	element, err := e.GetInstance(info)
+	element, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 		"textContent",
 		nil,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			e, err := wrapper.GetInstance(info)
+			e, err := wrapper.getInstance(info)
 			if err == nil {
 				e.SetTextContent(info.Args()[0].String())
 			}

@@ -76,8 +76,8 @@ func CreateURLPrototype(host *ScriptHost) *v8.FunctionTemplate {
 
 func (u URLV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
-	url, err1 := TryParseArg(args, 0, u.DecodeUSVString)
-	base, err2 := TryParseArg(args, 1, u.DecodeUSVString)
+	url, err1 := TryParseArg(args, 0, u.decodeUSVString)
+	base, err2 := TryParseArg(args, 1, u.decodeUSVString)
 	ctx := u.host.MustGetContext(info.Context())
 	if args.noOfReadArguments >= 2 {
 		err := errors.Join(err1, err2)
@@ -97,7 +97,7 @@ func (u URLV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, err
 
 func (u URLV8Wrapper) ToJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
+	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func (u URLV8Wrapper) ToJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 
 func (u URLV8Wrapper) Href(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
+	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (u URLV8Wrapper) SetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 
 func (u URLV8Wrapper) Origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
+	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func (u URLV8Wrapper) Origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 
 func (u URLV8Wrapper) Protocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
+	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (u URLV8Wrapper) SetPassword(info *v8.FunctionCallbackInfo) (*v8.Value, err
 
 func (u URLV8Wrapper) Host(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
+	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (u URLV8Wrapper) SetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 
 func (u URLV8Wrapper) Hostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
+	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func (u URLV8Wrapper) SetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, err
 
 func (u URLV8Wrapper) Port(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
+	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (u URLV8Wrapper) SetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 
 func (u URLV8Wrapper) Pathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
+	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func (u URLV8Wrapper) SetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, err
 
 func (u URLV8Wrapper) Search(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
+	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (u URLV8Wrapper) SearchParams(info *v8.FunctionCallbackInfo) (*v8.Value, er
 
 func (u URLV8Wrapper) Hash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
-	instance, err := u.GetInstance(info)
+	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
 	}

@@ -9,7 +9,7 @@ import (
 )
 
 type URLV8Wrapper struct {
-	HandleReffedObject[dom.URL]
+	handleReffedObject[dom.URL]
 }
 
 func NewURLV8Wrapper(host *ScriptHost) URLV8Wrapper {

@@ -9,7 +9,7 @@ import (
 )
 
 type FormDataV8Wrapper struct {
-	HandleReffedObject[*html.FormData]
+	handleReffedObject[*html.FormData]
 }
 
 func NewFormDataV8Wrapper(host *ScriptHost) FormDataV8Wrapper {
@@ -67,7 +67,7 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 		v8.SymbolIterator(iso),
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(info.Context())
-			data, err := wrapper.GetInstance(info)
+			data, err := wrapper.getInstance(info)
 			if err != nil {
 				return nil, err
 			}
@@ -93,7 +93,7 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 			iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 				args := newArgumentHelper(host, info)
-				instance, err0 := wrapper.GetInstance(info)
+				instance, err0 := wrapper.getInstance(info)
 				key, err1 := args.GetStringArg(0)
 				value, err2 := args.GetStringArg(1)
 				err := errors.Join(err0, err1, err2)
@@ -112,7 +112,7 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 			iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 				args := newArgumentHelper(host, info)
-				instance, err0 := wrapper.GetInstance(info)
+				instance, err0 := wrapper.getInstance(info)
 				if err0 != nil {
 					return nil, err0
 				}
@@ -130,7 +130,7 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(host.iso,
 			func(info *v8.FunctionCallbackInfo) (result *v8.Value, err error) {
 				args := newArgumentHelper(host, info)
-				instance, err0 := wrapper.GetInstance(info)
+				instance, err0 := wrapper.getInstance(info)
 				if err0 != nil {
 					return nil, err0
 				}
@@ -142,7 +142,7 @@ func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
 		iso,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(info.Context())
-			instance, err := wrapper.GetInstance(info)
+			instance, err := wrapper.getInstance(info)
 			if err != nil {
 				return nil, err
 			}

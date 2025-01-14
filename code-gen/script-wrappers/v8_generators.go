@@ -57,7 +57,7 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 	constructorName := fmt.Sprintf("New%s", typeName)
 	innerType := g.Raw(jen.Qual(html, data.Name()))
 	wrapperStruct := g.NewStruct(typeName)
-	wrapperStruct.Embed(g.Raw(jen.Id("NodeV8WrapperBase").Index(innerType)))
+	wrapperStruct.Embed(g.Raw(jen.Id("nodeV8WrapperBase").Index(innerType)))
 
 	wrapperConstructor := g.FunctionDefinition{
 		Name:     constructorName,
@@ -65,7 +65,7 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 		RtnTypes: g.List(g.NewType(typeName).Pointer()),
 		Body: g.Return(g.Raw(
 			jen.Op("&").Id(typeName).Values(
-				jen.Id("NewNodeV8WrapperBase").Index(innerType.Generate()).Call(jen.Id("host")),
+				jen.Id("newNodeV8WrapperBase").Index(innerType.Generate()).Call(jen.Id("host")),
 			),
 		)),
 	}
@@ -474,12 +474,12 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments)
 
 		var convertNames []string
 		if arg.Type != "" {
-			convertNames = []string{fmt.Sprintf("Decode%s", idlNameToGoName(arg.Type))}
+			convertNames = []string{fmt.Sprintf("decode%s", idlNameToGoName(arg.Type))}
 		} else {
 			types := arg.IdlType.IdlType.IType.Types
 			convertNames = make([]string, len(types))
 			for i, t := range types {
-				convertNames[i] = fmt.Sprintf("Decode%s", t.IType.TypeName)
+				convertNames[i] = fmt.Sprintf("decode%s", t.IType.TypeName)
 			}
 		}
 
@@ -508,6 +508,6 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments)
 func GetInstanceAndError(id g.Generator, errId g.Generator, data ESConstructorData) g.Generator {
 	return g.AssignMany(
 		g.List(id, errId),
-		g.Raw(jen.Id(data.Receiver).Dot("GetInstance").Call(jen.Id("info"))),
+		g.Raw(jen.Id(data.Receiver).Dot("getInstance").Call(jen.Id("info"))),
 	)
 }

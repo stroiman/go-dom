@@ -79,9 +79,9 @@ func (xhr ESXmlHttpRequest) Constructor(info *v8.FunctionCallbackInfo) (*v8.Valu
 
 func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
-	instance, err0 := xhr.GetInstance(info)
-	name, err1 := TryParseArg(args, 0, xhr.DecodeByteString)
-	value, err2 := TryParseArg(args, 1, xhr.DecodeByteString)
+	instance, err0 := xhr.getInstance(info)
+	name, err1 := TryParseArg(args, 0, xhr.decodeByteString)
+	value, err2 := TryParseArg(args, 1, xhr.decodeByteString)
 	if args.noOfReadArguments >= 2 {
 		err := errors.Join(err0, err1, err2)
 		if err != nil {
@@ -95,8 +95,8 @@ func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8
 
 func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
-	instance, err0 := xhr.GetInstance(info)
-	body, err1 := TryParseArg(args, 0, xhr.DecodeDocument, xhr.DecodeXMLHttpRequestBodyInit)
+	instance, err0 := xhr.getInstance(info)
+	body, err1 := TryParseArg(args, 0, xhr.decodeDocument, xhr.decodeXMLHttpRequestBodyInit)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -113,7 +113,7 @@ func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 }
 
 func (xhr ESXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	instance, err := xhr.GetInstance(info)
+	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -124,8 +124,8 @@ func (xhr ESXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, err
 func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	args := newArgumentHelper(xhr.host, info)
-	instance, err0 := xhr.GetInstance(info)
-	name, err1 := TryParseArg(args, 0, xhr.DecodeByteString)
+	instance, err0 := xhr.getInstance(info)
+	name, err1 := TryParseArg(args, 0, xhr.decodeByteString)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -139,7 +139,7 @@ func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v
 
 func (xhr ESXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
-	instance, err := xhr.GetInstance(info)
+	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -153,8 +153,8 @@ func (xhr ESXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo)
 
 func (xhr ESXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
-	instance, err0 := xhr.GetInstance(info)
-	mime, err1 := TryParseArg(args, 0, xhr.DecodeDOMString)
+	instance, err0 := xhr.getInstance(info)
+	mime, err1 := TryParseArg(args, 0, xhr.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -172,7 +172,7 @@ func (xhr ESXmlHttpRequest) ReadyState(info *v8.FunctionCallbackInfo) (*v8.Value
 
 func (xhr ESXmlHttpRequest) Timeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
-	instance, err := xhr.GetInstance(info)
+	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -182,8 +182,8 @@ func (xhr ESXmlHttpRequest) Timeout(info *v8.FunctionCallbackInfo) (*v8.Value, e
 
 func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
-	instance, err0 := xhr.GetInstance(info)
-	val, err1 := TryParseArg(args, 0, xhr.DecodeUnsignedLong)
+	instance, err0 := xhr.getInstance(info)
+	val, err1 := TryParseArg(args, 0, xhr.decodeUnsignedLong)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -197,7 +197,7 @@ func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value
 
 func (xhr ESXmlHttpRequest) WithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
-	instance, err := xhr.GetInstance(info)
+	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -207,8 +207,8 @@ func (xhr ESXmlHttpRequest) WithCredentials(info *v8.FunctionCallbackInfo) (*v8.
 
 func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
-	instance, err0 := xhr.GetInstance(info)
-	val, err1 := TryParseArg(args, 0, xhr.DecodeBoolean)
+	instance, err0 := xhr.getInstance(info)
+	val, err1 := TryParseArg(args, 0, xhr.decodeBoolean)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -222,7 +222,7 @@ func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*
 
 func (xhr ESXmlHttpRequest) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
-	instance, err := xhr.GetInstance(info)
+	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func (xhr ESXmlHttpRequest) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Valu
 
 func (xhr ESXmlHttpRequest) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
-	instance, err := xhr.GetInstance(info)
+	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (xhr ESXmlHttpRequest) Status(info *v8.FunctionCallbackInfo) (*v8.Value, er
 
 func (xhr ESXmlHttpRequest) StatusText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
-	instance, err := xhr.GetInstance(info)
+	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -260,7 +260,7 @@ func (xhr ESXmlHttpRequest) SetResponseType(info *v8.FunctionCallbackInfo) (*v8.
 
 func (xhr ESXmlHttpRequest) Response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
-	instance, err := xhr.GetInstance(info)
+	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +270,7 @@ func (xhr ESXmlHttpRequest) Response(info *v8.FunctionCallbackInfo) (*v8.Value, 
 
 func (xhr ESXmlHttpRequest) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
-	instance, err := xhr.GetInstance(info)
+	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
 	}

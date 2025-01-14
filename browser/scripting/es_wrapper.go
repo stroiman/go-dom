@@ -10,19 +10,19 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-// NodeV8WrapperBase serves as a helper for building v8 wrapping code around go objects.
+// nodeV8WrapperBase serves as a helper for building v8 wrapping code around go objects.
 // Generated code assumes that a wrapper type is used with specific helper
 // methods implemented.
-type NodeV8WrapperBase[T Entity] struct {
-	Converters
+type nodeV8WrapperBase[T Entity] struct {
+	converters
 	host *ScriptHost
 }
 
-func NewNodeV8WrapperBase[T Entity](host *ScriptHost) NodeV8WrapperBase[T] {
-	return NodeV8WrapperBase[T]{Converters{}, host}
+func newNodeV8WrapperBase[T Entity](host *ScriptHost) nodeV8WrapperBase[T] {
+	return nodeV8WrapperBase[T]{converters{}, host}
 }
 
-func (w NodeV8WrapperBase[T]) GetInstance(info *v8.FunctionCallbackInfo) (result T, err error) {
+func (w nodeV8WrapperBase[T]) getInstance(info *v8.FunctionCallbackInfo) (result T, err error) {
 	if ctx, ok := w.host.GetContext(info.Context()); ok {
 		if instance, ok := ctx.GetCachedNode(info.This()); ok {
 			if typedInstance, ok := instance.(T); ok {
@@ -36,29 +36,29 @@ func (w NodeV8WrapperBase[T]) GetInstance(info *v8.FunctionCallbackInfo) (result
 	return
 }
 
-type Converters struct{}
+type converters struct{}
 
-func (w Converters) DecodeUSVString(ctx *ScriptContext, val *v8.Value) (string, error) {
+func (w converters) decodeUSVString(ctx *ScriptContext, val *v8.Value) (string, error) {
 	return val.String(), nil
 }
 
-func (w Converters) DecodeByteString(ctx *ScriptContext, val *v8.Value) (string, error) {
+func (w converters) decodeByteString(ctx *ScriptContext, val *v8.Value) (string, error) {
 	return val.String(), nil
 }
 
-func (w Converters) DecodeDOMString(ctx *ScriptContext, val *v8.Value) (string, error) {
+func (w converters) decodeDOMString(ctx *ScriptContext, val *v8.Value) (string, error) {
 	return val.String(), nil
 }
 
-func (w Converters) DecodeBoolean(ctx *ScriptContext, val *v8.Value) (bool, error) {
+func (w converters) decodeBoolean(ctx *ScriptContext, val *v8.Value) (bool, error) {
 	return val.Boolean(), nil
 }
 
-func (w Converters) DecodeUnsignedLong(ctx *ScriptContext, val *v8.Value) (int, error) {
+func (w converters) decodeUnsignedLong(ctx *ScriptContext, val *v8.Value) (int, error) {
 	return int(val.Int32()), nil
 }
 
-func (w Converters) DecodeNode(ctx *ScriptContext, val *v8.Value) (dom.Node, error) {
+func (w converters) decodeNode(ctx *ScriptContext, val *v8.Value) (dom.Node, error) {
 	if val.IsObject() {
 		o := val.Object()
 		cached, ok_1 := ctx.GetCachedNode(o)
@@ -69,7 +69,7 @@ func (w Converters) DecodeNode(ctx *ScriptContext, val *v8.Value) (dom.Node, err
 	return nil, v8.NewTypeError(ctx.host.iso, "Must be a node")
 }
 
-func (w Converters) GetArgDOMString(args []*v8.Value, idx int) (result string, err error) {
+func (w converters) getArgDOMString(args []*v8.Value, idx int) (result string, err error) {
 	if idx >= len(args) {
 		err = errors.New("Index out of range")
 		return
@@ -78,22 +78,15 @@ func (w Converters) GetArgDOMString(args []*v8.Value, idx int) (result string, e
 	return
 }
 
-func (w Converters) GetArgUnsignedLong(args []*v8.Value, idx int) (result int, err error) {
-	if idx >= len(args) {
-		err = errors.New("Index out of range")
-		return
-	}
-	result = int(args[idx].Int32())
-	return
+func (w converters) GetArgByteString(args []*v8.Value, idx int) (result string, err error) {
+	return w.getArgDOMString(args, idx)
 }
 
-func (w Converters) GetArgByteString(args []*v8.Value, idx int) (result string, err error) {
-	return w.GetArgDOMString(args, idx)
+func (w converters) GetArgUSVString(args []*v8.Value, idx int) (result string, err error) {
+	return w.getArgDOMString(args, idx)
 }
-func (w Converters) GetArgUSVString(args []*v8.Value, idx int) (result string, err error) {
-	return w.GetArgDOMString(args, idx)
-}
-func (w Converters) GetArgBoolean(args []*v8.Value, idx int) (result bool, err error) {
+
+func (w converters) GetArgBoolean(args []*v8.Value, idx int) (result bool, err error) {
 	if idx >= len(args) {
 		err = errors.New("Index out of range")
 		return
@@ -101,67 +94,68 @@ func (w Converters) GetArgBoolean(args []*v8.Value, idx int) (result bool, err e
 	result = args[idx].Boolean()
 	return
 }
-func (w Converters) ToNullableByteString(ctx *ScriptContext, str *string) (*v8.Value, error) {
+
+func (w converters) ToNullableByteString(ctx *ScriptContext, str *string) (*v8.Value, error) {
 	if str == nil {
 		return v8.Null(ctx.host.iso), nil
 	}
 	return v8.NewValue(ctx.host.iso, *str)
 }
 
-func (w Converters) ToByteString(ctx *ScriptContext, str string) (*v8.Value, error) {
+func (w converters) ToByteString(ctx *ScriptContext, str string) (*v8.Value, error) {
 	if str == "" {
 		return v8.Null(ctx.host.iso), nil
 	}
 	return v8.NewValue(ctx.host.iso, str)
 }
 
-func (w Converters) ToDOMString(ctx *ScriptContext, str string) (*v8.Value, error) {
+func (w converters) ToDOMString(ctx *ScriptContext, str string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, str)
 }
 
-func (w Converters) ToNullableDOMString(ctx *ScriptContext, str *string) (*v8.Value, error) {
+func (w converters) ToNullableDOMString(ctx *ScriptContext, str *string) (*v8.Value, error) {
 	if str == nil {
 		return v8.Null(ctx.host.iso), nil
 	}
 	return v8.NewValue(ctx.host.iso, str)
 }
 
-func (w Converters) ToUnsignedLong(ctx *ScriptContext, val int) (*v8.Value, error) {
+func (w converters) ToUnsignedLong(ctx *ScriptContext, val int) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
 }
 
-func (w Converters) ToAny(ctx *ScriptContext, val string) (*v8.Value, error) {
+func (w converters) ToAny(ctx *ScriptContext, val string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
 }
 
-func (w Converters) ToUSVString(ctx *ScriptContext, str string) (*v8.Value, error) {
+func (w converters) ToUSVString(ctx *ScriptContext, str string) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, str)
 }
 
-func (w Converters) ToUnsignedShort(ctx *ScriptContext, val int) (*v8.Value, error) {
+func (w converters) ToUnsignedShort(ctx *ScriptContext, val int) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, uint32(val))
 }
 
-func (w Converters) ToBoolean(ctx *ScriptContext, val bool) (*v8.Value, error) {
+func (w converters) ToBoolean(ctx *ScriptContext, val bool) (*v8.Value, error) {
 	return v8.NewValue(ctx.host.iso, val)
 }
 
-func (w Converters) ToNodeList(ctx *ScriptContext, val NodeList) (*v8.Value, error) {
+func (w converters) ToNodeList(ctx *ScriptContext, val NodeList) (*v8.Value, error) {
 	return ctx.GetInstanceForNodeByName("NodeList", val)
 }
 
-type HandleReffedObject[T any] struct {
+type handleReffedObject[T any] struct {
 	host *ScriptHost
-	Converters
+	converters
 }
 
-func NewHandleReffedObject[T any](host *ScriptHost) HandleReffedObject[T] {
-	return HandleReffedObject[T]{
+func NewHandleReffedObject[T any](host *ScriptHost) handleReffedObject[T] {
+	return handleReffedObject[T]{
 		host: host,
 	}
 }
 
-func (o HandleReffedObject[T]) Store(value T, ctx *ScriptContext, this *v8.Object) {
+func (o handleReffedObject[T]) Store(value T, ctx *ScriptContext, this *v8.Object) {
 	handle := cgo.NewHandle(value)
 	ctx.AddDisposer(HandleDisposable(handle))
 
@@ -175,6 +169,6 @@ func getWrappedInstance[T any](object *v8.Object) T {
 	return handle.Value().(T)
 }
 
-func (o HandleReffedObject[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, error) {
+func (o handleReffedObject[T]) getInstance(info *v8.FunctionCallbackInfo) (T, error) {
 	return getWrappedInstance[T](info.This()), nil
 }

@@ -176,7 +176,7 @@ func (a ESOperationArgument) OptionalInGo() bool {
 
 func (a ESOperationArgument) DefaultValueInGo() (string, bool) {
 	hasDefaultInGo := a.Optional && a.ArgumentSpec != nil && a.ArgumentSpec.hasDefault
-	return fmt.Sprintf("Default%s", a.Type), hasDefaultInGo
+	return fmt.Sprintf("default%s", a.Type), hasDefaultInGo
 }
 
 type ESOperation struct {

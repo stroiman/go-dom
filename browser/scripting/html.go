@@ -7,11 +7,11 @@ import (
 )
 
 type ESElementContainerWrapper[T ElementContainer] struct {
-	NodeV8WrapperBase[T]
+	nodeV8WrapperBase[T]
 }
 
 func NewESContainerWrapper[T ElementContainer](host *ScriptHost) ESElementContainerWrapper[T] {
-	return ESElementContainerWrapper[T]{NewNodeV8WrapperBase[T](host)}
+	return ESElementContainerWrapper[T]{newNodeV8WrapperBase[T](host)}
 }
 
 func (e ESElementContainerWrapper[T]) Install(ft *v8.FunctionTemplate) {
