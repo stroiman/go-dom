@@ -1,31 +1,32 @@
 # go-dom - Headless browser for Go
 
+Test your Go web applications with 
+
 > [!NOTE] 
 >
-> This is still in development, and has not reached a level of usability.
+> This is still in development, and has not yet reached a level of usability.
 >
-> Given the progress I've had in the short time I spent working on this, I
-> believe this _will_ reach a level of usability. But it depends on how much
-> time I will have for this.
->
-> You can help by sponsoring the project. If I could reach a level where I could
-> work full-time on this, the Go community could have the most awesome testing
-> tool at their disposal within a few months.
+> Expected alpha release for a version supporting forms in the spring 2025.
 
-[Software license](./LICENSE.txt) (note: I currently distribute the source under
-the MIT license, but as this will most likely depend on v8go, I need to verify
-that the license is compatible).
+> [!WARNING]
+>
+> The API is not yet stable. use at your own risk.
+
+## Looking for sponsors
+
+I believe this would be an extremely useful tool, but it is also a bit of an
+undertaking.
+
+This has been the result of too much spare time; but 
 
 ## Code structure
 
-This is still in early development, and the structure may still change. But I
-believe I am approaching a sensible code structure.
+This is still in early development, and the structure may still change.
 
-The main library is in a `browser` subfolder. This primarily to separate it from
-the code generator which is used to automatically generate parts of the code
-based on IDL specs. The browser and code generator bases do not have any
-inter-dependencies, and they have different sets of unrelated external
-dependencies.
+The main library is in a subfolder, `browser`, to separate it from the code
+generator that generates pieces of code from IDL specs. The browser and code
+generator bases do not have any inter-dependencies, and they have different sets
+of unrelated external dependencies.
 
 ```sh
 browser/
@@ -38,10 +39,14 @@ code-gen/
   webref/ # Git submodule -> https://github.com/w3c/webref
 ```
 
-The submodules under `browser/` reflect the different standards, and the naming
+The subfolders under `browser/` reflects the [web
+APIs](https://developer.mozilla.org/en-US/docs/Web/API), and the naming
 reflects the corresponding idl files. E.g., `browser/dom/` will have types
 corresponding to the types specified in `code-gen/webref/ed/idl/dom.idl`.
-`browser/html/` corresponds to `html.idl`, etc.
+`browser/html/` corresponds to `html.idl`, etc.[^1]
+
+The `webref/` folder is not necessary for normal use, only when working with the
+code-generator.
 
 ### Modularisation
 
@@ -51,6 +56,10 @@ location services, you can add a module implementing location services.
 
 This helps keep the size of the dependencies down for client projects; keeping
 build times down for the TDD loop.
+
+It also provides the option of alternate implementations. E.g., for location
+services, the simple implementation can provide a single function to set the
+current location / accuracy. The advanced implementation can replay a GPX track.
 
 ### Building the code generator.
 
@@ -67,7 +76,7 @@ This build a set of files in the `curated/` subfolder.
 
 ## Project background
 
-While the SPA[^1] dominates the web today, some applications still render
+While the SPA[^2] dominates the web today, some applications still render
 server-side HTML, and HTMX is gaining in popularity. Go has some popularity as a
 back-end language for HTMX.
 
@@ -101,12 +110,12 @@ Some advantages of a native headless browser are:
   [`http.Handler`](https://pkg.go.dev/net/http#Handler); so no need to start an
   HTTP server.
 - You can run parallel tests in isolation as each can create their own _instance_
-  of the HTTP handler.[^2]
+  of the HTTP handler.[^3]
 
 Some disadvantages compared to e.g. Selenium.
 
 - You cannot verify how it look; e.g. you cannot get a screenshot of a failing test
-  - This means you cannot create snap-shot tests detect undesired UI changes.[^3]
+  - This means you cannot create snap-shot tests detect undesired UI changes.[^4]
 - You cannot verify that everything works in _all supported browsers_.
 
 This isn't intended as a replacement for the cases where an end-2-end test is
@@ -122,7 +131,10 @@ The test file [htmx_test.go](./browser/scripting/htmx_test.go) verifies that
 content is updated. The application being tested is [found
 here](./browser/internal/test/README.md).
 
-Client-side script is executed using the v8 engine.[^4]
+Client-side script is executed using the v8 engine.[^5]
+
+Experimental work is done to also support [goja](https://github.com/dop251/goja)
+for client-side script; but this version is not fully compatible yet.
 
 ### Memory Leaks
 
@@ -271,16 +283,19 @@ But just like the accessibility tree, this could be implemented in a new library
 depending only on the interface from here.
 
 
-[^1]: Single-Page app
-[^2]: This approach allows you to mock databases, and other external services;
+[^1]: This code structure may not be completely possible due to circular
+dependencies between web APIs. E.g., `HTMLFormElement` and `FormData` have
+circular dependencies.
+[^2]: Single-Page app
+[^3]: This approach allows you to mock databases, and other external services;
 A few integration tests that use a real database, message bus, or other external
 services, is a good idea. Here, isolation of parallel tests may be
 non-trivial; depending on the type of application.
-[^3]: I generally dislike snapshot tests; as they don't _describe_ expected
+[^4]: I generally dislike snapshot tests; as they don't _describe_ expected
 behaviour, only that the outcome mustn't change. There are a few cases where
 where snapshot tests are the right choice, but they should be avoided for a TDD
 process.
-[^4]: The engine is based on the v8go project by originally by @rogchap, later
+[^5]: The engine is based on the v8go project by originally by @rogchap, later
 kept up-to-date by @tommie; who did a remarkale job of automatically keeping the
 v8 dependencies up-to-date. But many necessary features of V8 are not exported;
 which I am adding in my own fork.
