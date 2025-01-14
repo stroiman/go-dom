@@ -53,8 +53,9 @@ func CreateInitFunction(data ESConstructorData) g.Generator {
 }
 
 func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
-	typeName := fmt.Sprintf("%sV8Wrapper", data.Name())
-	constructorName := fmt.Sprintf("New%s", typeName)
+	typeNameBase := fmt.Sprintf("%sV8Wrapper", data.Name())
+	typeName := lowerCaseFirstLetter(typeNameBase)
+	constructorName := fmt.Sprintf("new%s", typeNameBase)
 	innerType := g.Raw(jen.Qual(html, data.Name()))
 	wrapperStruct := g.NewStruct(typeName)
 	wrapperStruct.Embed(g.Raw(jen.Id("nodeV8WrapperBase").Index(innerType)))
@@ -202,7 +203,7 @@ func CreateV8ConstructorBody(data ESConstructorData) g.Generator {
 	scriptHost := g.NewValue("host")
 	constructor := v8FunctionTemplate{g.NewValue("constructor")}
 
-	createWrapperFunction := g.NewValue(fmt.Sprintf("New%s", data.WrapperTypeName))
+	createWrapperFunction := g.NewValue(fmt.Sprintf("new%s", data.WrapperTypeBaseName))
 
 	statements := g.StatementList(
 		builder.v8Iso.Assign(scriptHost.Field("iso")),

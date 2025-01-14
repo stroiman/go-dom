@@ -17,6 +17,6 @@ func installGlobals(
 	windowTemplate.Set("location", location.InstanceTemplate())
 }
 
-func (w *WindowV8Wrapper) Window(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w *windowV8Wrapper) Window(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return info.This().Value, nil
 }

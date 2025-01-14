@@ -8,12 +8,12 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type WindowV8Wrapper struct {
+type windowV8Wrapper struct {
 	nodeV8WrapperBase[html.Window]
 }
 
-func NewWindowV8Wrapper(host *ScriptHost) *WindowV8Wrapper {
-	return &WindowV8Wrapper{newNodeV8WrapperBase[html.Window](host)}
+func newWindowV8Wrapper(host *ScriptHost) *windowV8Wrapper {
+	return &windowV8Wrapper{newNodeV8WrapperBase[html.Window](host)}
 }
 
 func init() {
@@ -22,7 +22,7 @@ func init() {
 
 func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	wrapper := NewWindowV8Wrapper(host)
+	wrapper := newWindowV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()
@@ -136,55 +136,55 @@ func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	return constructor
 }
 
-func (w WindowV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, v8.NewTypeError(w.host.iso, "Illegal Constructor")
 }
 
-func (w WindowV8Wrapper) Close(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Close(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.close")
 }
 
-func (w WindowV8Wrapper) Stop(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Stop(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.stop")
 }
 
-func (w WindowV8Wrapper) Focus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Focus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.focus")
 }
 
-func (w WindowV8Wrapper) Blur(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Blur(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.blur")
 }
 
-func (w WindowV8Wrapper) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.open")
 }
 
-func (w WindowV8Wrapper) Alert(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Alert(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.alert")
 }
 
-func (w WindowV8Wrapper) Confirm(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Confirm(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.confirm")
 }
 
-func (w WindowV8Wrapper) Prompt(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Prompt(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.prompt")
 }
 
-func (w WindowV8Wrapper) Print(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Print(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.print")
 }
 
-func (w WindowV8Wrapper) PostMessage(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) PostMessage(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.postMessage")
 }
 
-func (w WindowV8Wrapper) Self(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Self(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Self")
 }
 
-func (w WindowV8Wrapper) Document(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Document(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.host.MustGetContext(info.Context())
 	instance, err := w.getInstance(info)
 	if err != nil {
@@ -194,94 +194,94 @@ func (w WindowV8Wrapper) Document(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	return ctx.GetInstanceForNode(result)
 }
 
-func (w WindowV8Wrapper) Name(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Name(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Name")
 }
 
-func (w WindowV8Wrapper) SetName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) SetName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.SetName")
 }
 
-func (w WindowV8Wrapper) History(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) History(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.History")
 }
 
-func (w WindowV8Wrapper) Navigation(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Navigation(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Navigation")
 }
 
-func (w WindowV8Wrapper) CustomElements(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) CustomElements(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.CustomElements")
 }
 
-func (w WindowV8Wrapper) Locationbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Locationbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Locationbar")
 }
 
-func (w WindowV8Wrapper) Menubar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Menubar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Menubar")
 }
 
-func (w WindowV8Wrapper) Personalbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Personalbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Personalbar")
 }
 
-func (w WindowV8Wrapper) Scrollbars(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Scrollbars(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Scrollbars")
 }
 
-func (w WindowV8Wrapper) Statusbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Statusbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Statusbar")
 }
 
-func (w WindowV8Wrapper) Toolbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Toolbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Toolbar")
 }
 
-func (w WindowV8Wrapper) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Status")
 }
 
-func (w WindowV8Wrapper) SetStatus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) SetStatus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.SetStatus")
 }
 
-func (w WindowV8Wrapper) Closed(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Closed(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Closed")
 }
 
-func (w WindowV8Wrapper) Frames(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Frames(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Frames")
 }
 
-func (w WindowV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Length")
 }
 
-func (w WindowV8Wrapper) Top(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Top(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Top")
 }
 
-func (w WindowV8Wrapper) Opener(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Opener(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Opener")
 }
 
-func (w WindowV8Wrapper) SetOpener(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) SetOpener(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.SetOpener")
 }
 
-func (w WindowV8Wrapper) FrameElement(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) FrameElement(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.FrameElement")
 }
 
-func (w WindowV8Wrapper) Navigator(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) Navigator(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Navigator")
 }
 
-func (w WindowV8Wrapper) ClientInformation(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) ClientInformation(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.ClientInformation")
 }
 
-func (w WindowV8Wrapper) OriginAgentCluster(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) OriginAgentCluster(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.OriginAgentCluster")
 }

@@ -188,7 +188,6 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	xhr := xhrModule.Type("XMLHttpRequest")
 	xhr.SkipPrototypeRegistration = true
 	xhr.InnerTypeName = "XmlHttpRequest"
-	xhr.WrapperTypeName = "ESXmlHttpRequest"
 	xhr.Receiver = "xhr"
 
 	xhr.MarkMembersAsNotImplemented(
@@ -203,6 +202,7 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 
 	urlSpecs := specs.Module("url")
 	url := urlSpecs.Type("URL")
+	url.InnerTypeName = "Url"
 	url.Receiver = "u"
 	url.MarkMembersAsNotImplemented(
 		"SetHref",
@@ -222,6 +222,7 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	domSpecs.SetMultipleFiles(true)
 
 	domTokenList := domSpecs.Type("DOMTokenList")
+	domTokenList.InnerTypeName = "DomTokenList"
 	domTokenList.Receiver = "u"
 	domTokenList.RunCustomCode = true
 	domTokenList.Method("item").SetNoError()
@@ -259,12 +260,14 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	htmlSpecs.SetMultipleFiles(true)
 
 	htmlTemplateElement := htmlSpecs.Type("HTMLTemplateElement")
+	htmlTemplateElement.InnerTypeName = "HtmlTemplateElement"
 	htmlTemplateElement.Method("shadowRootMode").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootDelegatesFocus").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootClonable").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootSerializable").SetNotImplemented()
 
 	window := htmlSpecs.Type("Window")
+	window.InnerTypeName = "Window"
 	window.CreateWrapper()
 
 	window.Method("window").SetCustomImplementation()

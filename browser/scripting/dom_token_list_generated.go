@@ -8,12 +8,12 @@ import (
 )
 
 func init() {
-	RegisterJSClass("DOMTokenList", "", CreateDOMTokenListPrototype)
+	RegisterJSClass("DOMTokenList", "", CreateDomTokenListPrototype)
 }
 
-func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func CreateDomTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	wrapper := NewDOMTokenListV8Wrapper(host)
+	wrapper := newDomTokenListV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()
@@ -41,11 +41,11 @@ func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	return constructor
 }
 
-func (u DOMTokenListV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u domTokenListV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, v8.NewTypeError(u.host.iso, "Illegal Constructor")
 }
 
-func (u DOMTokenListV8Wrapper) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u domTokenListV8Wrapper) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
@@ -61,7 +61,7 @@ func (u DOMTokenListV8Wrapper) Item(info *v8.FunctionCallbackInfo) (*v8.Value, e
 	return nil, errors.New("Missing arguments")
 }
 
-func (u DOMTokenListV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u domTokenListV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
@@ -77,7 +77,7 @@ func (u DOMTokenListV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Valu
 	return nil, errors.New("Missing arguments")
 }
 
-func (u DOMTokenListV8Wrapper) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u domTokenListV8Wrapper) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
 	tokens, err1 := TryParseArg(args, 0, u.decodeDOMString)
@@ -92,7 +92,7 @@ func (u DOMTokenListV8Wrapper) Add(info *v8.FunctionCallbackInfo) (*v8.Value, er
 	return nil, errors.New("Missing arguments")
 }
 
-func (u DOMTokenListV8Wrapper) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u domTokenListV8Wrapper) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
 	tokens, err1 := TryParseArg(args, 0, u.decodeDOMString)
@@ -107,7 +107,7 @@ func (u DOMTokenListV8Wrapper) Remove(info *v8.FunctionCallbackInfo) (*v8.Value,
 	return nil, errors.New("Missing arguments")
 }
 
-func (u DOMTokenListV8Wrapper) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u domTokenListV8Wrapper) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
@@ -124,11 +124,11 @@ func (u DOMTokenListV8Wrapper) Replace(info *v8.FunctionCallbackInfo) (*v8.Value
 	return nil, errors.New("Missing arguments")
 }
 
-func (u DOMTokenListV8Wrapper) Supports(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u domTokenListV8Wrapper) Supports(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: DOMTokenList.supports")
 }
 
-func (u DOMTokenListV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u domTokenListV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.getInstance(info)
 	if err != nil {
@@ -138,7 +138,7 @@ func (u DOMTokenListV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value,
 	return u.toUnsignedLong(ctx, result)
 }
 
-func (u DOMTokenListV8Wrapper) Value(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u domTokenListV8Wrapper) Value(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.getInstance(info)
 	if err != nil {
@@ -148,7 +148,7 @@ func (u DOMTokenListV8Wrapper) Value(info *v8.FunctionCallbackInfo) (*v8.Value, 
 	return u.toDOMString(ctx, result)
 }
 
-func (u DOMTokenListV8Wrapper) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u domTokenListV8Wrapper) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
 	val, err1 := TryParseArg(args, 0, u.decodeDOMString)

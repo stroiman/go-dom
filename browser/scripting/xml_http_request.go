@@ -9,11 +9,11 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type ESXmlHttpRequest struct {
+type xmlHttpRequestV8Wrapper struct {
 	nodeV8WrapperBase[html.XmlHttpRequest]
 }
 
-func (xhr ESXmlHttpRequest) decodeDocument(
+func (xhr xmlHttpRequestV8Wrapper) decodeDocument(
 	ctx *ScriptContext,
 	val *v8.Value,
 ) (*html.XHRRequestBody, error) {
@@ -23,7 +23,7 @@ func (xhr ESXmlHttpRequest) decodeDocument(
 	return nil, errors.New("Not supported yet")
 }
 
-func (xhr ESXmlHttpRequest) decodeXMLHttpRequestBodyInit(
+func (xhr xmlHttpRequestV8Wrapper) decodeXMLHttpRequestBodyInit(
 	ctx *ScriptContext,
 	val *v8.Value,
 ) (*html.XHRRequestBody, error) {
@@ -41,11 +41,14 @@ func (xhr ESXmlHttpRequest) decodeXMLHttpRequestBodyInit(
 	// return nil, errors.New("Not a node")
 }
 
-func NewESXmlHttpRequest(host *ScriptHost) ESXmlHttpRequest {
-	return ESXmlHttpRequest{newNodeV8WrapperBase[html.XmlHttpRequest](host)}
+func newXmlHttpRequestV8Wrapper(host *ScriptHost) xmlHttpRequestV8Wrapper {
+	return xmlHttpRequestV8Wrapper{newNodeV8WrapperBase[html.XmlHttpRequest](host)}
 }
 
-func (xhr ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) CreateInstance(
+	ctx *ScriptContext,
+	this *v8.Object,
+) (*v8.Value, error) {
 	result := ctx.Window().NewXmlHttpRequest()
 	result.SetCatchAllHandler(NewEventHandlerFunc(func(event Event) error {
 		prop := "on" + event.Type()
@@ -63,7 +66,9 @@ func (xhr ESXmlHttpRequest) CreateInstance(ctx *ScriptContext, this *v8.Object) 
 	return nil, nil
 }
 
-func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (result *v8.Value, err error) {
+func (xhr xmlHttpRequestV8Wrapper) Open(
+	info *v8.FunctionCallbackInfo,
+) (result *v8.Value, err error) {
 	args := newArgumentHelper(xhr.host, info)
 	method, err0 := TryParseArg(args, 0, xhr.decodeUSVString)
 	url, err1 := TryParseArg(args, 1, xhr.decodeUSVString)
@@ -87,6 +92,6 @@ func (xhr ESXmlHttpRequest) Open(info *v8.FunctionCallbackInfo) (result *v8.Valu
 	return
 }
 
-func (xhr ESXmlHttpRequest) Upload(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) Upload(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return info.This().Value, nil
 }

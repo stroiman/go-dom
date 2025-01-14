@@ -9,7 +9,7 @@ import (
 
 func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	wrapper := NewESXmlHttpRequest(host)
+	wrapper := newXmlHttpRequestV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()
@@ -72,12 +72,12 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	return constructor
 }
 
-func (xhr ESXmlHttpRequest) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	return xhr.CreateInstance(ctx, info.This())
 }
 
-func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	name, err1 := TryParseArg(args, 0, xhr.decodeByteString)
@@ -93,7 +93,7 @@ func (xhr ESXmlHttpRequest) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	body, err1 := TryParseArg(args, 0, xhr.decodeDocument, xhr.decodeXMLHttpRequestBodyInit)
@@ -112,7 +112,7 @@ func (xhr ESXmlHttpRequest) Send(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	return nil, callErr
 }
 
-func (xhr ESXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -121,7 +121,7 @@ func (xhr ESXmlHttpRequest) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	return nil, callErr
 }
 
-func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
@@ -137,7 +137,7 @@ func (xhr ESXmlHttpRequest) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr ESXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) GetAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
@@ -151,7 +151,7 @@ func (xhr ESXmlHttpRequest) GetAllResponseHeaders(info *v8.FunctionCallbackInfo)
 	}
 }
 
-func (xhr ESXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	mime, err1 := TryParseArg(args, 0, xhr.decodeDOMString)
@@ -166,11 +166,11 @@ func (xhr ESXmlHttpRequest) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr ESXmlHttpRequest) ReadyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) ReadyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: XMLHttpRequest.ReadyState")
 }
 
-func (xhr ESXmlHttpRequest) Timeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) Timeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
@@ -180,7 +180,7 @@ func (xhr ESXmlHttpRequest) Timeout(info *v8.FunctionCallbackInfo) (*v8.Value, e
 	return xhr.toUnsignedLong(ctx, result)
 }
 
-func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	val, err1 := TryParseArg(args, 0, xhr.decodeUnsignedLong)
@@ -195,7 +195,7 @@ func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr ESXmlHttpRequest) WithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) WithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
@@ -205,7 +205,7 @@ func (xhr ESXmlHttpRequest) WithCredentials(info *v8.FunctionCallbackInfo) (*v8.
 	return xhr.toBoolean(ctx, result)
 }
 
-func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) SetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	val, err1 := TryParseArg(args, 0, xhr.decodeBoolean)
@@ -220,7 +220,7 @@ func (xhr ESXmlHttpRequest) SetWithCredentials(info *v8.FunctionCallbackInfo) (*
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr ESXmlHttpRequest) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
@@ -230,7 +230,7 @@ func (xhr ESXmlHttpRequest) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Valu
 	return xhr.toUSVString(ctx, result)
 }
 
-func (xhr ESXmlHttpRequest) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
@@ -240,7 +240,7 @@ func (xhr ESXmlHttpRequest) Status(info *v8.FunctionCallbackInfo) (*v8.Value, er
 	return xhr.toUnsignedShort(ctx, result)
 }
 
-func (xhr ESXmlHttpRequest) StatusText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) StatusText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
@@ -250,15 +250,15 @@ func (xhr ESXmlHttpRequest) StatusText(info *v8.FunctionCallbackInfo) (*v8.Value
 	return xhr.toByteString(ctx, result)
 }
 
-func (xhr ESXmlHttpRequest) ResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) ResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: XMLHttpRequest.ResponseType")
 }
 
-func (xhr ESXmlHttpRequest) SetResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) SetResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: XMLHttpRequest.SetResponseType")
 }
 
-func (xhr ESXmlHttpRequest) Response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) Response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
@@ -268,7 +268,7 @@ func (xhr ESXmlHttpRequest) Response(info *v8.FunctionCallbackInfo) (*v8.Value, 
 	return xhr.toAny(ctx, result)
 }
 
-func (xhr ESXmlHttpRequest) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
@@ -278,6 +278,6 @@ func (xhr ESXmlHttpRequest) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Val
 	return xhr.toUSVString(ctx, result)
 }
 
-func (xhr ESXmlHttpRequest) ResponseXML(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) ResponseXML(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: XMLHttpRequest.ResponseXML")
 }

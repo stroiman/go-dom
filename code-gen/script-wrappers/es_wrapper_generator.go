@@ -37,20 +37,21 @@ func createData(spec IdlSpec, dataData WrapperTypeSpec) ESConstructorData {
 	if wrappedTypeName == "" {
 		wrappedTypeName = idlName.Type.Name
 	}
-	wrapperTypeName := dataData.WrapperTypeName
-	if wrapperTypeName == "" {
-		wrapperTypeName = fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
+	wrapperTypeBaseName := dataData.WrapperTypeName
+	if wrapperTypeBaseName == "" {
+		wrapperTypeBaseName = fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
 	}
 	return ESConstructorData{
-		Spec:            dataData,
-		InnerTypeName:   wrappedTypeName,
-		WrapperTypeName: wrapperTypeName,
-		Receiver:        dataData.Receiver,
-		RunCustomCode:   dataData.RunCustomCode,
-		Inheritance:     idlName.Inheritance(),
-		Constructor:     CreateConstructor(dataData, idlName),
-		Operations:      CreateInstanceMethods(dataData, idlName),
-		Attributes:      CreateAttributes(dataData, idlName),
+		Spec:                dataData,
+		InnerTypeName:       wrappedTypeName,
+		WrapperTypeName:     lowerCaseFirstLetter(wrapperTypeBaseName),
+		WrapperTypeBaseName: wrapperTypeBaseName,
+		Receiver:            dataData.Receiver,
+		RunCustomCode:       dataData.RunCustomCode,
+		Inheritance:         idlName.Inheritance(),
+		Constructor:         CreateConstructor(dataData, idlName),
+		Operations:          CreateInstanceMethods(dataData, idlName),
+		Attributes:          CreateAttributes(dataData, idlName),
 	}
 }
 
@@ -200,15 +201,16 @@ type ESAttribute struct {
 }
 
 type ESConstructorData struct {
-	Spec            *ESClassWrapper
-	InnerTypeName   string
-	WrapperTypeName string
-	Receiver        string
-	Inheritance     string
-	Operations      []ESOperation
-	Attributes      []ESAttribute
-	Constructor     *ESOperation
-	RunCustomCode   bool
+	Spec                *ESClassWrapper
+	InnerTypeName       string
+	WrapperTypeName     string
+	WrapperTypeBaseName string
+	Receiver            string
+	Inheritance         string
+	Operations          []ESOperation
+	Attributes          []ESAttribute
+	Constructor         *ESOperation
+	RunCustomCode       bool
 }
 
 func (d ESConstructorData) Name() string { return d.Spec.TypeName }
@@ -271,6 +273,21 @@ func idlNameToGoName(s string) string {
 	return strings.Join(words, "")
 }
 
+func idlNameToUnexportedGoName(s string) string {
+	return lowerCaseFirstLetter(idlNameToGoName(s))
+}
+
+func lowerCaseFirstLetter(s string) string {
+	strLen := len(s)
+	if strLen == 0 {
+		slog.Warn("Passing empty string to upperCaseFirstLetter")
+		return ""
+	}
+	buffer := make([]rune, 0, strLen)
+	buffer = append(buffer, unicode.ToLower([]rune(s)[0]))
+	buffer = append(buffer, []rune(s)[1:]...)
+	return string(buffer)
+}
 func upperCaseFirstLetter(s string) string {
 	strLen := len(s)
 	if strLen == 0 {

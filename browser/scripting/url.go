@@ -8,19 +8,19 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type URLV8Wrapper struct {
+type urlV8Wrapper struct {
 	handleReffedObject[dom.URL]
 }
 
-func NewURLV8Wrapper(host *ScriptHost) URLV8Wrapper {
-	return URLV8Wrapper{NewHandleReffedObject[dom.URL](host)}
+func newUrlV8Wrapper(host *ScriptHost) urlV8Wrapper {
+	return urlV8Wrapper{NewHandleReffedObject[dom.URL](host)}
 }
 
 type HandleDisposable cgo.Handle
 
 func (h HandleDisposable) Dispose() { cgo.Handle(h).Delete() }
 
-func (u URLV8Wrapper) CreateInstance(
+func (u urlV8Wrapper) CreateInstance(
 	ctx *ScriptContext,
 	this *v8.Object,
 	url string,
@@ -33,7 +33,7 @@ func (u URLV8Wrapper) CreateInstance(
 	return nil, nil
 }
 
-func (u URLV8Wrapper) CreateInstanceBase(
+func (u urlV8Wrapper) CreateInstanceBase(
 	ctx *ScriptContext,
 	this *v8.Object,
 	url string,
