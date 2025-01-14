@@ -14,10 +14,13 @@ Test your Go web applications with
 
 ## Looking for sponsors
 
-I believe this would be an extremely useful tool, but it is also a bit of an
-undertaking.
+If this tool could reach a minimum level of usability, this would be extremely
+valuable in testing Go web applications, particularly combined with HTMX, a tech
+combination which is becoming increasingly popular.
 
-This has been the result of too much spare time; but 
+Progress so far is the result of too much spare time; but that will not last. If
+If enough people would sponsor this project, it could mean the difference
+between continued development, or death.
 
 ## Code structure
 
