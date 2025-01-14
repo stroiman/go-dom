@@ -37,8 +37,11 @@ func (xhr xmlHttpRequestV8Wrapper) decodeXMLHttpRequestBodyInit(
 		return nil, errors.New("Not supported yet")
 	}
 	obj := val.Object()
-	formData := getWrappedInstance[*html.FormData](obj)
-	return formData.GetReader(), nil
+	if res, err := getWrappedInstance[*html.FormData](obj); err == nil {
+		return res.GetReader(), nil
+	} else {
+		return nil, err
+	}
 }
 
 func newXmlHttpRequestV8Wrapper(host *ScriptHost) xmlHttpRequestV8Wrapper {

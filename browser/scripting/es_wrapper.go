@@ -137,12 +137,17 @@ func (o handleReffedObject[T]) Store(value T, ctx *ScriptContext, this *v8.Objec
 	this.SetInternalField(0, internalField)
 }
 
-func getWrappedInstance[T any](object *v8.Object) T {
+func getWrappedInstance[T any](object *v8.Object) (res T, err error) {
 	field := object.GetInternalField(0)
 	handle := field.ExternalHandle()
-	return handle.Value().(T)
+	var ok bool
+	res, ok = handle.Value().(T)
+	if !ok {
+		err = errors.New("Not a valid type stored in the handle")
+	}
+	return
 }
 
 func (o handleReffedObject[T]) getInstance(info *v8.FunctionCallbackInfo) (T, error) {
-	return getWrappedInstance[T](info.This()), nil
+	return getWrappedInstance[T](info.This())
 }
