@@ -45,7 +45,7 @@ func (xhr xmlHttpRequestV8Wrapper) decodeXMLHttpRequestBodyInit(
 }
 
 func newXmlHttpRequestV8Wrapper(host *ScriptHost) xmlHttpRequestV8Wrapper {
-	return xmlHttpRequestV8Wrapper{NewHandleReffedObject[XmlHttpRequest](host)}
+	return xmlHttpRequestV8Wrapper{newHandleReffedObject[XmlHttpRequest](host)}
 }
 
 func (xhr xmlHttpRequestV8Wrapper) CreateInstance(

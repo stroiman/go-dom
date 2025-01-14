@@ -13,7 +13,7 @@ type urlV8Wrapper struct {
 }
 
 func newUrlV8Wrapper(host *ScriptHost) urlV8Wrapper {
-	return urlV8Wrapper{NewHandleReffedObject[dom.URL](host)}
+	return urlV8Wrapper{newHandleReffedObject[dom.URL](host)}
 }
 
 type HandleDisposable cgo.Handle

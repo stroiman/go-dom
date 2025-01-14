@@ -90,7 +90,7 @@ type eventTargetV8Wrapper struct {
 }
 
 func newEventTargetV8Wrapper(host *ScriptHost) eventTargetV8Wrapper {
-	return eventTargetV8Wrapper{NewHandleReffedObject[dom.EventTarget](host)}
+	return eventTargetV8Wrapper{newHandleReffedObject[dom.EventTarget](host)}
 }
 
 func (w eventTargetV8Wrapper) getInstance(info *v8.FunctionCallbackInfo) (dom.EventTarget, error) {

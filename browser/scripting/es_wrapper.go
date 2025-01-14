@@ -140,7 +140,7 @@ type handleReffedObject[T any] struct {
 	converters
 }
 
-func NewHandleReffedObject[T any](host *ScriptHost) handleReffedObject[T] {
+func newHandleReffedObject[T any](host *ScriptHost) handleReffedObject[T] {
 	return handleReffedObject[T]{
 		host: host,
 	}

@@ -13,7 +13,7 @@ type FormDataV8Wrapper struct {
 }
 
 func NewFormDataV8Wrapper(host *ScriptHost) FormDataV8Wrapper {
-	return FormDataV8Wrapper{NewHandleReffedObject[*html.FormData](host)}
+	return FormDataV8Wrapper{newHandleReffedObject[*html.FormData](host)}
 }
 
 func (w FormDataV8Wrapper) CreateInstance(
