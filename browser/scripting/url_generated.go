@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	RegisterJSClass("URL", "", createUrlPrototype)
+	registerJSClass("URL", "", createUrlPrototype)
 }
 
 func createUrlPrototype(host *ScriptHost) *v8.FunctionTemplate {

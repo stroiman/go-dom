@@ -45,7 +45,7 @@ func CreateV8Generator(data ESConstructorData) g.Generator {
 func CreateInitFunction(data ESConstructorData) g.Generator {
 	return g.FunctionDefinition{
 		Name: "init",
-		Body: g.NewValue("RegisterJSClass").Call(
+		Body: g.NewValue("registerJSClass").Call(
 			g.Lit(data.Spec.TypeName),
 			g.Lit(data.Inheritance),
 			g.Id(prototypeFactoryFunctionName(data))),

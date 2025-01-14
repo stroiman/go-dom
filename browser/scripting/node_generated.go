@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	RegisterJSClass("Node", "EventTarget", createNodePrototype)
+	registerJSClass("Node", "EventTarget", createNodePrototype)
 }
 
 func createNodePrototype(host *ScriptHost) *v8.FunctionTemplate {

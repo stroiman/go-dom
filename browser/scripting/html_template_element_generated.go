@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	RegisterJSClass("HTMLTemplateElement", "HTMLElement", createHtmlTemplateElementPrototype)
+	registerJSClass("HTMLTemplateElement", "HTMLElement", createHtmlTemplateElementPrototype)
 }
 
 func createHtmlTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {

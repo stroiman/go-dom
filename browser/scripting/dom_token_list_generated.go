@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	RegisterJSClass("DOMTokenList", "", createDomTokenListPrototype)
+	registerJSClass("DOMTokenList", "", createDomTokenListPrototype)
 }
 
 func createDomTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {

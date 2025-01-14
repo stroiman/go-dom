@@ -17,7 +17,7 @@ func newWindowV8Wrapper(host *ScriptHost) *windowV8Wrapper {
 }
 
 func init() {
-	RegisterJSClass("Window", "EventTarget", createWindowPrototype)
+	registerJSClass("Window", "EventTarget", createWindowPrototype)
 }
 
 func createWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {

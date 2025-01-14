@@ -204,7 +204,7 @@ type classSpec struct {
 
 var classes map[string]classSpec = make(map[string]classSpec)
 
-func RegisterJSClass(
+func registerJSClass(
 	className string,
 	superClassName string,
 	constructorFactory JSConstructorFactory,
@@ -230,29 +230,29 @@ func RegisterJSClass(
 }
 
 func init() {
-	RegisterJSClass("Event", "", createEvent)
-	RegisterJSClass("CustomEvent", "Event", createCustomEvent)
-	RegisterJSClass("NamedNodeMap", "", createNamedNodeMap)
-	RegisterJSClass("Location", "", createLocationPrototype)
-	RegisterJSClass("NodeList", "", createNodeList)
-	RegisterJSClass("EventTarget", "", CreateEventTarget)
+	registerJSClass("Event", "", createEvent)
+	registerJSClass("CustomEvent", "Event", createCustomEvent)
+	registerJSClass("NamedNodeMap", "", createNamedNodeMap)
+	registerJSClass("Location", "", createLocationPrototype)
+	registerJSClass("NodeList", "", createNodeList)
+	registerJSClass("EventTarget", "", CreateEventTarget)
 
-	RegisterJSClass("XMLHttpRequest", "EventTarget", createXmlHttpRequestPrototype)
+	registerJSClass("XMLHttpRequest", "EventTarget", createXmlHttpRequestPrototype)
 
-	RegisterJSClass("Document", "Node", createDocumentPrototype)
-	RegisterJSClass("HTMLDocument", "Document", createHTMLDocumentPrototype)
-	RegisterJSClass("DocumentFragment", "Node", createDocumentFragmentPrototype)
-	RegisterJSClass("ShadowRoot", "DocumentFragment", createShadowRootPrototype)
-	RegisterJSClass("Element", "Node", createElement)
-	RegisterJSClass("HTMLElement", "Element", createHtmlElement)
-	RegisterJSClass("Attr", "Node", createAttr)
+	registerJSClass("Document", "Node", createDocumentPrototype)
+	registerJSClass("HTMLDocument", "Document", createHTMLDocumentPrototype)
+	registerJSClass("DocumentFragment", "Node", createDocumentFragmentPrototype)
+	registerJSClass("ShadowRoot", "DocumentFragment", createShadowRootPrototype)
+	registerJSClass("Element", "Node", createElement)
+	registerJSClass("HTMLElement", "Element", createHtmlElement)
+	registerJSClass("Attr", "Node", createAttr)
 
-	RegisterJSClass("FormData", "", createFormData)
-	RegisterJSClass("DOMParser", "", createDOMParserPrototype)
+	registerJSClass("FormData", "", createFormData)
+	registerJSClass("DOMParser", "", createDOMParserPrototype)
 
 	for _, cls := range htmlElements {
 		if _, found := classes[cls]; !found {
-			RegisterJSClass(cls, "HTMLElement", createIllegalConstructor)
+			registerJSClass(cls, "HTMLElement", createIllegalConstructor)
 		}
 	}
 }
