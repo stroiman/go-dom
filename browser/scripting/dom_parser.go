@@ -26,8 +26,8 @@ func CreateDOMParserPrototype(host *ScriptHost) *v8.FunctionTemplate {
 				ctx := host.MustGetContext(info.Context())
 				window := ctx.Window()
 				args := newArgumentHelper(host, info)
-				html, err0 := args.GetStringArg(0)
-				contentType, err1 := args.GetStringArg(1)
+				html, err0 := args.getStringArg(0)
+				contentType, err1 := args.getStringArg(1)
 				if err := errors.Join(err0, err1); err != nil {
 					return nil, err
 				}

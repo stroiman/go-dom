@@ -52,7 +52,7 @@ func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		"createElement",
 		func(instance Document, args argumentHelper) (val *v8.Value, err error) {
 			var name string
-			name, err = args.GetStringArg(0)
+			name, err = args.getStringArg(0)
 			if err == nil {
 				e := instance.CreateElement(name)
 				val, err = args.ctx.GetInstanceForNode(e)

@@ -58,7 +58,7 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	helper.CreateFunction(
 		"hasAttribute",
 		func(instance Element, info argumentHelper) (*v8.Value, error) {
-			name, e1 := info.GetStringArg(0)
+			name, e1 := info.getStringArg(0)
 			result, e2 := v8.NewValue(iso, instance.GetAttribute(name) != "")
 			return result, errors.Join(e1, e2)
 		},
@@ -71,8 +71,8 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	)
 	helper.CreateFunction("setAttribute",
 		func(instance Element, info argumentHelper) (result *v8.Value, err error) {
-			name, err0 := info.GetStringArg(0)
-			value, err1 := info.GetStringArg(1)
+			name, err0 := info.getStringArg(0)
+			value, err1 := info.getStringArg(1)
 			if err = errors.Join(err0, err1); err == nil {
 				instance.SetAttribute(name, value)
 			}
@@ -82,8 +82,8 @@ func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
 	helper.CreateFunction(
 		"insertAdjacentHTML",
 		func(element Element, info argumentHelper) (val *v8.Value, err error) {
-			position, e1 := info.GetStringArg(0)
-			html, e2 := info.GetStringArg(1)
+			position, e1 := info.getStringArg(0)
+			html, e2 := info.getStringArg(1)
 			err = errors.Join(e1, e2)
 			if err == nil {
 				element.InsertAdjacentHTML(position, html)

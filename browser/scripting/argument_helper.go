@@ -1,7 +1,6 @@
 package scripting
 
 import (
-	"github.com/stroiman/go-dom/browser/dom"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -16,7 +15,7 @@ func newArgumentHelper(host *ScriptHost, info *v8.FunctionCallbackInfo) *argumen
 	return &argumentHelper{info, ctx, 0}
 }
 
-func (h argumentHelper) GetFunctionArg(index int) (*v8.Function, error) {
+func (h argumentHelper) getFunctionArg(index int) (*v8.Function, error) {
 	args := h.Args()
 	if index >= len(args) {
 		return nil, ErrWrongNoOfArguments
@@ -28,7 +27,7 @@ func (h argumentHelper) GetFunctionArg(index int) (*v8.Function, error) {
 	return nil, ErrIncompatibleType
 }
 
-func (h argumentHelper) GetInt32Arg(index int) (int32, error) {
+func (h argumentHelper) getInt32Arg(index int) (int32, error) {
 	args := h.Args()
 	if index >= len(args) {
 		return 0, ErrWrongNoOfArguments
@@ -40,7 +39,7 @@ func (h argumentHelper) GetInt32Arg(index int) (int32, error) {
 	return 0, ErrIncompatibleType
 }
 
-func (h argumentHelper) GetStringArg(index int) (string, error) {
+func (h argumentHelper) getStringArg(index int) (string, error) {
 	args := h.Args()
 	if index >= len(args) {
 		return "", ErrWrongNoOfArguments
@@ -52,23 +51,7 @@ func (h argumentHelper) GetStringArg(index int) (string, error) {
 	return "", ErrIncompatibleType
 }
 
-func (h argumentHelper) GetNodeArg(index int) (dom.Node, error) {
-	args := h.Args()
-	if index >= len(args) {
-		return nil, ErrWrongNoOfArguments
-	}
-	arg := args[index]
-	if arg.IsObject() {
-		o := arg.Object()
-		cached, ok_1 := h.ctx.GetCachedNode(o)
-		if node, ok_2 := cached.(dom.Node); ok_1 && ok_2 {
-			return node, nil
-		}
-	}
-	return nil, v8.NewTypeError(h.ctx.host.iso, "Must be a node")
-}
-
-func (h *argumentHelper) GetArg(index int) *v8.Value {
+func (h *argumentHelper) getArg(index int) *v8.Value {
 	args := h.FunctionCallbackInfo.Args()
 	if len(args) <= index {
 		return nil

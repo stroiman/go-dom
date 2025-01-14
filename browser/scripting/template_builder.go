@@ -223,7 +223,7 @@ func TryParseArg[T any](
 	index int,
 	parsers ...func(*ScriptContext, *v8.Value) (T, error),
 ) (result T, err error) {
-	value := args.GetArg(index)
+	value := args.getArg(index)
 	if value == nil {
 		return
 	}

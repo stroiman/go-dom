@@ -103,8 +103,8 @@ func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 				ctx := host.MustGetContext(info.Context())
 				if target, ok := ctx.domNodes[info.This().GetInternalField(0).Int32()].(dom.EventTarget); ok {
 					args := newArgumentHelper(host, info)
-					eventType, e1 := args.GetStringArg(0)
-					fn, e2 := args.GetFunctionArg(1)
+					eventType, e1 := args.getStringArg(0)
+					fn, e2 := args.getFunctionArg(1)
 					err := errors.Join(e1, e2)
 					if err == nil {
 						listener := NewV8EventListener(ctx, fn.Value)

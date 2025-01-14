@@ -69,7 +69,7 @@ func installEventLoopGlobals(host *ScriptHost, globalObjectTemplate *v8.ObjectTe
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 				ctx := host.MustGetContext(info.Context())
 				helper := newArgumentHelper(host, info)
-				f, err1 := helper.GetFunctionArg(0)
+				f, err1 := helper.getFunctionArg(0)
 				// delay, err2 := helper.GetInt32Arg(1)
 				if err1 == nil {
 					ctx.eventLoop.dispatch(newWorkItem(f))
