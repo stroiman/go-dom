@@ -1,6 +1,29 @@
 # go-dom - Headless browser for Go
 
-Test your Go web applications with 
+The Go-to headless browser for TDD workflows.
+
+```go
+browser := NewBrowserFromHandler(pkg.RootHttpHandler)
+window, err := browser.Open("/example")
+Expect(err).ToNot(HaveOccurred())
+doc := window.Document()
+button := doc.QuerySelector("button")
+targetArea := doc.GetElementById("target-area")
+button.Click()
+Expect(targetArea).To(HaveTextContent("Click count: 1"))
+button.Click()
+Expect(targetArea).To(HaveTextContent("Click count: 2"))
+```
+
+Go-dom downloads, and executes client-side script, making it an ideal choice to
+help build applications using a Go/HTMX stack. 
+
+Being written in Go you can connect directly to an `http.Handler` bypassing the
+overhead of a TCP connection; as well as the burden of managing ports and
+connections.
+
+This greatly simplifies the ability to replace dependencies during testing, as
+you can treat your HTTP server as a normal Go component.
 
 > [!NOTE] 
 >
@@ -21,6 +44,57 @@ combination which is becoming increasingly popular.
 Progress so far is the result of too much spare time; but that will not last. If
 If enough people would sponsor this project, it could mean the difference
 between continued development, or death.
+
+## Example
+
+Go-dom allow you to use Go code to test your Go web applications with
+client-side scripting
+
+
+## Project background
+
+While the SPA[^2] dominates the web today, some applications still render
+server-side HTML, and HTMX is gaining in popularity. Go has some popularity as a
+back-end language for HTMX.
+
+While Go has great tooling for verifying request/responses of HTTP applications,
+if you need to test at a higher level, for example verify how any JavaScript
+code effects the page; you would need to use browser automation which introduce
+a significant overhead; not only from out-of-process communication with the
+browser, but also the necessity of launching your server.
+
+This overhead discourages a TDD loop.
+
+The purpose of this project is to support a TDD feedback loop for code
+delivering HTML, and where merely verifying the HTTP response isn't enough, but
+you want to verify:
+
+- JavaScript code has the desired behaviour
+- General browser behaviour is verified, e.g. 
+  - clicking a `<button type="submit">` submits the form and a redirect response
+    is followed.
+
+Some advantages of a native headless browser are:
+
+- No need to wait for a browser to launch.
+- Everything works in-process, so interacting with the browser from test does
+  not incur the overhead of out-of-process communication, and you could for
+  example redirect all console output to go code easily.
+- You can request application directly through the 
+  [`http.Handler`](https://pkg.go.dev/net/http#Handler); so no need to start an
+  HTTP server.
+- You can run parallel tests in isolation as each can create their own _instance_
+  of the HTTP handler.[^3]
+
+Some disadvantages compared to browser automation.
+
+- You cannot verify how it look; e.g. you cannot get a screenshot of a failing test
+  - This means you cannot create snap-shot tests detect undesired UI changes.[^4]
+- You cannot verify that everything works in _all supported browsers_.
+
+This isn't intended as a replacement for the cases where an end-2-end test is
+the right choice. It is intended as a tool to help when you want a smaller
+isolated test, e.g. mocking out part of the behaviour;
 
 ## Code structure
 
@@ -77,54 +151,6 @@ $ npm run curate
 
 This build a set of files in the `curated/` subfolder.
 
-## Project background
-
-While the SPA[^2] dominates the web today, some applications still render
-server-side HTML, and HTMX is gaining in popularity. Go has some popularity as a
-back-end language for HTMX.
-
-In Go, writing tests for the HTTP handler is easy if all you need to do is
-verify the response.
-
-But if you need to test at a higher level, for example verify how any JavaScript
-code effects the page; you would need to use browser automation, like
-[Selenium](https://www.selenium.dev/), and this introduces a significant 
-overhead; not only from out-of-process communication with the browser, but also
-the necessity of launching your server.
-
-This overhead discourages a TDD loop.
-
-The purpose of this project is to support a TDD feedback loop for code
-delivering HTML, and where merely verifying the HTTP response isn't enough, but
-you want to verify:
-
-- JavaScript code has the desired behaviour
-- General browser behaviour is verified, e.g. 
-  - clicking a `<button type="submit">` submits the form and a redirect response
-    is followed.
-
-Some advantages of a native headless browser are:
-
-- No need to wait for a browser to launch.
-- Everything works in-process, so interacting with the browser from test does
-  not incur the overhead of out-of-process communication, and you could for
-  example redirect all console output to go code easily.
-- You can request application directly through the 
-  [`http.Handler`](https://pkg.go.dev/net/http#Handler); so no need to start an
-  HTTP server.
-- You can run parallel tests in isolation as each can create their own _instance_
-  of the HTTP handler.[^3]
-
-Some disadvantages compared to e.g. Selenium.
-
-- You cannot verify how it look; e.g. you cannot get a screenshot of a failing test
-  - This means you cannot create snap-shot tests detect undesired UI changes.[^4]
-- You cannot verify that everything works in _all supported browsers_.
-
-This isn't intended as a replacement for the cases where an end-2-end test is
-the right choice. It is intended as a tool to help when you want a smaller
-isolated test, e.g. mocking out part of the behaviour;
-
 ## Project status
 
 The browser is currently capable of loading an simple HTMX app; which can fetch
@@ -145,20 +171,24 @@ The current implementation is leaking memory for the scope of a browser
 `Window`. I.e., all DOM nodes created and deleted for the lifetime of the
 window will stay in memory until the window is actively disposed.
 
-The problem here is that this is a marriage between two garbage collected
-systems, and what is conceptually _one object_ is split into two, a Go object
-and a JavaScript wrapper. As long of them is reachable; so must the other be.
+**This is not a problem for the intended use case**
+
+#### Why memory leaks
+
+This codebase is a marriage between two garbage collected runtimes, and what is
+conceptually _one object_ is split into two, a Go object and a JavaScript
+wrapper. As long of them is reachable; so must the other be.
 
 I could join them into one; but that would result in an undesired coupling; the
-DOM implementation being coupled to the JavaScript execution engine.
+DOM implementation being coupled to the JavaScript execution engine. Eventually,
+a native Go JavaScript runtime will be supported.
 
-Another solution to this problem involves the use of weak references. This
-exists as an `internal` but [was
-accepted](https://github.com/golang/go/issues/67552) as a feature.
+A solution to this problem involves the use of weak references. This exists as
+an `internal` but [was accepted](https://github.com/golang/go/issues/67552) as a
+feature.
 
-Because of that, and because the browser is only intended to be kept alive for
-the scope of a single short lived test, I have postponed dealing with memory
-management.
+For that reason; and because it's not a problem for the intended use case, I
+have postponed dealing with that issue.
 
 ### Next up
 
@@ -220,41 +250,12 @@ benefits:
 - For applications like map providers
   - Avoid being billed for API use during testing.
 
-## Help
-
-This project will likely die without help. If you are interested in this, I
-would welcome contributions. Particularly if:
-
-- ~~You have experience building tokenisers and parsers, especially HTML.~~
-  - After first building my own parser, I moved to `x/net/html`, which seems
-    like the right choice; at least for now.
-- You have intimate knowledge of Go's garbage collection mechanics.
-  - If you don't have the time or desire to help _code_ on this project, ~~I would
-    appreciate peer reviews on those parts of the code.~~
-    - I have postponed solving that problem until Go gets weak references.
-    - However, if you do see another solution to the leaking problem, let me
-      know.
-- You have _intimate knowledge_ of how the DOM works in the browser, and can 
-  help detect poor design decisions early. For example:
-  - should the internal implementation use `document.CreateElement()`
-    when parsing HTML into DOM? 
-    - Would it be a big mistake to do so? 
-    - Would it be a big mistake to _not_ do so? 
-    - Is is it a _doesn't matter_, whatever makes the code clean, issue?
-  - Which "objects" should I expose from Go to v8? and where should the
-    functions live? The objects themselves, or should I create prototype
-    in Go code? (I think I _should_ make prototype objects)
-- You have knowledge of the whatwg IDL, and what kind of code could be
-  auto-generated from the IDL
-- You have experience working with the v8 engine, particularly exposing internal
-  objects to JavaScript (which is then External to JavaScript).
-  - In particular, if you've done this from Go.
-
 ## Out of scope.
 
 ### Full Spec Compliance
 
-> A goal is not always meant to be reached, it often serves simply as something to aim at.
+> A goal is not always meant to be reached, it often serves simply as something
+> to aim at.
 > 
 > - Bruce Lee
 
@@ -285,6 +286,7 @@ It is not a goal to be able to provide a visual rendering of the DOM.
 But just like the accessibility tree, this could be implemented in a new library
 depending only on the interface from here.
 
+---
 
 [^1]: This code structure may not be completely possible due to circular
 dependencies between web APIs. E.g., `HTMLFormElement` and `FormData` have
