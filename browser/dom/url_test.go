@@ -112,7 +112,7 @@ var _ = Describe("URL", func() {
 
 func HaveHRef(expected interface{}) types.GomegaMatcher {
 	if m, ok := expected.(types.GomegaMatcher); ok {
-		return WithTransform(func(u URL) string { return u.GetHref() }, m)
+		return WithTransform(func(u URL) string { return u.Href() }, m)
 	} else {
 		return HaveHRef(Equal(expected))
 	}
@@ -123,6 +123,6 @@ func HaveHref(expected string) types.GomegaMatcher {
 		if u == nil {
 			return false, errors.New("URL is nil")
 		}
-		return u.GetHref() == expected, nil
+		return u.Href() == expected, nil
 	})
 }

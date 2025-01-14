@@ -6,17 +6,17 @@ import (
 )
 
 type URL interface {
-	GetHash() string
-	GetHost() string
-	GetHostname() string
-	GetHref() string
+	Hash() string
+	Host() string
+	Hostname() string
+	Href() string
 	// TODO
 	// SetHref(href string)
 	Origin() string
-	GetPathname() string
-	GetPort() string
-	GetProtocol() string
-	GetSearch() string
+	Pathname() string
+	Port() string
+	Protocol() string
+	Search() string
 	ToJSON() (string, error)
 }
 
@@ -89,30 +89,30 @@ func NewURLFromNetURL(u *netURL.URL) URL {
 	return url{u}
 }
 
-func (l url) GetHash() string {
+func (l url) Hash() string {
 	if l.url.Fragment == "" {
 		return ""
 	}
 	return "#" + l.url.Fragment
 }
 
-func (l url) GetHost() string { return l.url.Host }
+func (l url) Host() string { return l.url.Host }
 
-func (l url) GetHostname() string {
+func (l url) Hostname() string {
 	return l.url.Hostname()
 }
 
-func (l url) GetHref() string { return l.url.String() }
+func (l url) Href() string { return l.url.String() }
 
 func (l url) Origin() string { return l.url.Scheme + "://" + l.url.Host }
 
-func (l url) GetPathname() string { return l.url.Path }
+func (l url) Pathname() string { return l.url.Path }
 
-func (l url) GetProtocol() string { return l.url.Scheme + ":" }
+func (l url) Protocol() string { return l.url.Scheme + ":" }
 
-func (l url) GetPort() string { return l.url.Port() }
+func (l url) Port() string { return l.url.Port() }
 
-func (l url) GetSearch() string {
+func (l url) Search() string {
 	if l.url.RawQuery != "" {
 		return "?" + l.url.RawQuery
 	} else {
@@ -120,4 +120,4 @@ func (l url) GetSearch() string {
 	}
 }
 
-func (l url) ToJSON() (string, error) { return l.GetHref(), nil }
+func (l url) ToJSON() (string, error) { return l.Href(), nil }

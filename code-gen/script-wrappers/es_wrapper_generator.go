@@ -98,15 +98,12 @@ func CreateAttributes(
 			RetType:              attribute.AttributeType(),
 			MethodCustomization:  methodCustomization,
 		}
-		name := idlNameToGoName(getter.Name)
+		getter.Name = idlNameToGoName(getter.Name)
 		if attribute.Readonly {
-			getter.Name = name
 		} else {
-			getter.Name = fmt.Sprintf("Get%s", name)
-
 			setter = new(ESOperation)
 			*setter = *getter
-			setter.Name = fmt.Sprintf("Set%s", name)
+			setter.Name = fmt.Sprintf("Set%s", getter.Name)
 			methodCustomization := dataData.GetMethodCustomization(setter.Name)
 			setter.NotImplemented = setter.NotImplemented || methodCustomization.NotImplemented
 			setter.CustomImplementation = setter.CustomImplementation || methodCustomization.CustomImplementation

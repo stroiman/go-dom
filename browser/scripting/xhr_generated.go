@@ -29,11 +29,11 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("timeout",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetTimeout),
+		v8.NewFunctionTemplateWithError(iso, wrapper.Timeout),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetTimeout),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("withCredentials",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetWithCredentials),
+		v8.NewFunctionTemplateWithError(iso, wrapper.WithCredentials),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetWithCredentials),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("upload",
@@ -53,7 +53,7 @@ func CreateXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseType",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseType),
+		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseType),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetResponseType),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("response",
@@ -170,13 +170,13 @@ func (xhr ESXmlHttpRequest) ReadyState(info *v8.FunctionCallbackInfo) (*v8.Value
 	return nil, errors.New("Not implemented: XMLHttpRequest.ReadyState")
 }
 
-func (xhr ESXmlHttpRequest) GetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) Timeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.GetInstance(info)
 	if err != nil {
 		return nil, err
 	}
-	result := instance.GetTimeout()
+	result := instance.Timeout()
 	return xhr.ToUnsignedLong(ctx, result)
 }
 
@@ -195,13 +195,13 @@ func (xhr ESXmlHttpRequest) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr ESXmlHttpRequest) GetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr ESXmlHttpRequest) WithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.MustGetContext(info.Context())
 	instance, err := xhr.GetInstance(info)
 	if err != nil {
 		return nil, err
 	}
-	result := instance.GetWithCredentials()
+	result := instance.WithCredentials()
 	return xhr.ToBoolean(ctx, result)
 }
 
@@ -250,8 +250,8 @@ func (xhr ESXmlHttpRequest) StatusText(info *v8.FunctionCallbackInfo) (*v8.Value
 	return xhr.ToByteString(ctx, result)
 }
 
-func (xhr ESXmlHttpRequest) GetResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: XMLHttpRequest.GetResponseType")
+func (xhr ESXmlHttpRequest) ResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented: XMLHttpRequest.ResponseType")
 }
 
 func (xhr ESXmlHttpRequest) SetResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

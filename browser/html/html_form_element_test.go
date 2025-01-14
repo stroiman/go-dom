@@ -104,7 +104,7 @@ var _ = Describe("HTML Form", func() {
 		Describe("Action", func() {
 			Describe("Get", func() {
 				It("Should return the document location when not set", func() {
-					Expect(form.GetAction()).To(Equal(window.Location().GetHref()))
+					Expect(form.GetAction()).To(Equal(window.Location().Href()))
 				})
 			})
 

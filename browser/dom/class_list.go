@@ -51,7 +51,7 @@ func (l DOMTokenList) Length() int {
 	return len(l.getTokens())
 }
 
-func (l DOMTokenList) GetValue() string {
+func (l DOMTokenList) Value() string {
 	return l.element.GetAttribute("class")
 }
 

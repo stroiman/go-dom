@@ -20,7 +20,7 @@ type Attr interface {
 	NamespaceURI() string
 	OwnerElement() Element
 	Prefix() string
-	GetValue() string
+	Value() string
 	SetValue(val string)
 }
 
@@ -71,7 +71,7 @@ func (a *attr) Name() string          { return a.attr.Key }
 func (a *attr) NamespaceURI() string  { panic("TODO") }
 func (a *attr) OwnerElement() Element { return a.ownerElement }
 func (a *attr) Prefix() string        { panic("TODO") }
-func (a *attr) GetValue() string      { return a.attr.Val }
+func (a *attr) Value() string         { return a.attr.Val }
 func (a *attr) SetValue(val string)   { a.attr.Val = val }
 func (a *attr) NodeType() NodeType    { return NodeTypeAttribute }
 

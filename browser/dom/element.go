@@ -203,7 +203,7 @@ func RenderElement(e Element, writer *strings.Builder) {
 		writer.WriteRune(' ')
 		writer.WriteString(a.Name())
 		writer.WriteString("=\"")
-		writer.WriteString(a.GetValue())
+		writer.WriteString(a.Value())
 		writer.WriteString("\"")
 	}
 	writer.WriteRune('>')

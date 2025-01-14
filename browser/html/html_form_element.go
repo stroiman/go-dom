@@ -70,7 +70,7 @@ func (e *htmlFormElement) getAction() dom.URL {
 	target := dom.URL(window.Location())
 	var err error
 	if action != "" {
-		if target, err = dom.NewUrlBase(action, window.Location().GetHref()); err != nil {
+		if target, err = dom.NewUrlBase(action, window.Location().Href()); err != nil {
 			// This _shouldn't_ happen. But let's refactor code, so err isn't a
 			// possible return value
 			panic(err)
@@ -79,7 +79,7 @@ func (e *htmlFormElement) getAction() dom.URL {
 	return target
 }
 func (e *htmlFormElement) GetAction() string {
-	return e.getAction().GetHref()
+	return e.getAction().Href()
 	// window := e.getWindow()
 	// action := e.GetAttribute("action")
 	// target := dom.URL(window.Location())
@@ -100,8 +100,8 @@ func (e *htmlFormElement) SetMethod(value string) {
 
 func replaceSearchParams(location dom.URL, searchParams string) string {
 	if searchParams == "" {
-		return fmt.Sprintf("%s%s", location.Origin(), location.GetPathname())
+		return fmt.Sprintf("%s%s", location.Origin(), location.Pathname())
 	} else {
-		return fmt.Sprintf("%s%s?%s", location.Origin(), location.GetPathname(), searchParams)
+		return fmt.Sprintf("%s%s?%s", location.Origin(), location.Pathname(), searchParams)
 	}
 }

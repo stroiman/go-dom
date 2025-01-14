@@ -33,7 +33,7 @@ func CreateDOMTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("value",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetValue),
+		v8.NewFunctionTemplateWithError(iso, wrapper.Value),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetValue),
 		v8.None)
 
@@ -138,13 +138,13 @@ func (u DOMTokenListV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value,
 	return u.ToUnsignedLong(ctx, result)
 }
 
-func (u DOMTokenListV8Wrapper) GetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u DOMTokenListV8Wrapper) Value(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.MustGetContext(info.Context())
 	instance, err := u.GetInstance(info)
 	if err != nil {
 		return nil, err
 	}
-	result := instance.GetValue()
+	result := instance.Value()
 	return u.ToDOMString(ctx, result)
 }
 

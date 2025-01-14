@@ -19,7 +19,7 @@ func CreateAttr(host *ScriptHost) *v8.FunctionTemplate {
 	}
 	proto := builder.NewPrototypeBuilder()
 	proto.CreateReadonlyProp("name", Attr.Name)
-	proto.CreateReadWriteProp("value", Attr.GetValue, Attr.SetValue)
+	proto.CreateReadWriteProp("value", Attr.Value, Attr.SetValue)
 	return builder.constructor
 }
 

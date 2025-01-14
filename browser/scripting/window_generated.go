@@ -53,7 +53,7 @@ func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("name",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetName),
+		v8.NewFunctionTemplateWithError(iso, wrapper.Name),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetName),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("history",
@@ -93,7 +93,7 @@ func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("status",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetStatus),
+		v8.NewFunctionTemplateWithError(iso, wrapper.Status),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetStatus),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("closed",
@@ -113,7 +113,7 @@ func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("opener",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetOpener),
+		v8.NewFunctionTemplateWithError(iso, wrapper.Opener),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetOpener),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("frameElement",
@@ -194,8 +194,8 @@ func (w WindowV8Wrapper) Document(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	return ctx.GetInstanceForNode(result)
 }
 
-func (w WindowV8Wrapper) GetName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.GetName")
+func (w WindowV8Wrapper) Name(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented: Window.Name")
 }
 
 func (w WindowV8Wrapper) SetName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -238,8 +238,8 @@ func (w WindowV8Wrapper) Toolbar(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	return nil, errors.New("Not implemented: Window.Toolbar")
 }
 
-func (w WindowV8Wrapper) GetStatus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.GetStatus")
+func (w WindowV8Wrapper) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented: Window.Status")
 }
 
 func (w WindowV8Wrapper) SetStatus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -262,8 +262,8 @@ func (w WindowV8Wrapper) Top(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: Window.Top")
 }
 
-func (w WindowV8Wrapper) GetOpener(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.GetOpener")
+func (w WindowV8Wrapper) Opener(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented: Window.Opener")
 }
 
 func (w WindowV8Wrapper) SetOpener(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

@@ -26,19 +26,19 @@ func CreateHTMLTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("shadowRootMode",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetShadowRootMode),
+		v8.NewFunctionTemplateWithError(iso, wrapper.ShadowRootMode),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetShadowRootMode),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("shadowRootDelegatesFocus",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetShadowRootDelegatesFocus),
+		v8.NewFunctionTemplateWithError(iso, wrapper.ShadowRootDelegatesFocus),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetShadowRootDelegatesFocus),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("shadowRootClonable",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetShadowRootClonable),
+		v8.NewFunctionTemplateWithError(iso, wrapper.ShadowRootClonable),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetShadowRootClonable),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("shadowRootSerializable",
-		v8.NewFunctionTemplateWithError(iso, wrapper.GetShadowRootSerializable),
+		v8.NewFunctionTemplateWithError(iso, wrapper.ShadowRootSerializable),
 		v8.NewFunctionTemplateWithError(iso, wrapper.SetShadowRootSerializable),
 		v8.None)
 
@@ -59,32 +59,32 @@ func (e HTMLTemplateElementV8Wrapper) Content(info *v8.FunctionCallbackInfo) (*v
 	return ctx.GetInstanceForNode(result)
 }
 
-func (e HTMLTemplateElementV8Wrapper) GetShadowRootMode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.GetShadowRootMode")
+func (e HTMLTemplateElementV8Wrapper) ShadowRootMode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented: HTMLTemplateElement.ShadowRootMode")
 }
 
 func (e HTMLTemplateElementV8Wrapper) SetShadowRootMode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: HTMLTemplateElement.SetShadowRootMode")
 }
 
-func (e HTMLTemplateElementV8Wrapper) GetShadowRootDelegatesFocus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.GetShadowRootDelegatesFocus")
+func (e HTMLTemplateElementV8Wrapper) ShadowRootDelegatesFocus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented: HTMLTemplateElement.ShadowRootDelegatesFocus")
 }
 
 func (e HTMLTemplateElementV8Wrapper) SetShadowRootDelegatesFocus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: HTMLTemplateElement.SetShadowRootDelegatesFocus")
 }
 
-func (e HTMLTemplateElementV8Wrapper) GetShadowRootClonable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.GetShadowRootClonable")
+func (e HTMLTemplateElementV8Wrapper) ShadowRootClonable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented: HTMLTemplateElement.ShadowRootClonable")
 }
 
 func (e HTMLTemplateElementV8Wrapper) SetShadowRootClonable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Not implemented: HTMLTemplateElement.SetShadowRootClonable")
 }
 
-func (e HTMLTemplateElementV8Wrapper) GetShadowRootSerializable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.GetShadowRootSerializable")
+func (e HTMLTemplateElementV8Wrapper) ShadowRootSerializable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Not implemented: HTMLTemplateElement.ShadowRootSerializable")
 }
 
 func (e HTMLTemplateElementV8Wrapper) SetShadowRootSerializable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

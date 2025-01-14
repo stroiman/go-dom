@@ -80,7 +80,7 @@ var _ = Describe("ClassList", func() {
 	Describe("Get/Set Value", func() {
 		It("Should read the class attribute", func() {
 			el.SetAttribute("class", "a b c")
-			Expect(classList.GetValue()).To(Equal("a b c"))
+			Expect(classList.Value()).To(Equal("a b c"))
 		})
 
 		It("Should write the class attribute", func() {

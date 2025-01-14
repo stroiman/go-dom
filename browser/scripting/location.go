@@ -13,14 +13,14 @@ func CreateLocationPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		return location, nil
 	}
 	helper := builder.NewPrototypeBuilder()
-	helper.CreateReadonlyProp("hash", Location.GetHash)
-	helper.CreateReadonlyProp("host", Location.GetHost)
-	helper.CreateReadonlyProp("hostname", Location.GetHostname)
-	helper.CreateReadonlyProp("href", Location.GetHref)
+	helper.CreateReadonlyProp("hash", Location.Hash)
+	helper.CreateReadonlyProp("host", Location.Host)
+	helper.CreateReadonlyProp("hostname", Location.Hostname)
+	helper.CreateReadonlyProp("href", Location.Href)
 	helper.CreateReadonlyProp("origin", Location.Origin)
-	helper.CreateReadonlyProp("pathname", Location.GetPathname)
-	helper.CreateReadonlyProp("port", Location.GetPort)
-	helper.CreateReadonlyProp("protocol", Location.GetProtocol)
-	helper.CreateReadonlyProp("search", Location.GetSearch)
+	helper.CreateReadonlyProp("pathname", Location.Pathname)
+	helper.CreateReadonlyProp("port", Location.Port)
+	helper.CreateReadonlyProp("protocol", Location.Protocol)
+	helper.CreateReadonlyProp("search", Location.Search)
 	return builder.constructor
 }

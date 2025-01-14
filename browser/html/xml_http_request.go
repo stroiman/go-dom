@@ -44,11 +44,11 @@ type XmlHttpRequest interface {
 	OverrideMimeType(mimeType string) error
 	GetResponseHeader(headerName string) *string
 	SetWithCredentials(val bool) error
-	GetWithCredentials() bool
+	WithCredentials() bool
 	ResponseURL() string
 	Response() string
 	SetTimeout(int) error
-	GetTimeout() int
+	Timeout() int
 }
 
 type xmlHttpRequest struct {
@@ -192,7 +192,7 @@ func (req *xmlHttpRequest) SetWithCredentials(val bool) error {
 	return nil
 }
 
-func (req *xmlHttpRequest) GetWithCredentials() bool {
+func (req *xmlHttpRequest) WithCredentials() bool {
 	return false
 }
 
@@ -200,7 +200,7 @@ func (req *xmlHttpRequest) SetTimeout(val int) error {
 	return nil
 }
 
-func (req *xmlHttpRequest) GetTimeout() int {
+func (req *xmlHttpRequest) Timeout() int {
 	return 0
 }
 
