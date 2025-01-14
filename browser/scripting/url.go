@@ -29,7 +29,7 @@ func (u urlV8Wrapper) CreateInstance(
 	if err != nil {
 		return nil, err
 	}
-	u.Store(value, ctx, this)
+	u.store(value, ctx, this)
 	return nil, nil
 }
 
@@ -43,6 +43,6 @@ func (u urlV8Wrapper) CreateInstanceBase(
 	if err != nil {
 		return nil, err
 	}
-	u.Store(value, ctx, this)
+	u.store(value, ctx, this)
 	return nil, nil
 }

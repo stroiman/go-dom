@@ -21,7 +21,7 @@ func (w FormDataV8Wrapper) CreateInstance(
 	this *v8.Object,
 ) (*v8.Value, error) {
 	var value = html.NewFormData()
-	w.Store(value, ctx, this)
+	w.store(value, ctx, this)
 	return nil, nil
 }
 

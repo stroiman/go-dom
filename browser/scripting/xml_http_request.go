@@ -13,7 +13,7 @@ import (
 )
 
 type xmlHttpRequestV8Wrapper struct {
-	nodeV8WrapperBase[XmlHttpRequest]
+	handleReffedObject[XmlHttpRequest]
 }
 
 func (xhr xmlHttpRequestV8Wrapper) decodeDocument(
@@ -45,7 +45,7 @@ func (xhr xmlHttpRequestV8Wrapper) decodeXMLHttpRequestBodyInit(
 }
 
 func newXmlHttpRequestV8Wrapper(host *ScriptHost) xmlHttpRequestV8Wrapper {
-	return xmlHttpRequestV8Wrapper{newNodeV8WrapperBase[XmlHttpRequest](host)}
+	return xmlHttpRequestV8Wrapper{NewHandleReffedObject[XmlHttpRequest](host)}
 }
 
 func (xhr xmlHttpRequestV8Wrapper) CreateInstance(
@@ -65,7 +65,7 @@ func (xhr xmlHttpRequestV8Wrapper) CreateInstance(
 		}
 		return nil
 	}))
-	ctx.cacheNode(this, result)
+	xhr.store(result, ctx, this)
 	return nil, nil
 }
 

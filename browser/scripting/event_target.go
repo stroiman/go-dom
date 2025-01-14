@@ -85,13 +85,37 @@ func createCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
 	return res
 }
 
+type eventTargetV8Wrapper struct {
+	handleReffedObject[dom.EventTarget]
+}
+
+func newEventTargetV8Wrapper(host *ScriptHost) eventTargetV8Wrapper {
+	return eventTargetV8Wrapper{NewHandleReffedObject[dom.EventTarget](host)}
+}
+
+func (w eventTargetV8Wrapper) getInstance(info *v8.FunctionCallbackInfo) (dom.EventTarget, error) {
+	if info.This().GetInternalField(0).IsExternal() {
+		return w.handleReffedObject.getInstance(info)
+	} else {
+		ctx := w.host.MustGetContext(info.Context())
+		entity, ok := ctx.getCachedNode(info.This())
+		if ok {
+			if target, ok := entity.(dom.EventTarget); ok {
+				return target, nil
+			}
+		}
+		return nil, errors.New("Stored object is not an event target")
+	}
+}
+
 func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
+	wrapper := newEventTargetV8Wrapper(host)
 	res := v8.NewFunctionTemplate(
 		iso,
 		func(info *v8.FunctionCallbackInfo) *v8.Value {
 			ctx := host.MustGetContext(info.Context())
-			ctx.cacheNode(info.This(), dom.NewEventTarget())
+			wrapper.store(dom.NewEventTarget(), ctx, info.This())
 			return v8.Undefined(iso)
 		},
 	)
@@ -101,29 +125,27 @@ func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 				ctx := host.MustGetContext(info.Context())
-				if target, ok := ctx.domNodes[info.This().GetInternalField(0).Int32()].(dom.EventTarget); ok {
-					args := newArgumentHelper(host, info)
-					eventType, e1 := args.getStringArg(0)
-					fn, e2 := args.getFunctionArg(1)
-					err := errors.Join(e1, e2)
-					if err == nil {
-						listener := NewV8EventListener(ctx, fn.Value)
-						target.AddEventListener(eventType, listener)
-					}
-					return v8.Undefined(iso), err
-				} else {
-					return nil, v8.NewTypeError(iso, "What?")
+				target, err := wrapper.getInstance(info)
+				if err != nil {
+					return nil, err
 				}
+				args := newArgumentHelper(host, info)
+				eventType, e1 := args.getStringArg(0)
+				fn, e2 := args.getFunctionArg(1)
+				err = errors.Join(e1, e2)
+				if err == nil {
+					listener := NewV8EventListener(ctx, fn.Value)
+					target.AddEventListener(eventType, listener)
+				}
+				return v8.Undefined(iso), err
 			}), v8.ReadOnly)
 	proto.Set(
 		"dispatchEvent",
 		v8.NewFunctionTemplateWithError(iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := host.MustGetContext(info.Context())
-				this, _ := ctx.getCachedNode(info.This())
-				target, ok := this.(dom.EventTarget)
-				if !ok {
-					return nil, v8.NewTypeError(iso, "Object not an EventTarget")
+				target, err := wrapper.getInstance(info)
+				if err != nil {
+					return nil, err
 				}
 				e := info.Args()[0]
 				handle := e.Object().GetInternalField(0).ExternalHandle()

@@ -36,6 +36,23 @@ func (w nodeV8WrapperBase[T]) getInstance(info *v8.FunctionCallbackInfo) (result
 	return
 }
 
+func (w nodeV8WrapperBase[T]) store(
+	value T,
+	ctx *ScriptContext,
+	this *v8.Object,
+) (*v8.Value, error) {
+	val := this.Value
+	objectId := value.ObjectId()
+	ctx.v8nodes[objectId] = val
+	ctx.domNodes[objectId] = value
+	internal, err := v8.NewValue(ctx.host.iso, objectId)
+	if err != nil {
+		return nil, err
+	}
+	this.SetInternalField(0, internal)
+	return val, nil
+}
+
 type converters struct{}
 
 func (w converters) decodeUSVString(ctx *ScriptContext, val *v8.Value) (string, error) {
@@ -129,7 +146,7 @@ func NewHandleReffedObject[T any](host *ScriptHost) handleReffedObject[T] {
 	}
 }
 
-func (o handleReffedObject[T]) Store(value T, ctx *ScriptContext, this *v8.Object) {
+func (o handleReffedObject[T]) store(value T, ctx *ScriptContext, this *v8.Object) {
 	handle := cgo.NewHandle(value)
 	ctx.AddDisposer(HandleDisposable(handle))
 
