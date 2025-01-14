@@ -394,7 +394,7 @@ func (c V8InstanceInvocation) GetGenerator() V8InstanceInvocationResult {
 		retType := c.Op.RetType
 		if retType.IsNode() {
 			genRes.RequireContext = true
-			valueReturn := (g.Return(g.Raw(jen.Id("ctx").Dot("GetInstanceForNode").Call(jen.Id("result")))))
+			valueReturn := (g.Return(g.Raw(jen.Id("ctx").Dot("getInstanceForNode").Call(jen.Id("result")))))
 			if genRes.HasError {
 				list.Append(g.IfStmt{
 					Condition: g.Neq{Lhs: g.Id("callErr"), Rhs: g.Nil},

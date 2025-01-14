@@ -191,7 +191,7 @@ func (w windowV8Wrapper) Document(info *v8.FunctionCallbackInfo) (*v8.Value, err
 		return nil, err
 	}
 	result := instance.Document()
-	return ctx.GetInstanceForNode(result)
+	return ctx.getInstanceForNode(result)
 }
 
 func (w windowV8Wrapper) Name(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

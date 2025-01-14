@@ -37,7 +37,7 @@ func createDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		host,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			scriptContext := host.MustGetContext(info.Context())
-			return scriptContext.CacheNode(info.This(), NewDocument(nil))
+			return scriptContext.cacheNode(info.This(), NewDocument(nil))
 		},
 	)
 	wrapper.Install(builder.constructor)
@@ -55,7 +55,7 @@ func createDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 			name, err = args.getStringArg(0)
 			if err == nil {
 				e := instance.CreateElement(name)
-				val, err = args.ctx.GetInstanceForNode(e)
+				val, err = args.ctx.getInstanceForNode(e)
 			}
 			return
 		},
@@ -64,14 +64,14 @@ func createDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		"createDocumentFragment",
 		func(instance Document, args argumentHelper) (val *v8.Value, err error) {
 			e := instance.CreateDocumentFragment()
-			return args.ctx.GetInstanceForNode(e)
+			return args.ctx.getInstanceForNode(e)
 		},
 	)
 
 	proto.SetAccessorPropertyCallback("documentElement",
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(arg.Context())
-			this, ok := ctx.GetCachedNode(arg.This())
+			this, ok := ctx.getCachedNode(arg.This())
 			if e, e_ok := this.(Document); ok && e_ok {
 				return ctx.GetInstanceForNodeByName("HTMLElement", e.DocumentElement())
 			}
@@ -83,7 +83,7 @@ func createDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	proto.SetAccessorPropertyCallback("head",
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(arg.Context())
-			this, ok := ctx.GetCachedNode(arg.This())
+			this, ok := ctx.getCachedNode(arg.This())
 			if e, e_ok := this.(Document); ok && e_ok {
 				return ctx.GetInstanceForNodeByName("HTMLElement", e.Head())
 			}
@@ -95,7 +95,7 @@ func createDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	proto.SetAccessorPropertyCallback("body",
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(arg.Context())
-			this, ok := ctx.GetCachedNode(arg.This())
+			this, ok := ctx.getCachedNode(arg.This())
 			if e, e_ok := this.(Document); ok && e_ok {
 				return ctx.GetInstanceForNodeByName("HTMLElement", e.Body())
 			}
@@ -109,10 +109,10 @@ func createDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso,
 			func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
 				ctx := host.MustGetContext(args.Context())
-				this, ok := ctx.GetCachedNode(args.This())
+				this, ok := ctx.getCachedNode(args.This())
 				if doc, e_ok := this.(Document); ok && e_ok {
 					element := doc.GetElementById(args.Args()[0].String())
-					return ctx.GetInstanceForNode(element)
+					return ctx.getInstanceForNode(element)
 				}
 				return nil, v8.NewTypeError(iso, "Object not a Document")
 			}),

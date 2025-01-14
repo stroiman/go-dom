@@ -29,7 +29,7 @@ func (e ESElementContainerWrapper[T]) QuerySelector(
 	host := e.host
 	iso := e.host.iso
 	ctx := host.MustGetContext(args.Context())
-	this, ok := ctx.GetCachedNode(args.This())
+	this, ok := ctx.getCachedNode(args.This())
 	if doc, e_ok := this.(ElementContainer); ok && e_ok {
 		node, err := doc.QuerySelector(args.Args()[0].String())
 		if err != nil {
@@ -38,7 +38,7 @@ func (e ESElementContainerWrapper[T]) QuerySelector(
 		if node == nil {
 			return v8.Null(iso), nil
 		}
-		return ctx.GetInstanceForNode(node)
+		return ctx.getInstanceForNode(node)
 	}
 	return nil, v8.NewTypeError(iso, "Object not a Document")
 }
@@ -49,7 +49,7 @@ func (e ESElementContainerWrapper[T]) QuerySelectorAll(
 	host := e.host
 	iso := e.host.iso
 	ctx := host.MustGetContext(args.Context())
-	this, ok := ctx.GetCachedNode(args.This())
+	this, ok := ctx.getCachedNode(args.This())
 	if doc, e_ok := this.(ElementContainer); ok && e_ok {
 		nodeList, err := doc.QuerySelectorAll(args.Args()[0].String())
 		if err != nil {

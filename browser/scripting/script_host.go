@@ -54,7 +54,7 @@ type ScriptContext struct {
 	disposers []Disposable
 }
 
-func (c *ScriptContext) CacheNode(obj *v8.Object, node Entity) (*v8.Value, error) {
+func (c *ScriptContext) cacheNode(obj *v8.Object, node Entity) (*v8.Value, error) {
 	val := obj.Value
 	objectId := node.ObjectId()
 	c.v8nodes[objectId] = val
@@ -67,7 +67,7 @@ func (c *ScriptContext) CacheNode(obj *v8.Object, node Entity) (*v8.Value, error
 	return val, nil
 }
 
-func (c *ScriptContext) GetInstanceForNode(
+func (c *ScriptContext) getInstanceForNode(
 	node Entity,
 ) (*v8.Value, error) {
 	iso := c.host.iso
@@ -117,12 +117,12 @@ func (c *ScriptContext) GetInstanceForNodeByName(
 		if cached, ok := c.v8nodes[objectId]; ok {
 			return cached, nil
 		}
-		return c.CacheNode(value, node)
+		return c.cacheNode(value, node)
 	}
 	return nil, err
 }
 
-func (c *ScriptContext) GetCachedNode(this *v8.Object) (Entity, bool) {
+func (c *ScriptContext) getCachedNode(this *v8.Object) (Entity, bool) {
 	result, ok := c.domNodes[this.GetInternalField(0).Int32()]
 	return result, ok
 }
@@ -316,7 +316,7 @@ func (host *ScriptHost) NewContext(window html.Window) *ScriptContext {
 	}
 	context.eventLoop = NewEventLoop(global, errorCallback)
 	host.contexts[context.v8ctx] = context
-	context.CacheNode(global, window)
+	context.cacheNode(global, window)
 	context.disposers = append(context.disposers, context.eventLoop.Start())
 
 	return context

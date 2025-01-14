@@ -49,7 +49,7 @@ func NewIllegalConstructorBuilder[T any](host *ScriptHost) ConstructorBuilder[T]
 }
 
 func getInstanceFromThis[T any](ctx *ScriptContext, this *v8.Object) (instance T, err error) {
-	cachedEntity, ok := ctx.GetCachedNode(this)
+	cachedEntity, ok := ctx.getCachedNode(this)
 	if !ok {
 		err = errors.New("No cached entity could be found for `this`")
 		return
@@ -64,7 +64,7 @@ func getInstanceFromThis[T any](ctx *ScriptContext, this *v8.Object) (instance T
 
 func (c *ConstructorBuilder[T]) SetDefaultInstanceLookup() {
 	c.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (val T, err error) {
-		instance, ok := ctx.GetCachedNode(this)
+		instance, ok := ctx.getCachedNode(this)
 		if instance, e_ok := instance.(T); e_ok && ok {
 			return instance, nil
 		} else {

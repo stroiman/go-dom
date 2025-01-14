@@ -77,13 +77,13 @@ func (n nodeV8Wrapper) GetRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, er
 			return nil, err
 		}
 		result := instance.GetRootNode(options)
-		return ctx.GetInstanceForNode(result)
+		return ctx.getInstanceForNode(result)
 	}
 	if err0 != nil {
 		return nil, err0
 	}
 	result := instance.GetRootNode()
-	return ctx.GetInstanceForNode(result)
+	return ctx.getInstanceForNode(result)
 }
 
 func (n nodeV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -117,7 +117,7 @@ func (n nodeV8Wrapper) InsertBefore(info *v8.FunctionCallbackInfo) (*v8.Value, e
 		if callErr != nil {
 			return nil, callErr
 		} else {
-			return ctx.GetInstanceForNode(result)
+			return ctx.getInstanceForNode(result)
 		}
 	}
 	return nil, errors.New("Missing arguments")
@@ -137,7 +137,7 @@ func (n nodeV8Wrapper) AppendChild(info *v8.FunctionCallbackInfo) (*v8.Value, er
 		if callErr != nil {
 			return nil, callErr
 		} else {
-			return ctx.GetInstanceForNode(result)
+			return ctx.getInstanceForNode(result)
 		}
 	}
 	return nil, errors.New("Missing arguments")
@@ -157,7 +157,7 @@ func (n nodeV8Wrapper) RemoveChild(info *v8.FunctionCallbackInfo) (*v8.Value, er
 		if callErr != nil {
 			return nil, callErr
 		} else {
-			return ctx.GetInstanceForNode(result)
+			return ctx.getInstanceForNode(result)
 		}
 	}
 	return nil, errors.New("Missing arguments")
@@ -190,7 +190,7 @@ func (n nodeV8Wrapper) OwnerDocument(info *v8.FunctionCallbackInfo) (*v8.Value, 
 		return nil, err
 	}
 	result := instance.OwnerDocument()
-	return ctx.GetInstanceForNode(result)
+	return ctx.getInstanceForNode(result)
 }
 
 func (n nodeV8Wrapper) ChildNodes(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -210,7 +210,7 @@ func (n nodeV8Wrapper) FirstChild(info *v8.FunctionCallbackInfo) (*v8.Value, err
 		return nil, err
 	}
 	result := instance.FirstChild()
-	return ctx.GetInstanceForNode(result)
+	return ctx.getInstanceForNode(result)
 }
 
 func (n nodeV8Wrapper) PreviousSibling(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -220,7 +220,7 @@ func (n nodeV8Wrapper) PreviousSibling(info *v8.FunctionCallbackInfo) (*v8.Value
 		return nil, err
 	}
 	result := instance.PreviousSibling()
-	return ctx.GetInstanceForNode(result)
+	return ctx.getInstanceForNode(result)
 }
 
 func (n nodeV8Wrapper) NextSibling(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -230,5 +230,5 @@ func (n nodeV8Wrapper) NextSibling(info *v8.FunctionCallbackInfo) (*v8.Value, er
 		return nil, err
 	}
 	result := instance.NextSibling()
-	return ctx.GetInstanceForNode(result)
+	return ctx.getInstanceForNode(result)
 }

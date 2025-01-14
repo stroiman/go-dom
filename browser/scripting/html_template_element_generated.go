@@ -56,7 +56,7 @@ func (e htmlTemplateElementV8Wrapper) Content(info *v8.FunctionCallbackInfo) (*v
 		return nil, err
 	}
 	result := instance.Content()
-	return ctx.GetInstanceForNode(result)
+	return ctx.getInstanceForNode(result)
 }
 
 func (e htmlTemplateElementV8Wrapper) ShadowRootMode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

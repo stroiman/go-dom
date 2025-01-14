@@ -84,7 +84,7 @@ func (i Iterator[T]) NewIteratorInstanceOfIterable(
 	}
 	res, err := i.ot.NewInstance(context.v8ctx)
 	if err == nil {
-		return context.CacheNode(res, iterator)
+		return context.cacheNode(res, iterator)
 	}
 	return res.Value, err
 }

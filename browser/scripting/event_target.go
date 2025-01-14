@@ -21,7 +21,7 @@ func (l v8EventListener) HandleEvent(e dom.Event) error {
 	f, err := l.val.AsFunction()
 	if err == nil {
 		var event *v8.Value
-		event, err = l.ctx.GetInstanceForNode(e)
+		event, err = l.ctx.getInstanceForNode(e)
 		if err == nil {
 			_, err = f.Call(l.val, event)
 		}
@@ -91,7 +91,7 @@ func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 		iso,
 		func(info *v8.FunctionCallbackInfo) *v8.Value {
 			ctx := host.MustGetContext(info.Context())
-			ctx.CacheNode(info.This(), dom.NewEventTarget())
+			ctx.cacheNode(info.This(), dom.NewEventTarget())
 			return v8.Undefined(iso)
 		},
 	)
@@ -120,7 +120,7 @@ func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 				ctx := host.MustGetContext(info.Context())
-				this, _ := ctx.GetCachedNode(info.This())
+				this, _ := ctx.getCachedNode(info.This())
 				target, ok := this.(dom.EventTarget)
 				if !ok {
 					return nil, v8.NewTypeError(iso, "Object not an EventTarget")

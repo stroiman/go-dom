@@ -91,5 +91,5 @@ func (e htmlTemplateElementV8Wrapper) ToDocumentFragment(
 	ctx *ScriptContext,
 	fragment dom.DocumentFragment,
 ) (*v8.Value, error) {
-	return ctx.GetInstanceForNode(fragment)
+	return ctx.getInstanceForNode(fragment)
 }

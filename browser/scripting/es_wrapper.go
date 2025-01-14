@@ -24,7 +24,7 @@ func newNodeV8WrapperBase[T Entity](host *ScriptHost) nodeV8WrapperBase[T] {
 
 func (w nodeV8WrapperBase[T]) getInstance(info *v8.FunctionCallbackInfo) (result T, err error) {
 	if ctx, ok := w.host.GetContext(info.Context()); ok {
-		if instance, ok := ctx.GetCachedNode(info.This()); ok {
+		if instance, ok := ctx.getCachedNode(info.This()); ok {
 			if typedInstance, ok := instance.(T); ok {
 				return typedInstance, nil
 			}
@@ -61,7 +61,7 @@ func (w converters) decodeUnsignedLong(ctx *ScriptContext, val *v8.Value) (int, 
 func (w converters) decodeNode(ctx *ScriptContext, val *v8.Value) (dom.Node, error) {
 	if val.IsObject() {
 		o := val.Object()
-		cached, ok_1 := ctx.GetCachedNode(o)
+		cached, ok_1 := ctx.getCachedNode(o)
 		if node, ok_2 := cached.(dom.Node); ok_1 && ok_2 {
 			return node, nil
 		}

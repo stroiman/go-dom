@@ -54,7 +54,7 @@ func (xhr xmlHttpRequestV8Wrapper) CreateInstance(
 		prop := "on" + event.Type()
 		handler, err := this.Get(prop)
 		if err == nil && handler.IsFunction() {
-			v8Event, err := ctx.GetInstanceForNode(event)
+			v8Event, err := ctx.getInstanceForNode(event)
 			if err == nil {
 				f, _ := handler.AsFunction()
 				f.Call(this, v8Event)
@@ -62,7 +62,7 @@ func (xhr xmlHttpRequestV8Wrapper) CreateInstance(
 		}
 		return nil
 	}))
-	ctx.CacheNode(this, result)
+	ctx.cacheNode(this, result)
 	return nil, nil
 }
 

@@ -53,7 +53,7 @@ func createNodeList(host *ScriptHost) *v8.FunctionTemplate {
 	nodeListIterator := NewIterator[dom.Node](
 		host,
 		func(instance dom.Node, ctx *ScriptContext) (*v8.Value, error) {
-			return ctx.GetInstanceForNode(instance)
+			return ctx.getInstanceForNode(instance)
 		},
 	)
 	iso := host.iso
@@ -77,7 +77,7 @@ func createNodeList(host *ScriptHost) *v8.FunctionTemplate {
 			if result == nil {
 				return v8.Null(iso), nil
 			}
-			return info.ctx.GetInstanceForNode(result)
+			return info.ctx.getInstanceForNode(result)
 		},
 	)
 	instanceTemplate := builder.NewInstanceBuilder().proto
@@ -98,7 +98,7 @@ func createNodeList(host *ScriptHost) *v8.FunctionTemplate {
 	instanceTemplate.SetIndexedHandler(
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.MustGetContext(info.Context())
-			instance, ok := ctx.GetCachedNode(info.This())
+			instance, ok := ctx.getCachedNode(info.This())
 			nodemap, ok_2 := instance.(dom.NodeList)
 			if ok && ok_2 {
 				index := int(info.Index())
@@ -106,7 +106,7 @@ func createNodeList(host *ScriptHost) *v8.FunctionTemplate {
 				if item == nil {
 					return v8.Undefined(iso), nil
 				}
-				return ctx.GetInstanceForNode(item)
+				return ctx.getInstanceForNode(item)
 			}
 			return nil, v8.NewTypeError(iso, "dunno")
 		},
