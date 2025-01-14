@@ -45,15 +45,9 @@ Progress so far is the result of too much spare time; but that will not last. If
 If enough people would sponsor this project, it could mean the difference
 between continued development, or death.
 
-## Example
-
-Go-dom allow you to use Go code to test your Go web applications with
-client-side scripting
-
-
 ## Project background
 
-While the SPA[^2] dominates the web today, some applications still render
+While the SPA[^1] dominates the web today, some applications still render
 server-side HTML, and HTMX is gaining in popularity. Go has some popularity as a
 back-end language for HTMX.
 
@@ -84,12 +78,12 @@ Some advantages of a native headless browser are:
   [`http.Handler`](https://pkg.go.dev/net/http#Handler); so no need to start an
   HTTP server.
 - You can run parallel tests in isolation as each can create their own _instance_
-  of the HTTP handler.[^3]
+  of the HTTP handler.[^2]
 
 Some disadvantages compared to browser automation.
 
 - You cannot verify how it look; e.g. you cannot get a screenshot of a failing test
-  - This means you cannot create snap-shot tests detect undesired UI changes.[^4]
+  - This means you cannot create snap-shot tests detect undesired UI changes.[^3]
 - You cannot verify that everything works in _all supported browsers_.
 
 This isn't intended as a replacement for the cases where an end-2-end test is
@@ -120,7 +114,7 @@ The subfolders under `browser/` reflects the [web
 APIs](https://developer.mozilla.org/en-US/docs/Web/API), and the naming
 reflects the corresponding idl files. E.g., `browser/dom/` will have types
 corresponding to the types specified in `code-gen/webref/ed/idl/dom.idl`.
-`browser/html/` corresponds to `html.idl`, etc.[^1]
+`browser/html/` corresponds to `html.idl`, etc.[^4]
 
 The `webref/` folder is not necessary for normal use, only when working with the
 code-generator.
@@ -288,18 +282,18 @@ depending only on the interface from here.
 
 ---
 
-[^1]: This code structure may not be completely possible due to circular
-dependencies between web APIs. E.g., `HTMLFormElement` and `FormData` have
-circular dependencies.
-[^2]: Single-Page app
-[^3]: This approach allows you to mock databases, and other external services;
+[^1]: Single-Page app
+[^2]: This approach allows you to mock databases, and other external services;
 A few integration tests that use a real database, message bus, or other external
 services, is a good idea. Here, isolation of parallel tests may be
 non-trivial; depending on the type of application.
-[^4]: I generally dislike snapshot tests; as they don't _describe_ expected
+[^3]: I generally dislike snapshot tests; as they don't _describe_ expected
 behaviour, only that the outcome mustn't change. There are a few cases where
 where snapshot tests are the right choice, but they should be avoided for a TDD
 process.
+[^4]: This code structure may not be completely possible due to circular
+dependencies between web APIs. E.g., `HTMLFormElement` and `FormData` have
+circular dependencies.
 [^5]: The engine is based on the v8go project by originally by @rogchap, later
 kept up-to-date by @tommie; who did a remarkale job of automatically keeping the
 v8 dependencies up-to-date. But many necessary features of V8 are not exported;
