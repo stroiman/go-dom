@@ -7,12 +7,13 @@ import (
 
 	. "github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
+	. "github.com/stroiman/go-dom/browser/scripting/internal/html"
 
 	v8 "github.com/tommie/v8go"
 )
 
 type xmlHttpRequestV8Wrapper struct {
-	nodeV8WrapperBase[html.XmlHttpRequest]
+	nodeV8WrapperBase[XmlHttpRequest]
 }
 
 func (xhr xmlHttpRequestV8Wrapper) decodeDocument(
@@ -41,14 +42,14 @@ func (xhr xmlHttpRequestV8Wrapper) decodeXMLHttpRequestBodyInit(
 }
 
 func newXmlHttpRequestV8Wrapper(host *ScriptHost) xmlHttpRequestV8Wrapper {
-	return xmlHttpRequestV8Wrapper{newNodeV8WrapperBase[html.XmlHttpRequest](host)}
+	return xmlHttpRequestV8Wrapper{newNodeV8WrapperBase[XmlHttpRequest](host)}
 }
 
 func (xhr xmlHttpRequestV8Wrapper) CreateInstance(
 	ctx *ScriptContext,
 	this *v8.Object,
 ) (*v8.Value, error) {
-	result := html.NewXmlHttpRequest(ctx.Window().HTTPClient())
+	result := NewXmlHttpRequest(ctx.Window().HTTPClient())
 	result.SetCatchAllHandler(NewEventHandlerFunc(func(event Event) error {
 		prop := "on" + event.Type()
 		handler, err := this.Get(prop)
@@ -79,7 +80,7 @@ func (xhr xmlHttpRequestV8Wrapper) Open(
 		if err = errors.Join(err0, err1, err2, errInstance); err != nil {
 			return
 		}
-		instance.Open(method, url, html.RequestOptionAsync(async))
+		instance.Open(method, url, RequestOptionAsync(async))
 		return
 	}
 	if args.noOfReadArguments < 2 {
