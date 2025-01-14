@@ -45,6 +45,13 @@ Progress so far is the result of too much spare time; but that will not last. If
 If enough people would sponsor this project, it could mean the difference
 between continued development, or death.
 
+## Join the "community"
+
+[Join my discord server](https://discord.gg/rPBRt8Rf) to chat with me, and stay
+up-to-date on progress: 
+
+- https://discord.gg/rPBRt8Rf
+
 ## Project background
 
 While the SPA[^1] dominates the web today, some applications still render
