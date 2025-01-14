@@ -27,6 +27,7 @@ type ScriptEngine interface {
 
 type Window interface {
 	EventTarget
+	Entity
 	Document() Document
 	Dispose()
 	Navigate(string) error // TODO: Remove, perhaps? for testing
@@ -226,3 +227,5 @@ func (w *window) Dispose() {
 		w.scriptEngine.Dispose()
 	}
 }
+
+func (w *window) ObjectId() int32 { return -1 }

@@ -7,7 +7,6 @@ import (
 type EventTarget interface {
 	// ObjectId is used internally for the scripting engine to associate a v8
 	// object with the Go object it wraps.
-	ObjectId() ObjectId
 	AddEventListener(eventType string, listener EventHandler /* TODO: options */)
 	RemoveEventListener(eventType string, listener EventHandler)
 	DispatchEvent(event Event) bool
@@ -18,7 +17,6 @@ type EventTarget interface {
 }
 
 type eventTarget struct {
-	base
 	parentTarget    EventTarget
 	lmap            map[string][]EventHandler
 	catchAllHandler EventHandler
@@ -26,7 +24,6 @@ type eventTarget struct {
 
 func newEventTarget() eventTarget {
 	return eventTarget{
-		base: newBase(),
 		lmap: make(map[string][]EventHandler),
 	}
 }
