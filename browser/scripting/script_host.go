@@ -317,7 +317,7 @@ func (host *ScriptHost) NewContext(window html.Window) *ScriptContext {
 	context.eventLoop = NewEventLoop(global, errorCallback)
 	host.contexts[context.v8ctx] = context
 	context.cacheNode(global, window)
-	context.disposers = append(context.disposers, context.eventLoop.Start())
+	context.AddDisposer(context.eventLoop.Start())
 
 	return context
 }
