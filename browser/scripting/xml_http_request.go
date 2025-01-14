@@ -49,7 +49,7 @@ func (xhr xmlHttpRequestV8Wrapper) CreateInstance(
 	ctx *ScriptContext,
 	this *v8.Object,
 ) (*v8.Value, error) {
-	result := ctx.Window().NewXmlHttpRequest()
+	result := html.NewXmlHttpRequest(ctx.Window().HTTPClient())
 	result.SetCatchAllHandler(NewEventHandlerFunc(func(event Event) error {
 		prop := "on" + event.Type()
 		handler, err := this.Get(prop)

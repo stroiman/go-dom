@@ -36,7 +36,6 @@ type Window interface {
 	SetScriptRunner(ScriptEngine)
 	GetScriptEngine() ScriptEngine
 	Location() Location
-	NewXmlHttpRequest() XmlHttpRequest
 	HTTPClient() http.Client
 	ParseFragment(ownerDocument Document, reader io.Reader) (dom.DocumentFragment, error)
 	// unexported
@@ -226,8 +225,4 @@ func (w *window) Dispose() {
 	if w.scriptEngine != nil {
 		w.scriptEngine.Dispose()
 	}
-}
-
-func (w *window) NewXmlHttpRequest() XmlHttpRequest {
-	return NewXmlHttpRequest(w.httpClient)
 }
