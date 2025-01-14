@@ -39,27 +39,20 @@ func NewUrlBase(relativeUrl string, base string) (result URL, err error) {
 	if u, err = netURL.Parse(base); err != nil {
 		return
 	}
+	u.RawQuery = ""
+	u.Fragment = ""
 	if strings.HasPrefix(relativeUrl, "/") {
-		// Find the root path; as the native URL.JoinPath doesn't handle absolute
-		// paths.
-		// Recursively joining with ".." may not be as effective as constructing the
-		// right URL, but we don't have to deal with protocols of opaque urls, nor
-		// credentials in the origin.
-		for u.Path != "/" && u.Path != "" {
+		u.Path = relativeUrl
+	} else {
+		// A DOM Url treats the relative path from the last slash in the base URL.
+		// Go's URL doesn't. To get the right behaviour, use the parent dir if the
+		// base path doesn't end in a slash
+		if u.Path != "" && !strings.HasSuffix(u.Path, "/") {
 			u = u.JoinPath("..")
 		}
+		u = u.JoinPath(relativeUrl)
 	}
-	base = u.String()
-	lastSlashIdx := strings.LastIndex(base, "/")
-	hasPath := u.Path != ""
-	// A DOM Url treats the relative path from the last slash in the base URL,
-	// Go's URL doesnt. Trim away from there.
-	if hasPath && lastSlashIdx > 0 {
-		u, err = netURL.Parse(base[0:lastSlashIdx])
-	}
-	if err == nil {
-		result = NewURLFromNetURL(u.JoinPath(relativeUrl))
-	}
+	result = NewURLFromNetURL(u)
 	return
 }
 
