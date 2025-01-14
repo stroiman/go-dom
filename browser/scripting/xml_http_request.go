@@ -2,6 +2,8 @@ package scripting
 
 import (
 	"errors"
+	"io"
+	"strings"
 
 	. "github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
@@ -16,7 +18,7 @@ type xmlHttpRequestV8Wrapper struct {
 func (xhr xmlHttpRequestV8Wrapper) decodeDocument(
 	ctx *ScriptContext,
 	val *v8.Value,
-) (*html.XHRRequestBody, error) {
+) (io.Reader, error) {
 	if val.IsNull() {
 		return nil, nil
 	}
@@ -26,19 +28,16 @@ func (xhr xmlHttpRequestV8Wrapper) decodeDocument(
 func (xhr xmlHttpRequestV8Wrapper) decodeXMLHttpRequestBodyInit(
 	ctx *ScriptContext,
 	val *v8.Value,
-) (*html.XHRRequestBody, error) {
+) (io.Reader, error) {
 	if val.IsString() {
-		return html.NewXHRRequestBodyOfString(val.String()), nil
+		return strings.NewReader(val.String()), nil
 	}
 	if !val.IsObject() {
 		return nil, errors.New("Not supported yet")
 	}
 	obj := val.Object()
 	formData := getWrappedInstance[*html.FormData](obj)
-	// if ok {
-	return html.NewXHRRequestBodyOfFormData(formData), nil
-	// }
-	// return nil, errors.New("Not a node")
+	return formData.GetReader(), nil
 }
 
 func newXmlHttpRequestV8Wrapper(host *ScriptHost) xmlHttpRequestV8Wrapper {

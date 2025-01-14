@@ -153,7 +153,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 				formData.Append("key1", "Value%42")
 				formData.Append("key2", "Value&=42")
 				formData.Append("key3", "International? æøå")
-				xhr.SendBody(NewXHRRequestBodyOfFormData(formData))
+				xhr.SendBody(formData.GetReader())
 				Expect(reqErr).ToNot(HaveOccurred())
 				Expect(actualMethod).To(Equal("POST"))
 				actualReqContentType := actualHeader.Get("Content-Type")

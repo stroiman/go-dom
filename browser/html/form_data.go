@@ -3,6 +3,9 @@ package html
 import (
 	"io"
 	"slices"
+	"strings"
+
+	netURL "net/url"
 )
 
 type FormDataValue string // TODO Blob/file
@@ -111,12 +114,20 @@ func (d *FormData) Has(name string) bool {
 }
 
 func (d *FormData) GetReader() io.Reader {
-	data := NewXHRRequestBodyOfFormData(d)
-	return data.getReader()
+	return strings.NewReader(d.QueryString())
 }
 
 // QueryString returns the formdata as a &-separated URL encoded key-value pair.
 func (d *FormData) QueryString() string {
-	data := NewXHRRequestBodyOfFormData(d)
-	return data.string()
+	sb := strings.Builder{}
+	for i, e := range d.Entries {
+		if i != 0 {
+			sb.WriteString("&")
+		}
+
+		sb.WriteString(netURL.QueryEscape(e.Name))
+		sb.WriteString("=")
+		sb.WriteString(netURL.QueryEscape(string(e.Value)))
+	}
+	return sb.String()
 }

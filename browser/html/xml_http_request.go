@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	netURL "net/url"
 	"strings"
 
 	"github.com/stroiman/go-dom/browser/dom"
@@ -35,7 +34,7 @@ type XmlHttpRequest interface {
 	Abort() error
 	Open(string, string, ...RequestOption)
 	Send() error
-	SendBody(body *XHRRequestBody) error
+	SendBody(body io.Reader) error
 	Status() int
 	StatusText() string
 	ResponseText() string
@@ -112,19 +111,17 @@ func (req *xmlHttpRequest) Send() error {
 	return req.SendBody(nil)
 }
 
-func (req *xmlHttpRequest) SendBody(body *XHRRequestBody) error {
-	var reader io.Reader
+func (req *xmlHttpRequest) SendBody(body io.Reader) error {
 	if body != nil {
 		// TODO: Set content type or not?
 		req.headers["Content-Type"] = []string{"application/x-www-form-urlencoded"}
-		reader = body.getReader()
 	}
 	if req.async {
 		req.DispatchEvent(dom.NewCustomEvent((XHREventLoadstart)))
-		go req.send(reader)
+		go req.send(body)
 		return nil
 	}
-	return req.send(reader)
+	return req.send(body)
 }
 
 func (req *xmlHttpRequest) Status() int { return req.status }
@@ -224,39 +221,4 @@ func RequestOptionPassword(_ string) RequestOption {
 		// TODO
 		panic("Not implemented")
 	}
-}
-
-/* -------- XHRRequestBody -------- */
-
-type XHRRequestBody struct {
-	data []byte // Temporary solution, should probably be an io.Reader
-}
-
-func NewXHRRequestBodyOfString(data string) *XHRRequestBody {
-	return &XHRRequestBody{[]byte(data)}
-}
-
-func NewXHRRequestBodyOfFormData(data *FormData) *XHRRequestBody {
-	sb := strings.Builder{}
-	for i, e := range data.Entries {
-		if i != 0 {
-			sb.WriteString("&")
-		}
-
-		sb.WriteString(netURL.QueryEscape(e.Name))
-		sb.WriteString("=")
-		sb.WriteString(netURL.QueryEscape(string(e.Value)))
-	}
-
-	return &XHRRequestBody{
-		data: []byte(sb.String()),
-	}
-}
-
-func (b XHRRequestBody) getReader() io.Reader {
-	return bytes.NewReader(b.data)
-}
-
-func (b XHRRequestBody) string() string {
-	return string(b.data)
 }
