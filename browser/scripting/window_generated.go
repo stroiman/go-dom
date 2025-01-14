@@ -17,10 +17,10 @@ func newWindowV8Wrapper(host *ScriptHost) *windowV8Wrapper {
 }
 
 func init() {
-	RegisterJSClass("Window", "EventTarget", CreateWindowPrototype)
+	RegisterJSClass("Window", "EventTarget", createWindowPrototype)
 }
 
-func CreateWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newWindowV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)

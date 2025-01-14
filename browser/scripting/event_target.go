@@ -34,7 +34,7 @@ func (l v8EventListener) Equals(other dom.EventHandler) bool {
 	return ok && x.val == l.val
 }
 
-func CreateEvent(host *ScriptHost) *v8.FunctionTemplate {
+func createEvent(host *ScriptHost) *v8.FunctionTemplate {
 	result := NewIllegalConstructorBuilder[dom.Event](host)
 	result.SetDefaultInstanceLookup()
 	protoBuilder := result.NewPrototypeBuilder()
@@ -49,7 +49,7 @@ func CreateEvent(host *ScriptHost) *v8.FunctionTemplate {
 	return result.constructor
 }
 
-func CreateCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
+func createCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	res := v8.NewFunctionTemplateWithError(
 		iso,

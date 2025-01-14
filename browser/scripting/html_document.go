@@ -14,7 +14,7 @@ func NewHTMLDocumentWrapper(host *ScriptHost) ESHTMLDocumentWrapper {
 	return ESHTMLDocumentWrapper{NewDocumentV8Wrapper(host)}
 }
 
-func CreateHTMLDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createHTMLDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	wrapper := NewDocumentV8Wrapper(host)
 	builder := NewIllegalConstructorBuilder[html.HTMLDocument](host)
 	constructor := builder.constructor

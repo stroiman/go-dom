@@ -6,7 +6,7 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-func CreateLocationPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createLocationPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	builder := NewIllegalConstructorBuilder[Location](host)
 	builder.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (Location, error) {
 		location := ctx.Window().Location()

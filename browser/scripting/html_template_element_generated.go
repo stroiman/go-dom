@@ -8,10 +8,10 @@ import (
 )
 
 func init() {
-	RegisterJSClass("HTMLTemplateElement", "HTMLElement", CreateHtmlTemplateElementPrototype)
+	RegisterJSClass("HTMLTemplateElement", "HTMLElement", createHtmlTemplateElementPrototype)
 }
 
-func CreateHtmlTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createHtmlTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newHtmlTemplateElementV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)

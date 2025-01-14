@@ -6,7 +6,7 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-func CreateAttr(host *ScriptHost) *v8.FunctionTemplate {
+func createAttr(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	builder := NewIllegalConstructorBuilder[Attr](host)
 	builder.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (Attr, error) {
@@ -23,7 +23,7 @@ func CreateAttr(host *ScriptHost) *v8.FunctionTemplate {
 	return builder.constructor
 }
 
-func CreateNamedNodeMap(host *ScriptHost) *v8.FunctionTemplate {
+func createNamedNodeMap(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	builder := NewIllegalConstructorBuilder[NamedNodeMap](host)
 	builder.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (NamedNodeMap, error) {

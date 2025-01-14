@@ -230,29 +230,29 @@ func RegisterJSClass(
 }
 
 func init() {
-	RegisterJSClass("Event", "", CreateEvent)
-	RegisterJSClass("CustomEvent", "Event", CreateCustomEvent)
-	RegisterJSClass("NamedNodeMap", "", CreateNamedNodeMap)
-	RegisterJSClass("Location", "", CreateLocationPrototype)
-	RegisterJSClass("NodeList", "", CreateNodeList)
+	RegisterJSClass("Event", "", createEvent)
+	RegisterJSClass("CustomEvent", "Event", createCustomEvent)
+	RegisterJSClass("NamedNodeMap", "", createNamedNodeMap)
+	RegisterJSClass("Location", "", createLocationPrototype)
+	RegisterJSClass("NodeList", "", createNodeList)
 	RegisterJSClass("EventTarget", "", CreateEventTarget)
 
-	RegisterJSClass("XMLHttpRequest", "EventTarget", CreateXmlHttpRequestPrototype)
+	RegisterJSClass("XMLHttpRequest", "EventTarget", createXmlHttpRequestPrototype)
 
-	RegisterJSClass("Document", "Node", CreateDocumentPrototype)
-	RegisterJSClass("HTMLDocument", "Document", CreateHTMLDocumentPrototype)
-	RegisterJSClass("DocumentFragment", "Node", CreateDocumentFragmentPrototype)
-	RegisterJSClass("ShadowRoot", "DocumentFragment", CreateShadowRootPrototype)
-	RegisterJSClass("Element", "Node", CreateElement)
-	RegisterJSClass("HTMLElement", "Element", CreateHtmlElement)
-	RegisterJSClass("Attr", "Node", CreateAttr)
+	RegisterJSClass("Document", "Node", createDocumentPrototype)
+	RegisterJSClass("HTMLDocument", "Document", createHTMLDocumentPrototype)
+	RegisterJSClass("DocumentFragment", "Node", createDocumentFragmentPrototype)
+	RegisterJSClass("ShadowRoot", "DocumentFragment", createShadowRootPrototype)
+	RegisterJSClass("Element", "Node", createElement)
+	RegisterJSClass("HTMLElement", "Element", createHtmlElement)
+	RegisterJSClass("Attr", "Node", createAttr)
 
-	RegisterJSClass("FormData", "", CreateFormData)
-	RegisterJSClass("DOMParser", "", CreateDOMParserPrototype)
+	RegisterJSClass("FormData", "", createFormData)
+	RegisterJSClass("DOMParser", "", createDOMParserPrototype)
 
 	for _, cls := range htmlElements {
 		if _, found := classes[cls]; !found {
-			RegisterJSClass(cls, "HTMLElement", CreateIllegalConstructor)
+			RegisterJSClass(cls, "HTMLElement", createIllegalConstructor)
 		}
 	}
 }

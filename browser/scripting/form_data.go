@@ -25,7 +25,7 @@ func (w FormDataV8Wrapper) CreateInstance(
 	return nil, nil
 }
 
-func CreateFormData(host *ScriptHost) *v8.FunctionTemplate {
+func createFormData(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewFormDataV8Wrapper(host)
 	builder := NewConstructorBuilder[*html.FormData](

@@ -30,7 +30,7 @@ func (w DocumentV8Wrapper) BuildInstanceTemplate(constructor *v8.FunctionTemplat
 	)
 }
 
-func CreateDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewDocumentV8Wrapper(host)
 	builder := NewConstructorBuilder[Document](

@@ -8,10 +8,10 @@ import (
 )
 
 func init() {
-	RegisterJSClass("Node", "EventTarget", CreateNodePrototype)
+	RegisterJSClass("Node", "EventTarget", createNodePrototype)
 }
 
-func CreateNodePrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createNodePrototype(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newNodeV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)

@@ -31,7 +31,7 @@ func (e ESElement) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return instance.Value, nil
 }
 
-func CreateElement(host *ScriptHost) *v8.FunctionTemplate {
+func createElement(host *ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := ESElement{NewESContainerWrapper[Element](host)}
 	builder := NewIllegalConstructorBuilder[Element](host)

@@ -49,7 +49,7 @@ thisArg Optional
     Value to use as this when executing callback.
 */
 
-func CreateNodeList(host *ScriptHost) *v8.FunctionTemplate {
+func createNodeList(host *ScriptHost) *v8.FunctionTemplate {
 	nodeListIterator := NewIterator[dom.Node](
 		host,
 		func(instance dom.Node, ctx *ScriptContext) (*v8.Value, error) {

@@ -186,7 +186,7 @@ func CreateV8FunctionTemplateCallbackBody(
 }
 
 func prototypeFactoryFunctionName(data ESConstructorData) string {
-	return fmt.Sprintf("Create%sPrototype", data.InnerTypeName)
+	return fmt.Sprintf("create%sPrototype", data.InnerTypeName)
 }
 
 func CreateV8Constructor(data ESConstructorData) g.Generator {
