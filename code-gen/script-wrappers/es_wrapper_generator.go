@@ -25,6 +25,7 @@ const (
 	dom  = "github.com/stroiman/go-dom/browser/dom"
 	html = "github.com/stroiman/go-dom/browser/html"
 	sc   = "github.com/stroiman/go-dom/browser/scripting"
+	goja = "github.com/stroiman/go-dom/browser/goja_driver"
 	v8   = "github.com/tommie/v8go"
 )
 

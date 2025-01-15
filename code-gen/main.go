@@ -48,6 +48,12 @@ func main() {
 	generatorType := flag.String("g", "", "Generator type")
 	flag.Parse()
 	switch *generatorType {
+	case "goja":
+		gen := wrappers.NewGojaWrapperModuleGenerator(idlParsedFS)
+		err := gen.GenerateScriptWrappers()
+		exitOnError(err)
+		os.Exit(0)
+		return
 	case "scripting":
 		gen := wrappers.NewScriptWrapperModulesGenerator(idlParsedFS)
 		err := gen.GenerateScriptWrappers()

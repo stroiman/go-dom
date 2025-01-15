@@ -68,8 +68,8 @@ func (g WrapperGeneratorsSpec) Module(spec string) *WrapperGeneratorFileSpec {
 	return mod
 }
 
-func writeGenerator(writer io.Writer, generator g.Generator) error {
-	file := jen.NewFilePath(sc)
+func writeGenerator(writer io.Writer, packagePath string, generator g.Generator) error {
+	file := jen.NewFilePath(packagePath)
 	file.HeaderComment("This file is generated. Do not edit.")
 	file.ImportName(dom, "browser")
 	file.ImportAlias(v8, "v8")
@@ -84,6 +84,7 @@ type TargetGenerators interface {
 type ScriptWrapperModulesGenerator struct {
 	IdlSources       fs.FS
 	Specs            WrapperGeneratorsSpec
+	PackagePath      string
 	TargetGenerators TargetGenerators
 }
 
@@ -104,10 +105,12 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 	generators := g.StatementList()
 	for _, specType := range spec.GetTypesSorted() {
 		typeGenerationInformation := createData(data, specType)
-		generators.Append(CreateV8Generator(typeGenerationInformation))
+		generators.Append(
+			gen.TargetGenerators.CreateJSConstructorGenerator(typeGenerationInformation),
+		)
 		generators.Append(g.Line)
 	}
-	return writeGenerator(writer, generators)
+	return writeGenerator(writer, gen.PackagePath, generators)
 }
 
 func (gen ScriptWrapperModulesGenerator) writeModuleTypes(
@@ -132,7 +135,7 @@ func (gen ScriptWrapperModulesGenerator) writeModuleTypes(
 			errs[i] = err
 		} else {
 			typeGenerationInformation := createData(data, specType)
-			errs[i] = writeGenerator(writer, CreateV8Generator(typeGenerationInformation))
+			errs[i] = writeGenerator(writer, gen.PackagePath, gen.TargetGenerators.CreateJSConstructorGenerator(typeGenerationInformation))
 		}
 	}
 	return errors.Join(errs...)
@@ -315,6 +318,7 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	return ScriptWrapperModulesGenerator{
 		IdlSources:       idlSources,
 		Specs:            specs,
+		PackagePath:      sc,
 		TargetGenerators: V8TargetGenerators{},
 	}
 }
