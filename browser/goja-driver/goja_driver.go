@@ -27,7 +27,7 @@ func WindowConstructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object 
 
 type Wrapper interface {
 	Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object
-	StoreInternal(value any, this *Object)
+	storeInternal(value any, this *Object)
 }
 
 type CreateWrapper func(instance *GojaInstance) Wrapper

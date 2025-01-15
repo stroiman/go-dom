@@ -4,15 +4,15 @@ import (
 	. "github.com/dop251/goja"
 )
 
-type BaseInstanceWrapper[T any] struct {
+type baseInstanceWrapper[T any] struct {
 	instance *GojaInstance
 }
 
-func NewBaseInstanceWrapper[T any](instance *GojaInstance) BaseInstanceWrapper[T] {
-	return BaseInstanceWrapper[T]{instance}
+func newBaseInstanceWrapper[T any](instance *GojaInstance) baseInstanceWrapper[T] {
+	return baseInstanceWrapper[T]{instance}
 }
 
-func (w BaseInstanceWrapper[T]) StoreInternal(value any, obj *Object) {
+func (w baseInstanceWrapper[T]) storeInternal(value any, obj *Object) {
 	obj.DefineDataPropertySymbol(
 		w.instance.wrappedGoObj,
 		w.instance.vm.ToValue(value),
@@ -23,7 +23,7 @@ func (w BaseInstanceWrapper[T]) StoreInternal(value any, obj *Object) {
 	// obj.SetSymbol(w.instance.wrappedGoObj, w.instance.vm.ToValue(value))
 }
 
-func (w BaseInstanceWrapper[T]) GetInstance(c FunctionCall) T {
+func (w baseInstanceWrapper[T]) GetInstance(c FunctionCall) T {
 	if c.This == nil {
 		panic("No this pointer")
 	}

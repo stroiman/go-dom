@@ -5,14 +5,14 @@ import (
 	"github.com/stroiman/go-dom/browser/dom"
 )
 
-type NodeWrapper struct {
-	BaseInstanceWrapper[dom.Node]
+type nodeWrapper struct {
+	baseInstanceWrapper[dom.Node]
 }
 
 func NewNodeWrapper(instance *GojaInstance) Wrapper {
-	return NodeWrapper{NewBaseInstanceWrapper[dom.Node](instance)}
+	return nodeWrapper{newBaseInstanceWrapper[dom.Node](instance)}
 }
 
-func (w NodeWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
+func (w nodeWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
 	panic(r.NewTypeError("Illegal Constructor"))
 }

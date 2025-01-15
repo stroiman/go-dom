@@ -6,11 +6,11 @@ import (
 )
 
 type DocumentWrapper struct {
-	BaseInstanceWrapper[dom.Document]
+	baseInstanceWrapper[dom.Document]
 }
 
 func NewDocumentWrapper(instance *GojaInstance) Wrapper {
-	return DocumentWrapper{NewBaseInstanceWrapper[dom.Document](instance)}
+	return DocumentWrapper{newBaseInstanceWrapper[dom.Document](instance)}
 }
 
 func (w DocumentWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {

@@ -6,7 +6,7 @@ import (
 )
 
 type WindowWrapper struct {
-	BaseInstanceWrapper[html.Window]
+	baseInstanceWrapper[html.Window]
 }
 
 func (w WindowWrapper) Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
@@ -14,5 +14,5 @@ func (w WindowWrapper) Constructor(call goja.ConstructorCall, r *goja.Runtime) *
 }
 
 func NewWindowWrapper(instance *GojaInstance) Wrapper {
-	return WindowWrapper{NewBaseInstanceWrapper[html.Window](instance)}
+	return WindowWrapper{newBaseInstanceWrapper[html.Window](instance)}
 }

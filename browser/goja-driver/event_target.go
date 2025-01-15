@@ -8,11 +8,11 @@ import (
 )
 
 type EventTargetWrapper struct {
-	BaseInstanceWrapper[dom.EventTarget]
+	baseInstanceWrapper[dom.EventTarget]
 }
 
 func NewEventTargetWrapper(instance *GojaInstance) Wrapper {
-	return EventTargetWrapper{NewBaseInstanceWrapper[dom.EventTarget](instance)}
+	return EventTargetWrapper{newBaseInstanceWrapper[dom.EventTarget](instance)}
 }
 
 type GojaEventListener struct {
@@ -32,7 +32,7 @@ func NewGojaEventListener(r *GojaInstance, v goja.Value) dom.EventHandler {
 func (h *GojaEventListener) HandleEvent(e dom.Event) error {
 	customEvent := h.instance.globals["CustomEvent"]
 	obj := h.instance.vm.CreateObject(customEvent.Prototype)
-	customEvent.Wrapper.StoreInternal(e, obj)
+	customEvent.Wrapper.storeInternal(e, obj)
 	_, err := h.f(obj, obj)
 	return err
 }
@@ -47,7 +47,7 @@ func (h *GojaEventListener) Equals(e dom.EventHandler) bool {
 
 func (w EventTargetWrapper) Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
 	newInstance := dom.NewEventTarget()
-	w.StoreInternal(newInstance, call.This)
+	w.storeInternal(newInstance, call.This)
 	return nil
 }
 

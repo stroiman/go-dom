@@ -6,12 +6,12 @@ import (
 )
 
 type EventWrapper struct {
-	BaseInstanceWrapper[dom.Event]
+	baseInstanceWrapper[dom.Event]
 }
 
 func NewEventWrapper(instance *GojaInstance) Wrapper { return newEventWrapper(instance) }
 func newEventWrapper(instance *GojaInstance) EventWrapper {
-	return EventWrapper{NewBaseInstanceWrapper[dom.Event](instance)}
+	return EventWrapper{newBaseInstanceWrapper[dom.Event](instance)}
 }
 
 type GojaEvent[T dom.Event] struct {
@@ -33,7 +33,7 @@ func (w EventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
 		}
 	}
 	newInstance := dom.NewCustomEvent(arg1, options...)
-	w.StoreInternal(newInstance, call.This)
+	w.storeInternal(newInstance, call.This)
 	return nil
 }
 
