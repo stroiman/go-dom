@@ -12,7 +12,7 @@ import (
 )
 
 type ScriptHost interface {
-	NewScriptEngine(window Window) ScriptContext
+	NewContext(window Window) ScriptContext
 	Dispose()
 }
 
@@ -47,7 +47,7 @@ type window struct {
 	EventTarget
 	document            Document
 	scriptEngineFactory ScriptHost
-	scriptEngine        ScriptContext
+	scriptContext       ScriptContext
 	httpClient          http.Client
 	baseLocation        string
 	domParser           domParser
@@ -101,12 +101,12 @@ func OpenWindowFromLocation(location string, windowOptions ...WindowOption) (Win
 
 func (w *window) initScriptEngine() {
 	factory := w.scriptEngineFactory
-	engine := w.scriptEngine
+	engine := w.scriptContext
 	if engine != nil {
 		engine.Dispose()
 	}
 	if factory != nil {
-		w.scriptEngine = factory.NewScriptEngine(w)
+		w.scriptContext = factory.NewContext(w)
 	}
 }
 
@@ -193,24 +193,24 @@ func (w *window) LoadHTML(html string) error {
 }
 
 func (w *window) Run(script string) error {
-	if w.scriptEngine != nil {
-		return w.scriptEngine.Run(script)
+	if w.scriptContext != nil {
+		return w.scriptContext.Run(script)
 	}
 	return errors.New("Script engine not initialised")
 }
 
 func (w *window) Eval(script string) (any, error) {
-	if w.scriptEngine != nil {
-		return w.scriptEngine.Eval(script)
+	if w.scriptContext != nil {
+		return w.scriptContext.Eval(script)
 	}
 	return nil, errors.New("Script engine not initialised")
 }
 
 func (w *window) SetScriptRunner(r ScriptContext) {
-	w.scriptEngine = r
+	w.scriptContext = r
 }
 
-func (w *window) GetScriptEngine() ScriptContext { return w.scriptEngine }
+func (w *window) GetScriptEngine() ScriptContext { return w.scriptContext }
 
 func (w *window) Location() Location {
 	var u *netURL.URL
@@ -223,8 +223,8 @@ func (w *window) Location() Location {
 }
 
 func (w *window) Dispose() {
-	if w.scriptEngine != nil {
-		w.scriptEngine.Dispose()
+	if w.scriptContext != nil {
+		w.scriptContext.Dispose()
 	}
 }
 

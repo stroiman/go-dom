@@ -325,7 +325,7 @@ func (host *V8ScriptHost) NewContext(window html.Window) *V8ScriptContext {
 
 type Wrapper V8ScriptHost
 
-func (w *Wrapper) NewScriptEngine(window html.Window) html.ScriptContext {
+func (w *Wrapper) NewContext(window html.Window) html.ScriptContext {
 	host := (*V8ScriptHost)(w)
 	return host.NewContext(window)
 }
