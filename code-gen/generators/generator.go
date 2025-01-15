@@ -90,6 +90,10 @@ func (v Value) Method(name string) Value {
 	return Value{Raw(v.Generate().Dot(name))}
 }
 
+func (v Value) TypeParam(g Generator) Value {
+	return Value{Raw(v.Generate().Index(g.Generate()))}
+}
+
 func (m Value) Call(args ...Generator) Value {
 	return Value{Raw(m.Generate().CallFunc(func(g *jen.Group) {
 		for _, arg := range args {
