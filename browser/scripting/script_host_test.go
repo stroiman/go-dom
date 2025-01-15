@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/stroiman/go-dom/browser/html"
-	"github.com/stroiman/go-dom/browser/scripting"
 )
 
 var _ = Describe("ScriptHost", func() {
@@ -39,7 +38,7 @@ var _ = Describe("ScriptHost", func() {
     <div>I should not be in the output</div>
   </body></html>
 `)
-				options := html.WindowOptions{ScriptHost: (*scripting.Wrapper)(host)}
+				options := html.WindowOptions{ScriptHost: host}
 				win, err := html.NewWindowReader(reader, options)
 				defer win.Close()
 				Expect(err).ToNot(HaveOccurred())

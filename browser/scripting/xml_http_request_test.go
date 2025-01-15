@@ -7,7 +7,6 @@ import (
 	"github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/internal/http"
-	. "github.com/stroiman/go-dom/browser/scripting"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -35,7 +34,7 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 		var err error
 		window = html.NewWindow(html.WindowOptions{
 			BaseLocation: "http://example.com",
-			ScriptHost:   (*Wrapper)(host),
+			ScriptHost:   host,
 			HttpClient:   NewHttpClientFromHandler(server),
 		})
 		Expect(err).ToNot(HaveOccurred())

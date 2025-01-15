@@ -11,7 +11,6 @@ import (
 	. "github.com/stroiman/go-dom/browser/internal/http"
 	"github.com/stroiman/go-dom/browser/internal/test"
 	suite "github.com/stroiman/go-dom/browser/internal/test/script-test-suite"
-	"github.com/stroiman/go-dom/browser/scripting"
 	. "github.com/stroiman/go-dom/browser/scripting"
 )
 
@@ -26,7 +25,7 @@ var scriptTestSuite *suite.ScriptTestSuite
 
 func OpenTestWindowFromHandler(location string, handler http.Handler) (html.Window, error) {
 	win, err := html.OpenWindowFromLocation(location, html.WindowOptions{
-		ScriptHost: (*scripting.Wrapper)(host),
+		ScriptHost: host,
 		HttpClient: NewHttpClientFromHandler(handler),
 	})
 	DeferCleanup(func() {
@@ -43,7 +42,7 @@ func init() {
 	// logLevel.Set(slog.LevelDebug)
 
 	host = NewScriptHost()
-	scriptTestSuite = suite.NewScriptTestSuite((*scripting.Wrapper)(host), "v8")
+	scriptTestSuite = suite.NewScriptTestSuite(host, "v8")
 	scriptTestSuite.CreateAllGinkgoTests()
 
 	BeforeSuite(func() {

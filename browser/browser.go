@@ -36,17 +36,15 @@ func (b *Browser) Open(location string) (window Window, err error) {
 }
 
 func NewBrowser() *Browser {
-	host := scripting.NewScriptHost()
 	return &Browser{
-		ScriptHost: (*scripting.Wrapper)(host),
+		ScriptHost: scripting.NewScriptHost(),
 		Client:     NewHttpClient(),
 	}
 }
 
 func NewBrowserFromHandler(handler http.Handler) *Browser {
-	host := scripting.NewScriptHost()
 	return &Browser{
-		ScriptHost: (*scripting.Wrapper)(host),
+		ScriptHost: scripting.NewScriptHost(),
 		Client:     NewHttpClientFromHandler(handler),
 	}
 }

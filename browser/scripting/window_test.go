@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/stroiman/go-dom/browser/html"
-	"github.com/stroiman/go-dom/browser/scripting"
 )
 
 var _ = Describe("Window", func() {
@@ -52,7 +51,7 @@ var _ = Describe("Window", func() {
   }
   window.document.addEventListener("DOMContentLoaded", listener1);
   window.document.addEventListener("load", listener2);
-</script></body>`), html.WindowOptions{ScriptHost: (*scripting.Wrapper)(host)},
+</script></body>`), html.WindowOptions{ScriptHost: host},
 				)
 				Expect(err).ToNot(HaveOccurred())
 				ctx := win.GetScriptEngine()

@@ -50,7 +50,7 @@ func NewTestContext(hooks ...CreateHook) TestScriptContext {
 	window := html.NewWindow(html.WindowOptions{
 		// ScriptEngineFactory: (*Wrapper)(host),
 	})
-	ctx.V8ScriptContext = host.NewContext(window)
+	ctx.V8ScriptContext = host.NewV8Context(window)
 	DeferCleanup(ctx.Close)
 	for _, hook := range hooks {
 		hook(&ctx)
@@ -78,7 +78,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 
 	BeforeEach(func() {
 		window := html.NewWindow()
-		ctx.V8ScriptContext = host.NewContext(window)
+		ctx.V8ScriptContext = host.NewV8Context(window)
 		window.SetScriptRunner(ctx)
 		for _, hook := range hooks {
 			hook(&ctx)

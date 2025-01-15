@@ -297,11 +297,15 @@ func (host *V8ScriptHost) Close() {
 
 var global *v8.Object
 
-func (host *V8ScriptHost) NewContext(window html.Window) *V8ScriptContext {
+func (host *V8ScriptHost) NewContext(w html.Window) html.ScriptContext {
+	return host.NewV8Context(w)
+}
+
+func (host *V8ScriptHost) NewV8Context(w html.Window) *V8ScriptContext {
 	context := &V8ScriptContext{
 		host:     host,
 		v8ctx:    v8.NewContext(host.iso, host.windowTemplate),
-		window:   window,
+		window:   w,
 		v8nodes:  make(map[ObjectId]*v8.Value),
 		domNodes: make(map[ObjectId]Entity),
 	}
@@ -313,26 +317,14 @@ func (host *V8ScriptHost) NewContext(window html.Window) *V8ScriptContext {
 	}
 	global = context.v8ctx.Global()
 	errorCallback := func(err error) {
-		window.DispatchEvent(NewCustomEvent("error"))
+		w.DispatchEvent(NewCustomEvent("error"))
 	}
 	context.eventLoop = NewEventLoop(global, errorCallback)
 	host.contexts[context.v8ctx] = context
-	context.cacheNode(global, window)
+	context.cacheNode(global, w)
 	context.AddDisposer(context.eventLoop.Start())
 
 	return context
-}
-
-type Wrapper V8ScriptHost
-
-func (w *Wrapper) NewContext(window html.Window) html.ScriptContext {
-	host := (*V8ScriptHost)(w)
-	return host.NewContext(window)
-}
-
-func (w *Wrapper) Close() {
-	host := (*V8ScriptHost)(w)
-	host.Close()
 }
 
 func must(err error) {
