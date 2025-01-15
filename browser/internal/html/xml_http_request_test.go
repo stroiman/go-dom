@@ -8,8 +8,8 @@ import (
 
 	. "github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/html"
+	. "github.com/stroiman/go-dom/browser/internal/html"
 	. "github.com/stroiman/go-dom/browser/internal/http"
-	. "github.com/stroiman/go-dom/browser/scripting/internal/html"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

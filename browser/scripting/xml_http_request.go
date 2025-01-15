@@ -7,7 +7,7 @@ import (
 
 	. "github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/scripting/internal/html"
+	. "github.com/stroiman/go-dom/browser/internal/html"
 
 	v8 "github.com/tommie/v8go"
 )
