@@ -10,7 +10,7 @@ type DocumentV8Wrapper struct {
 	ESElementContainerWrapper[Document]
 }
 
-func NewDocumentV8Wrapper(host *ScriptHost) DocumentV8Wrapper {
+func NewDocumentV8Wrapper(host *V8ScriptHost) DocumentV8Wrapper {
 	return DocumentV8Wrapper{NewESContainerWrapper[Document](host)}
 }
 
@@ -30,7 +30,7 @@ func (w DocumentV8Wrapper) BuildInstanceTemplate(constructor *v8.FunctionTemplat
 	)
 }
 
-func createDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createDocumentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewDocumentV8Wrapper(host)
 	builder := NewConstructorBuilder[Document](

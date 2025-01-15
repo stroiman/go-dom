@@ -17,7 +17,7 @@ type xmlHttpRequestV8Wrapper struct {
 }
 
 func (xhr xmlHttpRequestV8Wrapper) decodeDocument(
-	ctx *ScriptContext,
+	ctx *V8ScriptContext,
 	val *v8.Value,
 ) (io.Reader, error) {
 	if val.IsNull() {
@@ -27,7 +27,7 @@ func (xhr xmlHttpRequestV8Wrapper) decodeDocument(
 }
 
 func (xhr xmlHttpRequestV8Wrapper) decodeXMLHttpRequestBodyInit(
-	ctx *ScriptContext,
+	ctx *V8ScriptContext,
 	val *v8.Value,
 ) (io.Reader, error) {
 	if val.IsString() {
@@ -44,12 +44,12 @@ func (xhr xmlHttpRequestV8Wrapper) decodeXMLHttpRequestBodyInit(
 	}
 }
 
-func newXmlHttpRequestV8Wrapper(host *ScriptHost) xmlHttpRequestV8Wrapper {
+func newXmlHttpRequestV8Wrapper(host *V8ScriptHost) xmlHttpRequestV8Wrapper {
 	return xmlHttpRequestV8Wrapper{newHandleReffedObject[XmlHttpRequest](host)}
 }
 
 func (xhr xmlHttpRequestV8Wrapper) CreateInstance(
-	ctx *ScriptContext,
+	ctx *V8ScriptContext,
 	this *v8.Object,
 ) (*v8.Value, error) {
 	result := NewXmlHttpRequest(ctx.Window().HTTPClient())

@@ -6,10 +6,10 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-func createAttr(host *ScriptHost) *v8.FunctionTemplate {
+func createAttr(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	builder := NewIllegalConstructorBuilder[Attr](host)
-	builder.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (Attr, error) {
+	builder.instanceLookup = func(ctx *V8ScriptContext, this *v8.Object) (Attr, error) {
 		instance, ok := ctx.getCachedNode(this)
 		if e, e_ok := instance.(Attr); e_ok && ok {
 			return e, nil
@@ -23,10 +23,10 @@ func createAttr(host *ScriptHost) *v8.FunctionTemplate {
 	return builder.constructor
 }
 
-func createNamedNodeMap(host *ScriptHost) *v8.FunctionTemplate {
+func createNamedNodeMap(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	builder := NewIllegalConstructorBuilder[NamedNodeMap](host)
-	builder.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (NamedNodeMap, error) {
+	builder.instanceLookup = func(ctx *V8ScriptContext, this *v8.Object) (NamedNodeMap, error) {
 		instance, ok := ctx.getCachedNode(this)
 		if e, e_ok := instance.(NamedNodeMap); e_ok && ok {
 			return e, nil
@@ -37,7 +37,7 @@ func createNamedNodeMap(host *ScriptHost) *v8.FunctionTemplate {
 	proto := builder.NewPrototypeBuilder()
 	proto.CreateReadonlyProp2(
 		"length",
-		func(instance NamedNodeMap, ctx *ScriptContext) (*v8.Value, error) {
+		func(instance NamedNodeMap, ctx *V8ScriptContext) (*v8.Value, error) {
 			return v8.NewValue(iso, int32(instance.Length()))
 		},
 	)

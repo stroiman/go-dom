@@ -4,7 +4,7 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-func createHtmlElement(host *ScriptHost) *v8.FunctionTemplate {
+func createHtmlElement(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	res := v8.NewFunctionTemplateWithError(
 		iso,

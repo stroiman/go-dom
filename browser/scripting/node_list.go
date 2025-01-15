@@ -49,10 +49,10 @@ thisArg Optional
     Value to use as this when executing callback.
 */
 
-func createNodeList(host *ScriptHost) *v8.FunctionTemplate {
+func createNodeList(host *V8ScriptHost) *v8.FunctionTemplate {
 	nodeListIterator := NewIterator[dom.Node](
 		host,
-		func(instance dom.Node, ctx *ScriptContext) (*v8.Value, error) {
+		func(instance dom.Node, ctx *V8ScriptContext) (*v8.Value, error) {
 			return ctx.getInstanceForNode(instance)
 		},
 	)
@@ -62,7 +62,7 @@ func createNodeList(host *ScriptHost) *v8.FunctionTemplate {
 	proto := builder.NewPrototypeBuilder()
 	proto.CreateReadonlyProp2(
 		"length",
-		func(instance dom.NodeList, ctx *ScriptContext) (*v8.Value, error) {
+		func(instance dom.NodeList, ctx *V8ScriptContext) (*v8.Value, error) {
 			return v8.NewValue(iso, uint32(instance.Length()))
 		},
 	)

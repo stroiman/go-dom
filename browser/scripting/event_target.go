@@ -9,11 +9,11 @@ import (
 )
 
 type v8EventListener struct {
-	ctx *ScriptContext
+	ctx *V8ScriptContext
 	val *v8.Value
 }
 
-func NewV8EventListener(ctx *ScriptContext, val *v8.Value) dom.EventHandler {
+func NewV8EventListener(ctx *V8ScriptContext, val *v8.Value) dom.EventHandler {
 	return v8EventListener{ctx, val}
 }
 
@@ -34,7 +34,7 @@ func (l v8EventListener) Equals(other dom.EventHandler) bool {
 	return ok && x.val == l.val
 }
 
-func createEvent(host *ScriptHost) *v8.FunctionTemplate {
+func createEvent(host *V8ScriptHost) *v8.FunctionTemplate {
 	result := NewIllegalConstructorBuilder[dom.Event](host)
 	result.SetDefaultInstanceLookup()
 	protoBuilder := result.NewPrototypeBuilder()
@@ -49,7 +49,7 @@ func createEvent(host *ScriptHost) *v8.FunctionTemplate {
 	return result.constructor
 }
 
-func createCustomEvent(host *ScriptHost) *v8.FunctionTemplate {
+func createCustomEvent(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	res := v8.NewFunctionTemplateWithError(
 		iso,
@@ -89,7 +89,7 @@ type eventTargetV8Wrapper struct {
 	handleReffedObject[dom.EventTarget]
 }
 
-func newEventTargetV8Wrapper(host *ScriptHost) eventTargetV8Wrapper {
+func newEventTargetV8Wrapper(host *V8ScriptHost) eventTargetV8Wrapper {
 	return eventTargetV8Wrapper{newHandleReffedObject[dom.EventTarget](host)}
 }
 
@@ -108,7 +108,7 @@ func (w eventTargetV8Wrapper) getInstance(info *v8.FunctionCallbackInfo) (dom.Ev
 	}
 }
 
-func CreateEventTarget(host *ScriptHost) *v8.FunctionTemplate {
+func CreateEventTarget(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newEventTargetV8Wrapper(host)
 	res := v8.NewFunctionTemplate(

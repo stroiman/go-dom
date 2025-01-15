@@ -7,12 +7,12 @@ import (
 )
 
 type ConstructorBuilder[T any] struct {
-	host           *ScriptHost
+	host           *V8ScriptHost
 	constructor    *v8.FunctionTemplate
-	instanceLookup func(*ScriptContext, *v8.Object) (T, error)
+	instanceLookup func(*V8ScriptContext, *v8.Object) (T, error)
 }
 
-func createIllegalConstructor(host *ScriptHost) *v8.FunctionTemplate {
+func createIllegalConstructor(host *V8ScriptHost) *v8.FunctionTemplate {
 	result := v8.NewFunctionTemplateWithError(
 		host.iso,
 		func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -24,7 +24,7 @@ func createIllegalConstructor(host *ScriptHost) *v8.FunctionTemplate {
 }
 
 func NewConstructorBuilder[T any](
-	host *ScriptHost,
+	host *V8ScriptHost,
 	cb v8.FunctionCallbackWithError,
 ) ConstructorBuilder[T] {
 	constructor := v8.NewFunctionTemplateWithError(
@@ -39,7 +39,7 @@ func NewConstructorBuilder[T any](
 	return builder
 }
 
-func NewIllegalConstructorBuilder[T any](host *ScriptHost) ConstructorBuilder[T] {
+func NewIllegalConstructorBuilder[T any](host *V8ScriptHost) ConstructorBuilder[T] {
 	constructor := createIllegalConstructor(host)
 
 	builder := ConstructorBuilder[T]{host: host,
@@ -48,7 +48,7 @@ func NewIllegalConstructorBuilder[T any](host *ScriptHost) ConstructorBuilder[T]
 	return builder
 }
 
-func getInstanceFromThis[T any](ctx *ScriptContext, this *v8.Object) (instance T, err error) {
+func getInstanceFromThis[T any](ctx *V8ScriptContext, this *v8.Object) (instance T, err error) {
 	cachedEntity, ok := ctx.getCachedNode(this)
 	if !ok {
 		err = errors.New("No cached entity could be found for `this`")
@@ -63,7 +63,7 @@ func getInstanceFromThis[T any](ctx *ScriptContext, this *v8.Object) (instance T
 }
 
 func (c *ConstructorBuilder[T]) SetDefaultInstanceLookup() {
-	c.instanceLookup = func(ctx *ScriptContext, this *v8.Object) (val T, err error) {
+	c.instanceLookup = func(ctx *V8ScriptContext, this *v8.Object) (val T, err error) {
 		instance, ok := ctx.getCachedNode(this)
 		if instance, e_ok := instance.(T); e_ok && ok {
 			return instance, nil
@@ -97,9 +97,9 @@ func (c ConstructorBuilder[T]) NewInstanceBuilder() PrototypeBuilder[T] {
 }
 
 type PrototypeBuilder[T any] struct {
-	host   *ScriptHost
+	host   *V8ScriptHost
 	proto  *v8.ObjectTemplate
-	lookup func(*ScriptContext, *v8.Object) (T, error)
+	lookup func(*V8ScriptContext, *v8.Object) (T, error)
 }
 
 func (b ConstructorBuilder[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, error) {
@@ -114,12 +114,12 @@ func (b PrototypeBuilder[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, erro
 
 type FunctionInfo[T any] struct {
 	instance T
-	ctx      *ScriptContext
+	ctx      *V8ScriptContext
 }
 
 func (h PrototypeBuilder[T]) CreateReadonlyProp2(
 	name string,
-	fn func(T, *ScriptContext) (*v8.Value, error),
+	fn func(T, *V8ScriptContext) (*v8.Value, error),
 ) {
 	h.proto.SetAccessorPropertyCallback(name,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -199,10 +199,10 @@ func (h PrototypeBuilder[T]) CreateFunctionStringToString(name string, fn func(T
 }
 
 func TryParseArgs[T interface{}](
-	ctx *ScriptContext,
+	ctx *V8ScriptContext,
 	args []*v8.Value,
 	index int,
-	parsers ...func(*ScriptContext, *v8.Value) (T, error),
+	parsers ...func(*V8ScriptContext, *v8.Value) (T, error),
 ) (res T, err error) {
 	if index >= len(args) {
 		err = errors.New("Index out of range")
@@ -221,7 +221,7 @@ func TryParseArgs[T interface{}](
 func TryParseArg[T any](
 	args *argumentHelper,
 	index int,
-	parsers ...func(*ScriptContext, *v8.Value) (T, error),
+	parsers ...func(*V8ScriptContext, *v8.Value) (T, error),
 ) (result T, err error) {
 	value := args.getArg(index)
 	if value == nil {
@@ -241,7 +241,7 @@ func TryParseArgWithDefault[T any](
 	args *argumentHelper,
 	index int,
 	defaultValue func() T,
-	parsers ...func(*ScriptContext, *v8.Value) (T, error),
+	parsers ...func(*V8ScriptContext, *v8.Value) (T, error),
 ) (result T, err error) {
 	if index >= len(args.Args()) {
 		return defaultValue(), nil

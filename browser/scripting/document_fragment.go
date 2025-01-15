@@ -8,7 +8,7 @@ import (
 
 // createDocumentFragmentPrototype currently only exists to allow code to check
 // for inheritence, i.e., `node instanceof DocumentFragment`
-func createDocumentFragmentPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createDocumentFragmentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	builder := NewIllegalConstructorBuilder[Location](host)
 	wrapper := NewESContainerWrapper[DocumentFragment](host)
 	wrapper.Install(builder.constructor)

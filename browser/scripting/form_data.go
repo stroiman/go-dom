@@ -12,12 +12,12 @@ type FormDataV8Wrapper struct {
 	handleReffedObject[*html.FormData]
 }
 
-func NewFormDataV8Wrapper(host *ScriptHost) FormDataV8Wrapper {
+func NewFormDataV8Wrapper(host *V8ScriptHost) FormDataV8Wrapper {
 	return FormDataV8Wrapper{newHandleReffedObject[*html.FormData](host)}
 }
 
 func (w FormDataV8Wrapper) CreateInstance(
-	ctx *ScriptContext,
+	ctx *V8ScriptContext,
 	this *v8.Object,
 ) (*v8.Value, error) {
 	var value = html.NewFormData()
@@ -25,7 +25,7 @@ func (w FormDataV8Wrapper) CreateInstance(
 	return nil, nil
 }
 
-func createFormData(host *ScriptHost) *v8.FunctionTemplate {
+func createFormData(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := NewFormDataV8Wrapper(host)
 	builder := NewConstructorBuilder[*html.FormData](
@@ -37,14 +37,14 @@ func createFormData(host *ScriptHost) *v8.FunctionTemplate {
 	)
 	stringIterator := NewIterator(
 		host,
-		func(instance string, ctx *ScriptContext) (*v8.Value, error) {
+		func(instance string, ctx *V8ScriptContext) (*v8.Value, error) {
 			return v8.NewValue(ctx.host.iso, instance)
 		},
 	)
 
 	entryIterator := NewIterator(
 		host,
-		func(instance html.FormDataEntry, ctx *ScriptContext) (*v8.Value, error) {
+		func(instance html.FormDataEntry, ctx *V8ScriptContext) (*v8.Value, error) {
 			// TODO, no option to create an array, totally a hack!
 			arr, e1 := ctx.RunScript("(k,v) => [k,v]")
 			if e1 != nil {

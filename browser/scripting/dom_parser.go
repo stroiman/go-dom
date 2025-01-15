@@ -9,7 +9,7 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-func createDOMParserPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createDOMParserPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	constructor := v8.NewFunctionTemplateWithError(
 		iso,

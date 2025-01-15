@@ -9,7 +9,7 @@ import (
 )
 
 type TestScriptContext struct {
-	*ScriptContext
+	*V8ScriptContext
 	ignoreUnhandledErrors bool
 }
 
@@ -50,7 +50,7 @@ func NewTestContext(hooks ...CreateHook) TestScriptContext {
 	window := html.NewWindow(html.WindowOptions{
 		// ScriptEngineFactory: (*Wrapper)(host),
 	})
-	ctx.ScriptContext = host.NewContext(window)
+	ctx.V8ScriptContext = host.NewContext(window)
 	DeferCleanup(ctx.Dispose)
 	for _, hook := range hooks {
 		hook(&ctx)
@@ -78,7 +78,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 
 	BeforeEach(func() {
 		window := html.NewWindow()
-		ctx.ScriptContext = host.NewContext(window)
+		ctx.V8ScriptContext = host.NewContext(window)
 		window.SetScriptRunner(ctx)
 		for _, hook := range hooks {
 			hook(&ctx)

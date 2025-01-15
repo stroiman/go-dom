@@ -8,7 +8,7 @@ import (
 //go:embed polyfills/xpath.js
 var xpath []byte
 
-func installPolyfills(context *ScriptContext) error {
+func installPolyfills(context *V8ScriptContext) error {
 	errs := []error{
 		context.Run(`
 		FormData.prototype.forEach = function(cb) {

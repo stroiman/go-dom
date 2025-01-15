@@ -23,29 +23,29 @@ type globals struct {
 	namedGlobals map[string]*v8.FunctionTemplate
 }
 
-type ScriptHost struct {
+type V8ScriptHost struct {
 	iso             *v8.Isolate
 	inspector       *v8.Inspector
 	inspectorClient *v8.InspectorClient
 	windowTemplate  *v8.ObjectTemplate
 	globals         globals
-	contexts        map[*v8.Context]*ScriptContext
+	contexts        map[*v8.Context]*V8ScriptContext
 }
 
-func (h *ScriptHost) GetContext(v8ctx *v8.Context) (*ScriptContext, bool) {
+func (h *V8ScriptHost) GetContext(v8ctx *v8.Context) (*V8ScriptContext, bool) {
 	ctx, ok := h.contexts[v8ctx]
 	return ctx, ok
 }
 
-func (h *ScriptHost) MustGetContext(v8ctx *v8.Context) *ScriptContext {
+func (h *V8ScriptHost) MustGetContext(v8ctx *v8.Context) *V8ScriptContext {
 	if ctx, ok := h.GetContext(v8ctx); ok {
 		return ctx
 	}
 	panic("Unknown v8 context")
 }
 
-type ScriptContext struct {
-	host      *ScriptHost
+type V8ScriptContext struct {
+	host      *V8ScriptHost
 	v8ctx     *v8.Context
 	window    html.Window
 	pinner    runtime.Pinner
@@ -55,7 +55,7 @@ type ScriptContext struct {
 	disposers []Disposable
 }
 
-func (c *ScriptContext) cacheNode(obj *v8.Object, node Entity) (*v8.Value, error) {
+func (c *V8ScriptContext) cacheNode(obj *v8.Object, node Entity) (*v8.Value, error) {
 	val := obj.Value
 	objectId := node.ObjectId()
 	c.v8nodes[objectId] = val
@@ -68,7 +68,7 @@ func (c *ScriptContext) cacheNode(obj *v8.Object, node Entity) (*v8.Value, error
 	return val, nil
 }
 
-func (c *ScriptContext) getInstanceForNode(
+func (c *V8ScriptContext) getInstanceForNode(
 	node Entity,
 ) (*v8.Value, error) {
 	iso := c.host.iso
@@ -100,7 +100,7 @@ func (c *ScriptContext) getInstanceForNode(
 	}
 }
 
-func (c *ScriptContext) GetInstanceForNodeByName(
+func (c *V8ScriptContext) GetInstanceForNodeByName(
 	constructor string,
 	node Entity,
 ) (*v8.Value, error) {
@@ -123,12 +123,12 @@ func (c *ScriptContext) GetInstanceForNodeByName(
 	return nil, err
 }
 
-func (c *ScriptContext) getCachedNode(this *v8.Object) (Entity, bool) {
+func (c *V8ScriptContext) getCachedNode(this *v8.Object) (Entity, bool) {
 	result, ok := c.domNodes[this.GetInternalField(0).Int32()]
 	return result, ok
 }
 
-type JSConstructorFactory = func(*ScriptHost) *v8.FunctionTemplate
+type JSConstructorFactory = func(*V8ScriptHost) *v8.FunctionTemplate
 
 type class struct {
 	globalIdentifier string
@@ -139,7 +139,7 @@ type class struct {
 // createGlobals returns an ordered list of constructors to be created in global
 // scope. They must be installed in "order", as base classes must be installed
 // before subclasses
-func createGlobals(host *ScriptHost) []globalInstall {
+func createGlobals(host *V8ScriptHost) []globalInstall {
 	result := make([]globalInstall, 0)
 	var iter func(class classSpec) *v8.FunctionTemplate
 	uniqueNames := make(map[string]*v8.FunctionTemplate)
@@ -182,7 +182,7 @@ func createGlobals(host *ScriptHost) []globalInstall {
 	return result
 }
 
-func (host *ScriptHost) ConsoleAPIMessage(message v8.ConsoleAPIMessage) {
+func (host *V8ScriptHost) ConsoleAPIMessage(message v8.ConsoleAPIMessage) {
 	fmt.Println("Message", message)
 	switch message.ErrorLevel {
 	case v8.ErrorLevelDebug:
@@ -258,8 +258,8 @@ func init() {
 	}
 }
 
-func NewScriptHost() *ScriptHost {
-	host := &ScriptHost{iso: v8.NewIsolate()}
+func NewScriptHost() *V8ScriptHost {
+	host := &V8ScriptHost{iso: v8.NewIsolate()}
 	host.inspectorClient = v8.NewInspectorClient(host)
 	host.inspector = v8.NewInspector(host.iso, host.inspectorClient)
 
@@ -271,14 +271,14 @@ func NewScriptHost() *ScriptHost {
 	constructors := host.globals.namedGlobals
 	window := constructors["Window"]
 	host.windowTemplate = window.InstanceTemplate()
-	host.contexts = make(map[*v8.Context]*ScriptContext)
+	host.contexts = make(map[*v8.Context]*V8ScriptContext)
 	installGlobals(window, host, globalInstalls)
 	installEventLoopGlobals(host, host.windowTemplate)
 	return host
 }
 
-func (host *ScriptHost) Dispose() {
-	var undiposedContexts []*ScriptContext
+func (host *V8ScriptHost) Dispose() {
+	var undiposedContexts []*V8ScriptContext
 	for _, ctx := range host.contexts {
 		undiposedContexts = append(undiposedContexts, ctx)
 	}
@@ -297,8 +297,8 @@ func (host *ScriptHost) Dispose() {
 
 var global *v8.Object
 
-func (host *ScriptHost) NewContext(window html.Window) *ScriptContext {
-	context := &ScriptContext{
+func (host *V8ScriptHost) NewContext(window html.Window) *V8ScriptContext {
+	context := &V8ScriptContext{
 		host:     host,
 		v8ctx:    v8.NewContext(host.iso, host.windowTemplate),
 		window:   window,
@@ -323,15 +323,15 @@ func (host *ScriptHost) NewContext(window html.Window) *ScriptContext {
 	return context
 }
 
-type Wrapper ScriptHost
+type Wrapper V8ScriptHost
 
 func (w *Wrapper) NewScriptEngine(window html.Window) html.ScriptEngine {
-	host := (*ScriptHost)(w)
+	host := (*V8ScriptHost)(w)
 	return host.NewContext(window)
 }
 
 func (w *Wrapper) Dispose() {
-	host := (*ScriptHost)(w)
+	host := (*V8ScriptHost)(w)
 	host.Dispose()
 }
 
@@ -341,7 +341,7 @@ func must(err error) {
 	}
 }
 
-func (ctx *ScriptContext) Dispose() {
+func (ctx *V8ScriptContext) Dispose() {
 	ctx.host.inspector.ContextDestroyed(ctx.v8ctx)
 	slog.Debug("ScriptContext: Dispose")
 	for _, dispose := range ctx.disposers {
@@ -353,20 +353,20 @@ func (ctx *ScriptContext) Dispose() {
 	ctx.v8ctx.Close()
 }
 
-func (ctx *ScriptContext) AddDisposer(disposer Disposable) {
+func (ctx *V8ScriptContext) AddDisposer(disposer Disposable) {
 	ctx.disposers = append(ctx.disposers, disposer)
 }
 
-func (ctx *ScriptContext) RunScript(script string) (*v8.Value, error) {
+func (ctx *V8ScriptContext) RunScript(script string) (*v8.Value, error) {
 	return ctx.v8ctx.RunScript(script, "")
 }
 
-func (ctx *ScriptContext) Run(script string) error {
+func (ctx *V8ScriptContext) Run(script string) error {
 	_, err := ctx.RunScript(script)
 	return err
 }
 
-func (ctx *ScriptContext) Eval(script string) (interface{}, error) {
+func (ctx *V8ScriptContext) Eval(script string) (interface{}, error) {
 	result, err := ctx.RunScript(script)
 	if err == nil {
 		return v8ValueToGoValue(result)
@@ -374,7 +374,7 @@ func (ctx *ScriptContext) Eval(script string) (interface{}, error) {
 	return nil, err
 }
 
-func (ctx *ScriptContext) Window() html.Window {
+func (ctx *V8ScriptContext) Window() html.Window {
 	return ctx.window
 }
 

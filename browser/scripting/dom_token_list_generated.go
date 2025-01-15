@@ -11,7 +11,7 @@ func init() {
 	registerJSClass("DOMTokenList", "", createDomTokenListPrototype)
 }
 
-func createDomTokenListPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createDomTokenListPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newDomTokenListV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)

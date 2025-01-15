@@ -14,10 +14,10 @@ type domTokenListV8Wrapper struct {
 	Iterator Iterator[string]
 }
 
-func newDomTokenListV8Wrapper(host *ScriptHost) domTokenListV8Wrapper {
+func newDomTokenListV8Wrapper(host *V8ScriptHost) domTokenListV8Wrapper {
 	return domTokenListV8Wrapper{
 		newNodeV8WrapperBase[dom.Element](host),
-		NewIterator(host, func(item string, ctx *ScriptContext) (*v8.Value, error) {
+		NewIterator(host, func(item string, ctx *V8ScriptContext) (*v8.Value, error) {
 			return v8.NewValue(host.iso, item)
 		}),
 	}
@@ -76,19 +76,19 @@ type htmlTemplateElementV8Wrapper struct {
 	nodeV8WrapperBase[html.HTMLTemplateElement]
 }
 
-func newHtmlTemplateElementV8Wrapper(host *ScriptHost) htmlTemplateElementV8Wrapper {
+func newHtmlTemplateElementV8Wrapper(host *V8ScriptHost) htmlTemplateElementV8Wrapper {
 	return htmlTemplateElementV8Wrapper{newNodeV8WrapperBase[html.HTMLTemplateElement](host)}
 }
 
 func (e htmlTemplateElementV8Wrapper) CreateInstance(
-	ctx *ScriptContext,
+	ctx *V8ScriptContext,
 	this *v8.Object,
 ) (*v8.Value, error) {
 	return nil, errors.New("TODO")
 }
 
 func (e htmlTemplateElementV8Wrapper) ToDocumentFragment(
-	ctx *ScriptContext,
+	ctx *V8ScriptContext,
 	fragment dom.DocumentFragment,
 ) (*v8.Value, error) {
 	return ctx.getInstanceForNode(fragment)

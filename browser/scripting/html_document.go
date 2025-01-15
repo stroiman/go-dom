@@ -10,11 +10,11 @@ type ESHTMLDocumentWrapper struct {
 	DocumentV8Wrapper
 }
 
-func NewHTMLDocumentWrapper(host *ScriptHost) ESHTMLDocumentWrapper {
+func NewHTMLDocumentWrapper(host *V8ScriptHost) ESHTMLDocumentWrapper {
 	return ESHTMLDocumentWrapper{NewDocumentV8Wrapper(host)}
 }
 
-func createHTMLDocumentPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createHTMLDocumentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	wrapper := NewDocumentV8Wrapper(host)
 	builder := NewIllegalConstructorBuilder[html.HTMLDocument](host)
 	constructor := builder.constructor

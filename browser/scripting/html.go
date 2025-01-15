@@ -10,7 +10,7 @@ type ESElementContainerWrapper[T ElementContainer] struct {
 	nodeV8WrapperBase[T]
 }
 
-func NewESContainerWrapper[T ElementContainer](host *ScriptHost) ESElementContainerWrapper[T] {
+func NewESContainerWrapper[T ElementContainer](host *V8ScriptHost) ESElementContainerWrapper[T] {
 	return ESElementContainerWrapper[T]{newNodeV8WrapperBase[T](host)}
 }
 

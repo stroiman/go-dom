@@ -9,7 +9,7 @@ type nodeV8Wrapper struct {
 	nodeV8WrapperBase[dom.Node]
 }
 
-func newNodeV8Wrapper(host *ScriptHost) nodeV8Wrapper {
+func newNodeV8Wrapper(host *V8ScriptHost) nodeV8Wrapper {
 	return nodeV8Wrapper{newNodeV8WrapperBase[dom.Node](host)}
 }
 
@@ -22,7 +22,7 @@ func (n nodeV8Wrapper) NodeType(info *v8.FunctionCallbackInfo) (*v8.Value, error
 }
 
 func (n nodeV8Wrapper) decodeGetRootNodeOptions(
-	ctx *ScriptContext,
+	ctx *V8ScriptContext,
 	value *v8.Value,
 ) (dom.GetRootNodeOptions, error) {
 	return dom.GetRootNodeOptions(value.Boolean()), nil

@@ -6,11 +6,11 @@ import (
 
 type argumentHelper struct {
 	*v8.FunctionCallbackInfo
-	ctx               *ScriptContext
+	ctx               *V8ScriptContext
 	noOfReadArguments int
 }
 
-func newArgumentHelper(host *ScriptHost, info *v8.FunctionCallbackInfo) *argumentHelper {
+func newArgumentHelper(host *V8ScriptHost, info *v8.FunctionCallbackInfo) *argumentHelper {
 	ctx := host.MustGetContext(info.Context())
 	return &argumentHelper{info, ctx, 0}
 }

@@ -11,7 +11,7 @@ func init() {
 	registerJSClass("HTMLTemplateElement", "HTMLElement", createHtmlTemplateElementPrototype)
 }
 
-func createHtmlTemplateElementPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createHtmlTemplateElementPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newHtmlTemplateElementV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)

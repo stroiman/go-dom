@@ -6,7 +6,7 @@ import (
 
 func installGlobals(
 	windowFnTemplate *v8.FunctionTemplate,
-	host *ScriptHost,
+	host *V8ScriptHost,
 	globalInstalls []globalInstall,
 ) {
 	windowTemplate := windowFnTemplate.InstanceTemplate()

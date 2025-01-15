@@ -11,7 +11,7 @@ func init() {
 	registerJSClass("Node", "EventTarget", createNodePrototype)
 }
 
-func createNodePrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createNodePrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newNodeV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)

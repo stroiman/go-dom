@@ -12,7 +12,7 @@ type urlV8Wrapper struct {
 	handleReffedObject[dom.URL]
 }
 
-func newUrlV8Wrapper(host *ScriptHost) urlV8Wrapper {
+func newUrlV8Wrapper(host *V8ScriptHost) urlV8Wrapper {
 	return urlV8Wrapper{newHandleReffedObject[dom.URL](host)}
 }
 
@@ -21,7 +21,7 @@ type HandleDisposable cgo.Handle
 func (h HandleDisposable) Dispose() { cgo.Handle(h).Delete() }
 
 func (u urlV8Wrapper) CreateInstance(
-	ctx *ScriptContext,
+	ctx *V8ScriptContext,
 	this *v8.Object,
 	url string,
 ) (*v8.Value, error) {
@@ -34,7 +34,7 @@ func (u urlV8Wrapper) CreateInstance(
 }
 
 func (u urlV8Wrapper) CreateInstanceBase(
-	ctx *ScriptContext,
+	ctx *V8ScriptContext,
 	this *v8.Object,
 	url string,
 	base string,

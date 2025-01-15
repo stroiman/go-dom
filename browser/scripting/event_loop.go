@@ -59,7 +59,7 @@ func (l *EventLoop) Start() Disposable {
 	})
 }
 
-func installEventLoopGlobals(host *ScriptHost, globalObjectTemplate *v8.ObjectTemplate) {
+func installEventLoopGlobals(host *V8ScriptHost, globalObjectTemplate *v8.ObjectTemplate) {
 	iso := host.iso
 
 	globalObjectTemplate.Set(

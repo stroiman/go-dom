@@ -9,15 +9,15 @@ import (
 )
 
 type Iterator[T any] struct {
-	host           *ScriptHost
+	host           *V8ScriptHost
 	ot             *v8.ObjectTemplate
 	resultTemplate *v8.ObjectTemplate
 	entityLookup   EntityLookup[T]
 }
 
-type EntityLookup[T any] func(value T, ctx *ScriptContext) (*v8.Value, error)
+type EntityLookup[T any] func(value T, ctx *V8ScriptContext) (*v8.Value, error)
 
-func NewIterator[T any](host *ScriptHost, entityLookup EntityLookup[T]) Iterator[T] {
+func NewIterator[T any](host *V8ScriptHost, entityLookup EntityLookup[T]) Iterator[T] {
 	iso := host.iso
 	// TODO, once we have weak handles in v8, we can release the iterator when it
 	// goes out of scope.
@@ -65,12 +65,12 @@ func (i SliceIterable[T]) All() iter.Seq[T] {
 	return SeqOfSlice(i.items)
 }
 
-func (i Iterator[T]) NewIteratorInstance(context *ScriptContext, items []T) (*v8.Value, error) {
+func (i Iterator[T]) NewIteratorInstance(context *V8ScriptContext, items []T) (*v8.Value, error) {
 	return i.NewIteratorInstanceOfIterable(context, SliceIterable[T]{items})
 }
 
 func (i Iterator[T]) NewIteratorInstanceOfIterable(
-	context *ScriptContext,
+	context *V8ScriptContext,
 	items Iterable[T],
 ) (*v8.Value, error) {
 	seq := items.All()

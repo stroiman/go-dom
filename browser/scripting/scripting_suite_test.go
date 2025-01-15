@@ -20,7 +20,7 @@ func TestScripting(t *testing.T) {
 	RunSpecs(t, "Scripting Suite")
 }
 
-var host *ScriptHost
+var host *V8ScriptHost
 
 var scriptTestSuite *suite.ScriptTestSuite
 

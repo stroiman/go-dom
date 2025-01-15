@@ -7,7 +7,7 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-func createXmlHttpRequestPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createXmlHttpRequestPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newXmlHttpRequestV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)

@@ -12,7 +12,7 @@ type windowV8Wrapper struct {
 	nodeV8WrapperBase[html.Window]
 }
 
-func newWindowV8Wrapper(host *ScriptHost) *windowV8Wrapper {
+func newWindowV8Wrapper(host *V8ScriptHost) *windowV8Wrapper {
 	return &windowV8Wrapper{newNodeV8WrapperBase[html.Window](host)}
 }
 
@@ -20,7 +20,7 @@ func init() {
 	registerJSClass("Window", "EventTarget", createWindowPrototype)
 }
 
-func createWindowPrototype(host *ScriptHost) *v8.FunctionTemplate {
+func createWindowPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newWindowV8Wrapper(host)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
