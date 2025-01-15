@@ -77,9 +77,14 @@ func writeGenerator(writer io.Writer, generator g.Generator) error {
 	return file.Render(writer)
 }
 
+type TargetGenerators interface {
+	CreateJSConstructorGenerator(data ESConstructorData) g.Generator
+}
+
 type ScriptWrapperModulesGenerator struct {
-	IdlSources fs.FS
-	Specs      WrapperGeneratorsSpec
+	IdlSources       fs.FS
+	Specs            WrapperGeneratorsSpec
+	TargetGenerators TargetGenerators
 }
 
 func (gen ScriptWrapperModulesGenerator) writeModule(
@@ -308,8 +313,9 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	window.Method("length").SetNotImplemented()
 
 	return ScriptWrapperModulesGenerator{
-		IdlSources: idlSources,
-		Specs:      specs,
+		IdlSources:       idlSources,
+		Specs:            specs,
+		TargetGenerators: V8TargetGenerators{},
 	}
 }
 

@@ -17,6 +17,12 @@ func (t NewV8FunctionTemplate) Generate() *jen.Statement {
 	return jen.Qual(v8, "NewFunctionTemplateWithError").Call(t.iso.Generate(), t.f.Generate())
 }
 
+type V8TargetGenerators struct{}
+
+func (_ V8TargetGenerators) CreateJSConstructorGenerator(data ESConstructorData) g.Generator {
+	return CreateV8Generator(data)
+}
+
 func CreateV8Generator(data ESConstructorData) g.Generator {
 	generator := g.StatementList()
 	if !data.Spec.SkipPrototypeRegistration {
