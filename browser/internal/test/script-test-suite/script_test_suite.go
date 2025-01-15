@@ -6,7 +6,7 @@ import (
 )
 
 type ScriptTestSuite struct {
-	Engine html.ScriptEngineFactory
+	Engine html.ScriptHost
 	Prefix string
 }
 
@@ -27,14 +27,14 @@ func (ctx *ScriptTestContext) Dispose() {
 }
 
 func NewScriptTestSuite(
-	engine html.ScriptEngineFactory,
+	engine html.ScriptHost,
 	prefix string) *ScriptTestSuite {
 	return &ScriptTestSuite{engine, prefix + ": "}
 }
 
 func (suite *ScriptTestSuite) NewContext() *ScriptTestContext {
 	options := html.WindowOptions{
-		ScriptEngineFactory: suite.Engine,
+		ScriptHost: suite.Engine,
 	}
 	result := &ScriptTestContext{
 		Window: html.NewWindow(options),

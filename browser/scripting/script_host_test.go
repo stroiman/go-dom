@@ -39,7 +39,7 @@ var _ = Describe("ScriptHost", func() {
     <div>I should not be in the output</div>
   </body></html>
 `)
-				options := html.WindowOptions{ScriptEngineFactory: (*scripting.Wrapper)(host)}
+				options := html.WindowOptions{ScriptHost: (*scripting.Wrapper)(host)}
 				win, err := html.NewWindowReader(reader, options)
 				defer win.Dispose()
 				Expect(err).ToNot(HaveOccurred())

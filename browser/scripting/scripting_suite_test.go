@@ -26,8 +26,8 @@ var scriptTestSuite *suite.ScriptTestSuite
 
 func OpenTestWindowFromHandler(location string, handler http.Handler) (html.Window, error) {
 	win, err := html.OpenWindowFromLocation(location, html.WindowOptions{
-		ScriptEngineFactory: (*scripting.Wrapper)(host),
-		HttpClient:          NewHttpClientFromHandler(handler),
+		ScriptHost: (*scripting.Wrapper)(host),
+		HttpClient: NewHttpClientFromHandler(handler),
 	})
 	DeferCleanup(func() {
 		if win != nil {

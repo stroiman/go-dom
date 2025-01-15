@@ -34,9 +34,9 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 		})
 		var err error
 		window = html.NewWindow(html.WindowOptions{
-			BaseLocation:        "http://example.com",
-			ScriptEngineFactory: (*Wrapper)(host),
-			HttpClient:          NewHttpClientFromHandler(server),
+			BaseLocation: "http://example.com",
+			ScriptHost:   (*Wrapper)(host),
+			HttpClient:   NewHttpClientFromHandler(server),
 		})
 		Expect(err).ToNot(HaveOccurred())
 		DeferCleanup(func() {

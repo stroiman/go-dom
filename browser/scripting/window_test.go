@@ -52,7 +52,7 @@ var _ = Describe("Window", func() {
   }
   window.document.addEventListener("DOMContentLoaded", listener1);
   window.document.addEventListener("load", listener2);
-</script></body>`), html.WindowOptions{ScriptEngineFactory: (*scripting.Wrapper)(host)},
+</script></body>`), html.WindowOptions{ScriptHost: (*scripting.Wrapper)(host)},
 				)
 				Expect(err).ToNot(HaveOccurred())
 				ctx := win.GetScriptEngine()

@@ -15,9 +15,9 @@ import (
 // windows/tabs. This used to be the case for _some_ identity providers, but I'm
 // not sure if that even work anymore because of browser security.
 type Browser struct {
-	Client              http.Client
-	ScriptEngineFactory ScriptEngineFactory
-	windows             []Window
+	Client     http.Client
+	ScriptHost ScriptHost
+	windows    []Window
 }
 
 func (b *Browser) Open(location string) (window Window, err error) {
@@ -38,24 +38,24 @@ func (b *Browser) Open(location string) (window Window, err error) {
 func NewBrowser() *Browser {
 	host := scripting.NewScriptHost()
 	return &Browser{
-		ScriptEngineFactory: (*scripting.Wrapper)(host),
-		Client:              NewHttpClient(),
+		ScriptHost: (*scripting.Wrapper)(host),
+		Client:     NewHttpClient(),
 	}
 }
 
 func NewBrowserFromHandler(handler http.Handler) *Browser {
 	host := scripting.NewScriptHost()
 	return &Browser{
-		ScriptEngineFactory: (*scripting.Wrapper)(host),
-		Client:              NewHttpClientFromHandler(handler),
+		ScriptHost: (*scripting.Wrapper)(host),
+		Client:     NewHttpClientFromHandler(handler),
 	}
 }
 
 func (b *Browser) createOptions(location string) WindowOptions {
 	return WindowOptions{
-		ScriptEngineFactory: b.ScriptEngineFactory,
-		HttpClient:          b.Client,
-		BaseLocation:        location,
+		ScriptHost:   b.ScriptHost,
+		HttpClient:   b.Client,
+		BaseLocation: location,
 	}
 }
 
@@ -64,7 +64,7 @@ func (b *Browser) Dispose() {
 	for _, win := range b.windows {
 		win.Dispose()
 	}
-	if b.ScriptEngineFactory != nil {
-		b.ScriptEngineFactory.Dispose()
+	if b.ScriptHost != nil {
+		b.ScriptHost.Dispose()
 	}
 }

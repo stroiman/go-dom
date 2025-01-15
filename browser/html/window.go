@@ -11,12 +11,12 @@ import (
 	. "github.com/stroiman/go-dom/browser/dom"
 )
 
-type ScriptEngineFactory interface {
-	NewScriptEngine(window Window) ScriptEngine
+type ScriptHost interface {
+	NewScriptEngine(window Window) ScriptContext
 	Dispose()
 }
 
-type ScriptEngine interface {
+type ScriptContext interface {
 	// Run a script, and convert the result to a Go type. This will result in an
 	// error if the returned value cannot be represented as a Go type.
 	Eval(script string) (any, error)
@@ -34,8 +34,8 @@ type Window interface {
 	LoadHTML(string) error // TODO: Remove, for testing
 	Eval(string) (any, error)
 	Run(string) error
-	SetScriptRunner(ScriptEngine)
-	GetScriptEngine() ScriptEngine
+	SetScriptRunner(ScriptContext)
+	GetScriptEngine() ScriptContext
 	Location() Location
 	HTTPClient() http.Client
 	ParseFragment(ownerDocument Document, reader io.Reader) (dom.DocumentFragment, error)
@@ -46,8 +46,8 @@ type Window interface {
 type window struct {
 	EventTarget
 	document            Document
-	scriptEngineFactory ScriptEngineFactory
-	scriptEngine        ScriptEngine
+	scriptEngineFactory ScriptHost
+	scriptEngine        ScriptContext
 	httpClient          http.Client
 	baseLocation        string
 	domParser           domParser
@@ -62,7 +62,7 @@ func newWindow(windowOptions ...WindowOption) *window {
 		EventTarget:         NewEventTarget(),
 		httpClient:          options.HttpClient,
 		baseLocation:        options.BaseLocation,
-		scriptEngineFactory: options.ScriptEngineFactory,
+		scriptEngineFactory: options.ScriptHost,
 	}
 	result.domParser = domParser{}
 	result.initScriptEngine()
@@ -136,7 +136,7 @@ func (w *window) parseReader(reader io.Reader) error {
 func (w *window) HTTPClient() http.Client { return w.httpClient }
 
 type WindowOptions struct {
-	ScriptEngineFactory
+	ScriptHost
 	HttpClient   http.Client
 	BaseLocation string
 }
@@ -206,11 +206,11 @@ func (w *window) Eval(script string) (any, error) {
 	return nil, errors.New("Script engine not initialised")
 }
 
-func (w *window) SetScriptRunner(r ScriptEngine) {
+func (w *window) SetScriptRunner(r ScriptContext) {
 	w.scriptEngine = r
 }
 
-func (w *window) GetScriptEngine() ScriptEngine { return w.scriptEngine }
+func (w *window) GetScriptEngine() ScriptContext { return w.scriptEngine }
 
 func (w *window) Location() Location {
 	var u *netURL.URL
