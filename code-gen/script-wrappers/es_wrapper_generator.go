@@ -214,6 +214,35 @@ type ESConstructorData struct {
 	RunCustomCode       bool
 }
 
+func (d ESConstructorData) WrapperFunctionsToGenerate() iter.Seq[ESOperation] {
+	return func(yield func(ESOperation) bool) {
+		for _, op := range d.Operations {
+			if op.MethodCustomization.Ignored || op.MethodCustomization.CustomImplementation {
+				continue
+			}
+			if !yield(op) {
+				return
+			}
+		}
+	}
+}
+
+func (d ESConstructorData) AttributesToImplement() iter.Seq[ESAttribute] {
+	return func(yield func(ESAttribute) bool) {
+		for _, a := range d.Attributes {
+			if a.Getter != nil && a.Getter.CustomImplementation {
+				a.Getter = nil
+			}
+			if a.Setter != nil && a.Setter.CustomImplementation {
+				a.Setter = nil
+			}
+			if a.Getter != nil || a.Setter != nil {
+				yield(a)
+			}
+		}
+	}
+}
+
 func (d ESConstructorData) Name() string { return d.Spec.TypeName }
 
 func ReturnOnAnyError(errNames []g.Generator) g.Generator {

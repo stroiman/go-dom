@@ -104,18 +104,15 @@ func CreateV8ConstructorWrapper(data ESConstructorData) JenGenerator {
 
 func CreateV8WrapperMethods(data ESConstructorData) JenGenerator {
 	list := g.StatementList()
-	for _, op := range data.Operations {
-		if op.MethodCustomization.Ignored {
-			continue
-		}
+	for op := range data.WrapperFunctionsToGenerate() {
 		list.Append(CreateV8WrapperMethod(data, op))
 	}
-	for _, attr := range data.Attributes {
-		if attr.Getter != nil {
-			list.Append(CreateV8WrapperMethod(data, *attr.Getter))
+	for a := range data.AttributesToImplement() {
+		if a.Getter != nil {
+			list.Append(CreateV8WrapperMethod(data, *a.Getter))
 		}
-		if attr.Setter != nil {
-			list.Append(CreateV8WrapperMethod(data, *attr.Setter))
+		if a.Setter != nil {
+			list.Append(CreateV8WrapperMethod(data, *a.Setter))
 		}
 	}
 	return list
@@ -125,9 +122,6 @@ func CreateV8WrapperMethod(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
-	if op.CustomImplementation {
-		return g.Noop
-	}
 	return g.StatementList(
 		g.Line,
 		g.FunctionDefinition{
