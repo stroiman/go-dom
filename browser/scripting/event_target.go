@@ -108,7 +108,7 @@ func (w eventTargetV8Wrapper) getInstance(info *v8.FunctionCallbackInfo) (dom.Ev
 	}
 }
 
-func CreateEventTarget(host *V8ScriptHost) *v8.FunctionTemplate {
+func createEventTarget(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newEventTargetV8Wrapper(host)
 	res := v8.NewFunctionTemplate(
