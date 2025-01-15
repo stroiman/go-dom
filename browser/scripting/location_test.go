@@ -11,7 +11,7 @@ var _ = Describe("window.location", func() {
 		window := html.NewWindow(html.WindowOptionLocation("http://example.com/foo"))
 		ctx := host.NewContext(window)
 		DeferCleanup(func() {
-			ctx.Dispose()
+			ctx.Close()
 		})
 		Expect(ctx.Eval("location.href")).To(Equal("http://example.com/foo"))
 	})

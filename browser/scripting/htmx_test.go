@@ -14,7 +14,7 @@ var _ = Describe("Load from server", Ordered, func() {
 	It("Renders HTMX without errors", func() {
 		browser := browser.NewBrowserFromHandler(app.CreateServer())
 		DeferCleanup(func() {
-			browser.Dispose()
+			browser.Close()
 		})
 		win, err := browser.Open("/index.html")
 		Expect(err).ToNot(HaveOccurred())

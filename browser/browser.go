@@ -59,12 +59,12 @@ func (b *Browser) createOptions(location string) WindowOptions {
 	}
 }
 
-func (b *Browser) Dispose() {
-	slog.Debug("Browser: Dispose")
+func (b *Browser) Close() {
+	slog.Debug("Browser: Close()")
 	for _, win := range b.windows {
-		win.Dispose()
+		win.Close()
 	}
 	if b.ScriptHost != nil {
-		b.ScriptHost.Dispose()
+		b.ScriptHost.Close()
 	}
 }

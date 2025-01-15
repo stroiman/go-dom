@@ -22,7 +22,7 @@ var _ = Describe("Window.Location", func() {
 		Expect(err).ToNot(HaveOccurred())
 		DeferCleanup(func() {
 			if win != nil {
-				win.Dispose()
+				win.Close()
 			}
 		})
 		return win

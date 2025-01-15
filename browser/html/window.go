@@ -13,23 +13,28 @@ import (
 
 type ScriptHost interface {
 	NewContext(window Window) ScriptContext
-	Dispose()
+	Close()
 }
 
 type ScriptContext interface {
-	// Run a script, and convert the result to a Go type. This will result in an
-	// error if the returned value cannot be represented as a Go type.
+	// Run a script, and convert the result to a Go type. Only use this if you
+	// need the return value, otherwise call Run.
+	//
+	// If the evaluated JS value cannot be converted to a Go value, an error is
+	// returned.
 	Eval(script string) (any, error)
-	// Run a script, ignoring any returned value
+	// Run a script. This is should be used instead of eval when the return value
+	// is not needed, as eval could generate an error if the value cannot be
+	// converted to a go-type.
 	Run(script string) error
-	Dispose()
+	Close()
 }
 
 type Window interface {
 	EventTarget
 	Entity
 	Document() Document
-	Dispose()
+	Close()
 	Navigate(string) error // TODO: Remove, perhaps? for testing
 	LoadHTML(string) error // TODO: Remove, for testing
 	Eval(string) (any, error)
@@ -40,6 +45,7 @@ type Window interface {
 	HTTPClient() http.Client
 	ParseFragment(ownerDocument Document, reader io.Reader) (dom.DocumentFragment, error)
 	// unexported
+
 	fetchRequest(req *http.Request) error
 }
 
@@ -103,7 +109,7 @@ func (w *window) initScriptEngine() {
 	factory := w.scriptEngineFactory
 	engine := w.scriptContext
 	if engine != nil {
-		engine.Dispose()
+		engine.Close()
 	}
 	if factory != nil {
 		w.scriptContext = factory.NewContext(w)
@@ -222,9 +228,9 @@ func (w *window) Location() Location {
 	return NewLocationFromNetURL(u)
 }
 
-func (w *window) Dispose() {
+func (w *window) Close() {
 	if w.scriptContext != nil {
-		w.scriptContext.Dispose()
+		w.scriptContext.Close()
 	}
 }
 

@@ -277,7 +277,7 @@ func NewScriptHost() *V8ScriptHost {
 	return host
 }
 
-func (host *V8ScriptHost) Dispose() {
+func (host *V8ScriptHost) Close() {
 	var undiposedContexts []*V8ScriptContext
 	for _, ctx := range host.contexts {
 		undiposedContexts = append(undiposedContexts, ctx)
@@ -287,7 +287,7 @@ func (host *V8ScriptHost) Dispose() {
 	if undisposedCount > 0 {
 		slog.Warn("Script host shutdown: Not all contexts disposed", "count", len(host.contexts))
 		for _, ctx := range undiposedContexts {
-			ctx.Dispose()
+			ctx.Close()
 		}
 	}
 	host.inspectorClient.Dispose()
@@ -330,9 +330,9 @@ func (w *Wrapper) NewContext(window html.Window) html.ScriptContext {
 	return host.NewContext(window)
 }
 
-func (w *Wrapper) Dispose() {
+func (w *Wrapper) Close() {
 	host := (*V8ScriptHost)(w)
-	host.Dispose()
+	host.Close()
 }
 
 func must(err error) {
@@ -341,7 +341,7 @@ func must(err error) {
 	}
 }
 
-func (ctx *V8ScriptContext) Dispose() {
+func (ctx *V8ScriptContext) Close() {
 	ctx.host.inspector.ContextDestroyed(ctx.v8ctx)
 	slog.Debug("ScriptContext: Dispose")
 	for _, dispose := range ctx.disposers {

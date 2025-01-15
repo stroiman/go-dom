@@ -22,8 +22,8 @@ func (ctx *ScriptTestContext) Run(script string) error {
 	return ctx.Window.Run(script)
 }
 
-func (ctx *ScriptTestContext) Dispose() {
-	ctx.Window.Dispose()
+func (ctx *ScriptTestContext) Close() {
+	ctx.Window.Close()
 }
 
 func NewScriptTestSuite(
@@ -39,7 +39,7 @@ func (suite *ScriptTestSuite) NewContext() *ScriptTestContext {
 	result := &ScriptTestContext{
 		Window: html.NewWindow(options),
 	}
-	ginkgo.DeferCleanup(func() { result.Dispose() })
+	ginkgo.DeferCleanup(func() { result.Close() })
 	return result
 }
 

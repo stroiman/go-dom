@@ -44,7 +44,7 @@ var _ = Describe("Browser", func() {
 			}),
 		)
 		browser := NewBrowserFromHandler(server)
-		DeferCleanup(func() { browser.Dispose() })
+		DeferCleanup(func() { browser.Close() })
 		win, err := browser.Open("/index.html")
 		Expect(err).ToNot(HaveOccurred())
 		target := win.Document().GetElementById("target")

@@ -31,7 +31,7 @@ func OpenTestWindowFromHandler(location string, handler http.Handler) (html.Wind
 	})
 	DeferCleanup(func() {
 		if win != nil {
-			win.Dispose()
+			win.Close()
 		}
 	})
 	return win, err
@@ -50,6 +50,6 @@ func init() {
 	})
 
 	AfterSuite(func() {
-		host.Dispose()
+		host.Close()
 	})
 }

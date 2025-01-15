@@ -51,7 +51,7 @@ func NewTestContext(hooks ...CreateHook) TestScriptContext {
 		// ScriptEngineFactory: (*Wrapper)(host),
 	})
 	ctx.V8ScriptContext = host.NewContext(window)
-	DeferCleanup(ctx.Dispose)
+	DeferCleanup(ctx.Close)
 	for _, hook := range hooks {
 		hook(&ctx)
 	}
@@ -87,7 +87,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 	})
 
 	AfterEach(func() {
-		ctx.Dispose()
+		ctx.Close()
 	})
 
 	return &ctx

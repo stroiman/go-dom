@@ -41,7 +41,7 @@ var _ = Describe("ScriptHost", func() {
 `)
 				options := html.WindowOptions{ScriptHost: (*scripting.Wrapper)(host)}
 				win, err := html.NewWindowReader(reader, options)
-				defer win.Dispose()
+				defer win.Close()
 				Expect(err).ToNot(HaveOccurred())
 				ctx := win.GetScriptEngine()
 				Expect(

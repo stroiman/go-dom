@@ -40,7 +40,7 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 		})
 		Expect(err).ToNot(HaveOccurred())
 		DeferCleanup(func() {
-			window.Dispose()
+			window.Close()
 			server = nil
 			close(evt)
 			evt = nil
