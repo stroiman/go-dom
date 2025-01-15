@@ -1,4 +1,4 @@
-package goja_driver
+package goja
 
 import (
 	"fmt"

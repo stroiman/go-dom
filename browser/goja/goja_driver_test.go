@@ -1,4 +1,4 @@
-package goja_driver_test
+package goja_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
