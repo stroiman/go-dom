@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	. "github.com/stroiman/go-dom/browser/goja-driver"
+	. "github.com/stroiman/go-dom/browser/goja"
 	"github.com/stroiman/go-dom/browser/html"
 )
 
