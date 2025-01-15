@@ -155,3 +155,10 @@ func (s IfStmt) Generate() *jen.Statement {
 	}
 	return result
 }
+
+func ToJenCodes(gg []Generator) (res []jen.Code) {
+	for _, g := range gg {
+		res = append(res, g.Generate())
+	}
+	return
+}

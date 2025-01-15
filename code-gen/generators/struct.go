@@ -62,9 +62,5 @@ func (s Struct) Generate() *jen.Statement {
 }
 
 func InstantiateStruct(t Generator, values ...Generator) Generator {
-	v := []jen.Code{}
-	for _, val := range values {
-		v = append(v, val.Generate())
-	}
-	return Raw(t.Generate().Values(v...))
+	return Raw(t.Generate().Values(ToJenCodes(values)...))
 }
