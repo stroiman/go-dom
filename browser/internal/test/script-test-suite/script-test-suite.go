@@ -22,19 +22,29 @@ func (ctx *ScriptTestContext) Run(script string) error {
 	return ctx.Window.Run(script)
 }
 
+func (ctx *ScriptTestContext) Dispose() {
+	ctx.Window.Dispose()
+}
+
 func NewScriptTestSuite(
 	engine html.ScriptEngineFactory,
 	prefix string) *ScriptTestSuite {
 	return &ScriptTestSuite{engine, prefix + ": "}
 }
 
-func (suite *ScriptTestSuite) NewWindow() html.Window {
+func (suite *ScriptTestSuite) NewContext() *ScriptTestContext {
 	options := html.WindowOptions{
 		ScriptEngineFactory: suite.Engine,
 	}
-	result := html.NewWindow(options)
+	result := &ScriptTestContext{
+		Window: html.NewWindow(options),
+	}
 	ginkgo.DeferCleanup(func() { result.Dispose() })
 	return result
+}
+
+func (suite *ScriptTestSuite) NewWindow() html.Window {
+	return suite.NewContext().Window
 }
 
 func (suite *ScriptTestSuite) CreateAllGinkgoTests() {

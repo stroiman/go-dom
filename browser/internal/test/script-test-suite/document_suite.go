@@ -7,9 +7,14 @@ import (
 
 func (suite *ScriptTestSuite) CreateDocumentTests() {
 	prefix := suite.Prefix
+	var ctx *ScriptTestContext
+
+	BeforeEach(func() {
+		ctx = suite.NewContext()
+	})
+
 	Describe(prefix+"Document", func() {
 		Describe("prototype", func() {
-
 			It("Has a `createElement`", func() {
 				window := suite.NewWindow()
 				Expect(window.Eval(`
@@ -19,6 +24,14 @@ func (suite *ScriptTestSuite) CreateDocumentTests() {
 				const e = Document.prototype.createElement.call(document, "div")
 				typeof e
 			`)).To(Equal("object"))
+			})
+		})
+
+		Describe("Instance properties", func() {
+			It("Has a `location` property", func() {
+				Expect(
+					ctx.Eval("Object.getOwnPropertyNames(document)"),
+				).To(ContainElements("location"))
 			})
 		})
 	})

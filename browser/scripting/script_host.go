@@ -1,6 +1,7 @@
 package scripting
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"runtime"
@@ -395,6 +396,22 @@ func v8ValueToGoValue(result *v8go.Value) (interface{}, error) {
 	}
 	if result.IsUndefined() {
 		return nil, nil
+	}
+	if result.IsArray() {
+		obj, _ := result.AsObject()
+		length, err := obj.Get("length")
+		l := length.Uint32()
+		errs := make([]error, l+1)
+		errs[0] = err
+		result := make([]any, l)
+		for i := uint32(0); i < l; i++ {
+			val, err := obj.GetIdx(i)
+			if err == nil {
+				result[i], err = v8ValueToGoValue(val)
+			}
+			errs[i+1] = err
+		}
+		return result, errors.Join(errs...)
 	}
 	return nil, fmt.Errorf("Value not yet supported: %v", *result)
 }
