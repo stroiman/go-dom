@@ -9,10 +9,10 @@ type nodeWrapper struct {
 	baseInstanceWrapper[dom.Node]
 }
 
-func NewNodeWrapper(instance *GojaInstance) Wrapper {
+func NewNodeWrapper(instance *GojaContext) wrapper {
 	return nodeWrapper{newBaseInstanceWrapper[dom.Node](instance)}
 }
 
-func (w nodeWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
+func (w nodeWrapper) constructor(call ConstructorCall, r *Runtime) *Object {
 	panic(r.NewTypeError("Illegal Constructor"))
 }

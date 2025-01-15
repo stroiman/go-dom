@@ -5,14 +5,14 @@ import (
 	"github.com/stroiman/go-dom/browser/html"
 )
 
-type WindowWrapper struct {
+type windowWrapper struct {
 	baseInstanceWrapper[html.Window]
 }
 
-func (w WindowWrapper) Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
+func (w windowWrapper) constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
 	panic(r.NewTypeError("Illegal Constructor"))
 }
 
-func NewWindowWrapper(instance *GojaInstance) Wrapper {
-	return WindowWrapper{newBaseInstanceWrapper[html.Window](instance)}
+func newWindowWrapper(instance *GojaContext) wrapper {
+	return windowWrapper{newBaseInstanceWrapper[html.Window](instance)}
 }

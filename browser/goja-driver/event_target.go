@@ -7,29 +7,29 @@ import (
 	. "github.com/dop251/goja"
 )
 
-type EventTargetWrapper struct {
+type eventTargetWrapper struct {
 	baseInstanceWrapper[dom.EventTarget]
 }
 
-func NewEventTargetWrapper(instance *GojaInstance) Wrapper {
-	return EventTargetWrapper{newBaseInstanceWrapper[dom.EventTarget](instance)}
+func newEventTargetWrapper(instance *GojaContext) wrapper {
+	return eventTargetWrapper{newBaseInstanceWrapper[dom.EventTarget](instance)}
 }
 
-type GojaEventListener struct {
-	instance *GojaInstance
+type gojaEventListener struct {
+	instance *GojaContext
 	v        goja.Value
 	f        goja.Callable
 }
 
-func NewGojaEventListener(r *GojaInstance, v goja.Value) dom.EventHandler {
+func newGojaEventListener(r *GojaContext, v goja.Value) dom.EventHandler {
 	f, ok := AssertFunction(v)
 	if !ok {
 		panic("TODO")
 	}
-	return &GojaEventListener{r, v, f}
+	return &gojaEventListener{r, v, f}
 }
 
-func (h *GojaEventListener) HandleEvent(e dom.Event) error {
+func (h *gojaEventListener) HandleEvent(e dom.Event) error {
 	customEvent := h.instance.globals["CustomEvent"]
 	obj := h.instance.vm.CreateObject(customEvent.Prototype)
 	customEvent.Wrapper.storeInternal(e, obj)
@@ -37,21 +37,21 @@ func (h *GojaEventListener) HandleEvent(e dom.Event) error {
 	return err
 }
 
-func (h *GojaEventListener) Equals(e dom.EventHandler) bool {
-	if ge, ok := e.(*GojaEventListener); ok && ge.v.StrictEquals(h.v) {
+func (h *gojaEventListener) Equals(e dom.EventHandler) bool {
+	if ge, ok := e.(*gojaEventListener); ok && ge.v.StrictEquals(h.v) {
 		return true
 	} else {
 		return false
 	}
 }
 
-func (w EventTargetWrapper) Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
+func (w eventTargetWrapper) constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
 	newInstance := dom.NewEventTarget()
 	w.storeInternal(newInstance, call.This)
 	return nil
 }
 
-func (w EventTargetWrapper) GetEventTarget(c FunctionCall) dom.EventTarget {
+func (w eventTargetWrapper) getEventTarget(c FunctionCall) dom.EventTarget {
 	if c.This == nil {
 		panic("No this pointer")
 	}
@@ -65,15 +65,15 @@ func (w EventTargetWrapper) GetEventTarget(c FunctionCall) dom.EventTarget {
 	return instance
 }
 
-func (w EventTargetWrapper) AddEventListener(c FunctionCall) Value {
-	instance := w.GetInstance(c)
+func (w eventTargetWrapper) addEventListener(c FunctionCall) Value {
+	instance := w.getInstance(c)
 	name := c.Argument(0).String()
-	instance.AddEventListener(name, NewGojaEventListener(w.instance, c.Argument(1)))
+	instance.AddEventListener(name, newGojaEventListener(w.instance, c.Argument(1)))
 	return nil
 }
 
-func (w EventTargetWrapper) DispatchEvent(c FunctionCall) Value {
-	instance := w.GetInstance(c)
+func (w eventTargetWrapper) dispatchEvent(c FunctionCall) Value {
+	instance := w.getInstance(c)
 	internal := c.Argument(0).(*Object).GetSymbol(w.instance.wrappedGoObj).Export()
 	if event, ok := internal.(dom.Event); ok {
 		return w.instance.vm.ToValue(instance.DispatchEvent(event))
@@ -82,8 +82,8 @@ func (w EventTargetWrapper) DispatchEvent(c FunctionCall) Value {
 	}
 }
 
-func (w EventTargetWrapper) InitializePrototype(prototype *Object,
+func (w eventTargetWrapper) initializePrototype(prototype *Object,
 	vm *Runtime) {
-	prototype.Set("addEventListener", w.AddEventListener)
-	prototype.Set("dispatchEvent", w.DispatchEvent)
+	prototype.Set("addEventListener", w.addEventListener)
+	prototype.Set("dispatchEvent", w.dispatchEvent)
 }

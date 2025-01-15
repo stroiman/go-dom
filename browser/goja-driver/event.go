@@ -9,8 +9,8 @@ type EventWrapper struct {
 	baseInstanceWrapper[dom.Event]
 }
 
-func NewEventWrapper(instance *GojaInstance) Wrapper { return newEventWrapper(instance) }
-func newEventWrapper(instance *GojaInstance) EventWrapper {
+func NewEventWrapper(instance *GojaContext) wrapper { return newEventWrapper(instance) }
+func newEventWrapper(instance *GojaContext) EventWrapper {
 	return EventWrapper{newBaseInstanceWrapper[dom.Event](instance)}
 }
 
@@ -23,7 +23,7 @@ func ToBoolean(value Value) bool {
 	return value != nil && value.ToBoolean()
 }
 
-func (w EventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
+func (w EventWrapper) constructor(call ConstructorCall, r *Runtime) *Object {
 	arg1 := call.Argument(0).String()
 	options := make([]dom.CustomEventOption, 0, 2)
 	if arg2 := call.Argument(1); !IsUndefined(arg2) {
@@ -38,15 +38,15 @@ func (w EventWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
 }
 
 func (w EventWrapper) PreventDefault(c FunctionCall) Value {
-	w.GetInstance(c).PreventDefault()
+	w.getInstance(c).PreventDefault()
 	return nil
 }
 
 func (w EventWrapper) GetType(c FunctionCall) Value {
-	return w.instance.vm.ToValue(w.GetInstance(c).Type())
+	return w.instance.vm.ToValue(w.getInstance(c).Type())
 }
 
-func (w EventWrapper) InitializePrototype(prototype *Object,
+func (w EventWrapper) initializePrototype(prototype *Object,
 	vm *Runtime) {
 	prototype.Set("preventDefault", w.PreventDefault)
 	prototype.DefineAccessorProperty(
@@ -62,6 +62,6 @@ type CustomEventWrapper struct {
 	EventWrapper
 }
 
-func NewCustomEventWrapper(instance *GojaInstance) Wrapper {
+func NewCustomEventWrapper(instance *GojaContext) wrapper {
 	return CustomEventWrapper{newEventWrapper(instance)}
 }

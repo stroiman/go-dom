@@ -15,70 +15,65 @@ import (
 const INTERNAL_SYMBOL_NAME = "__go_dom_internal_value__"
 
 func NewGojaScriptEngine() html.ScriptHost {
-	return &GojaDriver{}
+	return &gojaScriptHost{}
 }
 
-type GojaDriver struct {
-}
+type gojaScriptHost struct{}
 
-func WindowConstructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
-	panic(r.NewTypeError("Illegal Constructor"))
-}
-
-type Wrapper interface {
-	Constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object
+type wrapper interface {
+	constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object
 	storeInternal(value any, this *Object)
 }
 
-type CreateWrapper func(instance *GojaInstance) Wrapper
+type createWrapper func(instance *GojaContext) wrapper
 
-type WrapperPrototypeInitializer interface {
-	InitializePrototype(prototype *Object, r *goja.Runtime)
+type wrapperPrototypeInitializer interface {
+	initializePrototype(prototype *Object, r *goja.Runtime)
 }
 
-type Class struct {
-	Name           string
-	SuperClassName string
-	Wrapper        CreateWrapper
+type class struct {
+	name           string
+	superClassName string
+	wrapper        createWrapper
 }
 
-type ClassMap map[string]Class
+type classMap map[string]class
 
-var Globals ClassMap = make(ClassMap)
+var globals classMap = make(classMap)
 
-func InstallClass(name string, superClassName string, wrapper CreateWrapper) {
-	if _, found := Globals[name]; found {
+func installClass(name string, superClassName string, wrapper createWrapper) {
+	if _, found := globals[name]; found {
 		panic("Class already installed")
 	}
-	Globals[name] = Class{name, superClassName, wrapper}
+	globals[name] = class{name, superClassName, wrapper}
 }
 
 func init() {
-	InstallClass("EventTarget", "", NewEventTargetWrapper)
-	InstallClass("Node", "EventTarget", NewNodeWrapper)
-	InstallClass("Window", "Node", NewWindowWrapper)
-	InstallClass("Document", "Node", NewDocumentWrapper)
-	InstallClass("Event", "", NewEventWrapper)
-	InstallClass("CustomEvent", "Event", NewCustomEventWrapper)
+	installClass("EventTarget", "", newEventTargetWrapper)
+	installClass("Node", "EventTarget", NewNodeWrapper)
+	installClass("Window", "Node", newWindowWrapper)
+	installClass("Document", "Node", newDocumentWrapper)
+	installClass("Event", "", NewEventWrapper)
+	installClass("CustomEvent", "Event", NewCustomEventWrapper)
 
 }
 
-type Function struct {
+type function struct {
 	Constructor *Object
 	Prototype   *Object
-	Wrapper     Wrapper
+	Wrapper     wrapper
 }
 
-func (d *GojaInstance) GetObject(obj any, class string) *Object {
+func (d *GojaContext) getObject(obj any, class string) *Object {
 	result := d.vm.ToValue(obj).(*Object)
 	g := d.globals[class]
 	result.SetPrototype(g.Prototype)
 	return result
 }
 
-type PropertyNameMapper struct{}
+type propertyNameMapper struct{}
 
-func (_ PropertyNameMapper) FieldName(t reflect.Type, f reflect.StructField) string {
+func (_ propertyNameMapper) FieldName(t reflect.Type, f reflect.StructField) string {
 	return ""
 }
 
@@ -86,7 +81,7 @@ func uncapitalize(s string) string {
 	return strings.ToLower(s[0:1]) + s[1:]
 }
 
-func (_ PropertyNameMapper) MethodName(t reflect.Type, m reflect.Method) string {
+func (_ propertyNameMapper) MethodName(t reflect.Type, m reflect.Method) string {
 	var doc dom.Document
 	var document = reflect.TypeOf(&doc).Elem()
 	if t.Implements(document) && m.Name == "Location" {
@@ -96,16 +91,16 @@ func (_ PropertyNameMapper) MethodName(t reflect.Type, m reflect.Method) string 
 	}
 }
 
-func (d *GojaInstance) installGlobals(classes ClassMap) {
-	d.globals = make(map[string]Function)
-	var assertGlobal func(Class) Function
-	assertGlobal = func(class Class) Function {
-		name := class.Name
-		wrapper := class.Wrapper(d)
+func (d *GojaContext) installGlobals(classes classMap) {
+	d.globals = make(map[string]function)
+	var assertGlobal func(class) function
+	assertGlobal = func(class class) function {
+		name := class.name
+		wrapper := class.wrapper(d)
 		if constructor, alreadyInstalled := d.globals[name]; alreadyInstalled {
 			return constructor
 		}
-		constructor := d.vm.ToValue(wrapper.Constructor).(*goja.Object)
+		constructor := d.vm.ToValue(wrapper.constructor).(*goja.Object)
 		constructor.DefineDataProperty(
 			"name",
 			d.vm.ToValue(name),
@@ -114,11 +109,11 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 			FLAG_NOT_SET,
 		)
 		prototype := constructor.Get("prototype").(*Object)
-		result := Function{constructor, prototype, wrapper}
+		result := function{constructor, prototype, wrapper}
 		d.vm.Set(name, constructor)
 		d.globals[name] = result
 
-		if super := class.SuperClassName; super != "" {
+		if super := class.superClassName; super != "" {
 			if superclass, found := classes[super]; found {
 				superPrototype := assertGlobal(superclass).Prototype
 				prototype.SetPrototype(superPrototype)
@@ -127,8 +122,8 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 			}
 		}
 
-		if initializer, ok := wrapper.(WrapperPrototypeInitializer); ok {
-			initializer.InitializePrototype(prototype, d.vm)
+		if initializer, ok := wrapper.(wrapperPrototypeInitializer); ok {
+			initializer.initializePrototype(prototype, d.vm)
 		}
 
 		return result
@@ -138,15 +133,15 @@ func (d *GojaInstance) installGlobals(classes ClassMap) {
 	}
 }
 
-func (d *GojaDriver) NewContext(window html.Window) html.ScriptContext {
+func (d *gojaScriptHost) NewContext(window html.Window) html.ScriptContext {
 	vm := goja.New()
-	vm.SetFieldNameMapper(PropertyNameMapper{})
-	result := &GojaInstance{
+	vm.SetFieldNameMapper(propertyNameMapper{})
+	result := &GojaContext{
 		vm:           vm,
 		window:       window,
 		wrappedGoObj: NewSymbol(INTERNAL_SYMBOL_NAME),
 	}
-	result.installGlobals(Globals)
+	result.installGlobals(globals)
 
 	globalThis := vm.GlobalObject()
 	globalThis.DefineDataPropertySymbol(
@@ -158,31 +153,29 @@ func (d *GojaDriver) NewContext(window html.Window) html.ScriptContext {
 	)
 	globalThis.Set("window", globalThis)
 	globalThis.DefineAccessorProperty("document", vm.ToValue(func(c *FunctionCall) Value {
-		return result.GetObject(window.Document(), "Document")
+		return result.getObject(window.Document(), "Document")
 	}), nil, FLAG_FALSE, FLAG_TRUE)
 	globalThis.SetPrototype(result.globals["Window"].Prototype)
 
 	return result
 }
 
-func (d *GojaDriver) Close() {
-}
+func (d *gojaScriptHost) Close() {}
 
-type GojaInstance struct {
+type GojaContext struct {
 	vm           *goja.Runtime
 	window       html.Window
-	globals      map[string]Function
+	globals      map[string]function
 	wrappedGoObj *goja.Symbol
 }
 
-func (i *GojaInstance) Close() {
-}
+func (i *GojaContext) Close() {}
 
-func (i *GojaInstance) Run(string) error {
+func (i *GojaContext) Run(string) error {
 	return nil
 }
 
-func (i *GojaInstance) Eval(str string) (res any, err error) {
+func (i *GojaContext) Eval(str string) (res any, err error) {
 	if gojaVal, err := i.vm.RunString(str); err == nil {
 		return gojaVal.Export(), nil
 	} else {

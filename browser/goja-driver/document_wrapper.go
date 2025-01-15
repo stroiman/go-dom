@@ -5,19 +5,19 @@ import (
 	"github.com/stroiman/go-dom/browser/dom"
 )
 
-type DocumentWrapper struct {
+type documentWrapper struct {
 	baseInstanceWrapper[dom.Document]
 }
 
-func NewDocumentWrapper(instance *GojaInstance) Wrapper {
-	return DocumentWrapper{newBaseInstanceWrapper[dom.Document](instance)}
+func newDocumentWrapper(instance *GojaContext) wrapper {
+	return documentWrapper{newBaseInstanceWrapper[dom.Document](instance)}
 }
 
-func (w DocumentWrapper) Constructor(call ConstructorCall, r *Runtime) *Object {
+func (w documentWrapper) constructor(call ConstructorCall, r *Runtime) *Object {
 	panic(r.NewTypeError("Illegal Constructor"))
 }
 
-func (w DocumentWrapper) InitializePrototype(prototype *Object,
+func (w documentWrapper) initializePrototype(prototype *Object,
 	vm *Runtime) {
 	createElement := vm.ToValue(func(c FunctionCall) Value {
 		if c.This == nil {
