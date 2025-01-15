@@ -6,5 +6,5 @@ codegen-v8:
 	cd scripting && gow -w ../../code-gen -e="" generate
 
 codegen-goja:
-	rm -f goja-driver/*_generated.go
-	cd goja-driver && gow -w ../../code-gen -e="" generate
+	rm -f goja/*_generated.go
+	cd goja && gow -w ../../code-gen -e="" generate

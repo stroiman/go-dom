@@ -71,7 +71,7 @@ func (g WrapperGeneratorsSpec) Module(spec string) *WrapperGeneratorFileSpec {
 func writeGenerator(writer io.Writer, packagePath string, generator g.Generator) error {
 	file := jen.NewFilePath(packagePath)
 	file.HeaderComment("This file is generated. Do not edit.")
-	file.ImportName(dom, "browser")
+	// file.ImportName(dom, "browser")
 	file.ImportAlias(v8, "v8")
 	file.Add(generator.Generate())
 	return file.Render(writer)

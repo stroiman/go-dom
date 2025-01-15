@@ -50,7 +50,7 @@ func installClass(name string, superClassName string, wrapper createWrapper) {
 
 func init() {
 	installClass("EventTarget", "", newEventTargetWrapper)
-	installClass("Node", "EventTarget", NewNodeWrapper)
+	installClass("Node", "EventTarget", newNodeWrapper)
 	installClass("Window", "Node", newWindowWrapper)
 	installClass("Document", "Node", newDocumentWrapper)
 	installClass("Event", "", NewEventWrapper)

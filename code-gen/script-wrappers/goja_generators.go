@@ -23,20 +23,17 @@ func (gen GojaTargetGenerators) CreateWrapperStruct(data ESConstructorData) g.Ge
 	typeNameBase := fmt.Sprintf("%sWrapper", data.Name())
 	typeName := lowerCaseFirstLetter(typeNameBase)
 	constructorName := fmt.Sprintf("new%s", typeNameBase)
-	innerType := g.Raw(jen.Qual(html, data.Name()))
+	innerType := g.Raw(jen.Qual(dom, data.Name()))
+
 	wrapperStruct := g.NewStruct(typeName)
-	wrapperStruct.Embed(g.Raw(jen.Id("BaseInstanceWrapper").Index(innerType)))
+	wrapperStruct.Embed(g.Raw(jen.Id("baseInstanceWrapper").Index(innerType)))
 
 	wrapperConstructor := g.FunctionDefinition{
 		Name:     constructorName,
-		Args:     g.Arg(g.Id("instance"), g.NewType("gojaInstance").Pointer()),
-		RtnTypes: g.List(g.NewType(typeName).Pointer()),
-		Body: g.Return(g.Raw(
-			jen.Id(typeName).Values(
-				jen.Id("newBaseInstanceWrapper").
-					Index(innerType.Generate()).
-					Call(jen.Id("instance")),
-			),
+		Args:     g.Arg(g.Id("instance"), g.NewType("GojaContext").Pointer()),
+		RtnTypes: g.List(g.NewType("wrapper")),
+		Body: g.Return(g.InstantiateStruct(g.Id(typeName),
+			g.NewValue("newBaseInstanceWrapper").TypeParam(innerType).Call(g.Id("instance")),
 		)),
 	}
 
