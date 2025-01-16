@@ -118,10 +118,46 @@ func (gen GojaTargetGenerators) CreateWrapperMethodBody(
 		converter := fmt.Sprintf("decode%s", a.Type)
 		readArgs.Append(g.Assign(argNames[i], receiver.Field(converter).Call(value)))
 	}
-	return g.StatementList(
+	list := g.StatementList(
 		g.Assign(instance, receiver.Field("getInstance").Call(callArgument)),
 		readArgs,
-		instance.Field(upperCaseFirstLetter(op.Name)).Call(argNames...),
-		g.Return(g.Nil),
 	)
+	if op.HasResult() {
+		converter := fmt.Sprintf("to%s", upperCaseFirstLetter(op.RetType.TypeName))
+		if op.GetHasError() {
+			list.Append(
+				g.AssignMany(g.List(
+					g.Id("result"), g.Id("err")),
+					instance.Field(upperCaseFirstLetter(op.Name)).Call(argNames...),
+				),
+				panicOnNotNil(g.Id("err")),
+			)
+		} else {
+			list.Append(
+				g.Assign(
+					g.Id("result"),
+					instance.Field(upperCaseFirstLetter(op.Name)).Call(argNames...),
+				),
+			)
+		}
+		list.Append(g.Return(receiver.Field(converter).Call(g.Id("result"))))
+	} else {
+		if op.GetHasError() {
+			list.Append(
+				g.Assign(g.Id("err"), instance.Field(upperCaseFirstLetter(op.Name)).Call(argNames...)),
+				panicOnNotNil(g.Id("err")),
+			)
+
+		} else {
+			list.Append(instance.Field(upperCaseFirstLetter(op.Name)).Call(argNames...))
+		}
+	}
+	return list
+}
+
+func panicOnNotNil(lhs g.Generator) g.Generator {
+	return g.IfStmt{
+		Condition: g.Neq{Lhs: lhs, Rhs: g.Nil},
+		Block:     g.Raw(jen.Panic(jen.Id("err"))),
+	}
 }

@@ -21,6 +21,9 @@ func (w baseInstanceWrapper[T]) storeInternal(value any, obj *Object) {
 		FLAG_FALSE,
 		FLAG_FALSE,
 	)
+	if e, ok := value.(dom.Entity); ok {
+		w.instance.cachedNodes[e.ObjectId()] = obj
+	}
 	// obj.SetSymbol(w.instance.wrappedGoObj, w.instance.vm.ToValue(value))
 }
 
@@ -50,4 +53,26 @@ func (w baseInstanceWrapper[T]) decodeNode(v Value) dom.Node {
 	} else {
 		panic("Bad node")
 	}
+}
+
+func (w baseInstanceWrapper[T]) getPrototype(e dom.Entity) *Object {
+	switch e.(type) {
+	case dom.Node:
+		return w.instance.globals["Node"].Prototype
+	}
+	panic("Prototype lookup not defined")
+}
+
+func (w baseInstanceWrapper[T]) toNode(e dom.Entity) Value {
+	if o := w.getCachedObject(e); o != nil {
+		return o
+	}
+	prototype := w.getPrototype(e)
+	obj := w.instance.vm.CreateObject(prototype)
+	w.storeInternal(e, obj)
+	return obj
+}
+
+func (w baseInstanceWrapper[T]) toBoolean(b bool) Value {
+	return w.instance.vm.ToValue(b)
 }

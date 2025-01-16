@@ -18,28 +18,37 @@ func newNodeWrapper(instance *GojaContext) wrapper {
 func (w nodeWrapper) Contains(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	other := w.decodeNode(c.Arguments[0])
-	instance.Contains(other)
-	return nil
+	result := instance.Contains(other)
+	return w.toBoolean(result)
 }
 
 func (w nodeWrapper) InsertBefore(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	node := w.decodeNode(c.Arguments[0])
 	child := w.decodeNode(c.Arguments[1])
-	instance.InsertBefore(node, child)
-	return nil
+	result, err := instance.InsertBefore(node, child)
+	if err != nil {
+		panic(err)
+	}
+	return w.toNode(result)
 }
 
 func (w nodeWrapper) AppendChild(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	node := w.decodeNode(c.Arguments[0])
-	instance.AppendChild(node)
-	return nil
+	result, err := instance.AppendChild(node)
+	if err != nil {
+		panic(err)
+	}
+	return w.toNode(result)
 }
 
 func (w nodeWrapper) RemoveChild(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	child := w.decodeNode(c.Arguments[0])
-	instance.RemoveChild(child)
-	return nil
+	result, err := instance.RemoveChild(child)
+	if err != nil {
+		panic(err)
+	}
+	return w.toNode(result)
 }
