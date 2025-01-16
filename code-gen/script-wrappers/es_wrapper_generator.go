@@ -230,6 +230,16 @@ func (d ESConstructorData) WrapperFunctionsToInstall() iter.Seq[ESOperation] {
 	}
 }
 
+func (d ESConstructorData) AttributesToInstall() iter.Seq[ESAttribute] {
+	return func(yield func(ESAttribute) bool) {
+		for _, a := range d.Attributes {
+			if !yield(a) {
+				return
+			}
+		}
+	}
+}
+
 func (d ESConstructorData) WrapperFunctionsToGenerate() iter.Seq[ESOperation] {
 	return func(yield func(ESOperation) bool) {
 		for op := range d.WrapperFunctionsToInstall() {

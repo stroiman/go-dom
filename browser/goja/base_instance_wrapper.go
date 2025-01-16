@@ -84,3 +84,7 @@ func (w baseInstanceWrapper[T]) toDOMString(b string) Value {
 func (w baseInstanceWrapper[T]) toDocument(e dom.Entity) Value {
 	return w.toNode(e)
 }
+
+func (w baseInstanceWrapper[T]) toUnsignedShort(i int) Value {
+	return w.instance.vm.ToValue(i)
+}

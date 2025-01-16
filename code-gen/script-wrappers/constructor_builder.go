@@ -51,10 +51,10 @@ func (builder ConstructorBuilder) InstallAttributeHandlers(
 	if length == 0 {
 		return g.Noop
 	}
-	generators := make([]JenGenerator, length+1)
+	generators := make([]JenGenerator, 1, length+1)
 	generators[0] = g.Line
-	for i, op := range data.Attributes {
-		generators[i+1] = builder.InstallAttributeHandler(op)
+	for op := range data.AttributesToInstall() {
+		generators = append(generators, builder.InstallAttributeHandler(op))
 	}
 	return g.StatementList(generators...)
 }

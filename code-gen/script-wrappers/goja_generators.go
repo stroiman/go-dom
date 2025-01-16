@@ -12,6 +12,7 @@ var (
 	gojaValue   = g.Raw(jen.Qual(gojaSrc, "Value"))
 	gojaObj     = g.Raw(jen.Op("*").Qual(gojaSrc, "Object"))
 	gojaRuntime = g.Raw(jen.Op("*").Qual(gojaSrc, "Runtime"))
+	flagTrue    = g.Raw(jen.Qual(gojaSrc, "FLAG_TRUE"))
 )
 
 type GojaNamingStrategy struct {
@@ -53,11 +54,30 @@ func (gen GojaTargetGenerators) CreateJSConstructorGenerator(data ESConstructorD
 func (gen GojaTargetGenerators) CreatePrototypeInitializer(data ESConstructorData) g.Generator {
 	naming := GojaNamingStrategy{data}
 	receiver := g.NewValue(naming.ReceiverName())
+	vm := receiver.Field("instance").Field("vm")
 	prototype := g.NewValue("prototype")
 
 	body := g.StatementList()
 	for op := range data.WrapperFunctionsToInstall() {
 		body.Append(prototype.Field("Set").Call(g.Lit(op.Name), receiver.Field(op.Name)))
+	}
+
+	for a := range data.AttributesToInstall() {
+		var getter, setter g.Generator
+		if a.Getter != nil {
+			getter = vm.Field("ToValue").Call(receiver.Field(a.Getter.Name))
+		} else {
+			getter = g.Nil
+		}
+		if a.Setter != nil {
+			setter = vm.Field("ToValue").Call(receiver.Field(a.Setter.Name))
+		} else {
+			setter = g.Nil
+		}
+		body.Append(
+			prototype.Field("DefineAccessorProperty").
+				Call(g.Lit(a.Name), getter, setter, flagTrue, flagTrue),
+		)
 	}
 
 	return g.FunctionDefinition{
@@ -147,7 +167,7 @@ func (gen GojaTargetGenerators) CreateWrapperMethodBody(
 		readArgs,
 	)
 	if op.HasResult() {
-		converter := fmt.Sprintf("to%s", upperCaseFirstLetter(op.RetType.TypeName))
+		converter := fmt.Sprintf("to%s", idlNameToGoName(op.RetType.TypeName))
 		if op.GetHasError() {
 			list.Append(
 				g.AssignMany(g.List(
