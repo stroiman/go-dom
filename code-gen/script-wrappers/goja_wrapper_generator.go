@@ -56,6 +56,7 @@ func NewGojaWrapperModuleGenerator(idlSources fs.FS) ScriptWrapperModulesGenerat
 	domNode.Method("nodeType").SetCustomImplementation()
 	domNode.Method("contains").SetNoError()
 	domNode.Method("getRootNode").SetNoError().Argument("options").HasDefault()
+	domNode.Method("getRootNode").Ignore()
 	domNode.Method("previousSibling").SetNoError()
 	domNode.Method("nextSibling").SetNoError()
 

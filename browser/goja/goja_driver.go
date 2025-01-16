@@ -140,6 +140,7 @@ func (d *gojaScriptHost) NewContext(window html.Window) html.ScriptContext {
 		vm:           vm,
 		window:       window,
 		wrappedGoObj: NewSymbol(INTERNAL_SYMBOL_NAME),
+		cachedNodes:  make(map[int32]Value),
 	}
 	result.installGlobals(globals)
 
@@ -167,6 +168,7 @@ type GojaContext struct {
 	window       html.Window
 	globals      map[string]function
 	wrappedGoObj *goja.Symbol
+	cachedNodes  map[int32]Value
 }
 
 func (i *GojaContext) Close() {}

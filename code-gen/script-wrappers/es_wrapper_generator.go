@@ -2,6 +2,7 @@ package wrappers
 
 import (
 	"fmt"
+	"iter"
 	"log/slog"
 	"strings"
 	"unicode"

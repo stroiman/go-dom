@@ -73,6 +73,7 @@ func writeGenerator(writer io.Writer, packagePath string, generator g.Generator)
 	file.HeaderComment("This file is generated. Do not edit.")
 	// file.ImportName(dom, "browser")
 	file.ImportAlias(v8, "v8")
+	file.ImportAlias(gojaSrc, "g")
 	file.Add(generator.Generate())
 	return file.Render(writer)
 }
