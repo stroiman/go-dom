@@ -347,7 +347,7 @@ type V8InstanceInvocationResult struct {
 func (c V8InstanceInvocation) PerformCall() (genRes V8InstanceInvocationResult) {
 	args := []g.Generator{}
 	genRes.HasError = c.Op.GetHasError()
-	genRes.HasValue = c.Op.RetType.IsDefined() // != "undefined"
+	genRes.HasValue = c.Op.HasResult() // != "undefined"
 	var stmt *jen.Statement
 	if genRes.HasValue {
 		stmt = jen.Id("result")

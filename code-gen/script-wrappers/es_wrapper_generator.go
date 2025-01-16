@@ -197,6 +197,10 @@ func (op ESOperation) GetHasError() bool {
 	return op.HasError
 }
 
+func (op ESOperation) HasResult() bool {
+	return op.RetType.IsDefined()
+}
+
 type ESAttribute struct {
 	Name   string
 	Getter *ESOperation
