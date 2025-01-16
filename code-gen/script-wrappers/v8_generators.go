@@ -107,14 +107,6 @@ func CreateV8WrapperMethods(data ESConstructorData) JenGenerator {
 	for op := range data.WrapperFunctionsToGenerate() {
 		list.Append(CreateV8WrapperMethod(data, op))
 	}
-	for a := range data.AttributesToImplement() {
-		if a.Getter != nil {
-			list.Append(CreateV8WrapperMethod(data, *a.Getter))
-		}
-		if a.Setter != nil {
-			list.Append(CreateV8WrapperMethod(data, *a.Setter))
-		}
-	}
 	return list
 }
 

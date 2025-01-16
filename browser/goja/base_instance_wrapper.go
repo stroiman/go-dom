@@ -76,3 +76,11 @@ func (w baseInstanceWrapper[T]) toNode(e dom.Entity) Value {
 func (w baseInstanceWrapper[T]) toBoolean(b bool) Value {
 	return w.instance.vm.ToValue(b)
 }
+
+func (w baseInstanceWrapper[T]) toDOMString(b string) Value {
+	return w.instance.vm.ToValue(b)
+}
+
+func (w baseInstanceWrapper[T]) toDocument(e dom.Entity) Value {
+	return w.toNode(e)
+}

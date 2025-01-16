@@ -237,20 +237,12 @@ func (d ESConstructorData) WrapperFunctionsToGenerate() iter.Seq[ESOperation] {
 				return
 			}
 		}
-	}
-}
-
-func (d ESConstructorData) AttributesToImplement() iter.Seq[ESAttribute] {
-	return func(yield func(ESAttribute) bool) {
 		for _, a := range d.Attributes {
-			if a.Getter != nil && a.Getter.CustomImplementation {
-				a.Getter = nil
+			if a.Getter != nil && !a.Getter.CustomImplementation {
+				yield(*a.Getter)
 			}
-			if a.Setter != nil && a.Setter.CustomImplementation {
-				a.Setter = nil
-			}
-			if a.Getter != nil || a.Setter != nil {
-				yield(a)
+			if a.Setter != nil && !a.Setter.CustomImplementation {
+				yield(*a.Setter)
 			}
 		}
 	}

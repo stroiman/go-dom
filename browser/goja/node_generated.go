@@ -58,3 +58,39 @@ func (w nodeWrapper) removeChild(c g.FunctionCall) g.Value {
 	}
 	return w.toNode(result)
 }
+
+func (w nodeWrapper) NodeName(c g.FunctionCall) g.Value {
+	instance := w.getInstance(c)
+	result := instance.NodeName()
+	return w.toDOMString(result)
+}
+
+func (w nodeWrapper) IsConnected(c g.FunctionCall) g.Value {
+	instance := w.getInstance(c)
+	result := instance.IsConnected()
+	return w.toBoolean(result)
+}
+
+func (w nodeWrapper) OwnerDocument(c g.FunctionCall) g.Value {
+	instance := w.getInstance(c)
+	result := instance.OwnerDocument()
+	return w.toDocument(result)
+}
+
+func (w nodeWrapper) FirstChild(c g.FunctionCall) g.Value {
+	instance := w.getInstance(c)
+	result := instance.FirstChild()
+	return w.toNode(result)
+}
+
+func (w nodeWrapper) PreviousSibling(c g.FunctionCall) g.Value {
+	instance := w.getInstance(c)
+	result := instance.PreviousSibling()
+	return w.toNode(result)
+}
+
+func (w nodeWrapper) NextSibling(c g.FunctionCall) g.Value {
+	instance := w.getInstance(c)
+	result := instance.NextSibling()
+	return w.toNode(result)
+}
