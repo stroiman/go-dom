@@ -220,13 +220,20 @@ type ESConstructorData struct {
 	RunCustomCode       bool
 }
 
-func (d ESConstructorData) WrapperFunctionsToGenerate() iter.Seq[ESOperation] {
+func (d ESConstructorData) WrapperFunctionsToInstall() iter.Seq[ESOperation] {
 	return func(yield func(ESOperation) bool) {
 		for _, op := range d.Operations {
-			if op.MethodCustomization.Ignored || op.MethodCustomization.CustomImplementation {
-				continue
+			if !op.MethodCustomization.Ignored && !yield(op) {
+				return
 			}
-			if !yield(op) {
+		}
+	}
+}
+
+func (d ESConstructorData) WrapperFunctionsToGenerate() iter.Seq[ESOperation] {
+	return func(yield func(ESOperation) bool) {
+		for op := range d.WrapperFunctionsToInstall() {
+			if !op.MethodCustomization.CustomImplementation && !yield(op) {
 				return
 			}
 		}

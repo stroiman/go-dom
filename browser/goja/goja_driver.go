@@ -173,8 +173,9 @@ type GojaContext struct {
 
 func (i *GojaContext) Close() {}
 
-func (i *GojaContext) Run(string) error {
-	return nil
+func (i *GojaContext) Run(str string) error {
+	_, err := i.vm.RunString(str)
+	return err
 }
 
 func (i *GojaContext) Eval(str string) (res any, err error) {

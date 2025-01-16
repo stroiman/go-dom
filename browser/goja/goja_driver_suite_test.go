@@ -9,11 +9,14 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 	. "github.com/stroiman/go-dom/browser/goja"
+	"github.com/stroiman/go-dom/browser/html"
 	"github.com/stroiman/go-dom/browser/internal/test"
 	. "github.com/stroiman/go-dom/browser/internal/test/script-test-suite"
 )
 
 var testSuite = NewScriptTestSuite(NewGojaScriptEngine(), "goja", SkipDOM)
+
+func newCtx() html.ScriptContext { return testSuite.NewContext() }
 
 func FormatException(value any) (result string, ok bool) {
 	var exception *goja.Exception

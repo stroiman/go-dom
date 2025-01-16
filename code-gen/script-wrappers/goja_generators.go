@@ -7,6 +7,13 @@ import (
 	g "github.com/stroiman/go-dom/code-gen/generators"
 )
 
+var (
+	gojaFc      = g.Raw(jen.Qual(gojaSrc, "FunctionCall"))
+	gojaValue   = g.Raw(jen.Qual(gojaSrc, "Value"))
+	gojaObj     = g.Raw(jen.Op("*").Qual(gojaSrc, "Object"))
+	gojaRuntime = g.Raw(jen.Op("*").Qual(gojaSrc, "Runtime"))
+)
+
 type GojaNamingStrategy struct {
 	ESConstructorData
 }
@@ -34,10 +41,34 @@ func (gen GojaTargetGenerators) CreateJSConstructorGenerator(data ESConstructorD
 
 	generator = g.StatementList(
 		gen.CreateWrapperStruct(data),
+		gen.CreatePrototypeInitializer(data),
 		gen.CreateWrapperMethods(data),
 		generator,
 	)
 	return generator
+}
+
+// CreatePrototypeInitializer creates the "initializePrototype" method, which
+// sets all the properties on the prototypes on this class.
+func (gen GojaTargetGenerators) CreatePrototypeInitializer(data ESConstructorData) g.Generator {
+	naming := GojaNamingStrategy{data}
+	receiver := g.NewValue(naming.ReceiverName())
+	prototype := g.NewValue("prototype")
+
+	body := g.StatementList()
+	for op := range data.WrapperFunctionsToInstall() {
+		body.Append(prototype.Field("Set").Call(g.Lit(op.Name), receiver.Field(op.Name)))
+	}
+
+	return g.FunctionDefinition{
+		Receiver: g.FunctionArgument{
+			Name: receiver,
+			Type: g.Id(naming.PrototypeWrapperTypeName()),
+		},
+		Name: "initializePrototype",
+		Args: g.Arg(prototype, gojaObj).Arg(g.Id("vm"), gojaRuntime),
+		Body: body,
+	}
 }
 
 func (gen GojaTargetGenerators) CreateWrapperStruct(data ESConstructorData) g.Generator {
@@ -69,11 +100,6 @@ func (gen GojaTargetGenerators) CreateWrapperMethods(data ESConstructorData) g.G
 	return list
 }
 
-var (
-	gojaFc    = g.Raw(jen.Qual(gojaSrc, "FunctionCall"))
-	gojaValue = g.Raw(jen.Qual(gojaSrc, "Value"))
-)
-
 func (gen GojaTargetGenerators) CreateWrapperMethod(
 	data ESConstructorData,
 	op ESOperation,
@@ -87,7 +113,7 @@ func (gen GojaTargetGenerators) CreateWrapperMethod(
 				Name: g.Id(naming.ReceiverName()),
 				Type: g.Id(naming.PrototypeWrapperTypeName()),
 			},
-			Name:     idlNameToGoName(op.Name),
+			Name:     op.Name,
 			Args:     g.Arg(callArgument, gojaFc),
 			RtnTypes: g.List(gojaValue),
 			Body:     gen.CreateWrapperMethodBody(data, op, callArgument),
@@ -107,9 +133,7 @@ func (gen GojaTargetGenerators) CreateWrapperMethodBody(
 	}
 	naming := GojaNamingStrategy{data}
 	receiver := g.NewValue(naming.ReceiverName())
-	// result := g.NewValue("result")
 	instance := g.NewValue("instance")
-	// converter := g.NewValue(fmt.Sprintf("to%s", op.RetType.TypeName))
 	readArgs := g.StatementList()
 	argNames := make([]g.Generator, len(op.Arguments))
 	for i, a := range op.Arguments {

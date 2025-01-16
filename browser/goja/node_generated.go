@@ -14,15 +14,21 @@ type nodeWrapper struct {
 func newNodeWrapper(instance *GojaContext) wrapper {
 	return nodeWrapper{newBaseInstanceWrapper[dom.Node](instance)}
 }
+func (w nodeWrapper) initializePrototype(prototype *g.Object, vm *g.Runtime) {
+	prototype.Set("contains", w.contains)
+	prototype.Set("insertBefore", w.insertBefore)
+	prototype.Set("appendChild", w.appendChild)
+	prototype.Set("removeChild", w.removeChild)
+}
 
-func (w nodeWrapper) Contains(c g.FunctionCall) g.Value {
+func (w nodeWrapper) contains(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	other := w.decodeNode(c.Arguments[0])
 	result := instance.Contains(other)
 	return w.toBoolean(result)
 }
 
-func (w nodeWrapper) InsertBefore(c g.FunctionCall) g.Value {
+func (w nodeWrapper) insertBefore(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	node := w.decodeNode(c.Arguments[0])
 	child := w.decodeNode(c.Arguments[1])
@@ -33,7 +39,7 @@ func (w nodeWrapper) InsertBefore(c g.FunctionCall) g.Value {
 	return w.toNode(result)
 }
 
-func (w nodeWrapper) AppendChild(c g.FunctionCall) g.Value {
+func (w nodeWrapper) appendChild(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	node := w.decodeNode(c.Arguments[0])
 	result, err := instance.AppendChild(node)
@@ -43,7 +49,7 @@ func (w nodeWrapper) AppendChild(c g.FunctionCall) g.Value {
 	return w.toNode(result)
 }
 
-func (w nodeWrapper) RemoveChild(c g.FunctionCall) g.Value {
+func (w nodeWrapper) removeChild(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	child := w.decodeNode(c.Arguments[0])
 	result, err := instance.RemoveChild(child)
