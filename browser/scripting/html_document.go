@@ -7,15 +7,15 @@ import (
 )
 
 type ESHTMLDocumentWrapper struct {
-	DocumentV8Wrapper
+	documentV8Wrapper
 }
 
 func NewHTMLDocumentWrapper(host *V8ScriptHost) ESHTMLDocumentWrapper {
-	return ESHTMLDocumentWrapper{NewDocumentV8Wrapper(host)}
+	return ESHTMLDocumentWrapper{newDocumentV8Wrapper(host)}
 }
 
 func createHTMLDocumentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
-	wrapper := NewDocumentV8Wrapper(host)
+	wrapper := newDocumentV8Wrapper(host)
 	builder := NewIllegalConstructorBuilder[html.HTMLDocument](host)
 	constructor := builder.constructor
 	instanceTemplate := constructor.InstanceTemplate()
