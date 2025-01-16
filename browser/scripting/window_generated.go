@@ -141,47 +141,47 @@ func (w windowV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, 
 }
 
 func (w windowV8Wrapper) Close(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.close")
+	return nil, errors.New("Window.close: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Stop(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.stop")
+	return nil, errors.New("Window.stop: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Focus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.focus")
+	return nil, errors.New("Window.focus: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Blur(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.blur")
+	return nil, errors.New("Window.blur: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.open")
+	return nil, errors.New("Window.open: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Alert(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.alert")
+	return nil, errors.New("Window.alert: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Confirm(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.confirm")
+	return nil, errors.New("Window.confirm: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Prompt(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.prompt")
+	return nil, errors.New("Window.prompt: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Print(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.print")
+	return nil, errors.New("Window.print: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) PostMessage(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.postMessage")
+	return nil, errors.New("Window.postMessage: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Self(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Self")
+	return nil, errors.New("Window.Self: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Document(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -195,93 +195,93 @@ func (w windowV8Wrapper) Document(info *v8.FunctionCallbackInfo) (*v8.Value, err
 }
 
 func (w windowV8Wrapper) Name(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Name")
+	return nil, errors.New("Window.Name: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) SetName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.SetName")
+	return nil, errors.New("Window.SetName: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) History(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.History")
+	return nil, errors.New("Window.History: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Navigation(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Navigation")
+	return nil, errors.New("Window.Navigation: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) CustomElements(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.CustomElements")
+	return nil, errors.New("Window.CustomElements: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Locationbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Locationbar")
+	return nil, errors.New("Window.Locationbar: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Menubar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Menubar")
+	return nil, errors.New("Window.Menubar: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Personalbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Personalbar")
+	return nil, errors.New("Window.Personalbar: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Scrollbars(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Scrollbars")
+	return nil, errors.New("Window.Scrollbars: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Statusbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Statusbar")
+	return nil, errors.New("Window.Statusbar: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Toolbar(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Toolbar")
+	return nil, errors.New("Window.Toolbar: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Status")
+	return nil, errors.New("Window.Status: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) SetStatus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.SetStatus")
+	return nil, errors.New("Window.SetStatus: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Closed(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Closed")
+	return nil, errors.New("Window.Closed: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Frames(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Frames")
+	return nil, errors.New("Window.Frames: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Length")
+	return nil, errors.New("Window.Length: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Top(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Top")
+	return nil, errors.New("Window.Top: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Opener(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Opener")
+	return nil, errors.New("Window.Opener: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) SetOpener(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.SetOpener")
+	return nil, errors.New("Window.SetOpener: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) FrameElement(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.FrameElement")
+	return nil, errors.New("Window.FrameElement: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) Navigator(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.Navigator")
+	return nil, errors.New("Window.Navigator: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) ClientInformation(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.ClientInformation")
+	return nil, errors.New("Window.ClientInformation: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w windowV8Wrapper) OriginAgentCluster(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: Window.OriginAgentCluster")
+	return nil, errors.New("Window.OriginAgentCluster: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }

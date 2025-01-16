@@ -120,7 +120,7 @@ func (u urlV8Wrapper) Href(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u urlV8Wrapper) SetHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SetHref")
+	return nil, errors.New("URL.SetHref: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) Origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -144,23 +144,23 @@ func (u urlV8Wrapper) Protocol(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 }
 
 func (u urlV8Wrapper) SetProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SetProtocol")
+	return nil, errors.New("URL.SetProtocol: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) Username(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.Username")
+	return nil, errors.New("URL.Username: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) SetUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SetUsername")
+	return nil, errors.New("URL.SetUsername: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) Password(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.Password")
+	return nil, errors.New("URL.Password: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) SetPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SetPassword")
+	return nil, errors.New("URL.SetPassword: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) Host(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -174,7 +174,7 @@ func (u urlV8Wrapper) Host(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u urlV8Wrapper) SetHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SetHost")
+	return nil, errors.New("URL.SetHost: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) Hostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -188,7 +188,7 @@ func (u urlV8Wrapper) Hostname(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 }
 
 func (u urlV8Wrapper) SetHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SetHostname")
+	return nil, errors.New("URL.SetHostname: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) Port(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -202,7 +202,7 @@ func (u urlV8Wrapper) Port(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u urlV8Wrapper) SetPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SetPort")
+	return nil, errors.New("URL.SetPort: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) Pathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -216,7 +216,7 @@ func (u urlV8Wrapper) Pathname(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 }
 
 func (u urlV8Wrapper) SetPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SetPathname")
+	return nil, errors.New("URL.SetPathname: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) Search(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -230,11 +230,11 @@ func (u urlV8Wrapper) Search(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u urlV8Wrapper) SetSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SetSearch")
+	return nil, errors.New("URL.SetSearch: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) SearchParams(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SearchParams")
+	return nil, errors.New("URL.SearchParams: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u urlV8Wrapper) Hash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -248,5 +248,5 @@ func (u urlV8Wrapper) Hash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u urlV8Wrapper) SetHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: URL.SetHash")
+	return nil, errors.New("URL.SetHash: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }

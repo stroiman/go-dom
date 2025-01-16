@@ -141,7 +141,9 @@ func CreateV8FunctionTemplateCallbackBody(
 	op ESOperation,
 ) JenGenerator {
 	if op.NotImplemented {
-		errMsg := fmt.Sprintf("Not implemented: %s.%s", data.Name(), op.Name)
+		errMsg := fmt.Sprintf(
+			"%s.%s: Not implemented. Create an issue: %s", data.Name(), op.Name, ISSUE_URL,
+		)
 		return g.Return(g.Nil, g.Raw(jen.Qual("errors", "New").Call(jen.Lit(errMsg))))
 	}
 	receiver := WrapperInstance{g.NewValue(data.Receiver)}

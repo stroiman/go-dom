@@ -60,33 +60,33 @@ func (e htmlTemplateElementV8Wrapper) Content(info *v8.FunctionCallbackInfo) (*v
 }
 
 func (e htmlTemplateElementV8Wrapper) ShadowRootMode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.ShadowRootMode")
+	return nil, errors.New("HTMLTemplateElement.ShadowRootMode: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (e htmlTemplateElementV8Wrapper) SetShadowRootMode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.SetShadowRootMode")
+	return nil, errors.New("HTMLTemplateElement.SetShadowRootMode: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (e htmlTemplateElementV8Wrapper) ShadowRootDelegatesFocus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.ShadowRootDelegatesFocus")
+	return nil, errors.New("HTMLTemplateElement.ShadowRootDelegatesFocus: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (e htmlTemplateElementV8Wrapper) SetShadowRootDelegatesFocus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.SetShadowRootDelegatesFocus")
+	return nil, errors.New("HTMLTemplateElement.SetShadowRootDelegatesFocus: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (e htmlTemplateElementV8Wrapper) ShadowRootClonable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.ShadowRootClonable")
+	return nil, errors.New("HTMLTemplateElement.ShadowRootClonable: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (e htmlTemplateElementV8Wrapper) SetShadowRootClonable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.SetShadowRootClonable")
+	return nil, errors.New("HTMLTemplateElement.SetShadowRootClonable: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (e htmlTemplateElementV8Wrapper) ShadowRootSerializable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.ShadowRootSerializable")
+	return nil, errors.New("HTMLTemplateElement.ShadowRootSerializable: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (e htmlTemplateElementV8Wrapper) SetShadowRootSerializable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: HTMLTemplateElement.SetShadowRootSerializable")
+	return nil, errors.New("HTMLTemplateElement.SetShadowRootSerializable: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }

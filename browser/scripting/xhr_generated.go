@@ -167,7 +167,7 @@ func (xhr xmlHttpRequestV8Wrapper) OverrideMimeType(info *v8.FunctionCallbackInf
 }
 
 func (xhr xmlHttpRequestV8Wrapper) ReadyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: XMLHttpRequest.ReadyState")
+	return nil, errors.New("XMLHttpRequest.ReadyState: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) Timeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -251,11 +251,11 @@ func (xhr xmlHttpRequestV8Wrapper) StatusText(info *v8.FunctionCallbackInfo) (*v
 }
 
 func (xhr xmlHttpRequestV8Wrapper) ResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: XMLHttpRequest.ResponseType")
+	return nil, errors.New("XMLHttpRequest.ResponseType: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) SetResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: XMLHttpRequest.SetResponseType")
+	return nil, errors.New("XMLHttpRequest.SetResponseType: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) Response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -279,5 +279,5 @@ func (xhr xmlHttpRequestV8Wrapper) ResponseText(info *v8.FunctionCallbackInfo) (
 }
 
 func (xhr xmlHttpRequestV8Wrapper) ResponseXML(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: XMLHttpRequest.ResponseXML")
+	return nil, errors.New("XMLHttpRequest.ResponseXML: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }

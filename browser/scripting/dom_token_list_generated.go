@@ -125,7 +125,7 @@ func (u domTokenListV8Wrapper) Replace(info *v8.FunctionCallbackInfo) (*v8.Value
 }
 
 func (u domTokenListV8Wrapper) Supports(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Not implemented: DOMTokenList.supports")
+	return nil, errors.New("DOMTokenList.supports: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (u domTokenListV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
