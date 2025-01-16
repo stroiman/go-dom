@@ -22,11 +22,12 @@ var (
 )
 
 const (
-	dom  = "github.com/stroiman/go-dom/browser/dom"
-	html = "github.com/stroiman/go-dom/browser/html"
-	sc   = "github.com/stroiman/go-dom/browser/scripting"
-	goja = "github.com/stroiman/go-dom/browser/goja"
-	v8   = "github.com/tommie/v8go"
+	dom     = BASE_PKG + "/browser/dom"
+	html    = BASE_PKG + "/browser/html"
+	sc      = BASE_PKG + "/browser/scripting"
+	goja    = BASE_PKG + "/browser/goja"
+	v8      = "github.com/tommie/v8go"
+	gojaSrc = "github.com/dop251/goja"
 )
 
 func createData(spec IdlSpec, dataData WrapperTypeSpec) ESConstructorData {
