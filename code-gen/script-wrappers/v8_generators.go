@@ -62,7 +62,7 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 
 	wrapperConstructor := g.FunctionDefinition{
 		Name:     constructorName,
-		Args:     g.Arg(g.Id("host"), g.NewType("ScriptHost").Pointer()),
+		Args:     g.Arg(g.Id("host"), scriptHostPtr),
 		RtnTypes: g.List(g.NewType(typeName).Pointer()),
 		Body: g.Return(g.Raw(
 			jen.Op("&").Id(typeName).Values(
