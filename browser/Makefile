@@ -6,5 +6,5 @@ codegen-v8:
 	cd v8host && gow -w ../../code-gen -e="" generate
 
 codegen-goja:
-	rm -f goja/*_generated.go
-	cd goja && gow -w ../../code-gen -e="" generate
+	rm -f gojahost/*_generated.go
+	cd gojahost && gow -w ../../code-gen -e="" generate

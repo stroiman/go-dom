@@ -1,4 +1,4 @@
-package goja_test
+package gojahost_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"

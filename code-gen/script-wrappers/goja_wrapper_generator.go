@@ -11,7 +11,7 @@ func NewGojaWrapperModuleGenerator(idlSources fs.FS) ScriptWrapperModulesGenerat
 	return ScriptWrapperModulesGenerator{
 		IdlSources:       idlSources,
 		Specs:            specs,
-		PackagePath:      goja,
+		PackagePath:      gojahost,
 		TargetGenerators: GojaTargetGenerators{},
 	}
 }

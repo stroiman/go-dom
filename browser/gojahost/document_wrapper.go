@@ -1,4 +1,4 @@
-package goja
+package gojahost
 
 import (
 	. "github.com/dop251/goja"

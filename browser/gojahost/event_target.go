@@ -1,10 +1,9 @@
-package goja
+package gojahost
 
 import (
 	"github.com/stroiman/go-dom/browser/dom"
 
 	"github.com/dop251/goja"
-	. "github.com/dop251/goja"
 )
 
 type eventTargetWrapper struct {
@@ -22,7 +21,7 @@ type gojaEventListener struct {
 }
 
 func newGojaEventListener(r *GojaContext, v goja.Value) dom.EventHandler {
-	f, ok := AssertFunction(v)
+	f, ok := goja.AssertFunction(v)
 	if !ok {
 		panic("TODO")
 	}
@@ -45,13 +44,16 @@ func (h *gojaEventListener) Equals(e dom.EventHandler) bool {
 	}
 }
 
-func (w eventTargetWrapper) constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object {
+func (w eventTargetWrapper) constructor(
+	call goja.ConstructorCall,
+	r *goja.Runtime,
+) *goja.Object {
 	newInstance := dom.NewEventTarget()
 	w.storeInternal(newInstance, call.This)
 	return nil
 }
 
-func (w eventTargetWrapper) getEventTarget(c FunctionCall) dom.EventTarget {
+func (w eventTargetWrapper) getEventTarget(c goja.FunctionCall) dom.EventTarget {
 	if c.This == nil {
 		panic("No this pointer")
 	}
@@ -65,16 +67,16 @@ func (w eventTargetWrapper) getEventTarget(c FunctionCall) dom.EventTarget {
 	return instance
 }
 
-func (w eventTargetWrapper) addEventListener(c FunctionCall) Value {
+func (w eventTargetWrapper) addEventListener(c goja.FunctionCall) goja.Value {
 	instance := w.getInstance(c)
 	name := c.Argument(0).String()
 	instance.AddEventListener(name, newGojaEventListener(w.instance, c.Argument(1)))
 	return nil
 }
 
-func (w eventTargetWrapper) dispatchEvent(c FunctionCall) Value {
+func (w eventTargetWrapper) dispatchEvent(c goja.FunctionCall) goja.Value {
 	instance := w.getInstance(c)
-	internal := c.Argument(0).(*Object).GetSymbol(w.instance.wrappedGoObj).Export()
+	internal := c.Argument(0).(*goja.Object).GetSymbol(w.instance.wrappedGoObj).Export()
 	if event, ok := internal.(dom.Event); ok {
 		return w.instance.vm.ToValue(instance.DispatchEvent(event))
 	} else {
@@ -82,8 +84,8 @@ func (w eventTargetWrapper) dispatchEvent(c FunctionCall) Value {
 	}
 }
 
-func (w eventTargetWrapper) initializePrototype(prototype *Object,
-	vm *Runtime) {
+func (w eventTargetWrapper) initializePrototype(prototype *goja.Object,
+	vm *goja.Runtime) {
 	prototype.Set("addEventListener", w.addEventListener)
 	prototype.Set("dispatchEvent", w.dispatchEvent)
 }

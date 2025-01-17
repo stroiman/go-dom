@@ -1,6 +1,6 @@
 // This file is generated. Do not edit.
 
-package goja
+package gojahost
 
 import (
 	g "github.com/dop251/goja"

@@ -1,4 +1,4 @@
-package goja_test
+package gojahost_test
 
 import (
 	"log/slog"
@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
-	. "github.com/stroiman/go-dom/browser/goja"
+	. "github.com/stroiman/go-dom/browser/gojahost"
 	"github.com/stroiman/go-dom/browser/html"
 	"github.com/stroiman/go-dom/browser/internal/test"
 	. "github.com/stroiman/go-dom/browser/internal/test/script-test-suite"
