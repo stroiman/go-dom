@@ -62,7 +62,7 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 	typeNameBase := fmt.Sprintf("%sV8Wrapper", data.Name())
 	typeName := lowerCaseFirstLetter(typeNameBase)
 	constructorName := fmt.Sprintf("new%s", typeNameBase)
-	innerType := g.Raw(jen.Qual(html, data.Name()))
+	innerType := g.Raw(jen.Qual(data.GetInternalPackage(), data.Name()))
 	wrapperStruct := g.NewStruct(typeName)
 	wrapperStruct.Embed(g.Raw(jen.Id("nodeV8WrapperBase").Index(innerType)))
 

@@ -220,6 +220,17 @@ type ESConstructorData struct {
 	RunCustomCode       bool
 }
 
+func (d ESConstructorData) GetInternalPackage() string {
+	switch d.Spec.DomSpec.Name {
+	case "dom":
+		return dom
+	case "html":
+		return html
+	default:
+		return html
+	}
+}
+
 func (d ESConstructorData) WrapperFunctionsToInstall() iter.Seq[ESOperation] {
 	return func(yield func(ESOperation) bool) {
 		for _, op := range d.Operations {

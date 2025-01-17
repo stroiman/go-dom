@@ -183,10 +183,12 @@ func (s *WrapperGeneratorFileSpec) Type(typeName string) WrapperTypeSpec {
 	if result, ok := s.Types[typeName]; ok {
 		return result
 	}
-	result := new(ESClassWrapper)
+	result := &ESClassWrapper{
+		DomSpec:  s,
+		TypeName: typeName,
+		Receiver: generators.DefaultReceiverName(typeName),
+	}
 	result.ensureMap()
-	result.TypeName = typeName
-	result.Receiver = generators.DefaultReceiverName(typeName)
 	s.Types[typeName] = result
 	return result
 }
@@ -218,6 +220,7 @@ func CreateSpecs() WrapperGeneratorsSpec {
 	domNode.Method("lastChild").Ignore()
 	domNode.Method("nodeValue").Ignore()
 	domNode.Method("textContent").Ignore()
+
 	return specs
 }
 

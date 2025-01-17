@@ -32,6 +32,7 @@ type ESMethodWrapper struct {
 // All classes will be generated using a set of defaults. Data in this structure
 // will allow deviating from the defaults.
 type ESClassWrapper struct {
+	DomSpec                   *WrapperGeneratorFileSpec
 	TypeName                  string
 	InnerTypeName             string
 	WrapperTypeName           string
