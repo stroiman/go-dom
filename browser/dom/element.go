@@ -29,7 +29,7 @@ type Element interface {
 	HasAttribute(name string) bool
 	GetAttribute(name string) (string, bool)
 	SetAttribute(name string, value string)
-	GetAttributes() NamedNodeMap
+	Attributes() NamedNodeMap
 	InsertAdjacentHTML(position string, text string) error
 	OuterHTML() string
 	InnerHTML() string
@@ -117,7 +117,7 @@ func (e *element) getAttributes() Attributes {
 	return e.attributes
 }
 
-func (e *element) GetAttributes() NamedNodeMap {
+func (e *element) Attributes() NamedNodeMap {
 	return NewNamedNodeMapForElement(e)
 }
 
@@ -199,7 +199,7 @@ func RenderElement(e Element, writer *strings.Builder) {
 	tagName := strings.ToLower(e.TagName())
 	writer.WriteRune('<')
 	writer.WriteString(tagName)
-	for a := range e.GetAttributes().All() {
+	for a := range e.Attributes().All() {
 		writer.WriteRune(' ')
 		writer.WriteString(a.Name())
 		writer.WriteString("=\"")

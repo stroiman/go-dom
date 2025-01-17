@@ -86,7 +86,7 @@ func createElement(host *V8ScriptHost) *v8.FunctionTemplate {
 	helper.CreateReadonlyProp2(
 		"attributes",
 		func(element Element, ctx *V8ScriptContext) (*v8.Value, error) {
-			return ctx.GetInstanceForNodeByName("NamedNodeMap", element.GetAttributes())
+			return ctx.GetInstanceForNodeByName("NamedNodeMap", element.Attributes())
 		},
 	)
 	helper.CreateFunction("setAttribute",
