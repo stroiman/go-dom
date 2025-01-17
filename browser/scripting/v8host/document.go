@@ -7,7 +7,7 @@ import (
 )
 
 type documentV8Wrapper struct {
-	ESElementContainerWrapper[Document]
+	esElementContainerWrapper[Document]
 }
 
 func newDocumentV8Wrapper(host *V8ScriptHost) documentV8Wrapper {

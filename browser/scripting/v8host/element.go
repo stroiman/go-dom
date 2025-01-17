@@ -8,11 +8,11 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type ESElement struct {
-	ESElementContainerWrapper[Element]
+type esElement struct {
+	esElementContainerWrapper[Element]
 }
 
-func (e ESElement) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e esElement) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	tokenList := e.host.globals.namedGlobals["DOMTokenList"]
 	ctx := e.host.MustGetContext(info.Context())
 	instance, err := tokenList.InstanceTemplate().NewInstance(ctx.v8ctx)
@@ -33,7 +33,7 @@ func (e ESElement) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 
 func createElement(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	wrapper := ESElement{NewESContainerWrapper[Element](host)}
+	wrapper := esElement{NewESContainerWrapper[Element](host)}
 	builder := NewIllegalConstructorBuilder[Element](host)
 	wrapper.Install(builder.constructor)
 	builder.SetDefaultInstanceLookup()

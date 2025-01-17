@@ -6,15 +6,15 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type ESElementContainerWrapper[T ElementContainer] struct {
+type esElementContainerWrapper[T ElementContainer] struct {
 	nodeV8WrapperBase[T]
 }
 
-func NewESContainerWrapper[T ElementContainer](host *V8ScriptHost) ESElementContainerWrapper[T] {
-	return ESElementContainerWrapper[T]{newNodeV8WrapperBase[T](host)}
+func NewESContainerWrapper[T ElementContainer](host *V8ScriptHost) esElementContainerWrapper[T] {
+	return esElementContainerWrapper[T]{newNodeV8WrapperBase[T](host)}
 }
 
-func (e ESElementContainerWrapper[T]) Install(ft *v8.FunctionTemplate) {
+func (e esElementContainerWrapper[T]) Install(ft *v8.FunctionTemplate) {
 	prototype := ft.PrototypeTemplate()
 	prototype.Set("querySelector", v8.NewFunctionTemplateWithError(e.host.iso, e.QuerySelector))
 	prototype.Set(
@@ -23,7 +23,7 @@ func (e ESElementContainerWrapper[T]) Install(ft *v8.FunctionTemplate) {
 	)
 }
 
-func (e ESElementContainerWrapper[T]) QuerySelector(
+func (e esElementContainerWrapper[T]) QuerySelector(
 	args *v8.FunctionCallbackInfo,
 ) (*v8.Value, error) {
 	host := e.host
@@ -43,7 +43,7 @@ func (e ESElementContainerWrapper[T]) QuerySelector(
 	return nil, v8.NewTypeError(iso, "Object not a Document")
 }
 
-func (e ESElementContainerWrapper[T]) QuerySelectorAll(
+func (e esElementContainerWrapper[T]) QuerySelectorAll(
 	args *v8.FunctionCallbackInfo,
 ) (*v8.Value, error) {
 	host := e.host
