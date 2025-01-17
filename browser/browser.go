@@ -8,7 +8,7 @@ import (
 	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/internal/http"
-	"github.com/stroiman/go-dom/browser/v8host"
+	"github.com/stroiman/go-dom/browser/scripting/v8host"
 )
 
 // Pretty stupid right now, but should _probably_ allow handling multiple

@@ -11,7 +11,7 @@ import (
 	. "github.com/stroiman/go-dom/browser/internal/http"
 	"github.com/stroiman/go-dom/browser/internal/test"
 	suite "github.com/stroiman/go-dom/browser/internal/test/script-test-suite"
-	. "github.com/stroiman/go-dom/browser/v8host"
+	. "github.com/stroiman/go-dom/browser/scripting/v8host"
 )
 
 func TestScripting(t *testing.T) {

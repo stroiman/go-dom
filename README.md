@@ -111,7 +111,9 @@ browser/
   dom/ # Core DOM implementation
   html/ # Window, HTMLDocument, HTMLElement, 
   # ...
-  scripting/ # v8 engine, and bindings
+  scripting/ # Client-side script support
+    v8host/ # v8 engine, and bindings
+    gojahost/ # goja javascript engine,
   browser.go # Main module
 code-gen/
   webref/ # Git submodule -> https://github.com/w3c/webref

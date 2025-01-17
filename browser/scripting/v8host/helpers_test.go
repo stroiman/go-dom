@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/v8host"
+	. "github.com/stroiman/go-dom/browser/scripting/v8host"
 )
 
 type TestScriptContext struct {

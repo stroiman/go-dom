@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
-	. "github.com/stroiman/go-dom/browser/v8host"
+	. "github.com/stroiman/go-dom/browser/scripting/v8host"
 )
 
 type BeJSInstanceOfMatcher struct {
