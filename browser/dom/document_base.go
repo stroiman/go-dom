@@ -32,8 +32,10 @@ type RootNodeHelper struct{ RootNode }
 func (d RootNodeHelper) GetElementById(id string) Element {
 	var search func(node Node) Element
 	search = func(node Node) Element {
-		if elm, ok := node.(Element); ok && elm.GetAttribute("id") == id {
-			return elm
+		if elm, ok := node.(Element); ok {
+			if a, _ := elm.GetAttribute("id"); a == id {
+				return elm
+			}
 		}
 		for _, child := range node.ChildNodes().All() {
 			if found := search(child); found != nil {

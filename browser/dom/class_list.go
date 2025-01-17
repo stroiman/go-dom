@@ -52,7 +52,8 @@ func (l DOMTokenList) Length() int {
 }
 
 func (l DOMTokenList) Value() string {
-	return l.element.GetAttribute("class")
+	a, _ := l.element.GetAttribute("class")
+	return a
 }
 
 func (l DOMTokenList) SetValue(val string) {
@@ -97,8 +98,8 @@ func (l DOMTokenList) Toggle(token string) bool {
 }
 
 func (l DOMTokenList) getTokens() []string {
-	class := l.element.GetAttribute("class")
-	if class == "" {
+	class, found := l.element.GetAttribute("class")
+	if !found {
 		return []string{}
 	}
 	return strings.Split(class, " ")

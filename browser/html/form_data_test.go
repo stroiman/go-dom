@@ -9,6 +9,12 @@ import (
 	"github.com/onsi/gomega/types"
 )
 
+var _ = Describe("FormDataForm", func() {
+	It("Should handle empty name/value of input fields", func() {
+		Skip("Not yet handled properly")
+	})
+})
+
 var _ = Describe("FormData", func() {
 	It("Should be empty when new", func() {
 		Expect(NewFormData()).To(BeEmptyFormData())

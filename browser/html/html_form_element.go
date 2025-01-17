@@ -55,7 +55,8 @@ func (e *htmlFormElement) Submit() error {
 }
 
 func (e *htmlFormElement) GetMethod() string {
-	if strings.ToLower(e.GetAttribute("method")) == "post" {
+	m, _ := e.GetAttribute("method")
+	if strings.ToLower(m) == "post" {
 		return "post"
 	} else {
 		return "get"
@@ -66,10 +67,10 @@ func (e *htmlFormElement) SetAction(val string) { e.SetAttribute("action", val) 
 
 func (e *htmlFormElement) getAction() dom.URL {
 	window := e.getWindow()
-	action := e.GetAttribute("action")
+	action, found := e.GetAttribute("action")
 	target := dom.URL(window.Location())
 	var err error
-	if action != "" {
+	if found {
 		if target, err = dom.NewUrlBase(action, window.Location().Href()); err != nil {
 			// This _shouldn't_ happen. But let's refactor code, so err isn't a
 			// possible return value

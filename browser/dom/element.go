@@ -27,7 +27,7 @@ type Element interface {
 	MouseEvents
 	ClassList() DOMTokenList
 	HasAttribute(name string) bool
-	GetAttribute(name string) string
+	GetAttribute(name string) (string, bool)
 	SetAttribute(name string, value string)
 	GetAttributes() NamedNodeMap
 	InsertAdjacentHTML(position string, text string) error
@@ -104,13 +104,13 @@ func (e *element) HasAttribute(name string) bool {
 	return false
 }
 
-func (e *element) GetAttribute(name string) string {
+func (e *element) GetAttribute(name string) (string, bool) {
 	for _, a := range e.attributes {
 		if a.Key == name {
-			return a.Val
+			return a.Val, true
 		}
 	}
-	return ""
+	return "", false
 }
 
 func (e *element) getAttributes() Attributes {
@@ -218,8 +218,8 @@ func RenderElement(e Element, writer *strings.Builder) {
 func (e *element) String() string {
 	childLen := e.ChildNodes().Length()
 
-	id := e.GetAttribute("id")
-	if id != "" {
+	id, found := e.GetAttribute("id")
+	if found {
 		id = "id='" + id + "'"
 	}
 	return fmt.Sprintf("<%s %s(child count=%d) />", e.tagName, id, childLen)

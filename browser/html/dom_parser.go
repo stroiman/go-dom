@@ -69,9 +69,9 @@ type ScriptElementRules struct{ BaseRules }
 
 func (r ScriptElementRules) Connected(win Window, node dom.Element) {
 	var script string
-	src := node.GetAttribute("src")
+	src, hasSrc := node.GetAttribute("src")
 	slog.Debug("Process script tag")
-	if src == "" {
+	if !hasSrc {
 		b := strings.Builder{}
 		for _, child := range node.ChildNodes().All() {
 			switch n := child.(type) {

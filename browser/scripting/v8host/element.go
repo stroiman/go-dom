@@ -54,12 +54,32 @@ func createElement(host *V8ScriptHost) *v8.FunctionTemplate {
 	)
 	helper.CreateReadonlyProp("outerHTML", Element.OuterHTML)
 	helper.CreateReadonlyProp("tagName", Element.TagName)
-	helper.CreateFunctionStringToString("getAttribute", Element.GetAttribute)
+	prototypeTemplate.Set(
+		"getAttribute",
+		v8.NewFunctionTemplateWithError(
+			iso,
+			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				helper := newArgumentHelper(host, info)
+				element, e0 := builder.GetInstance(info)
+				name, e1 := helper.getStringArg(0)
+				err := errors.Join(e0, e1)
+				if err != nil {
+					return nil, err
+				}
+				if r, ok := element.GetAttribute(name); ok {
+					return v8.NewValue(iso, r)
+				} else {
+					return v8.Null(iso), nil
+				}
+			},
+		),
+	)
 	helper.CreateFunction(
 		"hasAttribute",
 		func(instance Element, info argumentHelper) (*v8.Value, error) {
 			name, e1 := info.getStringArg(0)
-			result, e2 := v8.NewValue(iso, instance.GetAttribute(name) != "")
+			_, ok := instance.GetAttribute(name)
+			result, e2 := v8.NewValue(iso, ok)
 			return result, errors.Join(e1, e2)
 		},
 	)

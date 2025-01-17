@@ -2,6 +2,7 @@ package dom_test
 
 import (
 	. "github.com/stroiman/go-dom/browser/dom"
+	matchers "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -21,13 +22,13 @@ var _ = Describe("ClassList", func() {
 	Describe("Add", func() {
 		It("Should add a new class", func() {
 			Expect(classList.Add("c1", "c2")).To(Succeed())
-			Expect(el.GetAttribute("class")).To(Equal("c1 c2"))
+			Expect(el).To(matchers.HaveAttribute("class", "c1 c2"))
 		})
 
 		It("Should ignore existing classes", func() {
 			el.SetAttribute("class", "c1 c2")
 			Expect(classList.Add("c2", "c3")).To(Succeed())
-			Expect(el.GetAttribute("class")).To(Equal("c1 c2 c3"))
+			Expect(el).To(matchers.HaveAttribute("class", "c1 c2 c3"))
 
 		})
 
@@ -85,7 +86,7 @@ var _ = Describe("ClassList", func() {
 
 		It("Should write the class attribute", func() {
 			classList.SetValue("x y  z")
-			Expect(el.GetAttribute("class")).To(Equal("x y  z"))
+			Expect(el).To(matchers.HaveAttribute("class", "x y  z"))
 		})
 	})
 
@@ -105,19 +106,19 @@ var _ = Describe("ClassList", func() {
 		It("Should remove an existing class", func() {
 			el.SetAttribute("class", "a b c")
 			classList.Remove("b")
-			Expect(el.GetAttribute("class")).To(Equal("a c"))
+			Expect(el).To(matchers.HaveAttribute("class", "a c"))
 		})
 
 		It("Should remove the last class", func() {
 			el.SetAttribute("class", "a b c")
 			classList.Remove("c")
-			Expect(el.GetAttribute("class")).To(Equal("a b"))
+			Expect(el).To(matchers.HaveAttribute("class", "a b"))
 		})
 
 		It("Should leave the list intact for a non-existing class", func() {
 			el.SetAttribute("class", "a b c")
 			classList.Remove("x")
-			Expect(el.GetAttribute("class")).To(Equal("a b c"))
+			Expect(el).To(matchers.HaveAttribute("class", "a b c"))
 		})
 	})
 
@@ -125,13 +126,13 @@ var _ = Describe("ClassList", func() {
 		It("Should remove, insert, and remove true on existing item", func() {
 			el.SetAttribute("class", "a b c")
 			Expect(classList.Replace("b", "x")).To(BeTrue())
-			Expect(el.GetAttribute("class")).To(Equal("a c x"))
+			Expect(el).To(matchers.HaveAttribute("class", "a c x"))
 		})
 
 		It("Should leave the list and return false on non-existing item", func() {
 			el.SetAttribute("class", "a b c")
 			Expect(classList.Replace("y", "x")).To(BeFalse())
-			Expect(el.GetAttribute("class")).To(Equal("a b c"))
+			Expect(el).To(matchers.HaveAttribute("class", "a b c"))
 		})
 	})
 })

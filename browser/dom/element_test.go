@@ -9,7 +9,7 @@ import (
 )
 
 var _ = Describe("Element", func() {
-	Describe("SetAttribute", func() {
+	Describe("Get/Set attribute", func() {
 		It("Should add a new attribute when not existing", func() {
 			doc := CreateHTMLDocument()
 			elm := doc.CreateElement("div")
@@ -23,8 +23,12 @@ var _ = Describe("Element", func() {
 			elm := doc.CreateElement("div")
 			elm.SetAttribute("id", "1")
 			elm.SetAttribute("id", "2")
-			Expect(elm.GetAttribute("id")).To(Equal("2"))
+			Expect(elm).To(HaveAttribute("id", "2"))
 			Expect(elm.GetAttributes().Length()).To(Equal(1))
+		})
+
+		It("Should return nil when the attribute does't exist", func() {
+
 		})
 	})
 

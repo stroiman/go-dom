@@ -36,6 +36,14 @@ var _ = Describe("V8 Element", func() {
 			)).To(Equal("bar"))
 		})
 
+		It("Should return null when getting non-existing attribute", func() {
+			ctx := NewTestContext()
+			Expect(
+				ctx.RunTestScript(`document.createElement("div").getAttribute("dummy") === null`),
+			).To(BeTrue())
+
+		})
+
 		It("Should support hasAtribute", func() {
 			ctx := NewTestContext(LoadHTML(`<div id="1" class="foo"></div>`))
 			Expect(ctx.RunTestScript(
