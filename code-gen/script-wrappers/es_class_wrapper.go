@@ -55,6 +55,12 @@ func (w *ESClassWrapper) MarkMembersAsNotImplemented(names ...string) {
 		w.Customization[name] = &ESMethodWrapper{NotImplemented: true}
 	}
 }
+func (w *ESClassWrapper) MarkMembersAsIgnored(names ...string) {
+	w.ensureMap()
+	for _, name := range names {
+		w.Customization[name] = &ESMethodWrapper{Ignored: true}
+	}
+}
 
 func (w *ESClassWrapper) GetMethodCustomization(name string) (result ESMethodWrapper) {
 	if val, ok := w.Customization[name]; ok {

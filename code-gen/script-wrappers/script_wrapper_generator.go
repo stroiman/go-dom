@@ -262,6 +262,51 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 
 	domSpecs := specs.Module("dom")
 
+	domElement := domSpecs.Type("Element")
+	domElement.RunCustomCode = true
+	domElement.Method("getAttribute").SetCustomImplementation()
+	domElement.Method("setAttribute").SetNoError()
+	domElement.Method("hasAttribute").SetNoError()
+	domElement.Method("classList").SetCustomImplementation()
+
+	domElement.MarkMembersAsNotImplemented(
+		"hasAttributes",
+		"hasAttributeNS",
+		"getAttributeNames",
+		"getAttributeNS",
+		"setAttributeNS",
+		"removeAttributeNode",
+		"removeAttribute",
+		"removeAttributeNS",
+		"toggleAttribute",
+		"toggleAttributeForce",
+		"setAttributeNode",
+		"setAttributeNodeNS",
+		"getAttributeNode",
+		"getAttributeNodeNS",
+		"getElementsByTagName",
+		"getElementsByTagNameNS",
+		"getElementsByClassName",
+		"insertAdjacentElement",
+		"insertAdjacentText",
+		"namespaceURI",
+		"prefix",
+		"localName",
+		"id",
+		"shadowRoot",
+		"slot",
+		"className",
+		"decodeShadowRootInit",
+		"attachShadow",
+	)
+
+	domElement.MarkMembersAsIgnored(
+		// HTMX fails if these exist but throw
+		"matches",
+		"webkitMatchesSelector",
+		"closest",
+	)
+
 	domTokenList := domSpecs.Type("DOMTokenList")
 	domTokenList.InnerTypeName = "DomTokenList"
 	domTokenList.Receiver = "u"
