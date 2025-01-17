@@ -7,11 +7,6 @@ import (
 
 func (suite *ScriptTestSuite) CreateDocumentTests() {
 	prefix := suite.Prefix
-	var ctx *ScriptTestContext
-
-	BeforeEach(func() {
-		ctx = suite.NewContext()
-	})
 
 	Describe(prefix+"Document", func() {
 		Describe("prototype", func() {
@@ -29,6 +24,7 @@ func (suite *ScriptTestSuite) CreateDocumentTests() {
 
 		Describe("Instance properties", func() {
 			It("Has a `location` property", func() {
+				ctx := suite.NewContext()
 				Expect(
 					ctx.Eval("Object.getOwnPropertyNames(document)"),
 				).To(ContainElements("location"))

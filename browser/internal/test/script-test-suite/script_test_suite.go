@@ -1,7 +1,10 @@
 package suite
 
 import (
+	"strings"
+
 	"github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	"github.com/stroiman/go-dom/browser/html"
 )
 
@@ -51,6 +54,17 @@ func (suite *ScriptTestSuite) NewContext() *ScriptTestContext {
 	result := &ScriptTestContext{
 		Window: html.NewWindow(options),
 	}
+	ginkgo.DeferCleanup(func() { result.Close() })
+	return result
+}
+
+func (suite *ScriptTestSuite) LoadHTML(h string) *ScriptTestContext {
+	options := html.WindowOptions{
+		ScriptHost: suite.Engine,
+	}
+	win, err := html.NewWindowReader(strings.NewReader(h), options)
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+	result := &ScriptTestContext{Window: win}
 	ginkgo.DeferCleanup(func() { result.Close() })
 	return result
 }
