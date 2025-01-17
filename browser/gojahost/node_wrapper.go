@@ -44,8 +44,8 @@ func (w nodeWrapper) toNodeList(l dom.NodeList) g.Value {
 	if result := w.getCachedObject(l); result != nil {
 		return result
 	}
-	result := w.instance.vm.NewDynamicArray(nodeListDynamicArray{l, w.instance})
-	result.SetPrototype(w.instance.globals["NodeList"].Prototype)
+	result := w.ctx.vm.NewDynamicArray(nodeListDynamicArray{l, w.ctx})
+	result.SetPrototype(w.ctx.globals["NodeList"].Prototype)
 	w.storeInternal(l, result)
 	return result
 }

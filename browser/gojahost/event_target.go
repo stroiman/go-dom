@@ -57,12 +57,12 @@ func (w eventTargetWrapper) getEventTarget(c goja.FunctionCall) dom.EventTarget 
 	if c.This == nil {
 		panic("No this pointer")
 	}
-	if c.This == w.instance.vm.GlobalObject() {
-		return w.instance.window
+	if c.This == w.ctx.vm.GlobalObject() {
+		return w.ctx.window
 	}
 	instance, ok := c.This.Export().(dom.EventTarget)
 	if !ok {
-		panic(w.instance.vm.NewTypeError("Not an event target"))
+		panic(w.ctx.vm.NewTypeError("Not an event target"))
 	}
 	return instance
 }
@@ -70,17 +70,17 @@ func (w eventTargetWrapper) getEventTarget(c goja.FunctionCall) dom.EventTarget 
 func (w eventTargetWrapper) addEventListener(c goja.FunctionCall) goja.Value {
 	instance := w.getInstance(c)
 	name := c.Argument(0).String()
-	instance.AddEventListener(name, newGojaEventListener(w.instance, c.Argument(1)))
+	instance.AddEventListener(name, newGojaEventListener(w.ctx, c.Argument(1)))
 	return nil
 }
 
 func (w eventTargetWrapper) dispatchEvent(c goja.FunctionCall) goja.Value {
 	instance := w.getInstance(c)
-	internal := c.Argument(0).(*goja.Object).GetSymbol(w.instance.wrappedGoObj).Export()
+	internal := c.Argument(0).(*goja.Object).GetSymbol(w.ctx.wrappedGoObj).Export()
 	if event, ok := internal.(dom.Event); ok {
-		return w.instance.vm.ToValue(instance.DispatchEvent(event))
+		return w.ctx.vm.ToValue(instance.DispatchEvent(event))
 	} else {
-		panic(w.instance.vm.NewTypeError("Not an event"))
+		panic(w.ctx.vm.NewTypeError("Not an event"))
 	}
 }
 

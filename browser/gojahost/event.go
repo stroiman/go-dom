@@ -43,7 +43,7 @@ func (w EventWrapper) PreventDefault(c g.FunctionCall) g.Value {
 }
 
 func (w EventWrapper) GetType(c g.FunctionCall) g.Value {
-	return w.instance.vm.ToValue(w.getInstance(c).Type())
+	return w.ctx.vm.ToValue(w.getInstance(c).Type())
 }
 
 func (w EventWrapper) initializePrototype(prototype *g.Object,
@@ -51,7 +51,7 @@ func (w EventWrapper) initializePrototype(prototype *g.Object,
 	prototype.Set("preventDefault", w.PreventDefault)
 	prototype.DefineAccessorProperty(
 		"type",
-		w.instance.vm.ToValue(w.GetType),
+		w.ctx.vm.ToValue(w.GetType),
 		nil,
 		g.FLAG_TRUE,
 		g.FLAG_TRUE,

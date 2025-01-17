@@ -54,7 +54,7 @@ func (gen GojaTargetGenerators) CreateJSConstructorGenerator(data ESConstructorD
 func (gen GojaTargetGenerators) CreatePrototypeInitializer(data ESConstructorData) g.Generator {
 	naming := GojaNamingStrategy{data}
 	receiver := g.NewValue(naming.ReceiverName())
-	vm := receiver.Field("instance").Field("vm")
+	vm := receiver.Field("ctx").Field("vm")
 	prototype := g.NewValue("prototype")
 
 	body := g.StatementList()

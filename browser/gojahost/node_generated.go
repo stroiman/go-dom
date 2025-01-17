@@ -20,14 +20,14 @@ func (w nodeWrapper) initializePrototype(prototype *g.Object, vm *g.Runtime) {
 	prototype.Set("insertBefore", w.insertBefore)
 	prototype.Set("appendChild", w.appendChild)
 	prototype.Set("removeChild", w.removeChild)
-	prototype.DefineAccessorProperty("nodeType", w.instance.vm.ToValue(w.NodeType), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("nodeName", w.instance.vm.ToValue(w.NodeName), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("isConnected", w.instance.vm.ToValue(w.IsConnected), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("ownerDocument", w.instance.vm.ToValue(w.OwnerDocument), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("childNodes", w.instance.vm.ToValue(w.ChildNodes), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("firstChild", w.instance.vm.ToValue(w.FirstChild), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("previousSibling", w.instance.vm.ToValue(w.PreviousSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("nextSibling", w.instance.vm.ToValue(w.NextSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("nodeType", w.ctx.vm.ToValue(w.NodeType), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("nodeName", w.ctx.vm.ToValue(w.NodeName), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("isConnected", w.ctx.vm.ToValue(w.IsConnected), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("ownerDocument", w.ctx.vm.ToValue(w.OwnerDocument), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("childNodes", w.ctx.vm.ToValue(w.ChildNodes), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("firstChild", w.ctx.vm.ToValue(w.FirstChild), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("previousSibling", w.ctx.vm.ToValue(w.PreviousSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("nextSibling", w.ctx.vm.ToValue(w.NextSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 }
 
 func (w nodeWrapper) getRootNode(c g.FunctionCall) g.Value {
