@@ -57,6 +57,8 @@ func (w baseInstanceWrapper[T]) decodeNode(v g.Value) dom.Node {
 
 func (w baseInstanceWrapper[T]) getPrototype(e dom.Entity) *g.Object {
 	switch e.(type) {
+	case dom.Element:
+		return w.ctx.globals["Element"].Prototype
 	case dom.Node:
 		return w.ctx.globals["Node"].Prototype
 	}

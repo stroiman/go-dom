@@ -30,5 +30,20 @@ func (suite *ScriptTestSuite) CreateDocumentTests() {
 				).To(ContainElements("location"))
 			})
 		})
+
+		Describe("getElementById", func() {
+			It("Should return the right element", func() {
+				ctx := suite.LoadHTML(
+					`<body><div id='elm-1'>Elm: 1</div><div id='elm-2'>Elm: 2</div></body>`,
+				)
+				Expect(
+					ctx.Eval(`typeof document.getElementById("elm-2")`),
+				).To(Equal("object"), "Typeof element")
+				Expect(ctx.Eval(`
+          const e = document.getElementById("elm-2")
+          e.outerHTML
+        `)).To(Equal(`<div id="elm-2">Elm: 2</div>`))
+			})
+		})
 	})
 }

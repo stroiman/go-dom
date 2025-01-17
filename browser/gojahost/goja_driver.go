@@ -54,6 +54,7 @@ func init() {
 	installClass("Document", "Node", newDocumentWrapper)
 	installClass("Event", "", NewEventWrapper)
 	installClass("CustomEvent", "Event", NewCustomEventWrapper)
+	installClass("Element", "Node", newElementWrapper)
 
 }
 
