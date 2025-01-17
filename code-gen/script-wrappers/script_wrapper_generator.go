@@ -191,8 +191,38 @@ func (s *WrapperGeneratorFileSpec) Type(typeName string) WrapperTypeSpec {
 	return result
 }
 
-func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGenerator {
+func CreateSpecs() WrapperGeneratorsSpec {
 	specs := NewWrapperGeneratorsSpec()
+	domSpecs := specs.Module("dom")
+	domSpecs.SetMultipleFiles(true)
+	domNode := domSpecs.Type("Node")
+	domNode.Method("nodeType").SetCustomImplementation()
+	domNode.Method("contains").SetNoError()
+	domNode.Method("getRootNode").SetNoError().Argument("options").HasDefault()
+	domNode.Method("previousSibling").SetNoError()
+	domNode.Method("nextSibling").SetNoError()
+
+	domNode.Method("hasChildNodes").Ignore()
+	domNode.Method("normalize").Ignore()
+	domNode.Method("cloneNode").Ignore()
+	domNode.Method("isEqualNode").Ignore()
+	domNode.Method("isSameNode").Ignore()
+	domNode.Method("compareDocumentPosition").Ignore()
+	domNode.Method("lookupPrefix").Ignore()
+	domNode.Method("lookupNamespaceURI").Ignore()
+	domNode.Method("isDefaultNamespace").Ignore()
+	domNode.Method("replaceChild").Ignore()
+	domNode.Method("baseURI").Ignore()
+	domNode.Method("parentNode").Ignore()
+	domNode.Method("parentElement").Ignore()
+	domNode.Method("lastChild").Ignore()
+	domNode.Method("nodeValue").Ignore()
+	domNode.Method("textContent").Ignore()
+	return specs
+}
+
+func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGenerator {
+	specs := CreateSpecs()
 	xhrModule := specs.Module("xhr")
 	xhr := xhrModule.Type("XMLHttpRequest")
 	xhr.SkipPrototypeRegistration = true
@@ -228,7 +258,6 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	)
 
 	domSpecs := specs.Module("dom")
-	domSpecs.SetMultipleFiles(true)
 
 	domTokenList := domSpecs.Type("DOMTokenList")
 	domTokenList.InnerTypeName = "DomTokenList"
@@ -240,30 +269,6 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	domTokenList.Method("toggle").SetCustomImplementation()
 	domTokenList.Method("replace").SetNoError()
 	domTokenList.Method("supports").SetNotImplemented()
-
-	domNode := domSpecs.Type("Node")
-	domNode.Method("nodeType").SetCustomImplementation()
-	domNode.Method("contains").SetNoError()
-	domNode.Method("getRootNode").SetNoError().Argument("options").HasDefault()
-	domNode.Method("previousSibling").SetNoError()
-	domNode.Method("nextSibling").SetNoError()
-
-	domNode.Method("hasChildNodes").Ignore()
-	domNode.Method("normalize").Ignore()
-	domNode.Method("cloneNode").Ignore()
-	domNode.Method("isEqualNode").Ignore()
-	domNode.Method("isSameNode").Ignore()
-	domNode.Method("compareDocumentPosition").Ignore()
-	domNode.Method("lookupPrefix").Ignore()
-	domNode.Method("lookupNamespaceURI").Ignore()
-	domNode.Method("isDefaultNamespace").Ignore()
-	domNode.Method("replaceChild").Ignore()
-	domNode.Method("baseURI").Ignore()
-	domNode.Method("parentNode").Ignore()
-	domNode.Method("parentElement").Ignore()
-	domNode.Method("lastChild").Ignore()
-	domNode.Method("nodeValue").Ignore()
-	domNode.Method("textContent").Ignore()
 
 	htmlSpecs := specs.Module("html")
 	htmlSpecs.SetMultipleFiles(true)
