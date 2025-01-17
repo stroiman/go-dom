@@ -25,7 +25,7 @@ var (
 const (
 	dom     = BASE_PKG + "/browser/dom"
 	html    = BASE_PKG + "/browser/html"
-	sc      = BASE_PKG + "/browser/scripting"
+	v8host  = BASE_PKG + "/browser/v8host"
 	goja    = BASE_PKG + "/browser/goja"
 	v8      = "github.com/tommie/v8go"
 	gojaSrc = "github.com/dop251/goja"

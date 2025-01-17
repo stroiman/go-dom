@@ -324,7 +324,7 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	return ScriptWrapperModulesGenerator{
 		IdlSources:       idlSources,
 		Specs:            specs,
-		PackagePath:      sc,
+		PackagePath:      v8host,
 		TargetGenerators: V8TargetGenerators{},
 	}
 }

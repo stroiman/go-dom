@@ -8,7 +8,7 @@ import (
 	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/internal/http"
-	"github.com/stroiman/go-dom/browser/scripting"
+	"github.com/stroiman/go-dom/browser/v8host"
 )
 
 // Pretty stupid right now, but should _probably_ allow handling multiple
@@ -37,14 +37,14 @@ func (b *Browser) Open(location string) (window Window, err error) {
 
 func NewBrowser() *Browser {
 	return &Browser{
-		ScriptHost: scripting.NewScriptHost(),
+		ScriptHost: v8host.NewScriptHost(),
 		Client:     NewHttpClient(),
 	}
 }
 
 func NewBrowserFromHandler(handler http.Handler) *Browser {
 	return &Browser{
-		ScriptHost: scripting.NewScriptHost(),
+		ScriptHost: v8host.NewScriptHost(),
 		Client:     NewHttpClientFromHandler(handler),
 	}
 }

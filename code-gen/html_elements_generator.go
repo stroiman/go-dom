@@ -7,8 +7,8 @@ import (
 )
 
 func WriteHeader(b *builder) {
-	b.Printf("package scripting\n\n")
 	b.Printf("// This file is generated. Do not edit.\n\n")
+	b.Printf("package v8host\n\n")
 }
 
 type builder struct {
