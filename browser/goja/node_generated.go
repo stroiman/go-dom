@@ -15,6 +15,7 @@ func newNodeWrapper(instance *GojaContext) wrapper {
 	return nodeWrapper{newBaseInstanceWrapper[dom.Node](instance)}
 }
 func (w nodeWrapper) initializePrototype(prototype *g.Object, vm *g.Runtime) {
+	prototype.Set("getRootNode", w.getRootNode)
 	prototype.Set("contains", w.contains)
 	prototype.Set("insertBefore", w.insertBefore)
 	prototype.Set("appendChild", w.appendChild)
@@ -23,9 +24,17 @@ func (w nodeWrapper) initializePrototype(prototype *g.Object, vm *g.Runtime) {
 	prototype.DefineAccessorProperty("nodeName", w.instance.vm.ToValue(w.NodeName), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("isConnected", w.instance.vm.ToValue(w.IsConnected), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("ownerDocument", w.instance.vm.ToValue(w.OwnerDocument), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("childNodes", w.instance.vm.ToValue(w.ChildNodes), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("firstChild", w.instance.vm.ToValue(w.FirstChild), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("previousSibling", w.instance.vm.ToValue(w.PreviousSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("nextSibling", w.instance.vm.ToValue(w.NextSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+}
+
+func (w nodeWrapper) getRootNode(c g.FunctionCall) g.Value {
+	instance := w.getInstance(c)
+	options := w.decodeGetRootNodeOptions(c.Arguments[0])
+	result := instance.GetRootNode(options)
+	return w.toNode(result)
 }
 
 func (w nodeWrapper) contains(c g.FunctionCall) g.Value {
@@ -82,6 +91,10 @@ func (w nodeWrapper) OwnerDocument(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	result := instance.OwnerDocument()
 	return w.toDocument(result)
+}
+
+func (w nodeWrapper) ChildNodes(c g.FunctionCall) g.Value {
+	panic("Node.ChildNodes: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
 func (w nodeWrapper) FirstChild(c g.FunctionCall) g.Value {
