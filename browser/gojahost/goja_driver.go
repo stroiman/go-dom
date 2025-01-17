@@ -13,7 +13,7 @@ import (
 
 const INTERNAL_SYMBOL_NAME = "__go_dom_internal_value__"
 
-func NewGojaScriptEngine() html.ScriptHost {
+func New() html.ScriptHost {
 	return &gojaScriptHost{}
 }
 

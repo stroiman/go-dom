@@ -10,7 +10,7 @@ import (
 
 var _ = Describe("GojaDriver", func() {
 	It("Starts with a test", func() {
-		engine := NewGojaScriptEngine()
+		engine := New()
 		window := html.NewWindow(html.WindowOptions{ScriptHost: engine})
 		Expect(window.Eval("Window.name")).To(Equal("Window"), "Window.name")
 		Expect(window.Eval("typeof globalThis")).To(Equal("object"))

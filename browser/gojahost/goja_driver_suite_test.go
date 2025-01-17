@@ -14,7 +14,7 @@ import (
 	. "github.com/stroiman/go-dom/browser/internal/test/script-test-suite"
 )
 
-var testSuite = NewScriptTestSuite(NewGojaScriptEngine(), "goja", SkipDOM)
+var testSuite = NewScriptTestSuite(New(), "goja", SkipDOM)
 
 func newCtx() html.ScriptContext { return testSuite.NewContext() }
 
