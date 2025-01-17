@@ -149,7 +149,7 @@ func (gen GojaTargetGenerators) CreateWrapperMethodBody(
 		msg := fmt.Sprintf(
 			"%s.%s: Not implemented. Create an issue: %s", data.Name(), op.Name, ISSUE_URL,
 		)
-		return g.Raw(jen.Panic(jen.Lit(fmt.Sprintf(msg))))
+		return g.Raw(jen.Panic(jen.Lit(msg)))
 	}
 	naming := GojaNamingStrategy{data}
 	receiver := g.NewValue(naming.ReceiverName())
