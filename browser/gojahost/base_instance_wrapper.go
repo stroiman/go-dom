@@ -1,7 +1,7 @@
 package gojahost
 
 import (
-	. "github.com/dop251/goja"
+	g "github.com/dop251/goja"
 	"github.com/stroiman/go-dom/browser/dom"
 )
 
@@ -13,13 +13,13 @@ func newBaseInstanceWrapper[T any](instance *GojaContext) baseInstanceWrapper[T]
 	return baseInstanceWrapper[T]{instance}
 }
 
-func (w baseInstanceWrapper[T]) storeInternal(value any, obj *Object) {
+func (w baseInstanceWrapper[T]) storeInternal(value any, obj *g.Object) {
 	obj.DefineDataPropertySymbol(
 		w.instance.wrappedGoObj,
 		w.instance.vm.ToValue(value),
-		FLAG_FALSE,
-		FLAG_FALSE,
-		FLAG_FALSE,
+		g.FLAG_FALSE,
+		g.FLAG_FALSE,
+		g.FLAG_FALSE,
 	)
 	if e, ok := value.(dom.Entity); ok {
 		w.instance.cachedNodes[e.ObjectId()] = obj
@@ -27,12 +27,12 @@ func (w baseInstanceWrapper[T]) storeInternal(value any, obj *Object) {
 	// obj.SetSymbol(w.instance.wrappedGoObj, w.instance.vm.ToValue(value))
 }
 
-func getInstanceValue[T any](c *GojaContext, v Value) (T, bool) {
-	res, ok := v.(*Object).GetSymbol(c.wrappedGoObj).Export().(T)
+func getInstanceValue[T any](c *GojaContext, v g.Value) (T, bool) {
+	res, ok := v.(*g.Object).GetSymbol(c.wrappedGoObj).Export().(T)
 	return res, ok
 }
 
-func (w baseInstanceWrapper[T]) getInstance(c FunctionCall) T {
+func (w baseInstanceWrapper[T]) getInstance(c g.FunctionCall) T {
 	if c.This == nil {
 		panic("No this pointer")
 	}
@@ -43,11 +43,11 @@ func (w baseInstanceWrapper[T]) getInstance(c FunctionCall) T {
 	}
 }
 
-func (w baseInstanceWrapper[T]) getCachedObject(e dom.Entity) Value {
+func (w baseInstanceWrapper[T]) getCachedObject(e dom.Entity) g.Value {
 	return w.instance.cachedNodes[e.ObjectId()]
 }
 
-func (w baseInstanceWrapper[T]) decodeNode(v Value) dom.Node {
+func (w baseInstanceWrapper[T]) decodeNode(v g.Value) dom.Node {
 	if r, ok := getInstanceValue[dom.Node](w.instance, v); ok {
 		return r
 	} else {
@@ -55,7 +55,7 @@ func (w baseInstanceWrapper[T]) decodeNode(v Value) dom.Node {
 	}
 }
 
-func (w baseInstanceWrapper[T]) getPrototype(e dom.Entity) *Object {
+func (w baseInstanceWrapper[T]) getPrototype(e dom.Entity) *g.Object {
 	switch e.(type) {
 	case dom.Node:
 		return w.instance.globals["Node"].Prototype
@@ -63,7 +63,7 @@ func (w baseInstanceWrapper[T]) getPrototype(e dom.Entity) *Object {
 	panic("Prototype lookup not defined")
 }
 
-func (w baseInstanceWrapper[T]) toNode(e dom.Entity) Value {
+func (w baseInstanceWrapper[T]) toNode(e dom.Entity) g.Value {
 	if o := w.getCachedObject(e); o != nil {
 		return o
 	}
@@ -73,18 +73,18 @@ func (w baseInstanceWrapper[T]) toNode(e dom.Entity) Value {
 	return obj
 }
 
-func (w baseInstanceWrapper[T]) toBoolean(b bool) Value {
+func (w baseInstanceWrapper[T]) toBoolean(b bool) g.Value {
 	return w.instance.vm.ToValue(b)
 }
 
-func (w baseInstanceWrapper[T]) toDOMString(b string) Value {
+func (w baseInstanceWrapper[T]) toDOMString(b string) g.Value {
 	return w.instance.vm.ToValue(b)
 }
 
-func (w baseInstanceWrapper[T]) toDocument(e dom.Entity) Value {
+func (w baseInstanceWrapper[T]) toDocument(e dom.Entity) g.Value {
 	return w.toNode(e)
 }
 
-func (w baseInstanceWrapper[T]) toUnsignedShort(i int) Value {
+func (w baseInstanceWrapper[T]) toUnsignedShort(i int) g.Value {
 	return w.instance.vm.ToValue(i)
 }

@@ -1,7 +1,7 @@
 package gojahost
 
 import (
-	. "github.com/dop251/goja"
+	g "github.com/dop251/goja"
 	"github.com/stroiman/go-dom/browser/dom"
 )
 
@@ -13,13 +13,13 @@ func newDocumentWrapper(instance *GojaContext) wrapper {
 	return documentWrapper{newBaseInstanceWrapper[dom.Document](instance)}
 }
 
-func (w documentWrapper) constructor(call ConstructorCall, r *Runtime) *Object {
+func (w documentWrapper) constructor(call g.ConstructorCall, r *g.Runtime) *g.Object {
 	panic(r.NewTypeError("Illegal Constructor"))
 }
 
-func (w documentWrapper) initializePrototype(prototype *Object,
-	vm *Runtime) {
-	createElement := vm.ToValue(func(c FunctionCall) Value {
+func (w documentWrapper) initializePrototype(prototype *g.Object,
+	vm *g.Runtime) {
+	createElement := vm.ToValue(func(c g.FunctionCall) g.Value {
 		if c.This == nil {
 			panic("No this pointer")
 		}

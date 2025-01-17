@@ -1,7 +1,7 @@
 package gojahost
 
 import (
-	. "github.com/dop251/goja"
+	g "github.com/dop251/goja"
 	"github.com/stroiman/go-dom/browser/dom"
 )
 
@@ -15,19 +15,19 @@ func newEventWrapper(instance *GojaContext) EventWrapper {
 }
 
 type GojaEvent[T dom.Event] struct {
-	Value *Object
+	Value *g.Object
 	Event T
 }
 
-func ToBoolean(value Value) bool {
+func ToBoolean(value g.Value) bool {
 	return value != nil && value.ToBoolean()
 }
 
-func (w EventWrapper) constructor(call ConstructorCall, r *Runtime) *Object {
+func (w EventWrapper) constructor(call g.ConstructorCall, r *g.Runtime) *g.Object {
 	arg1 := call.Argument(0).String()
 	options := make([]dom.CustomEventOption, 0, 2)
-	if arg2 := call.Argument(1); !IsUndefined(arg2) {
-		if obj, ok := arg2.(*Object); ok {
+	if arg2 := call.Argument(1); !g.IsUndefined(arg2) {
+		if obj, ok := arg2.(*g.Object); ok {
 			options = append(options, dom.EventCancelable(ToBoolean(obj.Get("cancelable"))))
 			options = append(options, dom.EventBubbles(ToBoolean(obj.Get("bubbles"))))
 		}
@@ -37,24 +37,24 @@ func (w EventWrapper) constructor(call ConstructorCall, r *Runtime) *Object {
 	return nil
 }
 
-func (w EventWrapper) PreventDefault(c FunctionCall) Value {
+func (w EventWrapper) PreventDefault(c g.FunctionCall) g.Value {
 	w.getInstance(c).PreventDefault()
 	return nil
 }
 
-func (w EventWrapper) GetType(c FunctionCall) Value {
+func (w EventWrapper) GetType(c g.FunctionCall) g.Value {
 	return w.instance.vm.ToValue(w.getInstance(c).Type())
 }
 
-func (w EventWrapper) initializePrototype(prototype *Object,
-	vm *Runtime) {
+func (w EventWrapper) initializePrototype(prototype *g.Object,
+	vm *g.Runtime) {
 	prototype.Set("preventDefault", w.PreventDefault)
 	prototype.DefineAccessorProperty(
 		"type",
 		w.instance.vm.ToValue(w.GetType),
 		nil,
-		FLAG_TRUE,
-		FLAG_TRUE,
+		g.FLAG_TRUE,
+		g.FLAG_TRUE,
 	)
 }
 

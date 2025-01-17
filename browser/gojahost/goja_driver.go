@@ -8,8 +8,7 @@ import (
 	"github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
 
-	"github.com/dop251/goja"
-	. "github.com/dop251/goja"
+	g "github.com/dop251/goja"
 )
 
 const INTERNAL_SYMBOL_NAME = "__go_dom_internal_value__"
@@ -21,14 +20,14 @@ func NewGojaScriptEngine() html.ScriptHost {
 type gojaScriptHost struct{}
 
 type wrapper interface {
-	constructor(call goja.ConstructorCall, r *goja.Runtime) *goja.Object
-	storeInternal(value any, this *Object)
+	constructor(call g.ConstructorCall, r *g.Runtime) *g.Object
+	storeInternal(value any, this *g.Object)
 }
 
 type createWrapper func(instance *GojaContext) wrapper
 
 type wrapperPrototypeInitializer interface {
-	initializePrototype(prototype *Object, r *goja.Runtime)
+	initializePrototype(prototype *g.Object, r *g.Runtime)
 }
 
 type class struct {
@@ -59,13 +58,13 @@ func init() {
 }
 
 type function struct {
-	Constructor *Object
-	Prototype   *Object
+	Constructor *g.Object
+	Prototype   *g.Object
 	Wrapper     wrapper
 }
 
-func (d *GojaContext) getObject(obj any, class string) *Object {
-	result := d.vm.ToValue(obj).(*Object)
+func (d *GojaContext) getObject(obj any, class string) *g.Object {
+	result := d.vm.ToValue(obj).(*g.Object)
 	g := d.globals[class]
 	result.SetPrototype(g.Prototype)
 	return result
@@ -100,15 +99,15 @@ func (d *GojaContext) installGlobals(classes classMap) {
 		if constructor, alreadyInstalled := d.globals[name]; alreadyInstalled {
 			return constructor
 		}
-		constructor := d.vm.ToValue(wrapper.constructor).(*goja.Object)
+		constructor := d.vm.ToValue(wrapper.constructor).(*g.Object)
 		constructor.DefineDataProperty(
 			"name",
 			d.vm.ToValue(name),
-			FLAG_NOT_SET,
-			FLAG_NOT_SET,
-			FLAG_NOT_SET,
+			g.FLAG_NOT_SET,
+			g.FLAG_NOT_SET,
+			g.FLAG_NOT_SET,
 		)
-		prototype := constructor.Get("prototype").(*Object)
+		prototype := constructor.Get("prototype").(*g.Object)
 		result := function{constructor, prototype, wrapper}
 		d.vm.Set(name, constructor)
 		d.globals[name] = result
@@ -134,13 +133,13 @@ func (d *GojaContext) installGlobals(classes classMap) {
 }
 
 func (d *gojaScriptHost) NewContext(window html.Window) html.ScriptContext {
-	vm := goja.New()
+	vm := g.New()
 	vm.SetFieldNameMapper(propertyNameMapper{})
 	result := &GojaContext{
 		vm:           vm,
 		window:       window,
-		wrappedGoObj: NewSymbol(INTERNAL_SYMBOL_NAME),
-		cachedNodes:  make(map[int32]Value),
+		wrappedGoObj: g.NewSymbol(INTERNAL_SYMBOL_NAME),
+		cachedNodes:  make(map[int32]g.Value),
 	}
 	result.installGlobals(globals)
 
@@ -148,14 +147,14 @@ func (d *gojaScriptHost) NewContext(window html.Window) html.ScriptContext {
 	globalThis.DefineDataPropertySymbol(
 		result.wrappedGoObj,
 		vm.ToValue(window),
-		FLAG_FALSE,
-		FLAG_FALSE,
-		FLAG_FALSE,
+		g.FLAG_FALSE,
+		g.FLAG_FALSE,
+		g.FLAG_FALSE,
 	)
 	globalThis.Set("window", globalThis)
-	globalThis.DefineAccessorProperty("document", vm.ToValue(func(c *FunctionCall) Value {
+	globalThis.DefineAccessorProperty("document", vm.ToValue(func(c *g.FunctionCall) g.Value {
 		return result.getObject(window.Document(), "Document")
-	}), nil, FLAG_FALSE, FLAG_TRUE)
+	}), nil, g.FLAG_FALSE, g.FLAG_TRUE)
 	globalThis.SetPrototype(result.globals["Window"].Prototype)
 
 	return result
@@ -164,11 +163,11 @@ func (d *gojaScriptHost) NewContext(window html.Window) html.ScriptContext {
 func (d *gojaScriptHost) Close() {}
 
 type GojaContext struct {
-	vm           *goja.Runtime
+	vm           *g.Runtime
 	window       html.Window
 	globals      map[string]function
-	wrappedGoObj *goja.Symbol
-	cachedNodes  map[int32]Value
+	wrappedGoObj *g.Symbol
+	cachedNodes  map[int32]g.Value
 }
 
 func (i *GojaContext) Close() {}
