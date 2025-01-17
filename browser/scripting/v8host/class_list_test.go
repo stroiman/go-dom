@@ -3,6 +3,7 @@ package v8host_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	matchers "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 )
 
 var _ = Describe("V8 Element.classList", func() {
@@ -13,7 +14,7 @@ var _ = Describe("V8 Element.classList", func() {
 			list.add('c2')
 		`)
 		element := ctx.Window().Document().GetElementById("target")
-		Expect(element.GetAttribute("class")).To(Equal("c1 c2"))
+		Expect(element).To(matchers.HaveAttribute("class", "c1 c2"))
 	})
 
 	It("Should be an iterable", func() {
@@ -39,7 +40,7 @@ var _ = Describe("V8 Element.classList", func() {
 				document.getElementById("target").classList.toggle("b")
 			`)).To(BeFalse())
 			div := scriptContext.Window().Document().GetElementById("target")
-			Expect(div.GetAttribute("class")).To(Equal("a c"))
+			Expect(div).To(matchers.HaveAttribute("class", "a c"))
 		})
 
 		It("Removes an adds a non-existing item and returns true", func() {
@@ -47,7 +48,7 @@ var _ = Describe("V8 Element.classList", func() {
 				document.getElementById("target").classList.toggle("x")
 			`)).To(BeTrue())
 			div := scriptContext.Window().Document().GetElementById("target")
-			Expect(div.GetAttribute("class")).To(Equal("a b c x"))
+			Expect(div).To(matchers.HaveAttribute("class", "a b c x"))
 		})
 
 		Describe("force as true", func() {
@@ -56,7 +57,7 @@ var _ = Describe("V8 Element.classList", func() {
 				document.getElementById("target").classList.toggle("b", true)
 			`)).To(BeTrue())
 				div := scriptContext.Window().Document().GetElementById("target")
-				Expect(div.GetAttribute("class")).To(Equal("a b c"))
+				Expect(div).To(matchers.HaveAttribute("class", "a b c"))
 			})
 
 			It("Should add a non-existing item and return true", func() {
@@ -64,7 +65,7 @@ var _ = Describe("V8 Element.classList", func() {
 				document.getElementById("target").classList.toggle("x", true)
 			`)).To(BeTrue())
 				div := scriptContext.Window().Document().GetElementById("target")
-				Expect(div.GetAttribute("class")).To(Equal("a b c x"))
+				Expect(div).To(matchers.HaveAttribute("class", "a b c x"))
 			})
 		})
 
@@ -74,7 +75,7 @@ var _ = Describe("V8 Element.classList", func() {
 				document.getElementById("target").classList.toggle("b", false)
 			`)).To(BeFalse())
 				div := scriptContext.Window().Document().GetElementById("target")
-				Expect(div.GetAttribute("class")).To(Equal("a c"))
+				Expect(div).To(matchers.HaveAttribute("class", "a c"))
 			})
 
 			It("Should ignore a non-existing item and return false", func() {
@@ -82,7 +83,7 @@ var _ = Describe("V8 Element.classList", func() {
 				document.getElementById("target").classList.toggle("x", false)
 			`)).To(BeFalse())
 				div := scriptContext.Window().Document().GetElementById("target")
-				Expect(div.GetAttribute("class")).To(Equal("a b c"))
+				Expect(div).To(matchers.HaveAttribute("class", "a b c"))
 			})
 		})
 	})
