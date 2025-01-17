@@ -9,6 +9,7 @@ import (
 
 	. "github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
+	"github.com/stroiman/go-dom/browser/scripting"
 
 	"github.com/tommie/v8go"
 	v8 "github.com/tommie/v8go"
@@ -81,7 +82,7 @@ func (c *V8ScriptContext) getInstanceForNode(
 	case Event:
 		return c.GetInstanceForNodeByName("Event", n)
 	case Element:
-		if constructor, ok := htmlElements[strings.ToLower(n.TagName())]; ok {
+		if constructor, ok := scripting.HtmlElements[strings.ToLower(n.TagName())]; ok {
 			return c.GetInstanceForNodeByName(constructor, n)
 		}
 		return c.GetInstanceForNodeByName("Element", n)
@@ -251,7 +252,7 @@ func init() {
 	registerJSClass("FormData", "", createFormData)
 	registerJSClass("DOMParser", "", createDOMParserPrototype)
 
-	for _, cls := range htmlElements {
+	for _, cls := range scripting.HtmlElements {
 		if _, found := classes[cls]; !found {
 			registerJSClass(cls, "HTMLElement", createIllegalConstructor)
 		}

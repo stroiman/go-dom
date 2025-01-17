@@ -1,8 +1,8 @@
 // This file is generated. Do not edit.
 
-package v8host
+package scripting
 
-var htmlElements = map[string]string {
+var HtmlElements = map[string]string {
 	"html": "HTMLHtmlElement",
 	"head": "HTMLHeadElement",
 	"title": "HTMLTitleElement",

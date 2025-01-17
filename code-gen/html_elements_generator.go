@@ -8,7 +8,7 @@ import (
 
 func WriteHeader(b *builder) {
 	b.Printf("// This file is generated. Do not edit.\n\n")
-	b.Printf("package v8host\n\n")
+	b.Printf("package scripting\n\n")
 }
 
 type builder struct {
@@ -53,7 +53,7 @@ func generateHtmlElements(writer io.Writer) error {
 	output := ElementsJSON{}
 	json.Unmarshal(html_defs, &output)
 	WriteHeader(file)
-	fmt.Fprint(file, "var htmlElements = map[string]string {\n")
+	fmt.Fprint(file, "var HtmlElements = map[string]string {\n")
 	file.indent()
 	defer file.unIndentF("}\n")
 	for _, element := range output.Elements {
