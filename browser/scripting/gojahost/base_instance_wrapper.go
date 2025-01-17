@@ -1,8 +1,11 @@
 package gojahost
 
 import (
+	"strings"
+
 	g "github.com/dop251/goja"
 	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/scripting"
 )
 
 type baseInstanceWrapper[T any] struct {
@@ -56,8 +59,12 @@ func (w baseInstanceWrapper[T]) decodeNode(v g.Value) dom.Node {
 }
 
 func (w baseInstanceWrapper[T]) getPrototype(e dom.Entity) *g.Object {
-	switch e.(type) {
+	switch v := e.(type) {
 	case dom.Element:
+		className, found := scripting.HtmlElements[strings.ToLower(v.TagName())]
+		if found {
+			return w.ctx.globals[className].Prototype
+		}
 		return w.ctx.globals["Element"].Prototype
 	case dom.Node:
 		return w.ctx.globals["Node"].Prototype

@@ -7,6 +7,7 @@ import (
 
 	"github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
+	"github.com/stroiman/go-dom/browser/scripting"
 
 	g "github.com/dop251/goja"
 )
@@ -54,7 +55,13 @@ func init() {
 	installClass("Event", "", NewEventWrapper)
 	installClass("CustomEvent", "Event", NewCustomEventWrapper)
 	installClass("Element", "Node", newElementWrapper)
+	installClass("HTMLElement", "Element", newGenericElementWrapper)
 
+	for _, cls := range scripting.HtmlElements {
+		if _, found := globals[cls]; !found {
+			installClass(cls, "HTMLElement", newGenericElementWrapper)
+		}
+	}
 }
 
 type function struct {
