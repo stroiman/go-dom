@@ -7,6 +7,10 @@ import (
 	dom "github.com/stroiman/go-dom/browser/dom"
 )
 
+func init() {
+	installClass("Node", "EventTarget", newNodeWrapper)
+}
+
 type nodeWrapper struct {
 	baseInstanceWrapper[dom.Node]
 }

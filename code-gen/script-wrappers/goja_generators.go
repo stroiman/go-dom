@@ -41,12 +41,24 @@ func (gen GojaTargetGenerators) CreateJSConstructorGenerator(data ESConstructorD
 	generator := g.StatementList()
 
 	generator = g.StatementList(
+		gen.CreateInitFunction(data),
 		gen.CreateWrapperStruct(data),
 		gen.CreatePrototypeInitializer(data),
 		gen.CreateWrapperMethods(data),
 		generator,
 	)
 	return generator
+}
+
+func (gen GojaTargetGenerators) CreateInitFunction(data ESConstructorData) g.Generator {
+	naming := GojaNamingStrategy{data}
+	return g.FunctionDefinition{
+		Name: "init",
+		Body: g.NewValue("installClass").
+			Call(g.Lit(data.Name()), g.Lit(data.Inheritance), g.Id(naming.PrototypeWrapperConstructorName())),
+
+		//g.Lit(data.Name), g.Lit(data.Inheritance), g.Id(naming.PrototypeWrapperConstructorName())),
+	}
 }
 
 // CreatePrototypeInitializer creates the "initializePrototype" method, which
