@@ -37,14 +37,14 @@ func (b *Browser) Open(location string) (window Window, err error) {
 
 func NewBrowser() *Browser {
 	return &Browser{
-		ScriptHost: v8host.NewScriptHost(),
+		ScriptHost: v8host.New(),
 		Client:     NewHttpClient(),
 	}
 }
 
 func NewBrowserFromHandler(handler http.Handler) *Browser {
 	return &Browser{
-		ScriptHost: v8host.NewScriptHost(),
+		ScriptHost: v8host.New(),
 		Client:     NewHttpClientFromHandler(handler),
 	}
 }

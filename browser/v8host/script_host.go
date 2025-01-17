@@ -258,7 +258,7 @@ func init() {
 	}
 }
 
-func NewScriptHost() *V8ScriptHost {
+func New() *V8ScriptHost {
 	host := &V8ScriptHost{iso: v8.NewIsolate()}
 	host.inspectorClient = v8.NewInspectorClient(host)
 	host.inspector = v8.NewInspector(host.iso, host.inspectorClient)

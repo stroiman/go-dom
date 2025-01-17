@@ -41,7 +41,7 @@ func init() {
 	logLevel.Set(slog.LevelInfo)
 	// logLevel.Set(slog.LevelDebug)
 
-	host = NewScriptHost()
+	host = New()
 	scriptTestSuite = suite.NewScriptTestSuite(host, "v8")
 	scriptTestSuite.CreateAllGinkgoTests()
 
