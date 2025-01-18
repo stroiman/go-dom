@@ -317,7 +317,7 @@ func V8RequireContext(wrapper WrapperInstance) g.Generator {
 	info := v8ArgInfo(g.NewValue("info"))
 	return g.Assign(
 		g.Id("ctx"),
-		wrapper.GetScriptHost().Method("MustGetContext").Call(info.GetV8Context()),
+		wrapper.GetScriptHost().Method("mustGetContext").Call(info.GetV8Context()),
 	)
 }
 
@@ -489,11 +489,11 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments)
 		if hasDefault {
 			statements.Append(g.Assign(
 				g.Raw(jen.List(argName.Generate(), errName.Generate())),
-				g.NewValue("TryParseArgWithDefault").Call(gConverters...)))
+				g.NewValue("tryParseArgWithDefault").Call(gConverters...)))
 		} else {
 			statements.Append(g.Assign(
 				g.Raw(jen.List(argName.Generate(), errName.Generate())),
-				g.NewValue("TryParseArg").Call(gConverters...)))
+				g.NewValue("tryParseArg").Call(gConverters...)))
 		}
 	}
 	res.Generator = statements
