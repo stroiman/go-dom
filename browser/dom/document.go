@@ -8,7 +8,7 @@ import (
 
 type DocumentEvent = string
 
-type StaticNodeList NodeList
+type staticNodeList NodeList
 
 const (
 	DocumentEventDOMContentLoaded DocumentEvent = "DOMContentLoaded"
@@ -111,7 +111,7 @@ func (d *document) IsConnected() bool {
 }
 
 func (d *document) GetElementById(id string) Element {
-	return RootNodeHelper{d}.GetElementById(id)
+	return rootNodeHelper{d}.GetElementById(id)
 }
 
 func (d *document) createHtmlNode() *html.Node {
@@ -125,11 +125,11 @@ func (d *document) Location() Location {
 }
 
 func (d *document) QuerySelector(pattern string) (Element, error) {
-	return CSSHelper{d}.QuerySelector(pattern)
+	return cssHelper{d}.QuerySelector(pattern)
 }
 
-func (d *document) QuerySelectorAll(pattern string) (StaticNodeList, error) {
-	return CSSHelper{d}.QuerySelectorAll(pattern)
+func (d *document) QuerySelectorAll(pattern string) (staticNodeList, error) {
+	return cssHelper{d}.QuerySelectorAll(pattern)
 }
 
 func (d *document) OwnerDocument() Document { return d }

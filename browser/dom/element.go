@@ -120,7 +120,7 @@ func (e *element) getAttributes() Attributes {
 }
 
 func (e *element) Attributes() NamedNodeMap {
-	return NewNamedNodeMapForElement(e)
+	return newNamedNodeMapForElement(e)
 }
 
 func (e *element) SetAttribute(name string, value string) {
@@ -152,11 +152,11 @@ func (e *element) createHtmlNode() *html.Node {
 }
 
 func (e *element) QuerySelector(pattern string) (Element, error) {
-	return CSSHelper{e}.QuerySelector(pattern)
+	return cssHelper{e}.QuerySelector(pattern)
 }
 
-func (e *element) QuerySelectorAll(pattern string) (StaticNodeList, error) {
-	return CSSHelper{e}.QuerySelectorAll(pattern)
+func (e *element) QuerySelectorAll(pattern string) (staticNodeList, error) {
+	return cssHelper{e}.QuerySelectorAll(pattern)
 }
 
 func (n *element) InsertAdjacentHTML(position string, text string) error {
@@ -166,8 +166,8 @@ func (n *element) InsertAdjacentHTML(position string, text string) error {
 	)
 	switch position {
 	case "beforebegin":
-		parent = n.GetSelf().Parent()
-		reference = n.GetSelf()
+		parent = n.getSelf().Parent()
+		reference = n.getSelf()
 	case "afterbegin":
 		parent = n
 		reference = n.ChildNodes().Item(0)
@@ -194,10 +194,10 @@ func (n *element) Click() bool {
 }
 
 func (e *element) Render(writer *strings.Builder) {
-	RenderElement(e, writer)
+	renderElement(e, writer)
 }
 
-func RenderElement(e Element, writer *strings.Builder) {
+func renderElement(e Element, writer *strings.Builder) {
 	tagName := strings.ToLower(e.TagName())
 	writer.WriteRune('<')
 	writer.WriteString(tagName)
@@ -209,7 +209,7 @@ func RenderElement(e Element, writer *strings.Builder) {
 		writer.WriteString("\"")
 	}
 	writer.WriteRune('>')
-	if childRenderer, ok := e.GetSelf().(ChildrenRenderer); ok {
+	if childRenderer, ok := e.getSelf().(ChildrenRenderer); ok {
 		childRenderer.RenderChildren(writer)
 	}
 	writer.WriteString("</")

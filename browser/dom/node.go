@@ -46,10 +46,19 @@ type Node interface {
 	FirstChild() Node
 	SetTextContent(value string)
 	GetTextContent() string
+	// SetSelf must be called when creating instances of structs embedding a Node.
 	//
+	// If this is not called, the specialised type, which is itself a Node, will
+	// not be returned from functions that should have returned it, e.g., through
+	// ChildNodes. Only the embedded Node will be returned, and any specialised
+	// behaviour, including HTML output, will not work.
+	//
+	// This function is a workaround to solve a fundamental problem. The DOM
+	// specifies a model that is fundamentally object-oriented, with sub-classes
+	// overriding behaviour in super-classes. This is not a behaviour that Go has.
 	SetSelf(node Node)
-	GetSelf() Node
-	// unexported
+
+	getSelf() Node
 	createHtmlNode() *html.Node
 	setParent(node Node)
 	nodes() []Node
@@ -64,7 +73,7 @@ type node struct {
 }
 
 func newNode() node {
-	return node{newEventTarget(), entity.New(), nil, NewNodeList(), nil}
+	return node{newEventTarget(), entity.New(), nil, newNodeList(), nil}
 }
 
 func (n *node) AppendChild(child Node) (Node, error) {
@@ -165,24 +174,24 @@ func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
 	return newNode, nil
 }
 
-type NodeIterator struct{ Node }
+type nodeIterator struct{ Node }
 
 func toHtmlNode(node Node) *html.Node {
-	return NodeIterator{node}.toHtmlNode(nil)
+	return nodeIterator{node}.toHtmlNode(nil)
 }
 func toHtmlNodeAndMap(node Node) (*html.Node, map[*html.Node]Node) {
 	m := make(map[*html.Node]Node)
-	result := NodeIterator{node}.toHtmlNode(m)
+	result := nodeIterator{node}.toHtmlNode(m)
 	return result, m
 }
 
-func (n NodeIterator) toHtmlNode(m map[*html.Node]Node) *html.Node {
+func (n nodeIterator) toHtmlNode(m map[*html.Node]Node) *html.Node {
 	htmlNode := n.Node.createHtmlNode()
 	if m != nil {
 		m[htmlNode] = n.Node
 	}
 	for _, child := range n.nodes() {
-		htmlNode.AppendChild(NodeIterator{child}.toHtmlNode(m))
+		htmlNode.AppendChild(nodeIterator{child}.toHtmlNode(m))
 	}
 	return htmlNode
 }
@@ -236,7 +245,7 @@ func (n *node) nodes() []Node {
 }
 
 func (n *node) SetSelf(node Node) { n.self = node }
-func (n *node) GetSelf() Node     { return n.self }
+func (n *node) getSelf() Node     { return n.self }
 
 func (n *node) SetTextContent(val string) {
 	for x := n.FirstChild(); x != nil; x = n.FirstChild() {

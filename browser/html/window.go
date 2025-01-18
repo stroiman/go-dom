@@ -226,7 +226,7 @@ func (w *window) Location() Location {
 	} else {
 		u = new(netURL.URL)
 	}
-	return NewLocationFromNetURL(u)
+	return NewURLFromNetURL(u)
 }
 
 func (w *window) Close() {

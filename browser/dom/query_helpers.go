@@ -4,9 +4,9 @@ import (
 	"github.com/ericchiang/css"
 )
 
-type CSSHelper struct{ Node }
+type cssHelper struct{ Node }
 
-func (h CSSHelper) QuerySelector(pattern string) (Element, error) {
+func (h cssHelper) QuerySelector(pattern string) (Element, error) {
 	nodes, err := h.QuerySelectorAll(pattern)
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func (h CSSHelper) QuerySelector(pattern string) (Element, error) {
 	return element, nil
 }
 
-func (d CSSHelper) QuerySelectorAll(pattern string) (StaticNodeList, error) {
+func (d cssHelper) QuerySelectorAll(pattern string) (staticNodeList, error) {
 	sel, err := css.Parse(pattern)
 	if err != nil {
 		return nil, err
@@ -30,5 +30,5 @@ func (d CSSHelper) QuerySelectorAll(pattern string) (StaticNodeList, error) {
 		resultNode := m[node]
 		result[i] = resultNode
 	}
-	return NewNodeList(result...), nil
+	return newNodeList(result...), nil
 }

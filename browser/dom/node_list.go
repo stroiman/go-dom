@@ -6,17 +6,6 @@ type NodeList interface {
 	entity.Entity
 	Length() int
 	Item(index int) Node
-
-	// Instance properties
-	// length
-	// Instance methods
-	// entries()
-	// forEach()
-	// item()
-	// keys()
-	// values()}
-
-	// unexported
 	All() []Node
 	setNodes([]Node)
 	append(Node)
@@ -27,11 +16,11 @@ type nodeList struct {
 	nodes []Node
 }
 
-type StaticNodeSource []Node
+type staticNodeSource []Node
 
-func (s StaticNodeSource) ChildNodes() []Node { return s }
+func (s staticNodeSource) ChildNodes() []Node { return s }
 
-func NewNodeList(nodes ...Node) NodeList {
+func newNodeList(nodes ...Node) NodeList {
 	return &nodeList{entity.New(), nodes}
 }
 

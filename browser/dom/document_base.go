@@ -8,7 +8,7 @@ type ElementContainer interface {
 	Node
 	Append(Element) (Element, error)
 	QuerySelector(string) (Element, error)
-	QuerySelectorAll(string) (StaticNodeList, error)
+	QuerySelectorAll(string) (staticNodeList, error)
 }
 
 // RootNode implements defines common behaviour between [Document] and
@@ -27,9 +27,9 @@ func newRootNode() rootNode {
 	return rootNode{newNode()}
 }
 
-type RootNodeHelper struct{ RootNode }
+type rootNodeHelper struct{ RootNode }
 
-func (d RootNodeHelper) GetElementById(id string) Element {
+func (d rootNodeHelper) GetElementById(id string) Element {
 	var search func(node Node) Element
 	search = func(node Node) Element {
 		if elm, ok := node.(Element); ok {

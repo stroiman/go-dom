@@ -204,17 +204,25 @@ func (e *errorEvent) Error() string { return e.err.Error() }
 /* -------- EventHandler -------- */
 
 // EventHandler is the interface for an event handler. In JavaScript; an event
-// handler can be a function; or an object with a `handleEvent` function.
+// handler can be a function; or an object with a `handleEvent` function. In Go
+// code, you can provide your own implementation, or use [NewEventHandlerFunc]
+// to create a valid handler from a function.
 //
-// Duplicate detection during _add_, or removal is based on equality. JavaScript
-// equality does not translate natively to Go, so a handler must be able to
-// detect equality by itself
+// Multiple EventHandler instances can represent the same underlying event
+// handler. E.g., when JavaScript code calls RemoveEventListener, a new Go
+// struct is created wrapping the same underlying handler.
+//
+// The Equals function must return true when the other event handler is the same
+// as the current value, so event handlers can properly be removed, and avoiding
+// duplicates are added by AddEventListener.
 type EventHandler interface {
+	// HandleEvent is called when the the event occurrs.
+	//
+	// An non-nil error return value will dispatch an error event on the global
+	// object in a normally configured environment.
 	HandleEvent(event Event) error
-	// The interface for removing event handlers requires the caller to pass in
-	// the same handler to `RemoveEventListener`. In Go; functions cannot be
-	// compared for equality; so we need to have some kind of mechanism to
-	// identify if two handlers are identical.
+	// Equals must return true, if they underlying event handler of the other
+	// handler is the same as this handler.
 	Equals(other EventHandler) bool
 }
 
@@ -226,10 +234,12 @@ type eventHandlerFunc struct {
 	id          entity.ObjectId
 }
 
-// NewEventHandlerFunc creates an EventHandler wrapping a function with the
-// right signature.
-// Calling this twice for the same Go-function will be treated as different
-// event handlers; as Go functions do not support equality.
+// NewEventHandlerFunc creates an [EventHandler] implementation from a compatible
+// function.
+//
+// Note: Calling this twice for the same Go-function will be treated as
+// different event handlers. Be sure to use the same instance returned from this
+// function when removing.
 func NewEventHandlerFunc(handler HandlerFunc) EventHandler {
 	return eventHandlerFunc{handler, entity.NewObjectId()}
 }

@@ -36,7 +36,7 @@ type attr struct {
 	attr         *html.Attribute
 }
 
-func NewNamedNodeMapForElement(ownerElement Element) NamedNodeMap {
+func newNamedNodeMapForElement(ownerElement Element) NamedNodeMap {
 	return &namedNodeMap{entity.New(), ownerElement}
 }
 

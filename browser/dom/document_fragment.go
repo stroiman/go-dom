@@ -23,15 +23,15 @@ func (d *documentFragment) Append(element Element) (Element, error) {
 }
 
 func (d *documentFragment) GetElementById(id string) Element {
-	return RootNodeHelper{d}.GetElementById(id)
+	return rootNodeHelper{d}.GetElementById(id)
 }
 
 func (d *documentFragment) QuerySelector(pattern string) (Element, error) {
-	return CSSHelper{d}.QuerySelector(pattern)
+	return cssHelper{d}.QuerySelector(pattern)
 }
 
-func (d *documentFragment) QuerySelectorAll(pattern string) (StaticNodeList, error) {
-	return CSSHelper{d}.QuerySelectorAll(pattern)
+func (d *documentFragment) QuerySelectorAll(pattern string) (staticNodeList, error) {
+	return cssHelper{d}.QuerySelectorAll(pattern)
 }
 
 func (d *documentFragment) createHtmlNode() *html.Node {
