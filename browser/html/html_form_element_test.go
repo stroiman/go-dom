@@ -205,7 +205,8 @@ var _ = Describe("HTML Form", func() {
 
 			Describe("The button is not type='submit'", func() {
 				It("should not submit the form", func() {
-					Skip("TODO")
+					button.Click()
+					Expect(actualRequest).To(BeNil())
 				})
 			})
 		})

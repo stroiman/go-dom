@@ -9,16 +9,30 @@ func NewHTMLButtonElement(ownerDocument HTMLDocument) HTMLElement {
 }
 
 func (e *htmlButtonElement) Click() bool {
+	ok := e.htmlElement.Click()
+	if ok {
+		e.trySubmitForm()
+	}
+	return ok
+}
+func (e *htmlButtonElement) trySubmitForm() {
+	t, _ := e.GetAttribute("type")
+	if t != "submit" {
+		return
+	}
 	var form HTMLFormElement
-	for parent := e.Parent(); ; parent = parent.Parent() {
+	parent := e.Parent()
+	for {
+		if parent == nil {
+			break
+		}
 		if f, ok := parent.(HTMLFormElement); ok {
 			form = f
 			break
 		}
+		parent = parent.Parent()
 	}
-	ok := e.htmlElement.Click()
-	if ok {
+	if form != nil {
 		form.Submit()
 	}
-	return ok
 }
