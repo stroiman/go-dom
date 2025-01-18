@@ -60,7 +60,7 @@ func (w documentWrapper) location(c g.FunctionCall) g.Value {
 func (w documentWrapper) createElement(c g.FunctionCall) g.Value {
 	doc := w.getInstance(c)
 	name := c.Argument(0)
-	return w.ctx.vm.ToValue(doc.CreateElement(name.String()))
+	return w.toNode(doc.CreateElement(name.String()))
 }
 
 func (w documentWrapper) getElementById(c g.FunctionCall) g.Value {

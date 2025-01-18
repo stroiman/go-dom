@@ -16,15 +16,21 @@ func (suite *ScriptTestSuite) CreateDocumentTests() {
 			ctx = suite.NewContext()
 		})
 
-		Describe("prototype", func() {
-			It("Has a `createElement`", func() {
+		Describe("`createElement`", func() {
+			It("Should return an HTMLElement", func() {
+				Expect(
+					ctx.Eval(`const base = document.createElement("base");
+						base instanceof HTMLElement`),
+				).To(BeTrue())
+			})
+
+			It("Should exist on the prototype", func() {
 				Expect(ctx.Eval(`
 				Object.getOwnPropertyNames(Document.prototype).includes("createElement")
 			`)).To(BeTrue())
 				Expect(ctx.Eval(`
-				const e = Document.prototype.createElement.call(document, "div")
-				typeof e
-			`)).To(Equal("object"))
+				Object.getOwnPropertyNames(Document).includes("createElement")
+			`)).To(BeFalse())
 			})
 		})
 
