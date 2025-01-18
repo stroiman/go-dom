@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strings"
 
+	. "github.com/stroiman/go-dom/browser/internal/dom"
+
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )

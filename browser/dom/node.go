@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	. "github.com/stroiman/go-dom/browser/internal/dom"
 	"github.com/stroiman/go-dom/browser/internal/entity"
 	"golang.org/x/net/html"
 )
@@ -23,14 +24,6 @@ const (
 	NodeTypeDocumentType          NodeType = 10
 	NodeTypeDocumentFragment      NodeType = 11
 )
-
-type Renderer interface {
-	Render(*strings.Builder)
-}
-
-type ChildrenRenderer interface {
-	RenderChildren(*strings.Builder)
-}
 
 type GetRootNodeOptions bool
 

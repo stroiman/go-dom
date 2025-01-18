@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	. "github.com/stroiman/go-dom/browser/dom"
+	. "github.com/stroiman/go-dom/browser/internal/dom"
 )
 
 type HTMLElement interface {

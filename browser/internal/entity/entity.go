@@ -13,10 +13,10 @@ func init() {
 	c := make(chan ObjectId)
 	idSeq = c
 	go func() {
-		var val ObjectId = 1
+		var nextId ObjectId = 1
 		for {
-			c <- val
-			val = val + 1
+			c <- nextId
+			nextId++
 		}
 	}()
 }
@@ -25,26 +25,22 @@ func NewObjectId() ObjectId {
 	return <-idSeq
 }
 
-type base struct {
-	objectId ObjectId
-}
-
-func newBase() base {
-	return base{NewObjectId()}
-}
-
 // An Entity provides a unique identifier of an object that may be retrieved
 // from the DOM. It is part of a solution to ensure the same JS object is
 // returned for the same DOM element.
 //
 // Warning: This solution is temporary, and a different solution is intended to
 // be used. Do not rely on this value.
-func New() Entity {
-	return base{NewObjectId()}
-}
-
-func (b base) ObjectId() ObjectId { return b.objectId }
-
 type Entity interface {
 	ObjectId() ObjectId
 }
+
+type entity struct {
+	objectId ObjectId
+}
+
+func New() Entity {
+	return entity{NewObjectId()}
+}
+
+func (b entity) ObjectId() ObjectId { return b.objectId }
