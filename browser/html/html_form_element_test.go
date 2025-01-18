@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/internal/http"
 	matchers "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
@@ -97,70 +98,125 @@ var _ = Describe("HTML Form", func() {
 			form = f
 		})
 
-		Describe("Action", func() {
-			Describe("Get", func() {
-				It("Should return the document location when not set", func() {
-					Expect(form.GetAction()).To(Equal(window.Location().Href()))
+		Describe("Method and action behaviour", func() {
+
+			Describe("Action", func() {
+				Describe("Get", func() {
+					It("Should return the document location when not set", func() {
+						Expect(form.GetAction()).To(Equal(window.Location().Href()))
+					})
+				})
+
+				Describe("Set", func() {
+					It(
+						"Should update the action attribute, and update action property to relative url",
+						func() {
+							form.SetAction("/foo-bar")
+							Expect(
+								form,
+							).To(matchers.HaveAttribute("action", "/foo-bar"))
+							Expect(form.GetAction()).To(Equal("http://example.com/foo-bar"))
+						},
+					)
 				})
 			})
 
-			Describe("Set", func() {
-				It(
-					"Should update the action attribute, and update action property to relative url",
-					func() {
-						form.SetAction("/foo-bar")
-						Expect(
-							form,
-						).To(matchers.HaveAttribute("action", "/foo-bar"))
-						Expect(form.GetAction()).To(Equal("http://example.com/foo-bar"))
-					},
-				)
+			Describe("No method of action specified", func() {
+				It("Should make a GET request to the original location", func() {
+					form.Submit()
+					Expect(actualRequest.Method).To(Equal("GET"))
+					Expect(
+						actualRequest.URL.String(),
+					).To(Equal("http://example.com/forms/example-form.html?foo=bar"))
+				})
+
+				It("Should handle path lookup for relative paths", func() {
+					form.SetAttribute("action", "submit-target")
+					form.Submit()
+					Expect(actualRequest.Method).To(Equal("GET"))
+					Expect(
+						actualRequest.URL.String(),
+					).To(Equal("http://example.com/forms/submit-target?foo=bar"))
+				})
+			})
+
+			Describe("The form is a POST", func() {
+				BeforeEach(func() {
+					form.SetAttribute("method", "POST")
+				})
+
+				It("Should make a POST request", func() {
+					form.Submit()
+					Expect(actualRequest.Method).To(Equal("POST"))
+					Expect(
+						actualRequest.URL.String(),
+					).To(Equal("http://example.com/forms/example-form.html?original-query=original-value"))
+				})
+
+				It("Should store the values in the form body", func() {
+					form.Submit()
+					Expect(actualBody).To(Equal("foo=bar"))
+				})
+
+				It("Should resolve a relative 'action' without a ./.. prefix", func() {
+					form.SetAttribute("action", "example-form-post-target")
+					form.Submit()
+					Expect(
+						actualRequest.URL.String(),
+					).To(Equal("http://example.com/forms/example-form-post-target"))
+				})
 			})
 		})
 
-		Describe("No method of action specified", func() {
-			It("Should make a GET request to the original location", func() {
-				form.Submit()
-				Expect(actualRequest.Method).To(Equal("GET"))
-				Expect(
-					actualRequest.URL.String(),
-				).To(Equal("http://example.com/forms/example-form.html?foo=bar"))
-			})
+		Describe("React to <button> click", func() {
+			var button dom.Element
 
-			It("Should handle path lookup for relative paths", func() {
-				form.SetAttribute("action", "submit-target")
-				form.Submit()
-				Expect(actualRequest.Method).To(Equal("GET"))
-				Expect(
-					actualRequest.URL.String(),
-				).To(Equal("http://example.com/forms/submit-target?foo=bar"))
-			})
-		})
-
-		Describe("The form is a POST", func() {
 			BeforeEach(func() {
-				form.SetAttribute("method", "POST")
+				button = window.Document().CreateElement("button")
+				form.Append(button)
 			})
 
-			It("Should make a POST request", func() {
-				form.Submit()
-				Expect(actualRequest.Method).To(Equal("POST"))
-				Expect(
-					actualRequest.URL.String(),
-				).To(Equal("http://example.com/forms/example-form.html?original-query=original-value"))
+			Describe("The button is a type='submit'", func() {
+				BeforeEach(func() {
+					button.SetAttribute("type", "submit")
+				})
+
+				It("Should submit the form", func() {
+					button.Click()
+					Expect(actualRequest).ToNot(BeNil())
+				})
+
+				It("Should not submit if preventDefault is called", func() {
+					button.AddEventListener(
+						"click",
+						dom.NewEventHandlerFunc(func(e dom.Event) error {
+							e.PreventDefault()
+							return nil
+						}),
+					)
+					button.Click()
+					Expect(actualRequest).To(BeNil())
+				})
+
+				It("Should include the button name in the form data if set", func() {
+					Skip("TODO")
+				})
 			})
 
-			It("Should store the values in the form body", func() {
-				form.Submit()
-				Expect(actualBody).To(Equal("foo=bar"))
+			Describe("The button is not type='submit'", func() {
+				It("should not submit the form", func() {
+					Skip("TODO")
+				})
 			})
-
-			It("Should resolve a relative 'action' without a ./.. prefix", func() {
-				form.SetAttribute("action", "example-form-post-target")
-				form.Submit()
-				Expect(
-					actualRequest.URL.String(),
-				).To(Equal("http://example.com/forms/example-form-post-target"))
+		})
+		Describe("Click a <input type='submit'>", func() {
+			It("Should submit the form", func() {
+				Skip("TODO")
+			})
+		})
+		Describe("Click a <input type='something else'>", func() {
+			It("Should submit the form", func() {
+				Skip("TODO")
 			})
 		})
 	})
