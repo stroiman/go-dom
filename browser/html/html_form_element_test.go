@@ -1,7 +1,6 @@
 package html_test
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -73,9 +72,6 @@ var _ = Describe("HTML Form", func() {
 					http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 						actualRequest = req
 						requests = append(requests, req)
-						if req.Body == nil {
-							fmt.Println("******** BODY IS NIL********")
-						}
 						data, err := io.ReadAll(req.Body)
 						Expect(err).ToNot(HaveOccurred())
 						actualBody = string(data)
