@@ -248,13 +248,21 @@ var _ = Describe("HTML Form", func() {
 
 		Describe("Click a <input type='submit'>", func() {
 			It("Should submit the form", func() {
-				Skip("TODO")
+				input := window.Document().CreateElement("input").(HTMLInputElement)
+				input.SetType("submit")
+				form.Append(input)
+				input.Click()
+				Expect(actualRequest).ToNot(BeNil())
 			})
 		})
 
-		Describe("Click a <input type='something else'>", func() {
+		Describe("Click a <input type='reset'>", func() {
 			It("Should submit the form", func() {
-				Skip("TODO")
+				input := window.Document().CreateElement("input").(HTMLInputElement)
+				input.SetType("reset")
+				form.Append(input)
+				input.Click()
+				Expect(actualRequest).To(BeNil())
 			})
 		})
 	})
