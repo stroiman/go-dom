@@ -6,6 +6,7 @@ import (
 
 	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/internal/entity"
 
 	v8 "github.com/tommie/v8go"
 )
@@ -13,12 +14,12 @@ import (
 // nodeV8WrapperBase serves as a helper for building v8 wrapping code around go objects.
 // Generated code assumes that a wrapper type is used with specific helper
 // methods implemented.
-type nodeV8WrapperBase[T Entity] struct {
+type nodeV8WrapperBase[T entity.Entity] struct {
 	converters
 	host *V8ScriptHost
 }
 
-func newNodeV8WrapperBase[T Entity](host *V8ScriptHost) nodeV8WrapperBase[T] {
+func newNodeV8WrapperBase[T entity.Entity](host *V8ScriptHost) nodeV8WrapperBase[T] {
 	return nodeV8WrapperBase[T]{converters{}, host}
 }
 

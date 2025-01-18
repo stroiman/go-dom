@@ -3,11 +3,12 @@ package dom
 import (
 	"iter"
 
+	"github.com/stroiman/go-dom/browser/internal/entity"
 	"golang.org/x/net/html"
 )
 
 type NamedNodeMap interface {
-	Entity
+	entity.Entity
 	All() iter.Seq[Attr]
 	Length() int
 	Item(index int) Attr
@@ -25,7 +26,7 @@ type Attr interface {
 }
 
 type namedNodeMap struct {
-	base
+	entity.Entity
 	ownerElement Element
 }
 
@@ -36,13 +37,15 @@ type attr struct {
 }
 
 func NewNamedNodeMapForElement(ownerElement Element) NamedNodeMap {
-	return &namedNodeMap{newBase(), ownerElement}
+	return &namedNodeMap{entity.New(), ownerElement}
 }
 
 func (m *namedNodeMap) All() iter.Seq[Attr] {
 	return func(yield func(Attr) bool) {
 		for i := 0; i < m.Length(); i++ {
-			yield(m.Item(i))
+			if !yield(m.Item(i)) {
+				return
+			}
 		}
 	}
 }

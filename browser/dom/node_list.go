@@ -1,7 +1,9 @@
 package dom
 
+import "github.com/stroiman/go-dom/browser/internal/entity"
+
 type NodeList interface {
-	Entity
+	entity.Entity
 	Length() int
 	Item(index int) Node
 
@@ -21,7 +23,7 @@ type NodeList interface {
 }
 
 type nodeList struct {
-	base
+	entity.Entity
 	nodes []Node
 }
 
@@ -30,7 +32,7 @@ type StaticNodeSource []Node
 func (s StaticNodeSource) ChildNodes() []Node { return s }
 
 func NewNodeList(nodes ...Node) NodeList {
-	return &nodeList{newBase(), nodes}
+	return &nodeList{entity.New(), nodes}
 }
 
 func (l *nodeList) Length() int { return len(l.nodes) }

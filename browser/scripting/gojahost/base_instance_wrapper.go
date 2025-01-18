@@ -6,6 +6,7 @@ import (
 	g "github.com/dop251/goja"
 	"github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
+	"github.com/stroiman/go-dom/browser/internal/entity"
 	"github.com/stroiman/go-dom/browser/scripting"
 )
 
@@ -25,7 +26,7 @@ func (c *GojaContext) storeInternal(value any, obj *g.Object) {
 		g.FLAG_FALSE,
 		g.FLAG_FALSE,
 	)
-	if e, ok := value.(dom.Entity); ok {
+	if e, ok := value.(entity.Entity); ok {
 		c.cachedNodes[e.ObjectId()] = obj
 	}
 	// obj.SetSymbol(w.instance.wrappedGoObj, w.instance.vm.ToValue(value))
@@ -51,7 +52,7 @@ func (w baseInstanceWrapper[T]) getInstance(c g.FunctionCall) T {
 	}
 }
 
-func (w baseInstanceWrapper[T]) getCachedObject(e dom.Entity) g.Value {
+func (w baseInstanceWrapper[T]) getCachedObject(e entity.Entity) g.Value {
 	return w.ctx.cachedNodes[e.ObjectId()]
 }
 
@@ -63,7 +64,7 @@ func (w baseInstanceWrapper[T]) decodeNode(v g.Value) dom.Node {
 	}
 }
 
-func (c *GojaContext) getPrototype(e dom.Entity) function {
+func (c *GojaContext) getPrototype(e entity.Entity) function {
 	switch v := e.(type) {
 	case html.HTMLDocument:
 		return c.globals["HTMLDocument"]
@@ -81,7 +82,7 @@ func (c *GojaContext) getPrototype(e dom.Entity) function {
 	panic("Prototype lookup not defined")
 }
 
-func (c *GojaContext) toNode(e dom.Entity) g.Value {
+func (c *GojaContext) toNode(e entity.Entity) g.Value {
 	if o, ok := c.cachedNodes[e.ObjectId()]; ok {
 		return o
 	}
@@ -94,7 +95,7 @@ func (c *GojaContext) toNode(e dom.Entity) g.Value {
 	return obj
 }
 
-func (w baseInstanceWrapper[T]) toNode(e dom.Entity) g.Value {
+func (w baseInstanceWrapper[T]) toNode(e entity.Entity) g.Value {
 	return w.ctx.toNode(e)
 }
 
@@ -106,7 +107,7 @@ func (w baseInstanceWrapper[T]) toDOMString(b string) g.Value {
 	return w.ctx.vm.ToValue(b)
 }
 
-func (w baseInstanceWrapper[T]) toDocument(e dom.Entity) g.Value {
+func (w baseInstanceWrapper[T]) toDocument(e entity.Entity) g.Value {
 	return w.toNode(e)
 }
 

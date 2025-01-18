@@ -9,6 +9,7 @@ import (
 
 	. "github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
+	"github.com/stroiman/go-dom/browser/internal/entity"
 	"github.com/stroiman/go-dom/browser/scripting"
 
 	"github.com/tommie/v8go"
@@ -50,13 +51,13 @@ type V8ScriptContext struct {
 	v8ctx     *v8.Context
 	window    html.Window
 	pinner    runtime.Pinner
-	v8nodes   map[ObjectId]*v8.Value
-	domNodes  map[ObjectId]Entity
+	v8nodes   map[entity.ObjectId]*v8.Value
+	domNodes  map[entity.ObjectId]entity.Entity
 	eventLoop *eventLoop
 	disposers []disposable
 }
 
-func (c *V8ScriptContext) cacheNode(obj *v8.Object, node Entity) (*v8.Value, error) {
+func (c *V8ScriptContext) cacheNode(obj *v8.Object, node entity.Entity) (*v8.Value, error) {
 	val := obj.Value
 	objectId := node.ObjectId()
 	c.v8nodes[objectId] = val
@@ -70,7 +71,7 @@ func (c *V8ScriptContext) cacheNode(obj *v8.Object, node Entity) (*v8.Value, err
 }
 
 func (c *V8ScriptContext) getInstanceForNode(
-	node Entity,
+	node entity.Entity,
 ) (*v8.Value, error) {
 	iso := c.host.iso
 	if node == nil {
@@ -103,7 +104,7 @@ func (c *V8ScriptContext) getInstanceForNode(
 
 func (c *V8ScriptContext) getInstanceForNodeByName(
 	constructor string,
-	node Entity,
+	node entity.Entity,
 ) (*v8.Value, error) {
 	iso := c.host.iso
 	if node == nil {
@@ -124,7 +125,7 @@ func (c *V8ScriptContext) getInstanceForNodeByName(
 	return nil, err
 }
 
-func (c *V8ScriptContext) getCachedNode(this *v8.Object) (Entity, bool) {
+func (c *V8ScriptContext) getCachedNode(this *v8.Object) (entity.Entity, bool) {
 	result, ok := c.domNodes[this.GetInternalField(0).Int32()]
 	return result, ok
 }
@@ -313,8 +314,8 @@ func (host *V8ScriptHost) NewContext(w html.Window) html.ScriptContext {
 		host:     host,
 		v8ctx:    v8.NewContext(host.iso, host.windowTemplate),
 		window:   w,
-		v8nodes:  make(map[ObjectId]*v8.Value),
-		domNodes: make(map[ObjectId]Entity),
+		v8nodes:  make(map[entity.ObjectId]*v8.Value),
+		domNodes: make(map[entity.ObjectId]entity.Entity),
 	}
 	host.inspector.ContextCreated(context.v8ctx)
 	err := installPolyfills(context)

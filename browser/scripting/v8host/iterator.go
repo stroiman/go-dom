@@ -4,7 +4,7 @@ import (
 	"errors"
 	"iter"
 
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/internal/entity"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -41,7 +41,7 @@ type iterable[T any] interface {
 }
 
 type iteratorInstance[T any] struct {
-	dom.Entity
+	entity.Entity
 	items iterable[T]
 	next  func() (T, bool)
 	stop  func()
@@ -77,7 +77,7 @@ func (i iterator[T]) newIteratorInstanceOfIterable(
 	next, stop := iter.Pull(seq)
 
 	iterator := &iteratorInstance[T]{
-		dom.NewEntity(),
+		entity.New(),
 		items,
 		next,
 		stop,

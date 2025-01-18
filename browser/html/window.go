@@ -9,6 +9,7 @@ import (
 
 	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/internal/entity"
 )
 
 type ScriptHost interface {
@@ -32,7 +33,7 @@ type ScriptContext interface {
 
 type Window interface {
 	EventTarget
-	Entity
+	entity.Entity
 	Document() Document
 	Close()
 	Navigate(string) error // TODO: Remove, perhaps? for testing

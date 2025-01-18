@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/stroiman/go-dom/browser/internal/entity"
 	"golang.org/x/net/html"
 )
 
@@ -34,7 +35,7 @@ type ChildrenRenderer interface {
 type GetRootNodeOptions bool
 
 type Node interface {
-	Entity
+	entity.Entity
 	EventTarget
 	AppendChild(node Node) (Node, error)
 	GetRootNode(options ...GetRootNodeOptions) Node
@@ -63,14 +64,14 @@ type Node interface {
 
 type node struct {
 	eventTarget
-	base
+	entity.Entity
 	self       Node
 	childNodes NodeList
 	parent     Node
 }
 
 func newNode() node {
-	return node{newEventTarget(), newBase(), nil, NewNodeList(), nil}
+	return node{newEventTarget(), entity.New(), nil, NewNodeList(), nil}
 }
 
 func (n *node) AppendChild(child Node) (Node, error) {

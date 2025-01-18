@@ -2,6 +2,8 @@ package dom
 
 import (
 	"log/slog"
+
+	"github.com/stroiman/go-dom/browser/internal/entity"
 )
 
 type EventTarget interface {
@@ -107,7 +109,7 @@ func (e *eventTarget) dispatchError(event ErrorEvent) {
 /* -------- Event & CustomEvent -------- */
 
 type Event interface {
-	Entity
+	entity.Entity
 	Cancelable() bool
 	Bubbles() bool
 	PreventDefault()
@@ -130,7 +132,7 @@ type CustomEvent interface {
 }
 
 type event struct {
-	base
+	entity.Entity
 	cancelable bool
 	cancelled  bool
 	eventType  string
@@ -160,7 +162,7 @@ func EventCancelable(cancelable bool) CustomEventOption {
 
 func newEvent(eventType string) event {
 	return event{
-		base:      newBase(),
+		Entity:    entity.New(),
 		eventType: eventType,
 		bubbles:   false,
 		propagate: false,
@@ -221,7 +223,7 @@ type HandlerFunc = func(Event) error
 
 type eventHandlerFunc struct {
 	handlerFunc func(Event) error
-	id          ObjectId
+	id          entity.ObjectId
 }
 
 // NewEventHandlerFunc creates an EventHandler wrapping a function with the
@@ -229,7 +231,7 @@ type eventHandlerFunc struct {
 // Calling this twice for the same Go-function will be treated as different
 // event handlers; as Go functions do not support equality.
 func NewEventHandlerFunc(handler HandlerFunc) EventHandler {
-	return eventHandlerFunc{handler, NewObjectId()}
+	return eventHandlerFunc{handler, entity.NewObjectId()}
 }
 
 // NoError takes a function accepting a single argument and has no return value,
@@ -246,7 +248,7 @@ func NewEventHandlerFuncWithoutError(handler HandlerFuncWithoutError) EventHandl
 	return eventHandlerFunc{func(event Event) error {
 		handler(event)
 		return nil
-	}, NewObjectId()}
+	}, entity.NewObjectId()}
 }
 
 func (e eventHandlerFunc) HandleEvent(event Event) error {
@@ -254,11 +256,11 @@ func (e eventHandlerFunc) HandleEvent(event Event) error {
 }
 
 func (e eventHandlerFunc) Equals(handler EventHandler) bool {
-	x, ok := handler.(Entity)
+	x, ok := handler.(entity.Entity)
 	return ok && x.ObjectId() == e.id
 }
 
 // ObjectId makes the eventHandlerFunc type implement the Entity interface.
 // While the code will still compile without this function; equality check will
 // fail. This will be caught by tests verifying EventTarget behaviour.
-func (e eventHandlerFunc) ObjectId() ObjectId { return e.id }
+func (e eventHandlerFunc) ObjectId() entity.ObjectId { return e.id }
