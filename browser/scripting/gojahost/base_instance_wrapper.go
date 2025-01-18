@@ -5,6 +5,7 @@ import (
 
 	g "github.com/dop251/goja"
 	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 	"github.com/stroiman/go-dom/browser/scripting"
 )
 
@@ -16,18 +17,22 @@ func newBaseInstanceWrapper[T any](instance *GojaContext) baseInstanceWrapper[T]
 	return baseInstanceWrapper[T]{instance}
 }
 
-func (w baseInstanceWrapper[T]) storeInternal(value any, obj *g.Object) {
+func (c *GojaContext) storeInternal(value any, obj *g.Object) {
 	obj.DefineDataPropertySymbol(
-		w.ctx.wrappedGoObj,
-		w.ctx.vm.ToValue(value),
+		c.wrappedGoObj,
+		c.vm.ToValue(value),
 		g.FLAG_FALSE,
 		g.FLAG_FALSE,
 		g.FLAG_FALSE,
 	)
 	if e, ok := value.(dom.Entity); ok {
-		w.ctx.cachedNodes[e.ObjectId()] = obj
+		c.cachedNodes[e.ObjectId()] = obj
 	}
 	// obj.SetSymbol(w.instance.wrappedGoObj, w.instance.vm.ToValue(value))
+}
+
+func (w baseInstanceWrapper[T]) storeInternal(value any, obj *g.Object) {
+	w.ctx.storeInternal(value, obj)
 }
 
 func getInstanceValue[T any](c *GojaContext, v g.Value) (T, bool) {
@@ -58,28 +63,39 @@ func (w baseInstanceWrapper[T]) decodeNode(v g.Value) dom.Node {
 	}
 }
 
-func (w baseInstanceWrapper[T]) getPrototype(e dom.Entity) *g.Object {
+func (c *GojaContext) getPrototype(e dom.Entity) function {
 	switch v := e.(type) {
+	case html.HTMLDocument:
+		return c.globals["HTMLDocument"]
+	case dom.Document:
+		return c.globals["Document"]
 	case dom.Element:
 		className, found := scripting.HtmlElements[strings.ToLower(v.TagName())]
 		if found {
-			return w.ctx.globals[className].Prototype
+			return c.globals[className]
 		}
-		return w.ctx.globals["Element"].Prototype
+		return c.globals["Element"]
 	case dom.Node:
-		return w.ctx.globals["Node"].Prototype
+		return c.globals["Node"]
 	}
 	panic("Prototype lookup not defined")
 }
 
-func (w baseInstanceWrapper[T]) toNode(e dom.Entity) g.Value {
-	if o := w.getCachedObject(e); o != nil {
+func (c *GojaContext) toNode(e dom.Entity) g.Value {
+	if o, ok := c.cachedNodes[e.ObjectId()]; ok {
 		return o
 	}
-	prototype := w.getPrototype(e)
-	obj := w.ctx.vm.CreateObject(prototype)
-	w.storeInternal(e, obj)
+	data := c.getPrototype(e)
+	obj := c.vm.CreateObject(data.Prototype)
+	c.storeInternal(e, obj)
+	if initializer, ok := data.Wrapper.(instanceInitializer); ok {
+		initializer.initObject(obj)
+	}
 	return obj
+}
+
+func (w baseInstanceWrapper[T]) toNode(e dom.Entity) g.Value {
+	return w.ctx.toNode(e)
 }
 
 func (w baseInstanceWrapper[T]) toBoolean(b bool) g.Value {

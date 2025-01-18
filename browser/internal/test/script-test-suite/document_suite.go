@@ -3,19 +3,25 @@ package suite
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/stroiman/go-dom/browser/html"
 )
 
 func (suite *ScriptTestSuite) CreateDocumentTests() {
 	prefix := suite.Prefix
 
 	Describe(prefix+"Document", func() {
+		var ctx html.ScriptContext
+
+		BeforeEach(func() {
+			ctx = suite.NewContext()
+		})
+
 		Describe("prototype", func() {
 			It("Has a `createElement`", func() {
-				window := suite.NewWindow()
-				Expect(window.Eval(`
+				Expect(ctx.Eval(`
 				Object.getOwnPropertyNames(Document.prototype).includes("createElement")
 			`)).To(BeTrue())
-				Expect(window.Eval(`
+				Expect(ctx.Eval(`
 				const e = Document.prototype.createElement.call(document, "div")
 				typeof e
 			`)).To(Equal("object"))
@@ -24,7 +30,6 @@ func (suite *ScriptTestSuite) CreateDocumentTests() {
 
 		Describe("Instance properties", func() {
 			It("Has a `location` property", func() {
-				ctx := suite.NewContext()
 				Expect(
 					ctx.Eval("Object.getOwnPropertyNames(document)"),
 				).To(ContainElements("location"))
@@ -43,6 +48,65 @@ func (suite *ScriptTestSuite) CreateDocumentTests() {
 				Expect(
 					ctx.Eval(`Object.getPrototypeOf(e).constructor.name`),
 				).To(Equal("HTMLDivElement"))
+			})
+		})
+
+		Context("", func() {
+
+			itShouldBeADocument := func() {
+				It("Should be an instance of Document", func() {
+					Expect(ctx.Eval("actual instanceof Document")).To(BeTrue())
+				})
+				It("Should have nodeType 9", func() {
+					Expect(ctx.Eval("actual.nodeType")).To(BeEquivalentTo(9))
+				})
+				It("Should be an instance of Node", func() {
+					Expect(ctx.Eval("actual instanceof Node")).To(BeTrue())
+				})
+				It("Should be an instance of EventTarget", func() {
+					Expect(ctx.Eval("actual instanceof EventTarget")).To(BeTrue())
+				})
+				It("Should be an instance of Object", func() {
+					Expect(ctx.Eval("actual instanceof Object")).To(BeTrue())
+				})
+			}
+
+			itShouldBeAnHTMLDocument := func(expectHTMLDocument bool) {
+				It("Should be an instance of HTMLDocument", func() {
+					Expect(
+						ctx.Eval("actual instanceof HTMLDocument"),
+					).To(Equal(expectHTMLDocument))
+				})
+
+				itShouldBeADocument()
+
+				It("Should have a class hierarchy of 5 classes", func() {
+					expectedBaseClassCount := 4
+					if expectHTMLDocument {
+						expectedBaseClassCount++
+					}
+					Expect(ctx.Eval(`
+        let baseClassCount = 0
+        let current = actual
+        while(current = Object.getPrototypeOf(current))
+          baseClassCount++
+        baseClassCount;
+      `)).To(BeEquivalentTo(expectedBaseClassCount))
+				})
+			}
+			Describe("Class Hierarchy of new Document()", func() {
+				BeforeEach(func() {
+					Expect(ctx.Run("const actual = new Document()")).To(Succeed())
+				})
+				itShouldBeAnHTMLDocument(false)
+			})
+
+			Describe("Class Hierarchy of `window.document`", func() {
+				BeforeEach(func() {
+					ctx = suite.LoadHTML("<html></html>")
+					ctx.Run("const actual = window.document")
+				})
+				itShouldBeAnHTMLDocument(true)
 			})
 		})
 	})

@@ -8,61 +8,6 @@ import (
 var _ = Describe("V8 Document", func() {
 	ctx := InitializeContextWithEmptyHtml()
 
-	itShouldBeADocument := func() {
-		It("Should be an instance of Document", func() {
-			Expect(ctx.RunTestScript("actual instanceof Document")).To(BeTrue())
-		})
-		It("Should have nodeType 9", func() {
-			Expect(ctx.RunTestScript("actual.nodeType")).To(BeEquivalentTo(9))
-		})
-		It("Should be an instance of Node", func() {
-			Expect(ctx.RunTestScript("actual instanceof Node")).To(BeTrue())
-		})
-		It("Should be an instance of EventTarget", func() {
-			Expect(ctx.RunTestScript("actual instanceof EventTarget")).To(BeTrue())
-		})
-		It("Should be an instance of Object", func() {
-			Expect(ctx.RunTestScript("actual instanceof Object")).To(BeTrue())
-		})
-	}
-	itShouldBeAnHTMLDocument := func(expectHTMLDocument bool) {
-		It("Should be an instance of HTMLDocument", func() {
-			Expect(
-				ctx.RunTestScript("actual instanceof HTMLDocument"),
-			).To(Equal(expectHTMLDocument))
-		})
-
-		itShouldBeADocument()
-
-		It("Should have a class hierarchy of 5 classes", func() {
-			expectedBaseClassCount := 4
-			if expectHTMLDocument {
-				expectedBaseClassCount++
-			}
-			Expect(ctx.RunTestScript(`
-        let baseClassCount = 0
-        let current = actual
-        while(current = Object.getPrototypeOf(current))
-          baseClassCount++
-        baseClassCount;
-      `)).To(BeEquivalentTo(expectedBaseClassCount))
-		})
-	}
-
-	Describe("Class Hierarchy of new Document()", func() {
-		BeforeEach(func() {
-			ctx.RunTestScript("const actual = new Document()")
-		})
-		itShouldBeAnHTMLDocument(false)
-	})
-
-	Describe("Class Hierarchy of `window.document`", func() {
-		BeforeEach(func() {
-			ctx.RunTestScript("const actual = window.document")
-		})
-		itShouldBeAnHTMLDocument(true)
-	})
-
 	Describe("Constructor", func() {
 		It("Should be instance of Document", func() {
 			Expect(ctx.RunTestScript(`

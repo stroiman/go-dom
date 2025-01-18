@@ -52,6 +52,7 @@ func init() {
 	installClass("EventTarget", "", newEventTargetWrapper)
 	installClass("Window", "Node", newWindowWrapper)
 	installClass("Document", "Node", newDocumentWrapper)
+	installClass("HTMLDocument", "Document", newHTMLDocumentWrapper)
 	installClass("Event", "", NewEventWrapper)
 	installClass("CustomEvent", "Event", NewCustomEventWrapper)
 	installClass("Element", "Node", newElementWrapper)
@@ -70,11 +71,8 @@ type function struct {
 	Wrapper     wrapper
 }
 
-func (d *GojaContext) getObject(obj any, class string) *g.Object {
-	result := d.vm.ToValue(obj).(*g.Object)
-	g := d.globals[class]
-	result.SetPrototype(g.Prototype)
-	return result
+type instanceInitializer interface {
+	initObject(*g.Object)
 }
 
 type propertyNameMapper struct{}
@@ -160,7 +158,7 @@ func (d *gojaScriptHost) NewContext(window html.Window) html.ScriptContext {
 	)
 	globalThis.Set("window", globalThis)
 	globalThis.DefineAccessorProperty("document", vm.ToValue(func(c *g.FunctionCall) g.Value {
-		return result.getObject(window.Document(), "Document")
+		return result.toNode(window.Document())
 	}), nil, g.FLAG_FALSE, g.FLAG_TRUE)
 	globalThis.SetPrototype(result.globals["Window"].Prototype)
 
