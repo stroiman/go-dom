@@ -6,17 +6,17 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type ESHTMLDocumentWrapper struct {
+type htmlDocumentV8Wrapper struct {
 	documentV8Wrapper
 }
 
-func NewHTMLDocumentWrapper(host *V8ScriptHost) ESHTMLDocumentWrapper {
-	return ESHTMLDocumentWrapper{newDocumentV8Wrapper(host)}
+func newHTMLDocumentV8Wrapper(host *V8ScriptHost) htmlDocumentV8Wrapper {
+	return htmlDocumentV8Wrapper{newDocumentV8Wrapper(host)}
 }
 
 func createHTMLDocumentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	wrapper := newDocumentV8Wrapper(host)
-	builder := NewIllegalConstructorBuilder[html.HTMLDocument](host)
+	builder := newIllegalConstructorBuilder[html.HTMLDocument](host)
 	constructor := builder.constructor
 	instanceTemplate := constructor.InstanceTemplate()
 	instanceTemplate.SetInternalFieldCount(1)

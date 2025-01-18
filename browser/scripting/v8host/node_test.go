@@ -10,7 +10,7 @@ var _ = Describe("V8 Node", func() {
 		ctx := NewTestContext(
 			LoadHTML(`<div id="parent-1"><div id="child-1"></div><div id="child-2"></div></div>`),
 		)
-		Expect(ctx.RunTestScript(`
+		Expect(ctx.Eval(`
 			const f = document.createDocumentFragment()
 			const d1 = document.createElement("div")
 			const d2 = document.createElement("div")
@@ -40,7 +40,7 @@ var _ = Describe("V8 Node", func() {
 		It("Returns the correct node", func() {
 			ctx := NewTestContext(LoadHTML(`<div id="parent-1"><div id="child">child</div></div>`))
 			Expect(
-				ctx.RunTestScript(
+				ctx.Eval(
 					`document.getElementById("parent-1").firstChild.getAttribute("id")`,
 				),
 			).To(Equal("child"))
@@ -51,7 +51,7 @@ var _ = Describe("V8 Node", func() {
 		It("Returns true, when passed a child", func() {
 			ctx := NewTestContext(LoadHTML(`<div id="parent-1"><div id="child">child</div></div>`))
 			Expect(
-				ctx.RunTestScript(
+				ctx.Eval(
 					`document.getElementById("parent-1").contains(document.getElementById("child"))`,
 				),
 			).To(BeTrue())
@@ -62,7 +62,7 @@ var _ = Describe("V8 Node", func() {
 				LoadHTML(`<div id="parent-1"></div><div id="parent-2"></div></div>`),
 			)
 			Expect(
-				ctx.RunTestScript(
+				ctx.Eval(
 					`document.getElementById("parent-1").contains(document.getElementById("parent-2"))`,
 				),
 			).To(BeFalse())

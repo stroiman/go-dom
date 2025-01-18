@@ -10,7 +10,7 @@ var _ = Describe("V8 DocumentFragment", func() {
 
 	It("Should be a direct descendant of Node", func() {
 		Expect(
-			ctx.RunTestScript(
+			ctx.Eval(
 				`Object.getPrototypeOf(DocumentFragment.prototype) === Node.prototype`,
 			),
 		).To(BeTrue())
@@ -19,12 +19,12 @@ var _ = Describe("V8 DocumentFragment", func() {
 	It("Should have query functions", func() {
 		ctx.MustRunTestScript(`const fragment = document.createDocumentFragment()`)
 		Expect(
-			ctx.RunTestScript(
+			ctx.Eval(
 				`typeof fragment.querySelector`,
 			),
 		).To(Equal("function"))
 		Expect(
-			ctx.RunTestScript(
+			ctx.Eval(
 				`typeof document.createDocumentFragment().querySelectorAll`,
 			),
 		).To(Equal("function"))

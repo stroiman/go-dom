@@ -11,7 +11,7 @@ type argumentHelper struct {
 }
 
 func newArgumentHelper(host *V8ScriptHost, info *v8.FunctionCallbackInfo) *argumentHelper {
-	ctx := host.MustGetContext(info.Context())
+	ctx := host.mustGetContext(info.Context())
 	return &argumentHelper{info, ctx, 0}
 }
 

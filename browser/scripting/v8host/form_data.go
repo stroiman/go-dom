@@ -8,15 +8,15 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type FormDataV8Wrapper struct {
+type formDataV8Wrapper struct {
 	handleReffedObject[*html.FormData]
 }
 
-func NewFormDataV8Wrapper(host *V8ScriptHost) FormDataV8Wrapper {
-	return FormDataV8Wrapper{newHandleReffedObject[*html.FormData](host)}
+func newFormDataV8Wrapper(host *V8ScriptHost) formDataV8Wrapper {
+	return formDataV8Wrapper{newHandleReffedObject[*html.FormData](host)}
 }
 
-func (w FormDataV8Wrapper) CreateInstance(
+func (w formDataV8Wrapper) CreateInstance(
 	ctx *V8ScriptContext,
 	this *v8.Object,
 ) (*v8.Value, error) {
@@ -27,26 +27,26 @@ func (w FormDataV8Wrapper) CreateInstance(
 
 func createFormData(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	wrapper := NewFormDataV8Wrapper(host)
-	builder := NewConstructorBuilder[*html.FormData](
+	wrapper := newFormDataV8Wrapper(host)
+	builder := newConstructorBuilder[*html.FormData](
 		host,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := host.MustGetContext(info.Context())
+			ctx := host.mustGetContext(info.Context())
 			return wrapper.CreateInstance(ctx, info.This())
 		},
 	)
-	stringIterator := NewIterator(
+	stringIterator := newIterator(
 		host,
 		func(instance string, ctx *V8ScriptContext) (*v8.Value, error) {
 			return v8.NewValue(ctx.host.iso, instance)
 		},
 	)
 
-	entryIterator := NewIterator(
+	entryIterator := newIterator(
 		host,
 		func(instance html.FormDataEntry, ctx *V8ScriptContext) (*v8.Value, error) {
 			// TODO, no option to create an array, totally a hack!
-			arr, e1 := ctx.RunScript("(k,v) => [k,v]")
+			arr, e1 := ctx.runScript("(k,v) => [k,v]")
 			if e1 != nil {
 				return nil, e1
 			}
@@ -66,12 +66,12 @@ func createFormData(host *V8ScriptHost) *v8.FunctionTemplate {
 	builder.constructor.InstanceTemplate().SetSymbol(
 		v8.SymbolIterator(iso),
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := host.MustGetContext(info.Context())
+			ctx := host.mustGetContext(info.Context())
 			data, err := wrapper.getInstance(info)
 			if err != nil {
 				return nil, err
 			}
-			return stringIterator.NewIteratorInstance(ctx, data.Keys())
+			return stringIterator.newIteratorInstance(ctx, data.Keys())
 		},
 	)
 	// protoBuilder.CreateFunction(
@@ -134,19 +134,19 @@ func createFormData(host *V8ScriptHost) *v8.FunctionTemplate {
 				if err0 != nil {
 					return nil, err0
 				}
-				return stringIterator.NewIteratorInstance(args.ctx, instance.Keys())
+				return stringIterator.newIteratorInstance(args.ctx, instance.Keys())
 			}),
 	)
 
 	getEntries := v8.NewFunctionTemplateWithError(
 		iso,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := host.MustGetContext(info.Context())
+			ctx := host.mustGetContext(info.Context())
 			instance, err := wrapper.getInstance(info)
 			if err != nil {
 				return nil, err
 			}
-			return entryIterator.NewIteratorInstance(ctx, instance.Entries)
+			return entryIterator.newIteratorInstance(ctx, instance.Entries)
 		},
 	)
 	protoBuilder.proto.Set("entries", getEntries)

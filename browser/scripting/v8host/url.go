@@ -16,9 +16,9 @@ func newUrlV8Wrapper(host *V8ScriptHost) urlV8Wrapper {
 	return urlV8Wrapper{newHandleReffedObject[dom.URL](host)}
 }
 
-type HandleDisposable cgo.Handle
+type handleDisposable cgo.Handle
 
-func (h HandleDisposable) Dispose() { cgo.Handle(h).Delete() }
+func (h handleDisposable) dispose() { cgo.Handle(h).Delete() }
 
 func (u urlV8Wrapper) CreateInstance(
 	ctx *V8ScriptContext,

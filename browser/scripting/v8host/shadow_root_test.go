@@ -10,7 +10,7 @@ var _ = Describe("V8 ShadowRoot", func() {
 
 	It("Should be a direct descendant of DocumentFragment", func() {
 		Expect(
-			ctx.RunTestScript(
+			ctx.Eval(
 				`Object.getPrototypeOf(ShadowRoot.prototype).constructor.name`,
 			),
 		).To(Equal("DocumentFragment"))
@@ -22,7 +22,7 @@ var _ = Describe("V8 ShadowRoot", func() {
 		// so I assume that it inherits from DocumentFragment as it inherits from it
 		// https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot
 		Expect(
-			ctx.RunTestScript(
+			ctx.Eval(
 				`new ShadowRoot().nodeType`,
 			),
 		).To(BeEquivalentTo(11))

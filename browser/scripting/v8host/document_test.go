@@ -12,7 +12,7 @@ var _ = Describe("V8 Document", func() {
 		It("Should have a documentElement when HTML is loaded", func() {
 			ctx := NewTestContext(LoadHTML(` <html> <body> </body> </html>`))
 			Expect(
-				ctx.RunTestScript(
+				ctx.Eval(
 					"Object.getPrototypeOf(document.documentElement).constructor.name",
 				),
 			).To(Equal("HTMLElement"))
@@ -21,29 +21,29 @@ var _ = Describe("V8 Document", func() {
 		It("Should have a documentElement instance of HTMLElement", func() {
 			ctx := NewTestContext(LoadHTML(` <html> <body> </body> </html>`))
 			Expect(
-				ctx.RunTestScript("document.documentElement instanceof HTMLElement"),
+				ctx.Eval("document.documentElement instanceof HTMLElement"),
 			).To(BeTrue())
 		})
 	})
 
 	Describe("location property", func() {
 		It("Should be a Location", func() {
-			Expect(ctx.RunTestScript("document.location instanceof Location")).To(BeTrue())
+			Expect(ctx.Eval("document.location instanceof Location")).To(BeTrue())
 		})
 
 		It("Should equal window.location", func() {
-			Expect(ctx.RunTestScript("document.location === location")).To(BeTrue())
+			Expect(ctx.Eval("document.location === location")).To(BeTrue())
 		})
 	})
 
 	Describe("body and Body", func() {
 		It("document.body Should return a <body>", func() {
 			ctx := NewTestContext(LoadHTML(`<html><body></body></html>`))
-			Expect(ctx.RunTestScript("document.body.tagName")).To(Equal("BODY"))
+			Expect(ctx.Eval("document.body.tagName")).To(Equal("BODY"))
 		})
 		It("document.head Should return a <head>", func() {
 			ctx := NewTestContext(LoadHTML(`<html><body></body></html>`))
-			Expect(ctx.RunTestScript("document.head.tagName")).To(Equal("HEAD"))
+			Expect(ctx.Eval("document.head.tagName")).To(Equal("HEAD"))
 		})
 	})
 
@@ -55,13 +55,13 @@ var _ = Describe("V8 Document", func() {
 				),
 			)
 			Expect(
-				ctx.RunTestScript("document.querySelector('[data-key]').outerHTML"),
+				ctx.Eval("document.querySelector('[data-key]').outerHTML"),
 			).To(Equal(`<div data-key="1">1</div>`))
 			Expect(
-				ctx.RunTestScript(`document.querySelector('[data-key="2"]').outerHTML`),
+				ctx.Eval(`document.querySelector('[data-key="2"]').outerHTML`),
 			).To(Equal(`<div data-key="2">2</div>`))
 			Expect(
-				ctx.RunTestScript(`document.querySelector('script')`),
+				ctx.Eval(`document.querySelector('script')`),
 			).To(BeNil())
 		})
 	})
@@ -74,7 +74,7 @@ var _ = Describe("V8 Document", func() {
 				),
 			)
 			Expect(
-				ctx.RunTestScript(
+				ctx.Eval(
 					"Array.from(document.querySelectorAll('[data-key]')).map(x => x.outerHTML).join(',')",
 				),
 			).To(Equal(`<div data-key="1">1</div>,<div data-key="2">2</div>`))
@@ -84,7 +84,7 @@ var _ = Describe("V8 Document", func() {
 	Describe("createDocumentFragment", func() {
 		It("Should return a DocumentFragment", func() {
 			ctx := NewTestContext()
-			Expect(ctx.RunTestScript(`
+			Expect(ctx.Eval(`
 				const fragment = document.createDocumentFragment();
 				Object.getPrototypeOf(fragment) === DocumentFragment.prototype
 			`)).To(BeTrue())
@@ -92,7 +92,7 @@ var _ = Describe("V8 Document", func() {
 	})
 
 	It("Should create document fragments", func() {
-		Expect(ctx.RunTestScript(
+		Expect(ctx.Eval(
 			`Object.getPrototypeOf(document.createDocumentFragment()) === DocumentFragment.prototype`,
 		)).To(BeTrue())
 	})

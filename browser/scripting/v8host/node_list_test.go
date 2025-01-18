@@ -9,7 +9,7 @@ var _ = Describe("V8 NodeList", func() {
 	It("Should be a direct descendant of Node", func() {
 		ctx := NewTestContext()
 		Expect(
-			ctx.RunTestScript(
+			ctx.Eval(
 				`Object.getPrototypeOf(NodeList.prototype) === Object.prototype`,
 			),
 		).To(BeTrue())
@@ -22,30 +22,30 @@ var _ = Describe("V8 NodeList", func() {
 
 		It("Should be an iterable", func() {
 			Expect(
-				ctx.RunTestScript(`
+				ctx.Eval(`
 				  const a = Array.from(document.body.childNodes);
 				  a.map(x => x.getAttribute("id")).join(",")`),
 			).To(Equal("1,2,3"))
 		})
 
 		It("Should have a length property", func() {
-			Expect(ctx.RunTestScript("document.body.childNodes.length")).To(BeEquivalentTo(3))
+			Expect(ctx.Eval("document.body.childNodes.length")).To(BeEquivalentTo(3))
 		})
 
 		It("Should allow get by calling `item`", func() {
-			Expect(ctx.RunTestScript(
+			Expect(ctx.Eval(
 				`document.body.childNodes.item(1).getAttribute("id")`,
 			)).To(Equal("2"))
 		})
 
 		It("Should allow get by calling []", func() {
-			Expect(ctx.RunTestScript(
+			Expect(ctx.Eval(
 				`document.body.childNodes[1].getAttribute("id")`,
 			)).To(Equal("2"))
 		})
 
 		It("Should return null when getting item out of range", func() {
-			Expect(ctx.RunTestScript(
+			Expect(ctx.Eval(
 				`document.body.childNodes.item(5) === null`,
 			)).To(BeTrue())
 		})
@@ -53,7 +53,7 @@ var _ = Describe("V8 NodeList", func() {
 		It(
 			"Should return undefined when getting item out of range by indexed getter",
 			func() {
-				Expect(ctx.RunTestScript(
+				Expect(ctx.Eval(
 					`document.body.childNodes[5] === undefined`,
 				)).To(BeTrue())
 			},

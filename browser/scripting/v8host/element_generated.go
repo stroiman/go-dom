@@ -107,8 +107,8 @@ func (e elementV8Wrapper) GetAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Val
 func (e elementV8Wrapper) SetAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(e.host, info)
 	instance, err0 := e.getInstance(info)
-	qualifiedName, err1 := TryParseArg(args, 0, e.decodeDOMString)
-	value, err2 := TryParseArg(args, 1, e.decodeDOMString)
+	qualifiedName, err1 := tryParseArg(args, 0, e.decodeDOMString)
+	value, err2 := tryParseArg(args, 1, e.decodeDOMString)
 	if args.noOfReadArguments >= 2 {
 		err := errors.Join(err0, err1, err2)
 		if err != nil {
@@ -137,10 +137,10 @@ func (e elementV8Wrapper) ToggleAttribute(info *v8.FunctionCallbackInfo) (*v8.Va
 }
 
 func (e elementV8Wrapper) HasAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := e.host.MustGetContext(info.Context())
+	ctx := e.host.mustGetContext(info.Context())
 	args := newArgumentHelper(e.host, info)
 	instance, err0 := e.getInstance(info)
-	qualifiedName, err1 := TryParseArg(args, 0, e.decodeDOMString)
+	qualifiedName, err1 := tryParseArg(args, 0, e.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -213,7 +213,7 @@ func (e elementV8Wrapper) LocalName(info *v8.FunctionCallbackInfo) (*v8.Value, e
 }
 
 func (e elementV8Wrapper) TagName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := e.host.MustGetContext(info.Context())
+	ctx := e.host.mustGetContext(info.Context())
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -247,7 +247,7 @@ func (e elementV8Wrapper) SetSlot(info *v8.FunctionCallbackInfo) (*v8.Value, err
 }
 
 func (e elementV8Wrapper) Attributes(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := e.host.MustGetContext(info.Context())
+	ctx := e.host.mustGetContext(info.Context())
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err

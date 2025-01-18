@@ -15,7 +15,7 @@ var _ = Describe("ScriptHost", func() {
 		Describe("Global Object", func() {
 			It("Should be accessible as `window`", func() {
 				Expect(
-					ctx.RunTestScript("globalThis === window && window === window.window"),
+					ctx.Eval("globalThis === window && window === window.window"),
 				).To(BeTrue())
 			})
 
@@ -24,7 +24,7 @@ var _ = Describe("ScriptHost", func() {
 					"This is desired behaviour, but I haven't yet grokked the prototype on ObjectTemplates.",
 				)
 				Expect(
-					ctx.RunTestScript(
+					ctx.Eval(
 						`Object.getPrototypeOf(window).constructor.name === "Window"`,
 					),
 				).To(BeTrue())

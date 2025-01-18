@@ -33,13 +33,13 @@ type V8ScriptHost struct {
 	contexts        map[*v8.Context]*V8ScriptContext
 }
 
-func (h *V8ScriptHost) GetContext(v8ctx *v8.Context) (*V8ScriptContext, bool) {
+func (h *V8ScriptHost) netContext(v8ctx *v8.Context) (*V8ScriptContext, bool) {
 	ctx, ok := h.contexts[v8ctx]
 	return ctx, ok
 }
 
-func (h *V8ScriptHost) MustGetContext(v8ctx *v8.Context) *V8ScriptContext {
-	if ctx, ok := h.GetContext(v8ctx); ok {
+func (h *V8ScriptHost) mustGetContext(v8ctx *v8.Context) *V8ScriptContext {
+	if ctx, ok := h.netContext(v8ctx); ok {
 		return ctx
 	}
 	panic("Unknown v8 context")
@@ -52,8 +52,8 @@ type V8ScriptContext struct {
 	pinner    runtime.Pinner
 	v8nodes   map[ObjectId]*v8.Value
 	domNodes  map[ObjectId]Entity
-	eventLoop *EventLoop
-	disposers []Disposable
+	eventLoop *eventLoop
+	disposers []disposable
 }
 
 func (c *V8ScriptContext) cacheNode(obj *v8.Object, node Entity) (*v8.Value, error) {
@@ -78,30 +78,30 @@ func (c *V8ScriptContext) getInstanceForNode(
 	}
 	switch n := node.(type) {
 	case CustomEvent:
-		return c.GetInstanceForNodeByName("CustomEvent", n)
+		return c.getInstanceForNodeByName("CustomEvent", n)
 	case Event:
-		return c.GetInstanceForNodeByName("Event", n)
+		return c.getInstanceForNodeByName("Event", n)
 	case Element:
 		if constructor, ok := scripting.HtmlElements[strings.ToLower(n.TagName())]; ok {
-			return c.GetInstanceForNodeByName(constructor, n)
+			return c.getInstanceForNodeByName(constructor, n)
 		}
-		return c.GetInstanceForNodeByName("Element", n)
+		return c.getInstanceForNodeByName("Element", n)
 	case html.HTMLDocument:
-		return c.GetInstanceForNodeByName("HTMLDocument", n)
+		return c.getInstanceForNodeByName("HTMLDocument", n)
 	case Document:
-		return c.GetInstanceForNodeByName("Document", n)
+		return c.getInstanceForNodeByName("Document", n)
 	case DocumentFragment:
-		return c.GetInstanceForNodeByName("DocumentFragment", n)
+		return c.getInstanceForNodeByName("DocumentFragment", n)
 	case Node:
-		return c.GetInstanceForNodeByName("Node", n)
+		return c.getInstanceForNodeByName("Node", n)
 	case Attr:
-		return c.GetInstanceForNodeByName("Attr", n)
+		return c.getInstanceForNodeByName("Attr", n)
 	default:
 		panic("Cannot lookup node")
 	}
 }
 
-func (c *V8ScriptContext) GetInstanceForNodeByName(
+func (c *V8ScriptContext) getInstanceForNodeByName(
 	constructor string,
 	node Entity,
 ) (*v8.Value, error) {
@@ -129,11 +129,11 @@ func (c *V8ScriptContext) getCachedNode(this *v8.Object) (Entity, bool) {
 	return result, ok
 }
 
-type JSConstructorFactory = func(*V8ScriptHost) *v8.FunctionTemplate
+type jsConstructorFactory = func(*V8ScriptHost) *v8.FunctionTemplate
 
 type class struct {
 	globalIdentifier string
-	constructor      JSConstructorFactory
+	constructor      jsConstructorFactory
 	subClasses       []class
 }
 
@@ -183,7 +183,18 @@ func createGlobals(host *V8ScriptHost) []globalInstall {
 	return result
 }
 
-func (host *V8ScriptHost) ConsoleAPIMessage(message v8.ConsoleAPIMessage) {
+// consoleAPIMessageFunc represents a function that can receive javascript
+// console messages and implements the [v8.consoleAPIMessageFunc] interface.
+//
+// This type is a simple solution to avoid exporting the consoleAPIMessage
+// function.
+type consoleAPIMessageFunc func(message v8.ConsoleAPIMessage)
+
+func (f consoleAPIMessageFunc) ConsoleAPIMessage(message v8.ConsoleAPIMessage) {
+	f(message)
+}
+
+func (host *V8ScriptHost) consoleAPIMessage(message v8.ConsoleAPIMessage) {
 	fmt.Println("Message", message)
 	switch message.ErrorLevel {
 	case v8.ErrorLevelDebug:
@@ -201,7 +212,7 @@ func (host *V8ScriptHost) ConsoleAPIMessage(message v8.ConsoleAPIMessage) {
 type classSpec struct {
 	name           string
 	superClassName string
-	factory        JSConstructorFactory
+	factory        jsConstructorFactory
 }
 
 var classes map[string]classSpec = make(map[string]classSpec)
@@ -209,7 +220,7 @@ var classes map[string]classSpec = make(map[string]classSpec)
 func registerJSClass(
 	className string,
 	superClassName string,
-	constructorFactory JSConstructorFactory,
+	constructorFactory jsConstructorFactory,
 ) {
 	spec := classSpec{
 		className, superClassName, constructorFactory,
@@ -260,7 +271,7 @@ func init() {
 
 func New() *V8ScriptHost {
 	host := &V8ScriptHost{iso: v8.NewIsolate()}
-	host.inspectorClient = v8.NewInspectorClient(host)
+	host.inspectorClient = v8.NewInspectorClient(consoleAPIMessageFunc(host.consoleAPIMessage))
 	host.inspector = v8.NewInspector(host.iso, host.inspectorClient)
 
 	globalInstalls := createGlobals(host)
@@ -298,10 +309,6 @@ func (host *V8ScriptHost) Close() {
 var global *v8.Object
 
 func (host *V8ScriptHost) NewContext(w html.Window) html.ScriptContext {
-	return host.NewV8Context(w)
-}
-
-func (host *V8ScriptHost) NewV8Context(w html.Window) *V8ScriptContext {
 	context := &V8ScriptContext{
 		host:     host,
 		v8ctx:    v8.NewContext(host.iso, host.windowTemplate),
@@ -319,10 +326,10 @@ func (host *V8ScriptHost) NewV8Context(w html.Window) *V8ScriptContext {
 	errorCallback := func(err error) {
 		w.DispatchEvent(NewCustomEvent("error"))
 	}
-	context.eventLoop = NewEventLoop(global, errorCallback)
+	context.eventLoop = newEventLoop(global, errorCallback)
 	host.contexts[context.v8ctx] = context
 	context.cacheNode(global, w)
-	context.AddDisposer(context.eventLoop.Start())
+	context.addDisposer(context.eventLoop.Start())
 
 	return context
 }
@@ -337,7 +344,7 @@ func (ctx *V8ScriptContext) Close() {
 	ctx.host.inspector.ContextDestroyed(ctx.v8ctx)
 	slog.Debug("ScriptContext: Dispose")
 	for _, dispose := range ctx.disposers {
-		dispose.Dispose()
+		dispose.dispose()
 	}
 	ctx.pinner.Unpin()
 	// TODO: Synchronize
@@ -345,21 +352,21 @@ func (ctx *V8ScriptContext) Close() {
 	ctx.v8ctx.Close()
 }
 
-func (ctx *V8ScriptContext) AddDisposer(disposer Disposable) {
+func (ctx *V8ScriptContext) addDisposer(disposer disposable) {
 	ctx.disposers = append(ctx.disposers, disposer)
 }
 
-func (ctx *V8ScriptContext) RunScript(script string) (*v8.Value, error) {
+func (ctx *V8ScriptContext) runScript(script string) (*v8.Value, error) {
 	return ctx.v8ctx.RunScript(script, "")
 }
 
 func (ctx *V8ScriptContext) Run(script string) error {
-	_, err := ctx.RunScript(script)
+	_, err := ctx.runScript(script)
 	return err
 }
 
 func (ctx *V8ScriptContext) Eval(script string) (interface{}, error) {
-	result, err := ctx.RunScript(script)
+	result, err := ctx.runScript(script)
 	if err == nil {
 		return v8ValueToGoValue(result)
 	}
@@ -367,7 +374,7 @@ func (ctx *V8ScriptContext) Eval(script string) (interface{}, error) {
 }
 
 func (ctx *V8ScriptContext) EvalCore(script string) (any, error) {
-	return ctx.RunScript(script)
+	return ctx.runScript(script)
 }
 
 func (ctx *V8ScriptContext) RunFunction(script string, arguments ...any) (res any, err error) {
@@ -376,7 +383,7 @@ func (ctx *V8ScriptContext) RunFunction(script string, arguments ...any) (res an
 		f  *v8.Function
 		ok bool
 	)
-	if v, err = ctx.RunScript(script); err == nil {
+	if v, err = ctx.runScript(script); err == nil {
 		f, err = v.AsFunction()
 	}
 	if err == nil {

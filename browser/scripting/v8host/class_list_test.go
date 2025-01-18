@@ -19,14 +19,14 @@ var _ = Describe("V8 Element.classList", func() {
 
 	It("Should be an iterable", func() {
 		ctx := NewTestContext(LoadHTML("<div id='target' class='a b c'></div>"))
-		Expect(ctx.RunTestScript(`
+		Expect(ctx.Eval(`
 			list = document.getElementById("target").classList
 			typeof list[Symbol.iterator]`)).To(Equal("function"))
 	})
 
 	It("Should be an iterable of class names", func() {
 		ctx := NewTestContext(LoadHTML("<div id='target' class='a b c'></div>"))
-		Expect(ctx.RunTestScript(`
+		Expect(ctx.Eval(`
 			const list = document.getElementById('target').classList;
 			Array.from(list).join(",")
 		`)).To(Equal("a,b,c"))
@@ -36,7 +36,7 @@ var _ = Describe("V8 Element.classList", func() {
 		scriptContext := InitializeContext(LoadHTML(`<div id="target" class="a b c"></div>`))
 
 		It("Removes an existing item and returns false", func() {
-			Expect(scriptContext.RunTestScript(`
+			Expect(scriptContext.Eval(`
 				document.getElementById("target").classList.toggle("b")
 			`)).To(BeFalse())
 			div := scriptContext.Window().Document().GetElementById("target")
@@ -44,7 +44,7 @@ var _ = Describe("V8 Element.classList", func() {
 		})
 
 		It("Removes an adds a non-existing item and returns true", func() {
-			Expect(scriptContext.RunTestScript(`
+			Expect(scriptContext.Eval(`
 				document.getElementById("target").classList.toggle("x")
 			`)).To(BeTrue())
 			div := scriptContext.Window().Document().GetElementById("target")
@@ -53,7 +53,7 @@ var _ = Describe("V8 Element.classList", func() {
 
 		Describe("force as true", func() {
 			It("Should leave an existing item and return true", func() {
-				Expect(scriptContext.RunTestScript(`
+				Expect(scriptContext.Eval(`
 				document.getElementById("target").classList.toggle("b", true)
 			`)).To(BeTrue())
 				div := scriptContext.Window().Document().GetElementById("target")
@@ -61,7 +61,7 @@ var _ = Describe("V8 Element.classList", func() {
 			})
 
 			It("Should add a non-existing item and return true", func() {
-				Expect(scriptContext.RunTestScript(`
+				Expect(scriptContext.Eval(`
 				document.getElementById("target").classList.toggle("x", true)
 			`)).To(BeTrue())
 				div := scriptContext.Window().Document().GetElementById("target")
@@ -71,7 +71,7 @@ var _ = Describe("V8 Element.classList", func() {
 
 		Describe("force as false", func() {
 			It("Should remove an existing item and return false", func() {
-				Expect(scriptContext.RunTestScript(`
+				Expect(scriptContext.Eval(`
 				document.getElementById("target").classList.toggle("b", false)
 			`)).To(BeFalse())
 				div := scriptContext.Window().Document().GetElementById("target")
@@ -79,7 +79,7 @@ var _ = Describe("V8 Element.classList", func() {
 			})
 
 			It("Should ignore a non-existing item and return false", func() {
-				Expect(scriptContext.RunTestScript(`
+				Expect(scriptContext.Eval(`
 				document.getElementById("target").classList.toggle("x", false)
 			`)).To(BeFalse())
 				div := scriptContext.Window().Document().GetElementById("target")

@@ -9,7 +9,7 @@ import (
 var _ = Describe("window.location", func() {
 	It("Should have the location of the document", func() {
 		window := html.NewWindow(html.WindowOptionLocation("http://example.com/foo"))
-		ctx := host.NewV8Context(window)
+		ctx := host.NewContext(window)
 		DeferCleanup(func() {
 			ctx.Close()
 		})

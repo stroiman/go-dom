@@ -5,26 +5,20 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/scripting/v8host"
 )
 
 type TestScriptContext struct {
-	*V8ScriptContext
+	html.ScriptContext
 	ignoreUnhandledErrors bool
+	window                html.Window
 }
 
-// RunTestScript wraps the [v8.RunScript] function but converts the return value
-// to a Go object.
-//
-// If JavaScript code throws an error, an error is returned.
-//
-// Note: This conversion is incomplete.
-func (c TestScriptContext) RunTestScript(script string) (any, error) {
-	return c.Eval(script)
+func (c TestScriptContext) Window() html.Window {
+	return c.window
 }
 
 func (c TestScriptContext) MustRunTestScript(script string) any {
-	result, err := c.RunTestScript(script)
+	result, err := c.Eval(script)
 	if err != nil {
 		panic(
 			fmt.Sprintf(
@@ -50,7 +44,8 @@ func NewTestContext(hooks ...CreateHook) TestScriptContext {
 	window := html.NewWindow(html.WindowOptions{
 		// ScriptEngineFactory: (*Wrapper)(host),
 	})
-	ctx.V8ScriptContext = host.NewV8Context(window)
+	ctx.window = window
+	ctx.ScriptContext = host.NewContext(window)
 	DeferCleanup(ctx.Close)
 	for _, hook := range hooks {
 		hook(&ctx)
@@ -78,8 +73,9 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 
 	BeforeEach(func() {
 		window := html.NewWindow()
-		ctx.V8ScriptContext = host.NewV8Context(window)
-		window.SetScriptRunner(ctx)
+		ctx.window = window
+		ctx.ScriptContext = host.NewContext(window)
+		window.SetScriptRunner(ctx.ScriptContext)
 		for _, hook := range hooks {
 			hook(&ctx)
 		}

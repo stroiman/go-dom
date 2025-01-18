@@ -13,7 +13,7 @@ type v8EventListener struct {
 	val *v8.Value
 }
 
-func NewV8EventListener(ctx *V8ScriptContext, val *v8.Value) dom.EventHandler {
+func newV8EventListener(ctx *V8ScriptContext, val *v8.Value) dom.EventHandler {
 	return v8EventListener{ctx, val}
 }
 
@@ -35,7 +35,7 @@ func (l v8EventListener) Equals(other dom.EventHandler) bool {
 }
 
 func createEvent(host *V8ScriptHost) *v8.FunctionTemplate {
-	result := NewIllegalConstructorBuilder[dom.Event](host)
+	result := newIllegalConstructorBuilder[dom.Event](host)
 	result.SetDefaultInstanceLookup()
 	protoBuilder := result.NewPrototypeBuilder()
 	protoBuilder.CreateReadonlyProp("type", dom.Event.Type)
@@ -54,7 +54,7 @@ func createCustomEvent(host *V8ScriptHost) *v8.FunctionTemplate {
 	res := v8.NewFunctionTemplateWithError(
 		iso,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := host.MustGetContext(info.Context())
+			ctx := host.mustGetContext(info.Context())
 			args := info.Args()
 			if len(args) < 1 {
 				return nil, v8.NewTypeError(iso, "Must have at least one constructor argument")
@@ -76,7 +76,7 @@ func createCustomEvent(host *V8ScriptHost) *v8.FunctionTemplate {
 			}
 			e := dom.NewCustomEvent(args[0].String(), eventOptions...)
 			handle := cgo.NewHandle(e)
-			ctx.AddDisposer(HandleDisposable(handle))
+			ctx.addDisposer(handleDisposable(handle))
 			info.This().SetInternalField(0, v8.NewValueExternalHandle(iso, handle))
 			return v8.Undefined(iso), nil
 		},
@@ -97,7 +97,7 @@ func (w eventTargetV8Wrapper) getInstance(info *v8.FunctionCallbackInfo) (dom.Ev
 	if info.This().GetInternalField(0).IsExternal() {
 		return w.handleReffedObject.getInstance(info)
 	} else {
-		ctx := w.host.MustGetContext(info.Context())
+		ctx := w.host.mustGetContext(info.Context())
 		entity, ok := ctx.getCachedNode(info.This())
 		if ok {
 			if target, ok := entity.(dom.EventTarget); ok {
@@ -114,7 +114,7 @@ func createEventTarget(host *V8ScriptHost) *v8.FunctionTemplate {
 	res := v8.NewFunctionTemplate(
 		iso,
 		func(info *v8.FunctionCallbackInfo) *v8.Value {
-			ctx := host.MustGetContext(info.Context())
+			ctx := host.mustGetContext(info.Context())
 			wrapper.store(dom.NewEventTarget(), ctx, info.This())
 			return v8.Undefined(iso)
 		},
@@ -124,7 +124,7 @@ func createEventTarget(host *V8ScriptHost) *v8.FunctionTemplate {
 		"addEventListener",
 		v8.NewFunctionTemplateWithError(iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := host.MustGetContext(info.Context())
+				ctx := host.mustGetContext(info.Context())
 				target, err := wrapper.getInstance(info)
 				if err != nil {
 					return nil, err
@@ -134,7 +134,7 @@ func createEventTarget(host *V8ScriptHost) *v8.FunctionTemplate {
 				fn, e2 := args.getFunctionArg(1)
 				err = errors.Join(e1, e2)
 				if err == nil {
-					listener := NewV8EventListener(ctx, fn.Value)
+					listener := newV8EventListener(ctx, fn.Value)
 					target.AddEventListener(eventType, listener)
 				}
 				return v8.Undefined(iso), err

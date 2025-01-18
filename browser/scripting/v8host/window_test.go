@@ -13,27 +13,27 @@ var _ = Describe("Window", func() {
 
 	Describe("Constructor", func() {
 		It("Should be defined", func() {
-			Expect(ctx.RunScript("Window")).ToNot(BeNil())
+			Expect(ctx.Eval("Window && typeof Window === 'function'")).To(BeTrue())
 		})
 
 		It("Should not be callable", func() {
-			Expect(ctx.RunTestScript("Window()")).Error().To(HaveOccurred())
+			Expect(ctx.Eval("Window()")).Error().To(HaveOccurred())
 		})
 
 		It("Should not be newable", func() {
-			Expect(ctx.RunTestScript("new Window()")).Error().To(HaveOccurred())
+			Expect(ctx.Eval("new Window()")).Error().To(HaveOccurred())
 		})
 	})
 
 	Describe("Inheritance", func() {
 		It("Should be an EventTarget", func() {
-			Expect(ctx.RunTestScript("window instanceof EventTarget")).To(BeTrue())
+			Expect(ctx.Eval("window instanceof EventTarget")).To(BeTrue())
 		})
 	})
 
 	Describe("location property", func() {
 		It("Should be a Location", func() {
-			Expect(ctx.RunTestScript("window.location instanceof Location")).To(BeTrue())
+			Expect(ctx.Eval("window.location instanceof Location")).To(BeTrue())
 		})
 	})
 

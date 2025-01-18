@@ -50,14 +50,14 @@ thisArg Optional
 */
 
 func createNodeList(host *V8ScriptHost) *v8.FunctionTemplate {
-	nodeListIterator := NewIterator[dom.Node](
+	nodeListIterator := newIterator[dom.Node](
 		host,
 		func(instance dom.Node, ctx *V8ScriptContext) (*v8.Value, error) {
 			return ctx.getInstanceForNode(instance)
 		},
 	)
 	iso := host.iso
-	builder := NewIllegalConstructorBuilder[dom.NodeList](host)
+	builder := newIllegalConstructorBuilder[dom.NodeList](host)
 	builder.SetDefaultInstanceLookup()
 	proto := builder.NewPrototypeBuilder()
 	proto.CreateReadonlyProp2(
@@ -86,18 +86,18 @@ func createNodeList(host *V8ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(
 			iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := host.MustGetContext(info.Context())
+				ctx := host.mustGetContext(info.Context())
 				nodeList, err := getInstanceFromThis[dom.NodeList](ctx, info.This())
 				if err != nil {
 					return nil, err
 				}
-				return nodeListIterator.NewIteratorInstance(ctx, nodeList.All())
+				return nodeListIterator.newIteratorInstance(ctx, nodeList.All())
 			},
 		),
 	)
 	instanceTemplate.SetIndexedHandler(
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := host.MustGetContext(info.Context())
+			ctx := host.mustGetContext(info.Context())
 			instance, ok := ctx.getCachedNode(info.This())
 			nodemap, ok_2 := instance.(dom.NodeList)
 			if ok && ok_2 {

@@ -185,7 +185,7 @@ func (w windowV8Wrapper) Self(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 }
 
 func (w windowV8Wrapper) Document(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := w.host.MustGetContext(info.Context())
+	ctx := w.host.mustGetContext(info.Context())
 	instance, err := w.getInstance(info)
 	if err != nil {
 		return nil, err

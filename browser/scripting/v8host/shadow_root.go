@@ -10,6 +10,6 @@ import (
 // for inheritence, i.e., `node instanceof DocumentFragment`.
 // This is performed by HTMX; but it doesn't itself _create_ a shadow root.
 func createShadowRootPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
-	builder := NewIllegalConstructorBuilder[ShadowRoot](host)
+	builder := newIllegalConstructorBuilder[ShadowRoot](host)
 	return builder.constructor
 }

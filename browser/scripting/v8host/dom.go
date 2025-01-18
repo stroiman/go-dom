@@ -11,13 +11,13 @@ import (
 
 type domTokenListV8Wrapper struct {
 	nodeV8WrapperBase[dom.Element]
-	Iterator Iterator[string]
+	Iterator iterator[string]
 }
 
 func newDomTokenListV8Wrapper(host *V8ScriptHost) domTokenListV8Wrapper {
 	return domTokenListV8Wrapper{
 		newNodeV8WrapperBase[dom.Element](host),
-		NewIterator(host, func(item string, ctx *V8ScriptContext) (*v8.Value, error) {
+		newIterator(host, func(item string, ctx *V8ScriptContext) (*v8.Value, error) {
 			return v8.NewValue(host.iso, item)
 		}),
 	}
@@ -41,18 +41,18 @@ func (l domTokenListV8Wrapper) CustomInitialiser(constructor *v8.FunctionTemplat
 }
 
 func (l domTokenListV8Wrapper) GetIterator(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := l.host.MustGetContext(info.Context())
+	ctx := l.host.mustGetContext(info.Context())
 	instance, err := l.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
-	return l.Iterator.NewIteratorInstanceOfIterable(ctx, instance)
+	return l.Iterator.newIteratorInstanceOfIterable(ctx, instance)
 }
 
 func (l domTokenListV8Wrapper) Toggle(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(l.host, info)
-	token, err0 := TryParseArg(args, 0, l.decodeUSVString)
-	force, err1 := TryParseArg(args, 1, l.decodeBoolean)
+	token, err0 := tryParseArg(args, 0, l.decodeUSVString)
+	force, err1 := tryParseArg(args, 1, l.decodeBoolean)
 	instance, errInstance := l.getInstance(info)
 	if args.noOfReadArguments >= 2 {
 		if err := errors.Join(err0, err1, errInstance); err != nil {

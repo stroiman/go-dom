@@ -23,7 +23,7 @@ func newNodeV8WrapperBase[T Entity](host *V8ScriptHost) nodeV8WrapperBase[T] {
 }
 
 func (w nodeV8WrapperBase[T]) getInstance(info *v8.FunctionCallbackInfo) (result T, err error) {
-	if ctx, ok := w.host.GetContext(info.Context()); ok {
+	if ctx, ok := w.host.netContext(info.Context()); ok {
 		if instance, ok := ctx.getCachedNode(info.This()); ok {
 			if typedInstance, ok := instance.(T); ok {
 				return typedInstance, nil
@@ -132,7 +132,7 @@ func (w converters) toBoolean(ctx *V8ScriptContext, val bool) (*v8.Value, error)
 }
 
 func (w converters) toNodeList(ctx *V8ScriptContext, val NodeList) (*v8.Value, error) {
-	return ctx.GetInstanceForNodeByName("NodeList", val)
+	return ctx.getInstanceForNodeByName("NodeList", val)
 }
 
 type handleReffedObject[T any] struct {
@@ -148,7 +148,7 @@ func newHandleReffedObject[T any](host *V8ScriptHost) handleReffedObject[T] {
 
 func (o handleReffedObject[T]) store(value T, ctx *V8ScriptContext, this *v8.Object) {
 	handle := cgo.NewHandle(value)
-	ctx.AddDisposer(HandleDisposable(handle))
+	ctx.addDisposer(handleDisposable(handle))
 
 	internalField := v8.NewValueExternalHandle(o.host.iso, handle)
 	this.SetInternalField(0, internalField)

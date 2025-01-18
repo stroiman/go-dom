@@ -23,7 +23,7 @@ func createDOMParserPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(
 			iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := host.MustGetContext(info.Context())
+				ctx := host.mustGetContext(info.Context())
 				window := ctx.Window()
 				args := newArgumentHelper(host, info)
 				html, err0 := args.getStringArg(0)

@@ -11,7 +11,7 @@ type documentV8Wrapper struct {
 }
 
 func newDocumentV8Wrapper(host *V8ScriptHost) documentV8Wrapper {
-	return documentV8Wrapper{NewESContainerWrapper[Document](host)}
+	return documentV8Wrapper{newESContainerWrapper[Document](host)}
 }
 
 func (w documentV8Wrapper) BuildInstanceTemplate(constructor *v8.FunctionTemplate) {
@@ -21,7 +21,7 @@ func (w documentV8Wrapper) BuildInstanceTemplate(constructor *v8.FunctionTemplat
 		v8.NewFunctionTemplateWithError(
 			w.host.iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := w.host.MustGetContext(info.Context())
+				ctx := w.host.mustGetContext(info.Context())
 				return ctx.v8ctx.Global().Get("location")
 			},
 		),
@@ -33,10 +33,10 @@ func (w documentV8Wrapper) BuildInstanceTemplate(constructor *v8.FunctionTemplat
 func createDocumentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
 	wrapper := newDocumentV8Wrapper(host)
-	builder := NewConstructorBuilder[Document](
+	builder := newConstructorBuilder[Document](
 		host,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			scriptContext := host.MustGetContext(info.Context())
+			scriptContext := host.mustGetContext(info.Context())
 			return scriptContext.cacheNode(info.This(), NewDocument(nil))
 		},
 	)
@@ -70,10 +70,10 @@ func createDocumentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 
 	proto.SetAccessorPropertyCallback("documentElement",
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := host.MustGetContext(arg.Context())
+			ctx := host.mustGetContext(arg.Context())
 			this, ok := ctx.getCachedNode(arg.This())
 			if e, e_ok := this.(Document); ok && e_ok {
-				return ctx.GetInstanceForNodeByName("HTMLElement", e.DocumentElement())
+				return ctx.getInstanceForNodeByName("HTMLElement", e.DocumentElement())
 			}
 			return nil, v8.NewTypeError(iso, "Object not a Document")
 		},
@@ -82,10 +82,10 @@ func createDocumentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	)
 	proto.SetAccessorPropertyCallback("head",
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := host.MustGetContext(arg.Context())
+			ctx := host.mustGetContext(arg.Context())
 			this, ok := ctx.getCachedNode(arg.This())
 			if e, e_ok := this.(Document); ok && e_ok {
-				return ctx.GetInstanceForNodeByName("HTMLElement", e.Head())
+				return ctx.getInstanceForNodeByName("HTMLElement", e.Head())
 			}
 			return nil, v8.NewTypeError(iso, "Object not a Document")
 		},
@@ -94,10 +94,10 @@ func createDocumentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	)
 	proto.SetAccessorPropertyCallback("body",
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := host.MustGetContext(arg.Context())
+			ctx := host.mustGetContext(arg.Context())
 			this, ok := ctx.getCachedNode(arg.This())
 			if e, e_ok := this.(Document); ok && e_ok {
-				return ctx.GetInstanceForNodeByName("HTMLElement", e.Body())
+				return ctx.getInstanceForNodeByName("HTMLElement", e.Body())
 			}
 			return nil, v8.NewTypeError(iso, "Object not a Document")
 		},
@@ -108,7 +108,7 @@ func createDocumentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 		"getElementById",
 		v8.NewFunctionTemplateWithError(iso,
 			func(args *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := host.MustGetContext(args.Context())
+				ctx := host.mustGetContext(args.Context())
 				this, ok := ctx.getCachedNode(args.This())
 				if doc, e_ok := this.(Document); ok && e_ok {
 					element := doc.GetElementById(args.Args()[0].String())

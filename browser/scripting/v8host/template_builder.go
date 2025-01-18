@@ -6,7 +6,7 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type ConstructorBuilder[T any] struct {
+type constructorBuilder[T any] struct {
 	host           *V8ScriptHost
 	constructor    *v8.FunctionTemplate
 	instanceLookup func(*V8ScriptContext, *v8.Object) (T, error)
@@ -23,26 +23,26 @@ func createIllegalConstructor(host *V8ScriptHost) *v8.FunctionTemplate {
 	return result
 }
 
-func NewConstructorBuilder[T any](
+func newConstructorBuilder[T any](
 	host *V8ScriptHost,
 	cb v8.FunctionCallbackWithError,
-) ConstructorBuilder[T] {
+) constructorBuilder[T] {
 	constructor := v8.NewFunctionTemplateWithError(
 		host.iso,
 		cb,
 	)
 	constructor.InstanceTemplate().SetInternalFieldCount(1)
 
-	builder := ConstructorBuilder[T]{host: host,
+	builder := constructorBuilder[T]{host: host,
 		constructor: constructor,
 	}
 	return builder
 }
 
-func NewIllegalConstructorBuilder[T any](host *V8ScriptHost) ConstructorBuilder[T] {
+func newIllegalConstructorBuilder[T any](host *V8ScriptHost) constructorBuilder[T] {
 	constructor := createIllegalConstructor(host)
 
-	builder := ConstructorBuilder[T]{host: host,
+	builder := constructorBuilder[T]{host: host,
 		constructor: constructor,
 	}
 	return builder
@@ -62,7 +62,7 @@ func getInstanceFromThis[T any](ctx *V8ScriptContext, this *v8.Object) (instance
 	}
 }
 
-func (c *ConstructorBuilder[T]) SetDefaultInstanceLookup() {
+func (c *constructorBuilder[T]) SetDefaultInstanceLookup() {
 	c.instanceLookup = func(ctx *V8ScriptContext, this *v8.Object) (val T, err error) {
 		instance, ok := ctx.getCachedNode(this)
 		if instance, e_ok := instance.(T); e_ok && ok {
@@ -74,56 +74,51 @@ func (c *ConstructorBuilder[T]) SetDefaultInstanceLookup() {
 	}
 }
 
-func (c ConstructorBuilder[T]) NewPrototypeBuilder() PrototypeBuilder[T] {
+func (c constructorBuilder[T]) NewPrototypeBuilder() prototypeBuilder[T] {
 	if c.instanceLookup == nil {
 		panic("Cannot build prototype builder if instance lookup not specified")
 	}
-	return PrototypeBuilder[T]{
+	return prototypeBuilder[T]{
 		host:   c.host,
 		proto:  c.constructor.PrototypeTemplate(),
 		lookup: c.instanceLookup,
 	}
 }
 
-func (c ConstructorBuilder[T]) NewInstanceBuilder() PrototypeBuilder[T] {
+func (c constructorBuilder[T]) NewInstanceBuilder() prototypeBuilder[T] {
 	if c.instanceLookup == nil {
 		panic("Cannot build prototype builder if instance lookup not specified")
 	}
-	return PrototypeBuilder[T]{
+	return prototypeBuilder[T]{
 		host:   c.host,
 		proto:  c.constructor.InstanceTemplate(),
 		lookup: c.instanceLookup,
 	}
 }
 
-type PrototypeBuilder[T any] struct {
+type prototypeBuilder[T any] struct {
 	host   *V8ScriptHost
 	proto  *v8.ObjectTemplate
 	lookup func(*V8ScriptContext, *v8.Object) (T, error)
 }
 
-func (b ConstructorBuilder[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, error) {
-	ctx := b.host.MustGetContext(info.Context())
+func (b constructorBuilder[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, error) {
+	ctx := b.host.mustGetContext(info.Context())
 	return b.instanceLookup(ctx, info.This())
 }
 
-func (b PrototypeBuilder[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, error) {
-	ctx := b.host.MustGetContext(info.Context())
+func (b prototypeBuilder[T]) GetInstance(info *v8.FunctionCallbackInfo) (T, error) {
+	ctx := b.host.mustGetContext(info.Context())
 	return b.lookup(ctx, info.This())
 }
 
-type FunctionInfo[T any] struct {
-	instance T
-	ctx      *V8ScriptContext
-}
-
-func (h PrototypeBuilder[T]) CreateReadonlyProp2(
+func (h prototypeBuilder[T]) CreateReadonlyProp2(
 	name string,
 	fn func(T, *V8ScriptContext) (*v8.Value, error),
 ) {
 	h.proto.SetAccessorPropertyCallback(name,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := h.host.MustGetContext(info.Context())
+			ctx := h.host.mustGetContext(info.Context())
 			instance, err := h.GetInstance(info)
 			if err != nil {
 				return nil, err
@@ -132,7 +127,7 @@ func (h PrototypeBuilder[T]) CreateReadonlyProp2(
 		}, nil, v8.ReadOnly)
 }
 
-func (h PrototypeBuilder[T]) CreateReadonlyProp(name string, fn func(T) string) {
+func (h prototypeBuilder[T]) CreateReadonlyProp(name string, fn func(T) string) {
 	h.proto.SetAccessorPropertyCallback(name,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			instance, err := h.GetInstance(info)
@@ -144,14 +139,14 @@ func (h PrototypeBuilder[T]) CreateReadonlyProp(name string, fn func(T) string) 
 		}, nil, v8.ReadOnly)
 }
 
-func (h PrototypeBuilder[T]) CreateReadWriteProp(
+func (h prototypeBuilder[T]) CreateReadWriteProp(
 	name string,
 	get func(T) string,
 	set func(T, string),
 ) {
 	h.proto.SetAccessorPropertyCallback(name,
 		func(arg *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := h.host.MustGetContext(arg.Context())
+			ctx := h.host.mustGetContext(arg.Context())
 			instance, err := h.lookup(ctx, arg.This())
 			if err != nil {
 				return nil, err
@@ -170,7 +165,7 @@ func (h PrototypeBuilder[T]) CreateReadWriteProp(
 		}, v8.None)
 }
 
-func (h PrototypeBuilder[T]) CreateFunction(
+func (h prototypeBuilder[T]) CreateFunction(
 	name string,
 	fn func(T, argumentHelper) (*v8.Value, error),
 ) {
@@ -179,7 +174,7 @@ func (h PrototypeBuilder[T]) CreateFunction(
 		v8.NewFunctionTemplateWithError(
 			h.host.iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := h.host.MustGetContext(info.Context())
+				ctx := h.host.mustGetContext(info.Context())
 				instance, err := h.GetInstance(info)
 				if err != nil {
 					return nil, err
@@ -191,14 +186,14 @@ func (h PrototypeBuilder[T]) CreateFunction(
 	)
 }
 
-func (h PrototypeBuilder[T]) CreateFunctionStringToString(name string, fn func(T, string) string) {
+func (h prototypeBuilder[T]) CreateFunctionStringToString(name string, fn func(T, string) string) {
 	h.CreateFunction(name, func(instance T, info argumentHelper) (*v8.Value, error) {
 		value := fn(instance, info.Args()[0].String())
 		return v8.NewValue(h.host.iso, value)
 	})
 }
 
-func TryParseArgs[T interface{}](
+func tryParseArgs[T interface{}](
 	ctx *V8ScriptContext,
 	args []*v8.Value,
 	index int,
@@ -218,7 +213,7 @@ func TryParseArgs[T interface{}](
 	return
 }
 
-func TryParseArg[T any](
+func tryParseArg[T any](
 	args *argumentHelper,
 	index int,
 	parsers ...func(*V8ScriptContext, *v8.Value) (T, error),
@@ -237,7 +232,7 @@ func TryParseArg[T any](
 	return
 }
 
-func TryParseArgWithDefault[T any](
+func tryParseArgWithDefault[T any](
 	args *argumentHelper,
 	index int,
 	defaultValue func() T,
@@ -246,6 +241,6 @@ func TryParseArgWithDefault[T any](
 	if index >= len(args.Args()) {
 		return defaultValue(), nil
 	} else {
-		return TryParseArg(args, index, parsers...)
+		return tryParseArg(args, index, parsers...)
 	}
 }

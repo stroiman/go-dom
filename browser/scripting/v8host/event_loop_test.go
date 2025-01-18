@@ -21,7 +21,7 @@ var _ = Describe("EventLoop", func() {
 					return nil
 				}))
 		Expect(
-			ctx.RunTestScript(`
+			ctx.Eval(`
 				let val; setTimeout(() => {
 					val = 42;
 					window.dispatchEvent(new CustomEvent("go:home"));
@@ -30,13 +30,13 @@ var _ = Describe("EventLoop", func() {
 			),
 		).To(BeNil())
 		<-c
-		Expect(ctx.RunTestScript(`val`)).To(BeEquivalentTo(42))
+		Expect(ctx.Eval(`val`)).To(BeEquivalentTo(42))
 	})
 
 	It("Dispatches an 'error' event on unhandled error", func() {
 		ctx := NewTestContext(IgnoreUnhandledErrors)
 		Expect(
-			ctx.RunTestScript(`
+			ctx.Eval(`
 				let val;
 				window.addEventListener('error', () => {
 					val = 42;
@@ -48,6 +48,6 @@ var _ = Describe("EventLoop", func() {
 			),
 		).To(BeNil())
 		<-time.After(10 * time.Millisecond)
-		Expect(ctx.RunTestScript(`val`)).To(BeEquivalentTo(42))
+		Expect(ctx.Eval(`val`)).To(BeEquivalentTo(42))
 	})
 })

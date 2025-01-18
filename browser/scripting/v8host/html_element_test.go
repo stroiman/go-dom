@@ -6,24 +6,24 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
-	. "github.com/stroiman/go-dom/browser/scripting/v8host"
+	"github.com/stroiman/go-dom/browser/html"
 )
 
 type BeJSInstanceOfMatcher struct {
 	class string
-	ctx   *V8ScriptContext
+	ctx   html.ScriptContext
 }
 
 func BeJSInstanceOf(
 	expected string,
-	ctx *V8ScriptContext,
+	ctx html.ScriptContext,
 ) types.GomegaMatcher {
 	return BeJSInstanceOfMatcher{expected, ctx}
 }
 
 var _ = Describe("V8 HTML Element classes", func() {
 	It("Should have right element classes on elements", func() {
-		ctx := NewTestContext(LoadHTML(sampleHTML)).V8ScriptContext
+		ctx := NewTestContext(LoadHTML(sampleHTML))
 		Expect("document.getElementById('a')").To(BeJSInstanceOf("HTMLAnchorElement", ctx))
 		Expect("document.getElementById('p')").To(BeJSInstanceOf("HTMLParagraphElement", ctx))
 		Expect("document.getElementById('div')").To(BeJSInstanceOf("HTMLDivElement", ctx))
@@ -35,9 +35,10 @@ func (m BeJSInstanceOfMatcher) Match(actual interface{}) (success bool, err erro
 	if !ok {
 		return false, errors.New("Actual must be a string")
 	}
-	result, err := m.ctx.RunScript(str + " instanceof " + m.class)
-	if err == nil {
-		success = result.Boolean()
+	v, err := m.ctx.Eval(str + " instanceof " + m.class)
+	success, ok = v.(bool)
+	if !ok {
+		panic("Should have received a bool")
 	}
 	return
 }

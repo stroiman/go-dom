@@ -8,6 +8,6 @@ import (
 var _ = Describe("Polyfills", func() {
 	It("Should have a URL", func() {
 		c := NewTestContext()
-		Expect(c.RunTestScript("typeof window.URL")).To(Equal("function"))
+		Expect(c.Eval("typeof window.URL")).To(Equal("function"))
 	})
 })

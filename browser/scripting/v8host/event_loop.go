@@ -8,7 +8,7 @@ type workItem struct {
 	fn *v8.Function
 }
 
-type EventLoop struct {
+type eventLoop struct {
 	workItems    chan workItem
 	globalObject *v8.Object
 	errorCb      func(error)
@@ -19,25 +19,25 @@ func newWorkItem(fn *v8.Function) workItem {
 }
 
 // dispatch places an item on the event loop to be executed immediately
-func (l *EventLoop) dispatch(w workItem) {
+func (l *eventLoop) dispatch(w workItem) {
 	go func() {
 		l.workItems <- w
 	}()
 }
 
-func NewEventLoop(global *v8.Object, cb func(error)) *EventLoop {
-	return &EventLoop{make(chan workItem), global, cb}
+func newEventLoop(global *v8.Object, cb func(error)) *eventLoop {
+	return &eventLoop{make(chan workItem), global, cb}
 }
 
-type Disposable interface {
-	Dispose()
+type disposable interface {
+	dispose()
 }
 
-type DisposeFunc func()
+type disposeFunc func()
 
-func (fn DisposeFunc) Dispose() { fn() }
+func (fn disposeFunc) dispose() { fn() }
 
-func (l *EventLoop) Start() Disposable {
+func (l *eventLoop) Start() disposable {
 	closer := make(chan bool)
 	go func() {
 		for i := range l.workItems {
@@ -53,7 +53,7 @@ func (l *EventLoop) Start() Disposable {
 	// When we shut down, we must be sure that we don't have any running scripts
 	// when disposing the v8 Isolate, otherwise that will cause a panic.
 	// That is why the close function waits for a channel event before proceeding
-	return DisposeFunc(func() {
+	return disposeFunc(func() {
 		close(l.workItems)
 		<-closer
 	})
@@ -67,7 +67,7 @@ func installEventLoopGlobals(host *V8ScriptHost, globalObjectTemplate *v8.Object
 		v8.NewFunctionTemplateWithError(
 			iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := host.MustGetContext(info.Context())
+				ctx := host.mustGetContext(info.Context())
 				helper := newArgumentHelper(host, info)
 				f, err1 := helper.getFunctionArg(0)
 				// delay, err2 := helper.GetInt32Arg(1)

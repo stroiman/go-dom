@@ -8,7 +8,7 @@ import (
 
 func createAttr(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	builder := NewIllegalConstructorBuilder[Attr](host)
+	builder := newIllegalConstructorBuilder[Attr](host)
 	builder.instanceLookup = func(ctx *V8ScriptContext, this *v8.Object) (Attr, error) {
 		instance, ok := ctx.getCachedNode(this)
 		if e, e_ok := instance.(Attr); e_ok && ok {
@@ -25,7 +25,7 @@ func createAttr(host *V8ScriptHost) *v8.FunctionTemplate {
 
 func createNamedNodeMap(host *V8ScriptHost) *v8.FunctionTemplate {
 	iso := host.iso
-	builder := NewIllegalConstructorBuilder[NamedNodeMap](host)
+	builder := newIllegalConstructorBuilder[NamedNodeMap](host)
 	builder.instanceLookup = func(ctx *V8ScriptContext, this *v8.Object) (NamedNodeMap, error) {
 		instance, ok := ctx.getCachedNode(this)
 		if e, e_ok := instance.(NamedNodeMap); e_ok && ok {
@@ -47,7 +47,7 @@ func createNamedNodeMap(host *V8ScriptHost) *v8.FunctionTemplate {
 			idx, err := info.getInt32Arg(0)
 			item := instance.Item(int(idx))
 			if item != nil && err == nil {
-				val, err := info.ctx.GetInstanceForNodeByName("Attr", item)
+				val, err := info.ctx.getInstanceForNodeByName("Attr", item)
 				return val, err
 			}
 			return v8.Null(iso), err
@@ -55,7 +55,7 @@ func createNamedNodeMap(host *V8ScriptHost) *v8.FunctionTemplate {
 	)
 	instance := builder.NewInstanceBuilder()
 	instance.proto.SetIndexedHandler(func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-		ctx := host.MustGetContext(info.Context())
+		ctx := host.mustGetContext(info.Context())
 		instance, ok := ctx.getCachedNode(info.This())
 		nodemap, ok_2 := instance.(NamedNodeMap)
 		if ok && ok_2 {
@@ -64,7 +64,7 @@ func createNamedNodeMap(host *V8ScriptHost) *v8.FunctionTemplate {
 			if item == nil {
 				return v8.Undefined(iso), nil
 			}
-			return ctx.GetInstanceForNodeByName("Attr", item)
+			return ctx.getInstanceForNodeByName("Attr", item)
 		}
 		return nil, v8.NewTypeError(iso, "dunno")
 	})

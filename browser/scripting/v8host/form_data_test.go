@@ -9,13 +9,13 @@ var _ = Describe("V8 FormData", func() {
 	It("Should inherit from Object", func() {
 		c := NewTestContext()
 		Expect(
-			c.RunTestScript("Object.getPrototypeOf(FormData.prototype) === Object.prototype"),
+			c.Eval("Object.getPrototypeOf(FormData.prototype) === Object.prototype"),
 		).To(BeTrue())
 	})
 
 	It("Allows adding/getting", func() {
 		c := NewTestContext()
-		Expect(c.RunTestScript(`
+		Expect(c.Eval(`
 			data = new FormData();
 			data.append("key", "value");
 			data.get("key");
@@ -23,7 +23,7 @@ var _ = Describe("V8 FormData", func() {
 	})
 	It("Returns keys", func() {
 		c := NewTestContext()
-		Expect(c.RunTestScript(`
+		Expect(c.Eval(`
 			data = new FormData();
 			data.append("key1", "value");
 			data.append("key2", "value");
@@ -33,7 +33,7 @@ var _ = Describe("V8 FormData", func() {
 
 	It("Returns entries", func() {
 		c := NewTestContext()
-		Expect(c.RunTestScript(`
+		Expect(c.Eval(`
 			data = new FormData();
 			data.append("key1", "value1");
 			data.append("key2", "value2");
@@ -43,7 +43,7 @@ var _ = Describe("V8 FormData", func() {
 
 	It("Should support forEach", func() {
 		c := NewTestContext()
-		Expect(c.RunTestScript(`
+		Expect(c.Eval(`
 			const result = [];
 			data = new FormData();
 			data.append("key1", "value1");
@@ -55,13 +55,13 @@ var _ = Describe("V8 FormData", func() {
 
 	It("Implements iterable", func() {
 		c := NewTestContext()
-		Expect(c.RunTestScript(`
+		Expect(c.Eval(`
 			data = new FormData();
 			typeof data[Symbol.iterator]`)).To(Equal("function"))
 	})
 	It("Is itself iterable entries", func() {
 		c := NewTestContext()
-		Expect(c.RunTestScript(`
+		Expect(c.Eval(`
 			data = new FormData();
 			data.append("key1", "value1");
 			data.append("key2", "value2");

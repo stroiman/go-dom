@@ -46,10 +46,10 @@ func (u domTokenListV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.V
 }
 
 func (u domTokenListV8Wrapper) Item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := u.host.MustGetContext(info.Context())
+	ctx := u.host.mustGetContext(info.Context())
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
-	index, err1 := TryParseArg(args, 0, u.decodeUnsignedLong)
+	index, err1 := tryParseArg(args, 0, u.decodeUnsignedLong)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -62,10 +62,10 @@ func (u domTokenListV8Wrapper) Item(info *v8.FunctionCallbackInfo) (*v8.Value, e
 }
 
 func (u domTokenListV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := u.host.MustGetContext(info.Context())
+	ctx := u.host.mustGetContext(info.Context())
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
-	token, err1 := TryParseArg(args, 0, u.decodeDOMString)
+	token, err1 := tryParseArg(args, 0, u.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -80,7 +80,7 @@ func (u domTokenListV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Valu
 func (u domTokenListV8Wrapper) Add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
-	tokens, err1 := TryParseArg(args, 0, u.decodeDOMString)
+	tokens, err1 := tryParseArg(args, 0, u.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -95,7 +95,7 @@ func (u domTokenListV8Wrapper) Add(info *v8.FunctionCallbackInfo) (*v8.Value, er
 func (u domTokenListV8Wrapper) Remove(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
-	tokens, err1 := TryParseArg(args, 0, u.decodeDOMString)
+	tokens, err1 := tryParseArg(args, 0, u.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -108,11 +108,11 @@ func (u domTokenListV8Wrapper) Remove(info *v8.FunctionCallbackInfo) (*v8.Value,
 }
 
 func (u domTokenListV8Wrapper) Replace(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := u.host.MustGetContext(info.Context())
+	ctx := u.host.mustGetContext(info.Context())
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
-	token, err1 := TryParseArg(args, 0, u.decodeDOMString)
-	newToken, err2 := TryParseArg(args, 1, u.decodeDOMString)
+	token, err1 := tryParseArg(args, 0, u.decodeDOMString)
+	newToken, err2 := tryParseArg(args, 1, u.decodeDOMString)
 	if args.noOfReadArguments >= 2 {
 		err := errors.Join(err0, err1, err2)
 		if err != nil {
@@ -129,7 +129,7 @@ func (u domTokenListV8Wrapper) Supports(info *v8.FunctionCallbackInfo) (*v8.Valu
 }
 
 func (u domTokenListV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := u.host.MustGetContext(info.Context())
+	ctx := u.host.mustGetContext(info.Context())
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func (u domTokenListV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value,
 }
 
 func (u domTokenListV8Wrapper) Value(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := u.host.MustGetContext(info.Context())
+	ctx := u.host.mustGetContext(info.Context())
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -151,7 +151,7 @@ func (u domTokenListV8Wrapper) Value(info *v8.FunctionCallbackInfo) (*v8.Value, 
 func (u domTokenListV8Wrapper) SetValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(u.host, info)
 	instance, err0 := u.getInstance(info)
-	val, err1 := TryParseArg(args, 0, u.decodeDOMString)
+	val, err1 := tryParseArg(args, 0, u.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {

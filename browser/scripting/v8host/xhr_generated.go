@@ -73,15 +73,15 @@ func createXmlHttpRequestPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 }
 
 func (xhr xmlHttpRequestV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
+	ctx := xhr.host.mustGetContext(info.Context())
 	return xhr.CreateInstance(ctx, info.This())
 }
 
 func (xhr xmlHttpRequestV8Wrapper) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
-	name, err1 := TryParseArg(args, 0, xhr.decodeByteString)
-	value, err2 := TryParseArg(args, 1, xhr.decodeByteString)
+	name, err1 := tryParseArg(args, 0, xhr.decodeByteString)
+	value, err2 := tryParseArg(args, 1, xhr.decodeByteString)
 	if args.noOfReadArguments >= 2 {
 		err := errors.Join(err0, err1, err2)
 		if err != nil {
@@ -96,7 +96,7 @@ func (xhr xmlHttpRequestV8Wrapper) SetRequestHeader(info *v8.FunctionCallbackInf
 func (xhr xmlHttpRequestV8Wrapper) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
-	body, err1 := TryParseArg(args, 0, xhr.decodeDocument, xhr.decodeXMLHttpRequestBodyInit)
+	body, err1 := tryParseArg(args, 0, xhr.decodeDocument, xhr.decodeXMLHttpRequestBodyInit)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -122,10 +122,10 @@ func (xhr xmlHttpRequestV8Wrapper) Abort(info *v8.FunctionCallbackInfo) (*v8.Val
 }
 
 func (xhr xmlHttpRequestV8Wrapper) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
+	ctx := xhr.host.mustGetContext(info.Context())
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
-	name, err1 := TryParseArg(args, 0, xhr.decodeByteString)
+	name, err1 := tryParseArg(args, 0, xhr.decodeByteString)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -138,7 +138,7 @@ func (xhr xmlHttpRequestV8Wrapper) GetResponseHeader(info *v8.FunctionCallbackIn
 }
 
 func (xhr xmlHttpRequestV8Wrapper) GetAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
+	ctx := xhr.host.mustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (xhr xmlHttpRequestV8Wrapper) GetAllResponseHeaders(info *v8.FunctionCallba
 func (xhr xmlHttpRequestV8Wrapper) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
-	mime, err1 := TryParseArg(args, 0, xhr.decodeDOMString)
+	mime, err1 := tryParseArg(args, 0, xhr.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -171,7 +171,7 @@ func (xhr xmlHttpRequestV8Wrapper) ReadyState(info *v8.FunctionCallbackInfo) (*v
 }
 
 func (xhr xmlHttpRequestV8Wrapper) Timeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
+	ctx := xhr.host.mustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -183,7 +183,7 @@ func (xhr xmlHttpRequestV8Wrapper) Timeout(info *v8.FunctionCallbackInfo) (*v8.V
 func (xhr xmlHttpRequestV8Wrapper) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
-	val, err1 := TryParseArg(args, 0, xhr.decodeUnsignedLong)
+	val, err1 := tryParseArg(args, 0, xhr.decodeUnsignedLong)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -196,7 +196,7 @@ func (xhr xmlHttpRequestV8Wrapper) SetTimeout(info *v8.FunctionCallbackInfo) (*v
 }
 
 func (xhr xmlHttpRequestV8Wrapper) WithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
+	ctx := xhr.host.mustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -208,7 +208,7 @@ func (xhr xmlHttpRequestV8Wrapper) WithCredentials(info *v8.FunctionCallbackInfo
 func (xhr xmlHttpRequestV8Wrapper) SetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
-	val, err1 := TryParseArg(args, 0, xhr.decodeBoolean)
+	val, err1 := tryParseArg(args, 0, xhr.decodeBoolean)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -221,7 +221,7 @@ func (xhr xmlHttpRequestV8Wrapper) SetWithCredentials(info *v8.FunctionCallbackI
 }
 
 func (xhr xmlHttpRequestV8Wrapper) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
+	ctx := xhr.host.mustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -231,7 +231,7 @@ func (xhr xmlHttpRequestV8Wrapper) ResponseURL(info *v8.FunctionCallbackInfo) (*
 }
 
 func (xhr xmlHttpRequestV8Wrapper) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
+	ctx := xhr.host.mustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -241,7 +241,7 @@ func (xhr xmlHttpRequestV8Wrapper) Status(info *v8.FunctionCallbackInfo) (*v8.Va
 }
 
 func (xhr xmlHttpRequestV8Wrapper) StatusText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
+	ctx := xhr.host.mustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -259,7 +259,7 @@ func (xhr xmlHttpRequestV8Wrapper) SetResponseType(info *v8.FunctionCallbackInfo
 }
 
 func (xhr xmlHttpRequestV8Wrapper) Response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
+	ctx := xhr.host.mustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -269,7 +269,7 @@ func (xhr xmlHttpRequestV8Wrapper) Response(info *v8.FunctionCallbackInfo) (*v8.
 }
 
 func (xhr xmlHttpRequestV8Wrapper) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.MustGetContext(info.Context())
+	ctx := xhr.host.mustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err

@@ -18,7 +18,7 @@ type elementV8Wrapper struct {
 }
 
 func newElementV8Wrapper(host *V8ScriptHost) *elementV8Wrapper {
-	return &elementV8Wrapper{NewESContainerWrapper[dom.Element](host)}
+	return &elementV8Wrapper{newESContainerWrapper[dom.Element](host)}
 }
 
 func (e *elementV8Wrapper) CustomInitialiser(constructor *v8.FunctionTemplate) {
@@ -77,7 +77,7 @@ func (w *elementV8Wrapper) setTextContent(info *v8.FunctionCallbackInfo) (*v8.Va
 
 func (e elementV8Wrapper) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	tokenList := e.host.globals.namedGlobals["DOMTokenList"]
-	ctx := e.host.MustGetContext(info.Context())
+	ctx := e.host.mustGetContext(info.Context())
 	instance, err := tokenList.InstanceTemplate().NewInstance(ctx.v8ctx)
 	if err != nil {
 		return nil, err
@@ -98,7 +98,7 @@ func (e *elementV8Wrapper) toNamedNodeMap(
 	ctx *V8ScriptContext,
 	n dom.NamedNodeMap,
 ) (*v8.Value, error) {
-	return ctx.GetInstanceForNodeByName("NamedNodeMap", n)
+	return ctx.getInstanceForNodeByName("NamedNodeMap", n)
 }
 
 func (w elementV8Wrapper) GetAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

@@ -10,7 +10,7 @@ type esElementContainerWrapper[T ElementContainer] struct {
 	nodeV8WrapperBase[T]
 }
 
-func NewESContainerWrapper[T ElementContainer](host *V8ScriptHost) esElementContainerWrapper[T] {
+func newESContainerWrapper[T ElementContainer](host *V8ScriptHost) esElementContainerWrapper[T] {
 	return esElementContainerWrapper[T]{newNodeV8WrapperBase[T](host)}
 }
 
@@ -28,7 +28,7 @@ func (e esElementContainerWrapper[T]) QuerySelector(
 ) (*v8.Value, error) {
 	host := e.host
 	iso := e.host.iso
-	ctx := host.MustGetContext(args.Context())
+	ctx := host.mustGetContext(args.Context())
 	this, ok := ctx.getCachedNode(args.This())
 	if doc, e_ok := this.(ElementContainer); ok && e_ok {
 		node, err := doc.QuerySelector(args.Args()[0].String())
@@ -48,14 +48,14 @@ func (e esElementContainerWrapper[T]) QuerySelectorAll(
 ) (*v8.Value, error) {
 	host := e.host
 	iso := e.host.iso
-	ctx := host.MustGetContext(args.Context())
+	ctx := host.mustGetContext(args.Context())
 	this, ok := ctx.getCachedNode(args.This())
 	if doc, e_ok := this.(ElementContainer); ok && e_ok {
 		nodeList, err := doc.QuerySelectorAll(args.Args()[0].String())
 		if err != nil {
 			return nil, err
 		}
-		return ctx.GetInstanceForNodeByName("NodeList", nodeList)
+		return ctx.getInstanceForNodeByName("NodeList", nodeList)
 	}
 	return nil, v8.NewTypeError(iso, "Object not a Document")
 }

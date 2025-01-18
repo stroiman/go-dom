@@ -48,7 +48,7 @@ var _ = Describe("V8 XmlHttpRequest", func() {
 
 	It("Should inherit from EventTarget", func() {
 		ctx := NewTestContext()
-		Expect(ctx.RunTestScript("new XMLHttpRequest() instanceof EventTarget")).To(BeTrue())
+		Expect(ctx.Eval("new XMLHttpRequest() instanceof EventTarget")).To(BeTrue())
 	})
 
 	It("Should dispatch 'load' event", func() {
