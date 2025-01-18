@@ -366,6 +366,39 @@ func (ctx *V8ScriptContext) Eval(script string) (interface{}, error) {
 	return nil, err
 }
 
+func (ctx *V8ScriptContext) EvalCore(script string) (any, error) {
+	return ctx.RunScript(script)
+}
+
+func (ctx *V8ScriptContext) RunFunction(script string, arguments ...any) (res any, err error) {
+	var (
+		v  *v8.Value
+		f  *v8.Function
+		ok bool
+	)
+	if v, err = ctx.RunScript(script); err == nil {
+		f, err = v.AsFunction()
+	}
+	if err == nil {
+		args := make([]v8.Valuer, len(arguments))
+		for i, a := range arguments {
+			if args[i], ok = a.(v8.Valuer); !ok {
+				err = fmt.Errorf("V8ScriptContext.RunFunction: Arguments is not a V8 value: %d", i)
+			}
+		}
+		return f.Call(ctx.v8ctx.Global(), args...)
+	}
+	return
+}
+
+func (ctx *V8ScriptContext) Export(val any) (any, error) {
+	if res, ok := val.(*v8.Value); ok {
+		return v8ValueToGoValue(res)
+	} else {
+		return nil, errors.New("V8ScriptContext.Export: value not a V8 value")
+	}
+}
+
 func (ctx *V8ScriptContext) Window() html.Window {
 	return ctx.window
 }

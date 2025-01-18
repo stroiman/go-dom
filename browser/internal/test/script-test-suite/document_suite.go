@@ -3,14 +3,13 @@ package suite
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/stroiman/go-dom/browser/html"
 )
 
 func (suite *ScriptTestSuite) CreateDocumentTests() {
 	prefix := suite.Prefix
 
 	Describe(prefix+"Document", func() {
-		var ctx html.ScriptContext
+		var ctx *ScriptTestContext
 
 		BeforeEach(func() {
 			ctx = suite.NewContext()
@@ -18,10 +17,7 @@ func (suite *ScriptTestSuite) CreateDocumentTests() {
 
 		Describe("`createElement`", func() {
 			It("Should return an HTMLElement", func() {
-				Expect(
-					ctx.Eval(`const base = document.createElement("base");
-						base instanceof HTMLElement`),
-				).To(BeTrue())
+				Expect(`document.createElement("base")`).To(ctx.BeInstanceOf("HTMLElement"))
 			})
 
 			It("Should exist on the prototype", func() {
@@ -34,11 +30,14 @@ func (suite *ScriptTestSuite) CreateDocumentTests() {
 			})
 		})
 
-		Describe("Instance properties", func() {
-			It("Has a `location` property", func() {
+		Describe("`location`", func() {
+			It("Should be an own property of the document, not the prototype", func() {
 				Expect(
 					ctx.Eval("Object.getOwnPropertyNames(document)"),
 				).To(ContainElements("location"))
+				Expect(
+					ctx.Eval("Object.getOwnPropertyNames(Document.prototype)"),
+				).ToNot(ContainElements("location"))
 			})
 		})
 
@@ -60,7 +59,9 @@ func (suite *ScriptTestSuite) CreateDocumentTests() {
 		itShouldBeADocument := func() {
 			It("Should be an instance of Document", func() {
 				Expect(ctx.Eval("actual instanceof Document")).To(BeTrue())
+				Expect("actual").To(ctx.BeInstanceOf("Document"))
 			})
+
 			It("Should have nodeType 9", func() {
 				Expect(ctx.Eval("actual.nodeType")).To(BeEquivalentTo(9))
 			})

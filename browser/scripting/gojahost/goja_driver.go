@@ -1,6 +1,7 @@
 package gojahost
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/stroiman/go-dom/browser/html"
 	"github.com/stroiman/go-dom/browser/scripting"
 
+	"github.com/dop251/goja"
 	g "github.com/dop251/goja"
 )
 
@@ -188,4 +190,52 @@ func (i *GojaContext) Eval(str string) (res any, err error) {
 	} else {
 		return nil, err
 	}
+}
+
+func (i *GojaContext) EvalCore(str string) (res any, err error) {
+	return i.vm.RunString(str)
+}
+
+func (i *GojaContext) RunFunction(str string, arguments ...any) (res any, err error) {
+	var f g.Value
+	if f, err = i.vm.RunString(str); err == nil {
+		if c, ok := g.AssertFunction(f); !ok {
+			err = errors.New("GojaContext.RunFunction: script is not a function")
+		} else {
+			values := make([]g.Value, len(arguments))
+			for i, a := range arguments {
+				var ok bool
+				if values[i], ok = a.(g.Value); !ok {
+					err = fmt.Errorf("GojaContext.RunFunction: argument %d was not a goja Value", i)
+				}
+			}
+			res, err = c(goja.Undefined(), values...)
+		}
+	}
+	return
+}
+
+// Export create a native Go value out of a javascript value. The value argument
+// must be a [goja.Value] instance.
+//
+// This function is intended to be used only for test purposes. The value has an
+// [any] type as the tests are not supposed to know the details of the
+// underlying engine.
+//
+// The value is expected to be the ourput of [RunFunction] or [EvalCore]
+//
+// An error will be returned if the value is not a goja Value, or the value
+// could not be converted to a native Go object
+func (i *GojaContext) Export(value any) (res any, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("GojaContext.Export: %v", r)
+		}
+	}()
+	if gv, ok := value.(g.Value); ok {
+		res = gv.Export()
+	} else {
+		err = fmt.Errorf("GojaContext.Export: Value not a goja value: %v", value)
+	}
+	return
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	"github.com/stroiman/go-dom/browser/html"
+	matchers "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 )
 
 type ScriptTestSuite struct {
@@ -16,6 +17,7 @@ type ScriptTestSuite struct {
 
 type ScriptTestContext struct {
 	Window html.Window
+	matchers.ScriptMatchers
 }
 
 func (ctx *ScriptTestContext) Eval(script string) (any, error) {
@@ -47,15 +49,21 @@ func NewScriptTestSuite(
 	return result
 }
 
-func (suite *ScriptTestSuite) NewContext() *ScriptTestContext {
-	options := html.WindowOptions{
-		ScriptHost: suite.Engine,
-	}
-	result := &ScriptTestContext{
-		Window: html.NewWindow(options),
+func (suite *ScriptTestSuite) newContext(win html.Window) *ScriptTestContext {
+	result := &ScriptTestContext{Window: win,
+		ScriptMatchers: matchers.ScriptMatchers{
+			Ctx: win.GetScriptEngine().(matchers.MatcherScriptContext),
+		},
 	}
 	ginkgo.DeferCleanup(func() { result.Close() })
 	return result
+}
+
+func (suite *ScriptTestSuite) NewContext() *ScriptTestContext {
+	win := html.NewWindow(html.WindowOptions{
+		ScriptHost: suite.Engine,
+	})
+	return suite.newContext(win)
 }
 
 func (suite *ScriptTestSuite) LoadHTML(h string) *ScriptTestContext {
@@ -64,9 +72,7 @@ func (suite *ScriptTestSuite) LoadHTML(h string) *ScriptTestContext {
 	}
 	win, err := html.NewWindowReader(strings.NewReader(h), options)
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
-	result := &ScriptTestContext{Window: win}
-	ginkgo.DeferCleanup(func() { result.Close() })
-	return result
+	return suite.newContext(win)
 }
 
 func (suite *ScriptTestSuite) NewWindow() html.Window {

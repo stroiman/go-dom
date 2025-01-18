@@ -9,22 +9,6 @@ var _ = Describe("V8 Document", func() {
 	ctx := InitializeContextWithEmptyHtml()
 
 	Describe("Constructor", func() {
-		Describe("createElement", func() {
-			It("Should return an HTMLElement", func() {
-				Expect(
-					ctx.RunTestScript(`const base = document.createElement("base");
-						base instanceof HTMLElement`),
-				).To(BeTrue())
-			})
-		})
-
-		It("Should support Document functions", func() {
-			Expect(
-				ctx.RunTestScript(`document.createElement("div") instanceof HTMLElement`),
-			).Error().
-				ToNot(HaveOccurred())
-		})
-
 		It("Should have a documentElement when HTML is loaded", func() {
 			ctx := NewTestContext(LoadHTML(` <html> <body> </body> </html>`))
 			Expect(
