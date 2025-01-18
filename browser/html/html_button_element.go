@@ -40,7 +40,7 @@ func (e *htmlButtonElement) trySubmitForm() {
 		parent = parent.Parent()
 	}
 	if form != nil {
-		form.Submit()
+		form.RequestSubmit(e)
 	}
 }
 

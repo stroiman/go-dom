@@ -231,7 +231,9 @@ var _ = Describe("HTML Form", func() {
 				})
 
 				It("Should include the button name in the form data if set", func() {
-					Skip("TODO")
+					button.SetAttribute("name", "the-button")
+					button.Click()
+					Expect(submittedForm).To(HaveKey("the-button"))
 				})
 			})
 

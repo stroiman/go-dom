@@ -51,10 +51,10 @@ func NewFormDataForm(form HTMLFormElement) *FormData {
 }
 
 func (d *FormData) AddElement(e dom.Element) {
-	name, _ := e.GetAttribute("name")
-	value, _ := e.GetAttribute("value")
-	d.Append(name, NewFormDataValueString(value))
-
+	if name, _ := e.GetAttribute("name"); name != "" {
+		value, _ := e.GetAttribute("value")
+		d.Append(name, NewFormDataValueString(value))
+	}
 }
 
 func (d *FormData) Append(name string, value FormDataValue) {
