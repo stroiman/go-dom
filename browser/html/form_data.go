@@ -34,10 +34,15 @@ func NewFormDataForm(form HTMLFormElement) *FormData {
 	formData := NewFormData()
 	for _, input := range inputs.All() {
 		if inputElement, ok := input.(HTMLInputElement); ok {
-			// TODO, handle no values
-			name, _ := inputElement.GetAttribute("name")
-			value, _ := inputElement.GetAttribute("value")
-			formData.Append(name, NewFormDataValueString(value))
+			switch inputElement.Type() {
+			case "submit":
+				continue
+			default:
+				// TODO, handle no values
+				name, _ := inputElement.GetAttribute("name")
+				value, _ := inputElement.GetAttribute("value")
+				formData.Append(name, NewFormDataValueString(value))
+			}
 		}
 	}
 	return formData

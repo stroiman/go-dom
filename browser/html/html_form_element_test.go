@@ -3,6 +3,7 @@ package html_test
 import (
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/html"
@@ -57,6 +58,7 @@ var _ = Describe("HTML Form", func() {
 		var requests []*http.Request
 		var form HTMLFormElement
 		var actualRequest *http.Request
+		var submittedForm url.Values
 
 		AfterEach(func() {
 			// Make the values ready for garbage collection
@@ -66,12 +68,16 @@ var _ = Describe("HTML Form", func() {
 
 		BeforeEach(func() {
 			actualBody = ""
-			DeferCleanup(func() { requests = nil })
+			DeferCleanup(func() { requests = nil; submittedForm = nil })
 
 			window = NewWindow(WindowOptions{
 				HttpClient: NewHttpClientFromHandler(
 					http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+						if req.ParseForm() != nil {
+							panic("Error parsing form")
+						}
 						actualRequest = req
+						submittedForm = req.Form
 						requests = append(requests, req)
 						data, err := io.ReadAll(req.Body)
 						Expect(err).ToNot(HaveOccurred())
@@ -168,6 +174,26 @@ var _ = Describe("HTML Form", func() {
 			})
 		})
 
+		Describe("ReqeustSubmit with a <input type='submit'>", func() {
+			var submitter dom.Element
+			BeforeEach(func() {
+				submitter = window.Document().CreateElement("input")
+				submitter.SetAttribute("type", "submit")
+				submitter.SetAttribute("name", "submitter")
+				form.AppendChild(submitter)
+			})
+
+			It("Should add the name of a submitter, if passed", func() {
+				Skip("TODO")
+				form.RequestSubmit(submitter)
+			})
+
+			It("Should ignore the name of a submitter if not passed", func() {
+				form.RequestSubmit(submitter)
+				Expect(submittedForm).ToNot(HaveKey("submitter"))
+			})
+		})
+
 		Describe("React to <button> click", func() {
 			var button dom.Element
 
@@ -182,6 +208,12 @@ var _ = Describe("HTML Form", func() {
 				})
 
 				It("Should submit the form", func() {
+					button.Click()
+					Expect(actualRequest).ToNot(BeNil())
+				})
+
+				It("Should also submit the form if 'type' was weird casing", func() {
+					button.SetAttribute("type", "sUBmiT")
 					button.Click()
 					Expect(actualRequest).ToNot(BeNil())
 				})
@@ -205,16 +237,19 @@ var _ = Describe("HTML Form", func() {
 
 			Describe("The button is not type='submit'", func() {
 				It("should not submit the form", func() {
+					button.SetAttribute("type", "reset")
 					button.Click()
 					Expect(actualRequest).To(BeNil())
 				})
 			})
 		})
+
 		Describe("Click a <input type='submit'>", func() {
 			It("Should submit the form", func() {
 				Skip("TODO")
 			})
 		})
+
 		Describe("Click a <input type='something else'>", func() {
 			It("Should submit the form", func() {
 				Skip("TODO")

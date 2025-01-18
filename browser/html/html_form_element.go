@@ -20,6 +20,7 @@ type HTMLFormElement interface {
 	GetMethod() string
 	SetMethod(value string)
 	Submit() error
+	RequestSubmit(submitter dom.Element) error
 }
 
 type htmlFormElement struct {
@@ -52,6 +53,10 @@ func (e *htmlFormElement) Submit() error {
 		return err
 	}
 	return e.htmlDocument.getWindow().fetchRequest(req)
+}
+
+func (e *htmlFormElement) RequestSubmit(submitter dom.Element) error {
+	return e.Submit()
 }
 
 func (e *htmlFormElement) GetMethod() string {
