@@ -251,7 +251,7 @@ func (n *node) SetTextContent(val string) {
 	for x := n.FirstChild(); x != nil; x = n.FirstChild() {
 		x.RemoveChild(x)
 	}
-	n.AppendChild(NewTextNode(nil, val))
+	n.AppendChild(NewTextNode(val))
 }
 
 func (n *node) GetTextContent() string {

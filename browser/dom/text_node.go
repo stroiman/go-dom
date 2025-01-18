@@ -16,7 +16,7 @@ type textNode struct {
 	text string
 }
 
-func NewTextNode(node *html.Node, text string) Node {
+func NewTextNode(text string) Node {
 	result := &textNode{newNode(), text}
 	result.SetSelf(result)
 	return result

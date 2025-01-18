@@ -176,7 +176,7 @@ func iterate(w Window, d dom.Document, dest dom.Node, source *html.Node) {
 		case html.ElementNode:
 			createElementFromNode(w, d, dest, child)
 		case html.TextNode:
-			dest.AppendChild(dom.NewTextNode(cloneNode(child), child.Data))
+			dest.AppendChild(dom.NewTextNode(child.Data))
 		case html.DoctypeNode:
 			dest.AppendChild(dom.NewDocumentType(child.Data))
 		default:
