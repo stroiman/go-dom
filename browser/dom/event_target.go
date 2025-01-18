@@ -145,7 +145,7 @@ type errorEvent struct {
 	err error
 }
 
-type CustomEventOption interface {
+type EventOption interface {
 	updateEvent(*event)
 }
 
@@ -153,10 +153,10 @@ type eventOptionFunc func(*event)
 
 func (f eventOptionFunc) updateEvent(e *event) { f(e) }
 
-func EventBubbles(bubbles bool) CustomEventOption {
+func EventBubbles(bubbles bool) EventOption {
 	return eventOptionFunc(func(e *event) { e.bubbles = bubbles })
 }
-func EventCancelable(cancelable bool) CustomEventOption {
+func EventCancelable(cancelable bool) EventOption {
 	return eventOptionFunc(func(e *event) { e.cancelable = cancelable })
 }
 
@@ -173,7 +173,15 @@ type customEvent struct {
 	event
 }
 
-func NewCustomEvent(eventType string, options ...CustomEventOption) CustomEvent {
+func NewEvent(eventType string, options ...EventOption) Event {
+	e := newEvent(eventType)
+	for _, o := range options {
+		o.updateEvent(&e)
+	}
+	return &e
+}
+
+func NewCustomEvent(eventType string, options ...EventOption) CustomEvent {
 	e := &customEvent{newEvent(eventType)}
 	for _, o := range options {
 		o.updateEvent(&e.event)

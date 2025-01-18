@@ -1,6 +1,7 @@
 package html_test
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -13,6 +14,8 @@ import (
 	//
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gcustom"
+	"github.com/onsi/gomega/types"
 )
 
 var _ = Describe("HTML Form", func() {
@@ -265,5 +268,60 @@ var _ = Describe("HTML Form", func() {
 				Expect(actualRequest).To(BeNil())
 			})
 		})
+
+		Describe("Dispatched events", func() {
+			Describe("formdata event", func() {
+				It("Should be dispatched when a form is submitted", func() {
+					var actualEvent dom.Event
+					form.AddEventListener(
+						"formdata",
+						dom.NewEventHandlerFunc(func(e dom.Event) error {
+							actualEvent = e
+							return nil
+						}),
+					)
+					form.Submit()
+					Expect(actualEvent).ToNot(BeNil())
+					Expect(actualEvent.Cancelable()).To(BeFalse())
+					Expect(actualEvent.Bubbles()).To(BeTrue())
+					formDataEvent, ok := actualEvent.(FormDataEvent)
+					Expect(ok).To(BeTrue())
+					Expect(formDataEvent.FormData()).ToNot(BeNil())
+					Expect(formDataEvent.FormData()).To(HaveFormDataValue("foo", "bar"))
+				})
+			})
+		})
 	})
 })
+
+func HaveFormDataValue(key, expected string) types.GomegaMatcher {
+	matcher := Equal(expected)
+	var (
+		countMismatch bool
+		noOfMatches   int
+	)
+
+	return gcustom.MakeMatcher(
+		func(actual *FormData) (bool, error) {
+			if actual == nil {
+				return false, errors.New("Formdata was nil")
+			}
+			values := actual.GetAll(key)
+			noOfMatches = len(values)
+			if 0 == noOfMatches {
+				countMismatch = true
+				return false, nil
+			}
+			if 1 < noOfMatches {
+				countMismatch = true
+				return false, nil
+			}
+			return matcher.Match(string(values[0]))
+		}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have one value {{.Data.Key}}: {{.Data.Expected}}\n{{if .Data.CountMismatch }}Found {{.Data.NoOfMatches}}{{else}}{{.Data.Matcher.FailureMessage .Actual }}{{end}}", struct {
+		Key           string
+		Expected      string
+		Matcher       types.GomegaMatcher
+		CountMismatch *bool
+		NoOfMatches   *int
+	}{key, expected, matcher, &countMismatch, &noOfMatches})
+}

@@ -9,9 +9,34 @@ import (
 	"github.com/stroiman/go-dom/browser/dom"
 )
 
+type FormEvent string
+
+const (
+	FormEventFormData FormEvent = "formdata"
+	FormEventSubmit   FormEvent = "submit"
+	FormEventReset    FormEvent = "reset"
+)
+
 type GetReader interface {
 	GetReader() io.Reader
 }
+
+type FormDataEvent interface {
+	dom.Event
+	FormData() *FormData
+}
+
+type formDataEvent struct {
+	dom.Event
+	formData *FormData
+}
+
+func newFormDataEvent(data *FormData) FormDataEvent {
+	e := dom.NewEvent(string(FormEventFormData), dom.EventBubbles(true))
+	return &formDataEvent{e, data}
+}
+
+func (e *formDataEvent) FormData() *FormData { return e.formData }
 
 type HTMLFormElement interface {
 	HTMLElement
@@ -41,6 +66,8 @@ func (e *htmlFormElement) Submit() error {
 }
 
 func (e *htmlFormElement) submitFormData(formData *FormData) error {
+	e.DispatchEvent(newFormDataEvent(formData))
+
 	var (
 		req *http.Request
 		err error
