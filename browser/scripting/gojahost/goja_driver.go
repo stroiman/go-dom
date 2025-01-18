@@ -14,7 +14,7 @@ import (
 	g "github.com/dop251/goja"
 )
 
-const INTERNAL_SYMBOL_NAME = "__go_dom_internal_value__"
+const internal_symbol_name = "__go_dom_internal_value__"
 
 func New() html.ScriptHost {
 	return &gojaScriptHost{}
@@ -55,8 +55,8 @@ func init() {
 	installClass("Window", "Node", newWindowWrapper)
 	installClass("Document", "Node", newDocumentWrapper)
 	installClass("HTMLDocument", "Document", newHTMLDocumentWrapper)
-	installClass("Event", "", NewEventWrapper)
-	installClass("CustomEvent", "Event", NewCustomEventWrapper)
+	installClass("Event", "", newEventWrapperAsWrapper)
+	installClass("CustomEvent", "Event", newCustomEventWrapper)
 	installClass("Element", "Node", newElementWrapper)
 	installClass("HTMLElement", "Element", newGenericElementWrapper)
 
@@ -145,7 +145,7 @@ func (d *gojaScriptHost) NewContext(window html.Window) html.ScriptContext {
 	result := &GojaContext{
 		vm:           vm,
 		window:       window,
-		wrappedGoObj: g.NewSymbol(INTERNAL_SYMBOL_NAME),
+		wrappedGoObj: g.NewSymbol(internal_symbol_name),
 		cachedNodes:  make(map[int32]g.Value),
 	}
 	result.installGlobals(globals)
