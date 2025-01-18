@@ -36,11 +36,15 @@ func NewHtmlFormElement(ownerDocument HTMLDocument) HTMLFormElement {
 }
 
 func (e *htmlFormElement) Submit() error {
+	formData := NewFormDataForm(e)
+	return e.submitFormData(formData)
+}
+
+func (e *htmlFormElement) submitFormData(formData *FormData) error {
 	var (
 		req *http.Request
 		err error
 	)
-	formData := NewFormDataForm(e)
 	if e.GetMethod() == "get" {
 		searchParams := formData.QueryString()
 		targetURL := replaceSearchParams(e.getAction(), searchParams)
@@ -56,7 +60,11 @@ func (e *htmlFormElement) Submit() error {
 }
 
 func (e *htmlFormElement) RequestSubmit(submitter dom.Element) error {
-	return e.Submit()
+	formData := NewFormDataForm(e)
+	if submitter != nil {
+		formData.AddElement(submitter)
+	}
+	return e.submitFormData(formData)
 }
 
 func (e *htmlFormElement) GetMethod() string {

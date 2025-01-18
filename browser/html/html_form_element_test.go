@@ -184,12 +184,12 @@ var _ = Describe("HTML Form", func() {
 			})
 
 			It("Should add the name of a submitter, if passed", func() {
-				Skip("TODO")
 				form.RequestSubmit(submitter)
+				Expect(submittedForm).To(HaveKey("submitter"))
 			})
 
 			It("Should ignore the name of a submitter if not passed", func() {
-				form.RequestSubmit(submitter)
+				form.RequestSubmit(nil)
 				Expect(submittedForm).ToNot(HaveKey("submitter"))
 			})
 		})
