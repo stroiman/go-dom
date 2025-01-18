@@ -9,7 +9,7 @@ import (
 func createLocationPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	builder := newIllegalConstructorBuilder[Location](host)
 	builder.instanceLookup = func(ctx *V8ScriptContext, this *v8.Object) (Location, error) {
-		location := ctx.Window().Location()
+		location := ctx.window.Location()
 		return location, nil
 	}
 	helper := builder.NewPrototypeBuilder()

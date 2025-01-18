@@ -406,10 +406,6 @@ func (ctx *V8ScriptContext) Export(val any) (any, error) {
 	}
 }
 
-func (ctx *V8ScriptContext) Window() html.Window {
-	return ctx.window
-}
-
 func v8ValueToGoValue(result *v8go.Value) (interface{}, error) {
 	if result == nil {
 		return nil, nil
