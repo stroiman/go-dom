@@ -14,6 +14,9 @@ type NamedNodeMap interface {
 	Item(index int) Attr
 }
 
+// Attr is the interface corresponding to the [Attr DOM node]
+//
+// [Attr DOM node]: https://developer.mozilla.org/en-US/docs/Web/API/Attr
 type Attr interface {
 	Node
 	LocalName() string
