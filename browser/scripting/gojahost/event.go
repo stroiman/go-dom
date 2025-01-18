@@ -25,7 +25,7 @@ func toBoolean(value g.Value) bool {
 
 func (w eventWrapper) constructor(call g.ConstructorCall, r *g.Runtime) *g.Object {
 	arg1 := call.Argument(0).String()
-	options := make([]dom.CustomEventOption, 0, 2)
+	options := make([]dom.EventOption, 0, 2)
 	if arg2 := call.Argument(1); !g.IsUndefined(arg2) {
 		if obj, ok := arg2.(*g.Object); ok {
 			options = append(options, dom.EventCancelable(toBoolean(obj.Get("cancelable"))))

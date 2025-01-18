@@ -59,7 +59,7 @@ func createCustomEvent(host *V8ScriptHost) *v8.FunctionTemplate {
 			if len(args) < 1 {
 				return nil, v8.NewTypeError(iso, "Must have at least one constructor argument")
 			}
-			var eventOptions []dom.CustomEventOption
+			var eventOptions []dom.EventOption
 			if len(args) > 1 {
 				if options, err := args[1].AsObject(); err == nil {
 					bubbles, err1 := options.Get("bubbles")
@@ -68,7 +68,7 @@ func createCustomEvent(host *V8ScriptHost) *v8.FunctionTemplate {
 					if err != nil {
 						return nil, err
 					}
-					eventOptions = []dom.CustomEventOption{
+					eventOptions = []dom.EventOption{
 						dom.EventBubbles(bubbles.Boolean()),
 						dom.EventCancelable(cancelable.Boolean()),
 					}
