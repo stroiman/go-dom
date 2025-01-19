@@ -2,13 +2,15 @@ package dom
 
 import (
 	"strings"
+	"unicode/utf8"
 
 	"golang.org/x/net/html"
 )
 
 type CommentNode interface {
 	Node
-	// Text() string
+	Data() string
+	Length() int
 }
 
 type commentNode struct {
@@ -16,10 +18,18 @@ type commentNode struct {
 	text string
 }
 
-func NewCommentNode(text string) Node {
+func NewCommentNode(text string) CommentNode {
 	result := &commentNode{newNode(), text}
 	result.SetSelf(result)
 	return result
+}
+
+func (n *commentNode) Data() string {
+	return n.text
+}
+
+func (n *commentNode) Length() int {
+	return utf8.RuneCountInString(n.text)
 }
 
 func (n *commentNode) Render(builder *strings.Builder) {
