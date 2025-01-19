@@ -7,79 +7,89 @@ import (
 	"golang.org/x/net/html"
 )
 
-type CommentNode interface {
+/* -------- CharacterData -------- */
+
+type CharacterData interface {
 	Node
 	Data() string
 	Length() int
 }
 
-type commentNode struct {
+type characterData struct {
 	node
-	text string
+	data string
 }
 
-func NewCommentNode(text string) CommentNode {
-	result := &commentNode{newNode(), text}
+func (n *characterData) Data() string {
+	return n.data
+}
+
+func (n *characterData) Length() int {
+	return utf8.RuneCountInString(n.data)
+}
+
+/* -------- Comment -------- */
+
+type Comment interface {
+	CharacterData
+}
+
+type comment struct {
+	characterData
+}
+
+func NewComment(text string) Comment {
+	result := &comment{characterData{newNode(), text}}
 	result.SetSelf(result)
 	return result
 }
 
-func (n *commentNode) Data() string {
-	return n.text
-}
-
-func (n *commentNode) Length() int {
-	return utf8.RuneCountInString(n.text)
-}
-
-func (n *commentNode) Render(builder *strings.Builder) {
+func (n *comment) Render(builder *strings.Builder) {
 	builder.WriteString("<!--")
-	builder.WriteString(n.text)
+	builder.WriteString(n.Data())
 	builder.WriteString("-->")
 }
 
-func (n *commentNode) NodeType() NodeType {
+func (n *comment) NodeType() NodeType {
 	return NodeTypeComment
 }
 
-func (n *commentNode) createHtmlNode() *html.Node {
+func (n *comment) createHtmlNode() *html.Node {
 	return &html.Node{
 		Type: html.CommentNode,
-		Data: n.text,
+		Data: n.Data(),
 	}
 }
 
-type TextNode interface {
-	Node
-	Text() string
+/* -------- Text -------- */
+
+type Text interface {
+	CharacterData
 }
 
 type textNode struct {
-	node
-	text string
+	characterData
 }
 
-func NewTextNode(text string) Node {
-	result := &textNode{newNode(), text}
+func NewText(text string) Text {
+	result := &textNode{characterData{newNode(), text}}
 	result.SetSelf(result)
 	return result
 }
 
 func (n *textNode) Render(builder *strings.Builder) {
-	builder.WriteString(n.text)
+	builder.WriteString(n.Data())
 }
-
-func (n *textNode) Text() string { return n.text }
 
 func (n *textNode) NodeType() NodeType { return NodeTypeText }
 
 func (n *textNode) createHtmlNode() *html.Node {
 	return &html.Node{
 		Type: html.TextNode,
-		Data: n.text,
+		Data: n.Data(),
 	}
 }
 
 func (n *textNode) GetTextContent() string {
-	return n.text
+	return n.Data()
 }

@@ -112,7 +112,7 @@ var _ = Describe("Parser", func() {
 
 func BeTextNode(content string) types.GomegaMatcher {
 	return gcustom.MakeMatcher(func(actual interface{}) (bool, error) {
-		_, ok := actual.(dom.TextNode)
+		_, ok := actual.(dom.Text)
 		return ok, nil
 	})
 }

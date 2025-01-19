@@ -75,8 +75,8 @@ func (r ScriptElementRules) Connected(win Window, node dom.Element) {
 		b := strings.Builder{}
 		for _, child := range node.ChildNodes().All() {
 			switch n := child.(type) {
-			case dom.TextNode:
-				b.WriteString(n.Text())
+			case dom.Text:
+				b.WriteString(n.Data())
 			}
 		}
 		script = b.String()
@@ -193,11 +193,11 @@ func iterate(w Window, d dom.Document, dest dom.Node, source *html.Node) {
 		case html.ElementNode:
 			createElementFromNode(w, d, dest, child)
 		case html.TextNode:
-			dest.AppendChild(dom.NewTextNode(child.Data))
+			dest.AppendChild(dom.NewText(child.Data))
 		case html.DoctypeNode:
 			dest.AppendChild(dom.NewDocumentType(child.Data))
 		case html.CommentNode:
-			dest.AppendChild(dom.NewCommentNode(child.Data))
+			dest.AppendChild(dom.NewComment(child.Data))
 		default:
 			panic(fmt.Sprintf("Node not yet supported: %v", child.Type))
 		}
