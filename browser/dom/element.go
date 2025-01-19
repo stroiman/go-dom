@@ -46,6 +46,7 @@ type element struct {
 	namespace     string
 	attributes    Attributes
 	ownerDocument Document
+	selfElement   Element
 	// We might want a "prototype" as a value, rather than a Go type, as new types
 	// can be created at runtime. But if so, we probably want them on the node
 	// type.
@@ -54,24 +55,33 @@ type element struct {
 func NewElement(tagName string, ownerDocument Document) Element {
 	// return newElement(tagName, ownerDocument)
 	// // TODO: handle namespace
-	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument}
+	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument, nil}
 	result.SetSelf(result)
 	return result
 }
 
 func newElement(tagName string, ownerDocument Document) *element {
 	// TODO: handle namespace
-	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument}
+	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument, nil}
 	result.SetSelf(result)
 	return result
 }
 
+func (e *element) SetSelf(n Node) {
+	self, ok := n.(Element)
+	if !ok {
+		panic("Setting a non-element as element self")
+	}
+	e.selfElement = self
+	e.node.SetSelf(n)
+}
+
 func (e *element) NodeName() string {
-	return e.TagName()
+	return e.selfElement.TagName()
 }
 
 func (e *element) TagName() string {
-	return strings.ToUpper(e.tagName)
+	return strings.ToLower(e.tagName)
 }
 
 func (parent *element) Append(child Element) (Element, error) {
@@ -166,7 +176,7 @@ func (n *element) InsertAdjacentHTML(position string, text string) error {
 	)
 	switch position {
 	case "beforebegin":
-		parent = n.getSelf().Parent()
+		parent = n.Parent()
 		reference = n.getSelf()
 	case "afterbegin":
 		parent = n

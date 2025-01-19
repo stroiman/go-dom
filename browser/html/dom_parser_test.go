@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/stroiman/go-dom/browser/dom"
+	matchers "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -66,6 +67,8 @@ var _ = Describe("Parser", func() {
   <h1>Hello</h1>
   <p>Lorem Ipsum</p>
 </div></body></html>`)
+		// Expect(result.Body().FirstChild()).To(matchers.HaveTag("DIV"))
+		// return
 		Expect(result.Body()).To(MatchStructure("BODY", MatchStructure("DIV",
 			BeTextNode("\n  "),
 			MatchStructure("H1", BeTextNode("Hello")),
@@ -73,6 +76,23 @@ var _ = Describe("Parser", func() {
 			MatchStructure("P", BeTextNode("Lorem Ipsum")),
 			BeTextNode("\n"),
 		)))
+	})
+
+	It("Should parse svg elements correctly", func() {
+		// Note: At the moment of writing this, the DOM doesn't yet support xml
+		// namespaces. This test exists to ensure that SVG elements _can_ be parsed,
+		// particularly because the code depends on the x/net/html parser, which
+		// _does_ handle namespaces.
+		result := ParseHtmlString(`<!DOCTYPE html><html><body><svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 200 200"
+						width="2rem"
+						height="2rem"
+					><rect x="10" y="10" width="180" height="180" rx="20" ry="20" fill="#e6e6e6" stroke="#999999" stroke-width="4"></rect><svg>`)
+		body := result.Body()
+		Expect(body).ToNot(BeNil())
+		svg := result.Body().FirstChild()
+		Expect(svg).To(matchers.HaveTag("svg"))
 	})
 })
 

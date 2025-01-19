@@ -27,6 +27,7 @@ type Document interface {
 	Head() Element
 	CreateDocumentFragment() DocumentFragment
 	CreateElement(string) Element
+	CreateElementNS(string, string) Element
 	DocumentElement() Element
 	Location() Location
 	// unexported
@@ -83,6 +84,10 @@ func (d *document) Head() Element {
 }
 
 func (d *document) CreateElement(name string) Element {
+	return NewElement(name, d)
+}
+
+func (d *document) CreateElementNS(_ string, name string) Element {
 	return NewElement(name, d)
 }
 

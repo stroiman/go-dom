@@ -139,6 +139,18 @@ func cloneNode(n *html.Node) *html.Node {
 	}
 }
 
+// convertNS converts the namespace URI from x/net/html to the _right_
+// namespace.
+// SVG elements have namespace "svg"
+func convertNS(ns string) string {
+	switch ns {
+	case "svg":
+		return "http://www.w3.org/2000/svg"
+	default:
+		return ns
+	}
+}
+
 func createElementFromNode(
 	w Window,
 	d dom.Document,
@@ -150,7 +162,12 @@ func createElementFromNode(
 		rules = BaseRules{}
 	}
 	var newNode dom.Node
-	newElm := d.CreateElement(source.Data)
+	var newElm dom.Element
+	if source.Namespace == "" {
+		newElm = d.CreateElement(source.Data)
+	} else {
+		newElm = d.CreateElementNS(convertNS(source.Namespace), source.Data)
+	}
 	for _, a := range source.Attr {
 		newElm.SetAttribute(a.Key, a.Val)
 	}

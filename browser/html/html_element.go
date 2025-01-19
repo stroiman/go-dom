@@ -37,6 +37,10 @@ func (e *htmlElement) getHTMLDocument() HTMLDocument { return e.htmlDocument }
 
 func (e *htmlElement) getWindow() Window { return e.getHTMLDocument().getWindow() }
 
+func (e *htmlElement) TagName() string {
+	return strings.ToUpper(e.Element.TagName())
+}
+
 type HTMLTemplateElement interface {
 	HTMLElement
 	Content() DocumentFragment

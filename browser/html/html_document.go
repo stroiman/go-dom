@@ -38,6 +38,13 @@ func newHTMLDocument(window Window) HTMLDocument {
 	return result
 }
 
+func (d *htmlDocument) CreateElementNS(namespace string, name string) Element {
+	if namespace == "http://www.w3.org/1999/xhtml" {
+		return d.CreateElement(name)
+	}
+	return d.Document.CreateElementNS(namespace, name)
+}
+
 func (d *htmlDocument) CreateElement(name string) Element {
 	switch name {
 	case "template":
