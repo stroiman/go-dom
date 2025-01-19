@@ -39,7 +39,12 @@ func init() {
 	format.RegisterCustomFormatter(FormatElement)
 }
 
-func HaveTextContent(matcher GomegaMatcher) GomegaMatcher {
+func HaveTextContent(expected interface{}) GomegaMatcher {
+	matcher, ok := expected.(GomegaMatcher)
+	if !ok {
+		return HaveTextContent(gomega.Equal(expected))
+	}
+
 	return gcustom.MakeMatcher(func(e dom.Element) (bool, error) {
 		return matcher.Match(e.GetTextContent())
 	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.GetTextContent}}", matcher)

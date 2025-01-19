@@ -89,10 +89,24 @@ var _ = Describe("Parser", func() {
 						width="2rem"
 						height="2rem"
 					><rect x="10" y="10" width="180" height="180" rx="20" ry="20" fill="#e6e6e6" stroke="#999999" stroke-width="4"></rect><svg></body></html>`)
-		body := result.Body()
-		Expect(body).ToNot(BeNil())
 		svg := result.Body().FirstChild()
 		Expect(svg).To(matchers.HaveTag("svg"))
+	})
+
+	It("Should parse a document with comments", func() {
+		// Note: At the moment of writing this, the DOM doesn't yet support xml
+		// namespaces. This test exists to ensure that SVG elements _can_ be parsed,
+		// particularly because the code depends on the x/net/html parser, which
+		// _does_ handle namespaces.
+		result := ParseHtmlString(
+			`<!DOCTYPE html><html><body>Text content<!-- comment --> More content</body></html>`,
+		)
+		body := result.Body()
+		Expect(body).ToNot(BeNil())
+		Expect(result.Body()).To(matchers.HaveTextContent("Text content More content"))
+		Expect(
+			body,
+		).To(matchers.HaveOuterHTML(`<body>Text content<!-- comment --> More content</body>`))
 	})
 })
 
