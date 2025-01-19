@@ -52,6 +52,44 @@ up-to-date on progress:
 
 - https://discord.gg/rPBRt8Rf
 
+## Installation
+
+Go get the `browser` package inside this repository, that's where the fun stuff
+is. The root is not a go module.
+
+```sh
+go get github.com/stroiman/go-dom/browser
+```
+
+### "Replace" v8go
+
+After installing, you need to replace the v8go, running the commands:
+
+```
+go mod edit -replace="github.com/tommie/v8go=github.com/stroiman/v8go@go-dom-support"
+go mod tidy
+```
+
+Rerun this, if you get compiler errors after an update.
+
+The library is based on [tommie's fork](https://github.com/tommie/v8go) of the
+v8go engine, but depends on v8 features that are not yet supported in that fork.
+You need to use my fork for that. I have a specific branch, `go-dom-support`
+that will be kept up-to-date as `go-dom` requires it.
+
+### Automating the update
+
+On a unix-like system, I would suggest adding a new file, `update-v8`, with the contents:
+
+```sh
+#!/bin/sh
+go mod edit -replace="github.com/tommie/v8go=github.com/stroiman/v8go@go-dom-support"
+go mod tidy
+```
+
+Make it executable: `chmod +x ./update-v8`, and now you can run `./update-v8`
+locally.
+
 ## Project background
 
 While the SPA[^1] dominates the web today, some applications still render
