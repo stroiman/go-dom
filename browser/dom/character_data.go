@@ -90,6 +90,6 @@ func (n *textNode) createHtmlNode() *html.Node {
 	}
 }
 
-func (n *textNode) GetTextContent() string {
+func (n *textNode) TextContent() string {
 	return n.Data()
 }

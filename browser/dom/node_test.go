@@ -134,7 +134,7 @@ var _ = Describe("Node", func() {
 			doc := ParseHtmlString(
 				`<body><div style="display: none">Hidden text</div><div>Visible text</div></body>`,
 			)
-			text := doc.Body().GetTextContent()
+			text := doc.Body().TextContent()
 			Expect(text).To(Equal("Hidden textVisible text"))
 		})
 	})

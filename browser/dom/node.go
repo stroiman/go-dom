@@ -44,8 +44,8 @@ type Node interface {
 	NextSibling() Node
 	PreviousSibling() Node
 	FirstChild() Node
+	TextContent() string
 	SetTextContent(value string)
-	GetTextContent() string
 	// SetSelf must be called when creating instances of structs embedding a Node.
 	//
 	// If this is not called, the specialised type, which is itself a Node, will
@@ -254,10 +254,10 @@ func (n *node) SetTextContent(val string) {
 	n.AppendChild(NewText(val))
 }
 
-func (n *node) GetTextContent() string {
+func (n *node) TextContent() string {
 	b := &strings.Builder{}
 	for _, node := range n.nodes() {
-		b.WriteString(node.GetTextContent())
+		b.WriteString(node.TextContent())
 	}
 	return b.String()
 }
