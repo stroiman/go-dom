@@ -88,7 +88,7 @@ var _ = Describe("Parser", func() {
 						viewBox="0 0 200 200"
 						width="2rem"
 						height="2rem"
-					><rect x="10" y="10" width="180" height="180" rx="20" ry="20" fill="#e6e6e6" stroke="#999999" stroke-width="4"></rect><svg>`)
+					><rect x="10" y="10" width="180" height="180" rx="20" ry="20" fill="#e6e6e6" stroke="#999999" stroke-width="4"></rect><svg></body></html>`)
 		body := result.Body()
 		Expect(body).ToNot(BeNil())
 		svg := result.Body().FirstChild()
