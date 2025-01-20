@@ -127,6 +127,13 @@ func (w *window) ParseFragment(
 ) (dom.DocumentFragment, error) {
 	return w.domParser.ParseFragment(ownerDocument, reader)
 }
+
+// NewWindowReader will create a new window and load parse the HTML from the
+// reader. If there is an error reading from the stream, or parsing the DOM, an
+// error is returned.
+//
+// If this function returns without an error, the DOM will have been parsed and
+// the DOMContentLoaded event has been dispached on the [Document]
 func NewWindowReader(reader io.Reader, windowOptions ...WindowOption) (Window, error) {
 	window := newWindow(windowOptions...)
 	err := window.parseReader(reader)

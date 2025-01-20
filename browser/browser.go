@@ -20,9 +20,13 @@ type Browser struct {
 	windows    []Window
 }
 
+// Open will open a new [http.Window], loading the specified location. If the
+// server does not respons with a 200 status code, an error is returned.
+//
+// See [html.NewWindowReader] about the return value, and when the window
+// returns.
 func (b *Browser) Open(location string) (window Window, err error) {
 	// slog.Debug("Browser: OpenWindow", "URL", location)
-	// return OpenWindowFromLocation(location, b.createOptions(location))
 	resp, err := b.Client.Get(location)
 	if err != nil {
 		return nil, err
@@ -35,18 +39,44 @@ func (b *Browser) Open(location string) (window Window, err error) {
 	return
 }
 
-func NewBrowser() *Browser {
+// NewFromHandler initialises a new [Browser] with the default script engine and
+// sets up the internal [http.Client] used with an [http.Roundtripper] that
+// bypasses the TCP stack and calls directly into the
+//
+// Note: There is a current limitation that NO requests from the browser will be
+// sent when using this. So sites will not work if they
+//   - Depend on content from CDN
+//   - Depend on an external service, e.g., an identity provider.
+//
+// That is a limitation that was the result of prioritising more important, and
+// higher risk features.
+func NewFromHandler(handler http.Handler) *Browser {
+	return &Browser{
+		ScriptHost: v8host.New(),
+		Client:     NewHttpClientFromHandler(handler),
+	}
+}
+
+// New initialises a new [Browser] with the default script engine.
+func New() *Browser {
 	return &Browser{
 		ScriptHost: v8host.New(),
 		Client:     NewHttpClient(),
 	}
 }
 
+// NewBrowser should not be called. Call New instead.
+//
+// This method will selfdestruct in 10 commits
+func NewBrowser() *Browser {
+	return New()
+}
+
+// NewBrowserFromHandler should not be called, call, NewFromHandler instead.
+//
+// This method will selfdestruct in 10 commits
 func NewBrowserFromHandler(handler http.Handler) *Browser {
-	return &Browser{
-		ScriptHost: v8host.New(),
-		Client:     NewHttpClientFromHandler(handler),
-	}
+	return NewFromHandler(handler)
 }
 
 func (b *Browser) createOptions(location string) WindowOptions {
