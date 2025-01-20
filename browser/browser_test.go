@@ -52,21 +52,6 @@ var _ = Describe("Browser", func() {
 	})
 
 	Describe("Navigation", func() {
-		var server *http.ServeMux
-
-		BeforeEach(func() {
-			server = http.NewServeMux()
-			server.HandleFunc("GET /a.html", func(res http.ResponseWriter, req *http.Request) {
-				res.Write([]byte(`<body>
-					<h1>Page A</h1>
-					<a href="b.html">Load B</a>
-					<script>loadedA = "PAGE A"</script>
-				</body>`))
-			})
-			server.HandleFunc("GET /b.html", func(res http.ResponseWriter, req *http.Request) {
-				res.Write([]byte(`<body><h1>Page B</h1><script>loadedB = "PAGE B"</script></body>`))
-			})
-		})
 		Describe("Page A has been loaded", func() {
 			var (
 				window Window
@@ -74,6 +59,8 @@ var _ = Describe("Browser", func() {
 
 			BeforeEach(func() {
 				var err error
+				server := newBrowserNavigateTestServer()
+				DeferCleanup(func() { server = nil })
 				browser := NewBrowserFromHandler(server)
 				window, err = browser.Open("/a.html")
 				Expect(err).ToNot(HaveOccurred())
@@ -116,3 +103,27 @@ var _ = Describe("Browser", func() {
 		})
 	})
 })
+
+func newBrowserNavigateTestServer() http.Handler {
+	server := http.NewServeMux()
+	server.HandleFunc("GET /a.html",
+		func(res http.ResponseWriter, req *http.Request) {
+			res.Write([]byte(
+				`<body>
+					<h1>Page A</h1>
+					<a href="b.html">Load B</a>
+					<script>loadedA = "PAGE A"</script>
+				</body>`))
+		})
+
+	server.HandleFunc("GET /b.html",
+		func(res http.ResponseWriter, req *http.Request) {
+			res.Write([]byte(`
+				<body>
+					<h1>Page B</h1>
+					<script>loadedB = "PAGE B"</script>
+				</body>`))
+		})
+
+	return server
+}
