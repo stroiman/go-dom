@@ -6,8 +6,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/html"
+	"github.com/stroiman/go-dom/browser/internal/domslices"
 	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
+	"github.com/stroiman/go-dom/browser/testing/testservers"
 )
 
 var _ = Describe("Window", func() {
@@ -20,5 +23,53 @@ var _ = Describe("Window", func() {
 	It("Should respect the <!DOCTYPE>", func() {
 		Skip("<!DOCTYPE> should be respected")
 		// win, err := NewWindowReader(strings.NewReader("<!DOCTYPE HTML><html><body></body></html>"))
+	})
+
+	Describe("Location()", func() {
+		var window Window
+
+		BeforeEach(func() {
+			server := testservers.NewAnchorTagNavigationServer()
+			DeferCleanup(func() { server = nil })
+			window = NewWindowFromHandler(server)
+		})
+
+		It("Should be about:blank", func() {
+			Expect(window.Location().Href()).To(Equal("about:blank"))
+		})
+
+		It("Should return the path loaded from", func() {
+			Expect(window.Navigate("/index")).To(Succeed())
+			Expect(window.Location().Pathname()).To(Equal("/index"))
+		})
+
+		Describe("User navigates", func() {
+			var links []dom.Node
+
+			BeforeEach(func() {
+				Expect(window.Navigate("/index")).To(Succeed())
+				nodes, err := window.Document().QuerySelectorAll("a")
+				Expect(err).ToNot(HaveOccurred())
+				links = nodes.All()
+			})
+
+			It("Should update when using a link with absolute url", func() {
+				link, ok := domslices.SliceFindFunc(links, func(n dom.Node) bool {
+					return n.TextContent() == "Products from absolute url"
+				})
+				Expect(ok).To(BeTrue())
+				link.(dom.Element).Click()
+				Expect(window.Location().Pathname()).To(Equal("/products"))
+			})
+
+			It("Should update when using a link with relative url", func() {
+				link, ok := domslices.SliceFindFunc(links, func(n dom.Node) bool {
+					return n.TextContent() == "Products from relative url"
+				})
+				Expect(ok).To(BeTrue())
+				link.(dom.Element).Click()
+				Expect(window.Location().Pathname()).To(Equal("/products"))
+			})
+		})
 	})
 })

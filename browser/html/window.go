@@ -48,6 +48,7 @@ type Window interface {
 	// unexported
 
 	fetchRequest(req *http.Request) error
+	resolveHref(string) dom.URL
 }
 
 type window struct {
@@ -70,6 +71,9 @@ func newWindow(windowOptions ...WindowOption) *window {
 		httpClient:          options.HttpClient,
 		baseLocation:        options.BaseLocation,
 		scriptEngineFactory: options.ScriptHost,
+	}
+	if result.baseLocation == "" {
+		result.baseLocation = "about:blank"
 	}
 	result.domParser = domParser{}
 	result.initScriptEngine()
@@ -180,6 +184,7 @@ func (w *window) handleResponse(resp *http.Response) error {
 
 func (w *window) Navigate(href string) error {
 	w.initScriptEngine()
+	w.baseLocation = href
 	resp, err := w.httpClient.Get(href)
 	if err != nil {
 		return err
@@ -236,3 +241,13 @@ func (w *window) Close() {
 }
 
 func (w *window) ObjectId() int32 { return -1 }
+
+// resolveHref takes an href from a <a> tag, or action from a <form> tag and
+// resolves an absolute URL that must be requested.
+func (w *window) resolveHref(href string) dom.URL {
+	r, err := dom.NewUrlBase(href, w.Location().Href())
+	if err != nil {
+		panic(err)
+	}
+	return r
+}

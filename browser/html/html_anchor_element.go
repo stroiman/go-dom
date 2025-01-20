@@ -15,7 +15,9 @@ func NewHTMLAnchorElement(ownerDocument HTMLDocument) HTMLElement {
 func (e *htmlAnchorElement) Click() bool {
 	result := e.HTMLElement.Click()
 	if href, found := e.GetAttribute("href"); found && result {
-		e.getHTMLDocument().getWindow().Navigate(href)
+		window := e.getHTMLDocument().getWindow()
+		newUrl := window.resolveHref(href)
+		window.Navigate(newUrl.Href())
 	}
 	return result
 }
