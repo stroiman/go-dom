@@ -27,6 +27,7 @@ const (
 	NodeTypeDocumentFragment      NodeType = 11
 )
 
+// canHaveChildren returns true for note types that allow child nodes
 func (t NodeType) canHaveChildren() bool {
 	switch t {
 	case NodeTypeElement:
@@ -40,6 +41,10 @@ func (t NodeType) canHaveChildren() bool {
 	}
 }
 
+// isCharacterDataNode returns true the 4 node types that are [Characterdata]
+// nodes.
+//
+// [Characterdata]: https://developer.mozilla.org/en-US/docs/Web/API/CharacterData
 func (t NodeType) isCharacterDataNode() bool {
 	switch t {
 	case NodeTypeText:
@@ -55,6 +60,9 @@ func (t NodeType) isCharacterDataNode() bool {
 	}
 }
 
+// canBeAChild returns true for node types that are allowed as children. Node,
+// special rules may apply, such as a document node can only contain one child
+// element.
 func (t NodeType) canBeAChild() bool {
 	if t.isCharacterDataNode() {
 		return true
@@ -71,6 +79,8 @@ func (t NodeType) canBeAChild() bool {
 	}
 }
 
+// String returns name of the node type. For invalid values, a string
+// representation of the integer value is returned.
 func (t NodeType) String() string {
 	switch t {
 	case NodeTypeElement:
@@ -161,9 +171,15 @@ func (n *node) append(nodes ...Node) error {
 	return nil
 }
 
-func (n *node) AppendChild(child Node) (Node, error) {
-	_, err := n.self.InsertBefore(child, nil)
-	return child, err
+// AppendChild adds node to the end of the list of the current node's child
+// nodes. The appended child is returned. If node is not a valid child of the
+// parent, a [DOMError] is returned. The [MDN docs for appendChild] lists the
+// error conditions.
+//
+// [MDN docs for appendChild]: https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild
+func (n *node) AppendChild(node Node) (Node, error) {
+	_, err := n.self.InsertBefore(node, nil)
+	return node, err
 }
 
 func (n *node) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
