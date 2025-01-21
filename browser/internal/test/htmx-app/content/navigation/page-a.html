@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/public/htmx.js"></script>
+  </head>
+  <body hx-swap-oob="true">
+    <h1>Page A</h1>
+    <a hx-get="page-b.html" hx-target="body">To page b</a>
+    <script>var pageA = true</script>
+  </body>
+</html>

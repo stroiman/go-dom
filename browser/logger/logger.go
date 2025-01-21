@@ -1,4 +1,8 @@
 // Package logger provides the basic functionality of supplying a custom logger.
+//
+// go-dom will write log messages to an [slog.Logger] instance, but the default
+// logger discards all messages. You can provide your own logger, allowing
+// control over where log messages appear.
 package logger
 
 import (
