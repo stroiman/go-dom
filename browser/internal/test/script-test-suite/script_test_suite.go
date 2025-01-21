@@ -52,7 +52,7 @@ func NewScriptTestSuite(
 func (suite *ScriptTestSuite) newContext(win html.Window) *ScriptTestContext {
 	result := &ScriptTestContext{Window: win,
 		ScriptMatchers: matchers.ScriptMatchers{
-			Ctx: win.GetScriptEngine().(matchers.MatcherScriptContext),
+			Ctx: win.ScriptContext().(matchers.MatcherScriptContext),
 		},
 	}
 	ginkgo.DeferCleanup(func() { result.Close() })

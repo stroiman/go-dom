@@ -69,7 +69,7 @@ var _ = Describe("Browser", func() {
 			It("Should have Page A loaded", func() {
 				heading, _ := window.Document().QuerySelector("h1")
 				Expect(heading).To(HaveTextContent(Equal("Page A")))
-				Expect(window.GetScriptEngine().Eval("loadedA")).To(Equal("PAGE A"))
+				Expect(window.ScriptContext().Eval("loadedA")).To(Equal("PAGE A"))
 			})
 
 			Describe("Navigate to new page", func() {
@@ -82,11 +82,11 @@ var _ = Describe("Browser", func() {
 				It("Should load a new page when clicking a link", func() {
 					heading, _ := window.Document().QuerySelector("h1")
 					Expect(heading).To(HaveTextContent(Equal("Page B")))
-					Expect(window.GetScriptEngine().Eval("loadedB")).To(Equal("PAGE B"))
+					Expect(window.ScriptContext().Eval("loadedB")).To(Equal("PAGE B"))
 				})
 
 				It("Should have cleared global JS state", func() {
-					Expect(window.GetScriptEngine().Eval("typeof loadedA")).To(Equal("undefined"))
+					Expect(window.ScriptContext().Eval("typeof loadedA")).To(Equal("undefined"))
 				})
 			})
 

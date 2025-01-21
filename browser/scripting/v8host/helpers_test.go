@@ -75,7 +75,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 		window := html.NewWindow()
 		ctx.window = window
 		ctx.ScriptContext = host.NewContext(window)
-		window.SetScriptRunner(ctx.ScriptContext)
+		window.SetScriptContext(ctx.ScriptContext)
 		for _, hook := range hooks {
 			hook(&ctx)
 		}

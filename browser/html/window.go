@@ -40,8 +40,8 @@ type Window interface {
 	LoadHTML(string) error // TODO: Remove, for testing
 	Eval(string) (any, error)
 	Run(string) error
-	SetScriptRunner(ScriptContext)
-	GetScriptEngine() ScriptContext
+	ScriptContext() ScriptContext
+	SetScriptContext(ScriptContext)
 	Location() Location
 	HTTPClient() http.Client
 	ParseFragment(ownerDocument Document, reader io.Reader) (dom.DocumentFragment, error)
@@ -225,11 +225,11 @@ func (w *window) Eval(script string) (any, error) {
 	return nil, errors.New("Script engine not initialised")
 }
 
-func (w *window) SetScriptRunner(r ScriptContext) {
+func (w *window) SetScriptContext(r ScriptContext) {
 	w.scriptContext = r
 }
 
-func (w *window) GetScriptEngine() ScriptContext { return w.scriptContext }
+func (w *window) ScriptContext() ScriptContext { return w.scriptContext }
 
 func (w *window) Location() Location {
 	var u *netURL.URL

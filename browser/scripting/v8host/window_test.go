@@ -54,7 +54,7 @@ var _ = Describe("Window", func() {
 </script></body>`), html.WindowOptions{ScriptHost: host},
 				)
 				Expect(err).ToNot(HaveOccurred())
-				ctx := win.GetScriptEngine()
+				ctx := win.ScriptContext()
 				Expect(ctx.Eval("scripts.join(',')")).To(Equal("DOMContentLoaded,load"))
 			})
 		})
