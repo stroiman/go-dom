@@ -80,9 +80,11 @@ func (t *IdlTypeSpec) Attributes() iter.Seq[AttributeSpec] {
 }
 
 func ParseIdlJsonReader(reader io.Reader) (IdlSpec, error) {
-	decoder := json.NewDecoder(reader)
 	spec := IdlSpec{}
-	err := decoder.Decode(&spec.ParsedIdlFile)
+	b, err := io.ReadAll(reader)
+	if err == nil {
+		err = json.Unmarshal(b, &spec)
+	}
 	return spec, err
 }
 
