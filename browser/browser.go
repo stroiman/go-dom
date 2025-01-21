@@ -1,7 +1,7 @@
 package browser
 
 import (
-	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -32,7 +32,7 @@ func (b *Browser) Open(location string) (window Window, err error) {
 		return nil, err
 	}
 	if resp.StatusCode != 200 {
-		return nil, errors.New("Non-ok Response")
+		return nil, fmt.Errorf("Non-ok Response: %d", resp.StatusCode)
 	}
 	window, err = html.NewWindowReader(resp.Body, b.createOptions(location))
 	b.windows = append(b.windows, window)
