@@ -2,7 +2,9 @@ package dom
 
 import (
 	"errors"
+	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	. "github.com/stroiman/go-dom/browser/internal/dom"
@@ -24,6 +26,75 @@ const (
 	NodeTypeDocumentType          NodeType = 10
 	NodeTypeDocumentFragment      NodeType = 11
 )
+
+func (t NodeType) canHaveChildren() bool {
+	switch t {
+	case NodeTypeElement:
+		return true
+	case NodeTypeDocument:
+		return true
+	case NodeTypeDocumentFragment:
+		return true
+	default:
+		return false
+	}
+}
+
+func (t NodeType) isCharacterDataNode() bool {
+	switch t {
+	case NodeTypeText:
+		return true
+	case NodeTypeCDataSection:
+		return true
+	case NodeTypeComment:
+		return true
+	case NodeTypeProcessingInstruction:
+		return true
+	default:
+		return false
+	}
+}
+
+func (t NodeType) canBeAChild() bool {
+	if t.isCharacterDataNode() {
+		return true
+	}
+	switch t {
+	case NodeTypeDocumentFragment:
+		return true
+	case NodeTypeDocumentType:
+		return true
+	case NodeTypeElement:
+		return true
+	default:
+		return false
+	}
+}
+
+func (t NodeType) String() string {
+	switch t {
+	case NodeTypeElement:
+		return "Element"
+	case NodeTypeAttribute:
+		return "Attribute"
+	case NodeTypeText:
+		return "Text"
+	case NodeTypeCDataSection:
+		return "CDataSection"
+	case NodeTypeProcessingInstruction:
+		return "ProcessingInstruction"
+	case NodeTypeComment:
+		return "Comment"
+	case NodeTypeDocument:
+		return "Document"
+	case NodeTypeDocumentType:
+		return "DocumentType"
+	case NodeTypeDocumentFragment:
+		return "DocumentFragment"
+	default:
+		return strconv.Itoa(int(t))
+	}
+}
 
 type GetRootNodeOptions bool
 
@@ -60,8 +131,9 @@ type Node interface {
 
 	getSelf() Node
 	createHtmlNode() *html.Node
-	setParent(node Node)
+	setParent(Node)
 	nodes() []Node
+	assertCanAddNode(Node) error
 }
 
 type node struct {
@@ -156,6 +228,65 @@ func (n *node) RemoveChild(node Node) (Node, error) {
 	}
 	n.childNodes.setNodes(slices.Delete(n.childNodes.All(), idx, idx+1))
 	return node, nil
+}
+
+// assertCanAddNode verifies that the node can be added as a child. The function
+// returns the corresponding [DOMError] that should be returned from the
+// relevant function. If the node is a valid new child in the current state of
+// the node, the return value is nill
+//
+// This is a separate function for the purpose of checking all arguments to
+// [Element.Append] before adding, to avoid a partial update if the last
+// argument was invalid.
+func (n *node) assertCanAddNode(newNode Node) error {
+	parentType := n.getSelf().NodeType()
+	childType := newNode.NodeType()
+	if !parentType.canHaveChildren() {
+		return newDomError(
+			fmt.Sprintf("May not add children to node type %s", parentType),
+		)
+	}
+	if !childType.canBeAChild() {
+		return newDomError(
+			fmt.Sprintf("May not add an node type %s as a child", childType),
+		)
+	}
+	if newNode.Contains(n.getSelf()) {
+		return newDomError("May not add a parent as a child")
+	}
+	if childType == NodeTypeText && parentType != NodeTypeDocument {
+		return newDomError("Text nodes may not be direct descendants of a document")
+	}
+	if childType == NodeTypeDocumentType && parentType != NodeTypeDocument {
+		return newDomError("Document type may only be a parent of Document")
+	}
+	if doc, isDoc := n.getSelf().(Document); isDoc {
+		if doc.ChildElementCount() > 0 {
+			return newDomError("Document can have only one child element")
+		}
+		if fragment, isFragment := newNode.(DocumentFragment); isFragment {
+			if fragment.ChildElementCount() > 0 {
+				return newDomError("Document can have only one child element")
+			}
+			for _, n := range fragment.ChildNodes().All() {
+				if n.NodeType() == NodeTypeText {
+					return newDomError("Text nodes may not be direct descendants of a document")
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (n *node) childElements() []Element {
+	nodes := n.childNodes.All()
+	res := make([]Element, 0, len(nodes))
+	for _, n := range nodes {
+		if e, ok := n.(Element); ok {
+			res = append(res, e)
+		}
+	}
+	return res
 }
 
 func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {

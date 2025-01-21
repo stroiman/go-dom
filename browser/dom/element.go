@@ -67,6 +67,10 @@ func newElement(tagName string, ownerDocument Document) *element {
 	return result
 }
 
+func (e *element) ChildElementCount() int {
+	return len(e.childElements())
+}
+
 func (e *element) SetSelf(n Node) {
 	self, ok := n.(Element)
 	if !ok {

@@ -9,6 +9,7 @@ type ElementContainer interface {
 	Append(Element) (Element, error)
 	QuerySelector(string) (Element, error)
 	QuerySelectorAll(string) (staticNodeList, error)
+	ChildElementCount() int
 }
 
 // RootNode implements defines common behaviour between [Document] and

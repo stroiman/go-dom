@@ -30,6 +30,7 @@ type Document interface {
 	CreateElementNS(string, string) Element
 	DocumentElement() Element
 	Location() Location
+	ChildElementCount() int
 	// unexported
 	parseFragment(reader io.Reader) (DocumentFragment, error)
 }
@@ -53,6 +54,10 @@ func NewDocument(window DocumentParentWindow) Document {
 
 func (d *document) parseFragment(reader io.Reader) (DocumentFragment, error) {
 	return d.ownerWindow.ParseFragment(d, reader)
+}
+
+func (d *document) ChildElementCount() int {
+	return len(d.childElements())
 }
 
 func (d *document) Body() Element {

@@ -17,6 +17,10 @@ func NewDocumentFragment(ownerDocument Document) DocumentFragment {
 	return result
 }
 
+func (f *documentFragment) ChildElementCount() int {
+	return len(f.childElements())
+}
+
 func (d *documentFragment) Append(element Element) (Element, error) {
 	_, err := d.AppendChild(element)
 	return element, err
