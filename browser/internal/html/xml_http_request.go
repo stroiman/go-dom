@@ -52,6 +52,7 @@ type XmlHttpRequest interface {
 
 type xmlHttpRequest struct {
 	dom.EventTarget
+	location string
 	client   http.Client
 	async    bool
 	status   int
@@ -62,9 +63,10 @@ type xmlHttpRequest struct {
 	headers  http.Header
 }
 
-func NewXmlHttpRequest(client http.Client) XmlHttpRequest {
+func NewXmlHttpRequest(client http.Client, location string) XmlHttpRequest {
 	return &xmlHttpRequest{
 		EventTarget: dom.NewEventTarget(),
+		location:    location,
 		client:      client,
 		headers:     make(map[string][]string),
 	}
@@ -89,7 +91,11 @@ func (req *xmlHttpRequest) Open(
 }
 
 func (req *xmlHttpRequest) send(body io.Reader) error {
-	httpRequest, err := http.NewRequest(req.method, req.url, body)
+	url := req.url
+	if u := dom.ParseURLBase(req.url, req.location); u != nil {
+		url = u.Href()
+	}
+	httpRequest, err := http.NewRequest(req.method, url, body)
 	if err != nil {
 		return err
 	}

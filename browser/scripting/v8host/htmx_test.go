@@ -16,7 +16,7 @@ var _ = Describe("Load from server", Ordered, func() {
 		DeferCleanup(func() {
 			browser.Close()
 		})
-		win, err := browser.Open("/index.html")
+		win, err := browser.Open("/counter/index.html")
 		Expect(err).ToNot(HaveOccurred())
 		counter := win.Document().GetElementById("counter")
 		Expect(counter).To(HaveInnerHTML(Equal("Count: 1")))

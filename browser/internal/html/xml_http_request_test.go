@@ -20,7 +20,7 @@ func newFromHandlerFunc(f func(http.ResponseWriter, *http.Request)) XmlHttpReque
 	client := http.Client{
 		Transport: TestRoundTripper{Handler: http.HandlerFunc(f)},
 	}
-	return NewXmlHttpRequest(client)
+	return NewXmlHttpRequest(client, "")
 }
 
 var _ = Describe("XmlHTTPRequest", func() {
@@ -52,7 +52,7 @@ var _ = Describe("XmlHTTPRequest", func() {
 			}
 			w.Write([]byte("Hello, World!"))
 		})
-		xhr = NewXmlHttpRequest(NewHttpClientFromHandler(handler))
+		xhr = NewXmlHttpRequest(NewHttpClientFromHandler(handler), "")
 		DeferCleanup(func() {
 			// Allow GC after test run
 			handler = nil
