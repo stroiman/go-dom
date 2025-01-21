@@ -2,12 +2,12 @@ package browser
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 
 	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/internal/http"
+	"github.com/stroiman/go-dom/browser/internal/log"
 	"github.com/stroiman/go-dom/browser/scripting/v8host"
 )
 
@@ -26,7 +26,7 @@ type Browser struct {
 // See [html.NewWindowReader] about the return value, and when the window
 // returns.
 func (b *Browser) Open(location string) (window Window, err error) {
-	// slog.Debug("Browser: OpenWindow", "URL", location)
+	// log.Debug("Browser: OpenWindow", "URL", location)
 	resp, err := b.Client.Get(location)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (b *Browser) createOptions(location string) WindowOptions {
 }
 
 func (b *Browser) Close() {
-	slog.Debug("Browser: Close()")
+	log.Debug("Browser: Close()")
 	for _, win := range b.windows {
 		win.Close()
 	}

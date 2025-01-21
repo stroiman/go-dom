@@ -2,12 +2,12 @@ package dom
 
 import (
 	"errors"
-	"log/slog"
 	"slices"
 	"strings"
 
 	. "github.com/stroiman/go-dom/browser/internal/dom"
 	"github.com/stroiman/go-dom/browser/internal/entity"
+	"github.com/stroiman/go-dom/browser/internal/log"
 	"golang.org/x/net/html"
 )
 
@@ -101,7 +101,7 @@ func (n *node) ChildNodes() NodeList { return n.childNodes }
 
 func (n *node) GetRootNode(options ...GetRootNodeOptions) Node {
 	if len(options) > 1 {
-		slog.Warn("Node.GetRootNode: composed not yet implemented")
+		log.Warn("Node.GetRootNode: composed not yet implemented")
 	}
 	if n.parent == nil {
 		return n.self

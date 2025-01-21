@@ -13,12 +13,11 @@ func FilterLogAttributes(groups []string, a slog.Attr) slog.Attr {
 	return a
 }
 
-func InstallDefaultTextLogger() *slog.LevelVar {
+func CreateTestLogger(lvl slog.Level) *slog.Logger {
 	var logLevel = new(slog.LevelVar)
 	var h slog.Handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level:       logLevel,
 		ReplaceAttr: FilterLogAttributes,
 	})
-	slog.SetDefault(slog.New(h))
-	return logLevel
+	return slog.New(h)
 }

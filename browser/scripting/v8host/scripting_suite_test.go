@@ -11,6 +11,7 @@ import (
 	. "github.com/stroiman/go-dom/browser/internal/http"
 	"github.com/stroiman/go-dom/browser/internal/test"
 	suite "github.com/stroiman/go-dom/browser/internal/test/script-test-suite"
+	"github.com/stroiman/go-dom/browser/logger"
 	. "github.com/stroiman/go-dom/browser/scripting/v8host"
 )
 
@@ -37,9 +38,7 @@ func OpenTestWindowFromHandler(location string, handler http.Handler) (html.Wind
 }
 
 func init() {
-	var logLevel = test.InstallDefaultTextLogger()
-	logLevel.Set(slog.LevelInfo)
-	// logLevel.Set(slog.LevelDebug)
+	logger.SetDefault(test.CreateTestLogger(slog.LevelInfo))
 
 	host = New()
 	scriptTestSuite = suite.NewScriptTestSuite(host, "v8")

@@ -8,10 +8,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
-	. "github.com/stroiman/go-dom/browser/scripting/gojahost"
 	"github.com/stroiman/go-dom/browser/html"
 	"github.com/stroiman/go-dom/browser/internal/test"
 	. "github.com/stroiman/go-dom/browser/internal/test/script-test-suite"
+	"github.com/stroiman/go-dom/browser/logger"
+	. "github.com/stroiman/go-dom/browser/scripting/gojahost"
 )
 
 var testSuite = NewScriptTestSuite(New(), "goja", SkipDOM)
@@ -27,10 +28,7 @@ func FormatException(value any) (result string, ok bool) {
 }
 
 func init() {
-	testSuite.CreateAllGinkgoTests()
-	var logLevel = test.InstallDefaultTextLogger()
-	logLevel.Set(slog.LevelInfo)
-	// logLevel.Set(slog.LevelDebug)
+	logger.SetDefault(test.CreateTestLogger(slog.LevelInfo))
 
 	format.RegisterCustomFormatter(FormatException)
 }

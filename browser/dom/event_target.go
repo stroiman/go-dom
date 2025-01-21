@@ -1,9 +1,8 @@
 package dom
 
 import (
-	"log/slog"
-
 	"github.com/stroiman/go-dom/browser/internal/entity"
+	"github.com/stroiman/go-dom/browser/internal/log"
 )
 
 type EventTarget interface {
@@ -36,7 +35,7 @@ func NewEventTarget() EventTarget {
 }
 
 func (e *eventTarget) AddEventListener(eventType string, listener EventHandler) {
-	slog.Debug("AddEventListener", "EventType", eventType)
+	log.Debug("AddEventListener", "EventType", eventType)
 	// TODO: Handle options
 	// - capture
 	// - once
@@ -72,14 +71,14 @@ func (e *eventTarget) SetCatchAllHandler(handler EventHandler) {
 
 func (e *eventTarget) DispatchEvent(event Event) bool {
 	event.reset()
-	slog.Debug("Dispatch event", "EventType", event.Type())
+	log.Debug("Dispatch event", "EventType", event.Type())
 	return e.dispatchEvent(event)
 }
 
 func (e *eventTarget) dispatchEvent(event Event) bool {
 	if e.catchAllHandler != nil {
 		if err := e.catchAllHandler.HandleEvent(event); err != nil {
-			slog.Debug("Error occurred", "error", err.Error())
+			log.Debug("Error occurred", "error", err.Error())
 			e.dispatchError(NewErrorEvent(err))
 		}
 	}
@@ -87,7 +86,7 @@ func (e *eventTarget) dispatchEvent(event Event) bool {
 
 	for _, l := range listeners {
 		if err := l.HandleEvent(event); err != nil {
-			slog.Debug("Error occurred", "error", err.Error())
+			log.Debug("Error occurred", "error", err.Error())
 			e.dispatchError(NewErrorEvent(err))
 		}
 	}

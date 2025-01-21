@@ -5,15 +5,14 @@ import (
 	"testing"
 
 	"github.com/stroiman/go-dom/browser/internal/test"
+	"github.com/stroiman/go-dom/browser/logger"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 func init() {
-	var logLevel = test.InstallDefaultTextLogger()
-	logLevel.Set(slog.LevelInfo)
-	// logLevel.Set(slog.LevelDebug)
+	logger.SetDefault(test.CreateTestLogger(slog.LevelInfo))
 }
 
 func TestDomTypes(t *testing.T) {
