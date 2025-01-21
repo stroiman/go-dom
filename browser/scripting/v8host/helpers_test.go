@@ -72,10 +72,11 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 	ctx := TestScriptContext{}
 
 	BeforeEach(func() {
-		window := html.NewWindow()
+		window := html.NewWindow(html.WindowOptions{
+			ScriptHost: host,
+		})
 		ctx.window = window
-		ctx.ScriptContext = host.NewContext(window)
-		window.SetScriptContext(ctx.ScriptContext)
+		ctx.ScriptContext = window.ScriptContext()
 		for _, hook := range hooks {
 			hook(&ctx)
 		}
