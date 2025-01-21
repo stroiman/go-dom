@@ -154,6 +154,9 @@ func (n *node) AppendChild(child Node) (Node, error) {
 }
 
 func (n *node) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
+	if err := n.assertCanAddNode(newChild); err != nil {
+		return nil, err
+	}
 	if fragment, ok := newChild.(DocumentFragment); ok {
 		for fragment.ChildNodes().Length() > 0 {
 			if _, err := n.InsertBefore(fragment.ChildNodes().Item(0), referenceNode); err != nil {
@@ -254,7 +257,7 @@ func (n *node) assertCanAddNode(newNode Node) error {
 	if newNode.Contains(n.getSelf()) {
 		return newDomError("May not add a parent as a child")
 	}
-	if childType == NodeTypeText && parentType != NodeTypeDocument {
+	if childType == NodeTypeText && parentType == NodeTypeDocument {
 		return newDomError("Text nodes may not be direct descendants of a document")
 	}
 	if childType == NodeTypeDocumentType && parentType != NodeTypeDocument {
@@ -290,9 +293,6 @@ func (n *node) childElements() []Element {
 }
 
 func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
-	if _, isAttribute := newNode.(Attr); isAttribute {
-		return nil, newDomError("Node.appendChild: May not add an Attribute as a child")
-	}
 	// TODO, Don't allow newNode to be inserted in it's own branch (circular tree)
 	// TODO, Handle a fragment. Also returns nil
 	if referenceNode == nil {
