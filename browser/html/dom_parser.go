@@ -70,7 +70,7 @@ type ScriptElementRules struct{ BaseRules }
 func (r ScriptElementRules) Connected(win Window, node dom.Element) {
 	var script string
 	src, hasSrc := node.GetAttribute("src")
-	slog.Debug("Process script tag")
+	slog.Debug("Process script tag", "src", src)
 	if !hasSrc {
 		b := strings.Builder{}
 		for _, child := range node.ChildNodes().All() {
@@ -87,6 +87,8 @@ func (r ScriptElementRules) Connected(win Window, node dom.Element) {
 			panic(err)
 		}
 		if resp.StatusCode != 200 {
+			body, _ := io.ReadAll(resp.Body)
+			slog.Error("Error from server", "body", string(body), "src", src)
 			panic("Bad response")
 		}
 
