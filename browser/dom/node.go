@@ -159,6 +159,9 @@ func (n *node) RemoveChild(node Node) (Node, error) {
 }
 
 func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
+	if _, isAttribute := newNode.(Attr); isAttribute {
+		return nil, newDomError("Node.appendChild: May not add an Attribute as a child")
+	}
 	// TODO, Don't allow newNode to be inserted in it's own branch (circular tree)
 	// TODO, Handle a fragment. Also returns nil
 	if referenceNode == nil {
