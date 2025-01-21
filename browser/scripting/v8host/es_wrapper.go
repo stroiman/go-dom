@@ -87,6 +87,13 @@ func (w converters) decodeNode(ctx *V8ScriptContext, val *v8.Value) (dom.Node, e
 	return nil, v8.NewTypeError(ctx.host.iso, "Must be a node")
 }
 
+func (w converters) decodeNodeOrText(ctx *V8ScriptContext, val *v8.Value) (dom.Node, error) {
+	if val.IsString() {
+		return NewText(val.String()), nil
+	}
+	return w.decodeNode(ctx, val)
+}
+
 func (w converters) toNullableByteString(ctx *V8ScriptContext, str *string) (*v8.Value, error) {
 	if str == nil {
 		return v8.Null(ctx.host.iso), nil

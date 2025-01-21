@@ -1,6 +1,7 @@
 package v8host
 
 import (
+	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
 
 	v8 "github.com/tommie/v8go"
@@ -21,6 +22,7 @@ func (e esElementContainerWrapper[T]) Install(ft *v8.FunctionTemplate) {
 		"querySelectorAll",
 		v8.NewFunctionTemplateWithError(e.host.iso, e.QuerySelectorAll),
 	)
+	prototype.Set("append", v8.NewFunctionTemplateWithError(e.host.iso, e.append))
 }
 
 func (e esElementContainerWrapper[T]) QuerySelector(
@@ -58,4 +60,21 @@ func (e esElementContainerWrapper[T]) QuerySelectorAll(
 		return ctx.getInstanceForNodeByName("NodeList", nodeList)
 	}
 	return nil, v8.NewTypeError(iso, "Object not a Document")
+}
+
+func (w esElementContainerWrapper[T]) append(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	var err error
+	ctx := w.host.mustGetContext(info.Context())
+	args := info.Args()
+	nodes := make([]dom.Node, len(args))
+	for i, a := range args {
+		if nodes[i], err = w.decodeNodeOrText(ctx, a); err != nil {
+			return nil, err
+		}
+	}
+	i, err := w.getInstance(info)
+	if err == nil {
+		i.Append(nodes...)
+	}
+	return nil, nil
 }
