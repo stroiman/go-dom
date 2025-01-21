@@ -30,7 +30,6 @@ type Document interface {
 	CreateElementNS(string, string) Element
 	DocumentElement() Element
 	Location() Location
-	ChildElementCount() int
 	// unexported
 	parseFragment(reader io.Reader) (DocumentFragment, error)
 }
@@ -100,9 +99,8 @@ func (d *document) CreateDocumentFragment() DocumentFragment {
 	return NewDocumentFragment(d)
 }
 
-func (d *document) Append(element Element) (Element, error) {
-	_, err := d.AppendChild(element)
-	return element, err
+func (d *document) Append(nodes ...Node) error {
+	return d.append(nodes...)
 }
 
 func (d *document) DocumentElement() Element {

@@ -6,7 +6,12 @@ package dom
 // elements
 type ElementContainer interface {
 	Node
-	Append(Element) (Element, error)
+	// Append supports appending multiple child elements. The JavaScript API
+	// supports adding string values, but the Go API requires a [Text] node
+	// explicitly for text content
+	//
+	// See also: https://developer.mozilla.org/en-US/docs/Web/API/Element/append
+	Append(...Node) error
 	QuerySelector(string) (Element, error)
 	QuerySelectorAll(string) (staticNodeList, error)
 	ChildElementCount() int

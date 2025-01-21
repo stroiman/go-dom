@@ -88,9 +88,8 @@ func (e *element) TagName() string {
 	return strings.ToLower(e.tagName)
 }
 
-func (parent *element) Append(child Element) (Element, error) {
-	_, err := parent.AppendChild(child)
-	return child, err
+func (e *element) Append(nodes ...Node) error {
+	return e.append(nodes...)
 }
 
 func (e *element) ClassList() DOMTokenList {

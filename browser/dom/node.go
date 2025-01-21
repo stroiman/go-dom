@@ -129,6 +129,7 @@ type Node interface {
 	// overriding behaviour in super-classes. This is not a behaviour that Go has.
 	SetSelf(node Node)
 
+	append(nodes ...Node) error
 	getSelf() Node
 	createHtmlNode() *html.Node
 	setParent(Node)
@@ -146,6 +147,18 @@ type node struct {
 
 func newNode() node {
 	return node{newEventTarget(), entity.New(), nil, newNodeList(), nil}
+}
+
+func (n *node) append(nodes ...Node) error {
+	for _, nn := range nodes {
+		if err := n.assertCanAddNode(nn); err != nil {
+			return err
+		}
+	}
+	for _, nn := range nodes {
+		n.AppendChild(nn)
+	}
+	return nil
 }
 
 func (n *node) AppendChild(child Node) (Node, error) {

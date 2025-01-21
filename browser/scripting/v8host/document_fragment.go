@@ -1,16 +1,27 @@
 package v8host
 
 import (
+	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
 
 	v8 "github.com/tommie/v8go"
 )
 
-// createDocumentFragmentPrototype currently only exists to allow code to check
-// for inheritence, i.e., `node instanceof DocumentFragment`
+type documentFragmentV8Wrapper struct {
+	esElementContainerWrapper[DocumentFragment]
+}
+
+func (w documentFragmentV8Wrapper) constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := w.host.mustGetContext(info.Context())
+	result := dom.NewDocumentFragment(ctx.window.Document())
+	_, err := w.store(result, ctx, info.This())
+	return nil, err
+}
+
 func createDocumentFragmentPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
-	builder := newIllegalConstructorBuilder[Location](host)
-	wrapper := newESContainerWrapper[DocumentFragment](host)
-	wrapper.Install(builder.constructor)
-	return builder.constructor
+	wrapper := documentFragmentV8Wrapper{newESContainerWrapper[DocumentFragment](host)}
+	constructor := v8.NewFunctionTemplateWithError(host.iso, wrapper.constructor)
+	constructor.InstanceTemplate().SetInternalFieldCount(1)
+	wrapper.Install(constructor)
+	return constructor
 }
