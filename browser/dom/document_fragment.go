@@ -1,6 +1,8 @@
 package dom
 
-import "golang.org/x/net/html"
+import (
+	"golang.org/x/net/html"
+)
 
 type DocumentFragment interface {
 	RootNode

@@ -85,6 +85,7 @@ func (e *eventTarget) dispatchEvent(event Event) bool {
 	listeners := e.lmap[event.Type()]
 
 	for _, l := range listeners {
+		log.Debug("Calling handler")
 		if err := l.HandleEvent(event); err != nil {
 			log.Debug("Error occurred", "error", err.Error())
 			e.dispatchError(NewErrorEvent(err))
