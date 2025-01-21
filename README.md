@@ -30,6 +30,8 @@ you can treat your HTTP server as a normal Go component.
 > This is still in development, and has not yet reached a level of usability.
 >
 > Expected alpha release for a version supporting forms in the spring 2025.
+>
+> [Feature list](./README_FEATURE_LIST.md)
 
 > [!WARNING]
 >
