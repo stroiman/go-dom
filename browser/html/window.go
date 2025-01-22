@@ -10,6 +10,7 @@ import (
 	"github.com/stroiman/go-dom/browser/dom"
 	. "github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/internal/entity"
+	"github.com/stroiman/go-dom/browser/internal/log"
 )
 
 type ScriptHost interface {
@@ -189,6 +190,7 @@ func (w *window) handleResponse(resp *http.Response) error {
 }
 
 func (w *window) Navigate(href string) error {
+	log.Info("Window.navigate:", "href", href)
 	w.initScriptEngine()
 	w.baseLocation = href
 	resp, err := w.httpClient.Get(href)
