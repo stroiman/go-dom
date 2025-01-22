@@ -13,7 +13,7 @@ codegen-watch: codegen-clean
 
 .PHONY: test-watch
 test: 
-	gow -s -v -w=./.. test -vet=off ./...
+	gow -c -e=go -e=js -e=html -v -w=./.. test -vet=off ./...
 
 .PHONY: test-dom
 test-dom: 
@@ -25,8 +25,8 @@ test-html:
 
 .PHONY: test-v8
 test-v8: 
-	cd scripting/v8host && ginkgo watch -vet=off
+	gow -c -e=go -e=js -e=html -w ./.. test -vet=off ./scripting/v8host
 
 .PHONY: test-goja
 test-goja:
-	cd scripting/gojahost && ginkgo watch -vet=off
+	gow -c -e=go -e=js -e=html -w ./.. test -vet=off ./scripting/gojahost
