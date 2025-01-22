@@ -23,8 +23,9 @@ var _ = Describe("Window", func() {
 	})
 
 	It("Should respect the <!DOCTYPE>", func() {
-		Skip("<!DOCTYPE> should be respected")
-		// win, err := NewWindowReader(strings.NewReader("<!DOCTYPE HTML><html><body></body></html>"))
+		win, err := NewWindowReader(strings.NewReader("<!DOCTYPE HTML><html><body></body></html>"))
+		Expect(err).ToNot(HaveOccurred())
+		Expect(win.Document().FirstChild().NodeType()).To(Equal(dom.NodeTypeDocumentType))
 	})
 
 	Describe("History()", func() {
@@ -34,7 +35,7 @@ var _ = Describe("Window", func() {
 		BeforeEach(func() {
 			h = new(testing.EchoHandler)
 			win = html.NewWindow(windowOptionHandler(h))
-			DeferCleanup(func() { win = nil })
+			DeferCleanup(func() { win = nil; h = nil }) // Allow GC
 		})
 
 		It("Should have a length of one when starting", func() {
@@ -53,7 +54,6 @@ var _ = Describe("Window", func() {
 			Expect(win.History().Go(0)).To(Succeed())
 			Expect(win.History().Length()).To(Equal(2))
 			Expect(h.RequestCount()).To(Equal(2)) // about:blank wasn't a request
-
 		})
 
 		It("Should have a length of two when navigating", func() {
