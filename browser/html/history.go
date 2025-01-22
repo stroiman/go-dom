@@ -23,7 +23,14 @@ func (h History) Length() int {
 	return len(h.entries)
 }
 
-func (h *History) Back() error    { return h.Go(-1) }
+// Back calls Go(-1).
+//
+// See also: https://developer.mozilla.org/en-US/docs/Web/API/History/back
+func (h *History) Back() error { return h.Go(-1) }
+
+// Forward calls Go(1).
+//
+// See also: https://developer.mozilla.org/en-US/docs/Web/API/History/forward
 func (h *History) Forward() error { return h.Go(1) }
 
 func (h *History) Go(relative int) error {

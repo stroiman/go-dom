@@ -1,8 +1,6 @@
 package html_test
 
 import (
-	"fmt"
-	"net/http"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -13,6 +11,7 @@ import (
 	. "github.com/stroiman/go-dom/browser/html"
 	"github.com/stroiman/go-dom/browser/internal/domslices"
 	. "github.com/stroiman/go-dom/browser/internal/http"
+	"github.com/stroiman/go-dom/browser/internal/testing"
 	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 	"github.com/stroiman/go-dom/browser/testing/testservers"
 )
@@ -32,15 +31,9 @@ var _ = Describe("Window", func() {
 	Describe("History()", func() {
 		var win html.Window
 		BeforeEach(func() {
-			win = html.NewWindow(
-				WindowOptions{
-					HttpClient: NewHttpClientFromHandler(
-						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-							w.Write([]byte(fmt.Sprintf("<body><h1>%s</h1></body>", r.URL.Path)))
-						}),
-					),
-				},
-			)
+			options := WindowOptions{HttpClient: NewHttpClientFromHandler(testing.EchoHandler)}
+			win = html.NewWindow(options)
+			DeferCleanup(func() { win = nil })
 		})
 
 		It("Should have a length of one when starting", func() {
@@ -76,7 +69,6 @@ var _ = Describe("Window", func() {
 			Expect(win.Navigate("/page-6")).To(Succeed())
 			Expect(win.History().Length()).To(Equal(3))
 			Expect(win.Location().Pathname()).To(Equal("/page-6"))
-
 		})
 	})
 
