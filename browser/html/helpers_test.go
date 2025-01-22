@@ -6,6 +6,7 @@ import (
 
 	"github.com/stroiman/go-dom/browser/dom"
 	"github.com/stroiman/go-dom/browser/html"
+	. "github.com/stroiman/go-dom/browser/internal/http"
 	domHttp "github.com/stroiman/go-dom/browser/internal/http"
 )
 
@@ -16,4 +17,9 @@ func ParseHtmlString(s string) (res dom.Document) {
 
 func NewWindowFromHandler(handler http.Handler) html.Window {
 	return html.NewWindow(html.WindowOptions{HttpClient: domHttp.NewHttpClientFromHandler(handler)})
+}
+func windowOptionHandler(h http.Handler) html.WindowOption {
+	return html.WindowOptionFunc(func(o *html.WindowOptions) {
+		o.HttpClient = NewHttpClientFromHandler(h)
+	})
 }

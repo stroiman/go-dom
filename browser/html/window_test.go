@@ -10,7 +10,6 @@ import (
 	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/html"
 	"github.com/stroiman/go-dom/browser/internal/domslices"
-	. "github.com/stroiman/go-dom/browser/internal/http"
 	"github.com/stroiman/go-dom/browser/internal/testing"
 	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 	"github.com/stroiman/go-dom/browser/testing/testservers"
@@ -30,9 +29,11 @@ var _ = Describe("Window", func() {
 
 	Describe("History()", func() {
 		var win html.Window
+		var h *testing.EchoHandler
+
 		BeforeEach(func() {
-			options := WindowOptions{HttpClient: NewHttpClientFromHandler(testing.EchoHandler)}
-			win = html.NewWindow(options)
+			h = new(testing.EchoHandler)
+			win = html.NewWindow(windowOptionHandler(h))
 			DeferCleanup(func() { win = nil })
 		})
 
@@ -43,6 +44,16 @@ var _ = Describe("Window", func() {
 		It("Should have a length of two when navigating", func() {
 			Expect(win.Navigate("/page-2")).To(Succeed())
 			Expect(win.History().Length()).To(Equal(2))
+		})
+
+		It("Should reload, but keep the length on Go(0)", func() {
+			Expect(win.Navigate("/page-2")).To(Succeed())
+			Expect(win.History().Length()).To(Equal(2))
+			Expect(h.RequestCount()).To(Equal(1)) // about:blank wasn't a request
+			Expect(win.History().Go(0)).To(Succeed())
+			Expect(win.History().Length()).To(Equal(2))
+			Expect(h.RequestCount()).To(Equal(2)) // about:blank wasn't a request
+
 		})
 
 		It("Should have a length of two when navigating", func() {

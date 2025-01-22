@@ -33,6 +33,11 @@ func (h *History) Back() error { return h.Go(-1) }
 // See also: https://developer.mozilla.org/en-US/docs/Web/API/History/forward
 func (h *History) Forward() error { return h.Go(1) }
 
+// Go moves back or forward through the history, possibly reloading the page if
+// necessary. A negative value goes back in history; a positive value moves
+// forward if possible. A value of 0 will trigger a reload.
+//
+// See also: https://developer.mozilla.org/en-US/docs/Web/API/History/go
 func (h *History) Go(relative int) error {
 	newPos := h.currentPos + relative
 	if newPos <= 0 || newPos > h.Length() {
