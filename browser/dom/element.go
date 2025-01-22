@@ -263,12 +263,10 @@ func (e *element) Matches(pattern string) (bool, error) {
 	// upon.
 
 	patterns := strings.Split(pattern, ",")
-	log.Info("Element.Matches", "pattern", pattern, "element", e.getSelfElement().OuterHTML())
-	log.Info("Patterns", "len", len(patterns), "p", patterns)
+	log.Debug("Element.Matches", "pattern", pattern, "element", e.getSelfElement().OuterHTML())
 
 	for _, p := range patterns {
 		p = strings.TrimSpace(p)
-		log.Debug("Element.Matches: iter", "pattern", p)
 
 		knownPattern := false
 
@@ -313,8 +311,6 @@ func (e *element) Matches(pattern string) (bool, error) {
 			key := m[2]
 			val := m[3]
 			v, found := e.GetAttribute(key)
-			fmt.Println("Vals", tag, key, val, found, v, e.getSelfElement().OuterHTML())
-			fmt.Println("Tags", strings.ToLower(e.getSelfElement().TagName()), strings.ToLower(tag))
 			if strings.ToLower(e.getSelfElement().TagName()) == strings.ToLower(tag) && found &&
 				val == v {
 				return true, nil
@@ -329,7 +325,7 @@ func (e *element) Matches(pattern string) (bool, error) {
 			)
 		}
 	}
-	log.Error("Element.Matches: no match", "pattern", pattern, "e", e.getSelfElement().OuterHTML())
+	log.Debug("Element.Matches: no match", "pattern", pattern, "e", e.getSelfElement().OuterHTML())
 	return false, nil
 }
 
