@@ -1,14 +1,18 @@
 package html_test
 
 import (
+	"fmt"
+	"net/http"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/stroiman/go-dom/browser/html"
 	. "github.com/stroiman/go-dom/browser/html"
 	"github.com/stroiman/go-dom/browser/internal/domslices"
+	. "github.com/stroiman/go-dom/browser/internal/http"
 	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
 	"github.com/stroiman/go-dom/browser/testing/testservers"
 )
@@ -23,6 +27,36 @@ var _ = Describe("Window", func() {
 	It("Should respect the <!DOCTYPE>", func() {
 		Skip("<!DOCTYPE> should be respected")
 		// win, err := NewWindowReader(strings.NewReader("<!DOCTYPE HTML><html><body></body></html>"))
+	})
+
+	Describe("History()", func() {
+		var win html.Window
+		BeforeEach(func() {
+			win = html.NewWindow(
+				WindowOptions{
+					HttpClient: NewHttpClientFromHandler(
+						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+							w.Write([]byte(fmt.Sprintf("<body><h1>%s</h1></body>", r.URL.Path)))
+						}),
+					),
+				},
+			)
+		})
+
+		It("Should have a length of one when starting", func() {
+			Expect(win.History().Length()).To(Equal(1))
+		})
+
+		It("Should have a length of two when navigating", func() {
+			Expect(win.Navigate("/page-2")).To(Succeed())
+			Expect(win.History().Length()).To(Equal(2))
+		})
+
+		It("Should have a length of two when navigating", func() {
+			Expect(win.Navigate("/page-2")).To(Succeed())
+			Expect(win.History().Length()).To(Equal(2))
+			Expect(win.Document().QuerySelector("h1")).To(HaveTextContent("/page-2"))
+		})
 	})
 
 	Describe("Location()", func() {

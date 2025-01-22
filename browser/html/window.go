@@ -43,6 +43,7 @@ type Window interface {
 	Run(string) error
 	ScriptContext() ScriptContext
 	Location() Location
+	History() *History
 	HTTPClient() http.Client
 	ParseFragment(ownerDocument Document, reader io.Reader) (dom.DocumentFragment, error)
 	// unexported
@@ -54,6 +55,7 @@ type Window interface {
 type window struct {
 	EventTarget
 	document            Document
+	history             *History
 	scriptEngineFactory ScriptHost
 	scriptContext       ScriptContext
 	httpClient          http.Client
@@ -71,10 +73,12 @@ func newWindow(windowOptions ...WindowOption) *window {
 		httpClient:          options.HttpClient,
 		baseLocation:        options.BaseLocation,
 		scriptEngineFactory: options.ScriptHost,
+		history:             new(History),
 	}
 	if result.baseLocation == "" {
 		result.baseLocation = "about:blank"
 	}
+	result.history.pushLoad(result.baseLocation)
 	result.domParser = domParser{}
 	result.initScriptEngine()
 	result.document = NewHTMLDocument(result)
@@ -121,6 +125,9 @@ func (w *window) initScriptEngine() {
 	}
 }
 
+func (w *window) History() *History {
+	return w.history
+}
 func (w *window) ParseFragment(
 	ownerDocument Document,
 	reader io.Reader,
@@ -191,6 +198,7 @@ func (w *window) handleResponse(resp *http.Response) error {
 
 func (w *window) Navigate(href string) error {
 	log.Info("Window.navigate:", "href", href)
+	w.History().pushLoad(href)
 	w.initScriptEngine()
 	w.baseLocation = href
 	resp, err := w.httpClient.Get(href)

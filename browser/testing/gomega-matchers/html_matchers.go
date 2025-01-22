@@ -47,7 +47,7 @@ func HaveTextContent(expected interface{}) GomegaMatcher {
 
 	return gcustom.MakeMatcher(func(e dom.Element) (bool, error) {
 		return matcher.Match(e.TextContent())
-	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.GetTextContent}}", matcher)
+	}).WithTemplate("Expected:\n{{.FormattedActual}}\n{{.To}} have textContent {{.Data.FailureMessage .Actual.TextContent}}", matcher)
 }
 
 func HaveInnerHTML(matcher GomegaMatcher) GomegaMatcher {
