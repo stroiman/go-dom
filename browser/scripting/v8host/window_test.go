@@ -53,6 +53,7 @@ var _ = Describe("Window", func() {
   window.document.addEventListener("load", listener2);
 </script></body>`), html.WindowOptions{ScriptHost: host},
 				)
+				DeferCleanup(func() { win.Close() })
 				Expect(err).ToNot(HaveOccurred())
 				ctx := win.ScriptContext()
 				Expect(ctx.Eval("scripts.join(',')")).To(Equal("DOMContentLoaded,load"))

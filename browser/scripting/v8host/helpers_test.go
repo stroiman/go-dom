@@ -81,10 +81,7 @@ func InitializeContext(hooks ...CreateHook) *TestScriptContext {
 			hook(&ctx)
 		}
 		// ctx.ScriptContext = window.
-	})
-
-	AfterEach(func() {
-		ctx.Close()
+		DeferCleanup(func() { window.Close() })
 	})
 
 	return &ctx
