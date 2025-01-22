@@ -1,6 +1,7 @@
 package dom_test
 
 import (
+	"fmt"
 	"log/slog"
 	"testing"
 
@@ -12,6 +13,7 @@ import (
 )
 
 func init() {
+	fmt.Println("Set debug level")
 	logger.SetDefault(test.CreateTestLogger(slog.LevelInfo))
 }
 

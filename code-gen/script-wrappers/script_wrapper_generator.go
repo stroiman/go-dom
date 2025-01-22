@@ -268,6 +268,7 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	domElement.Method("setAttribute").SetNoError()
 	domElement.Method("hasAttribute").SetNoError()
 	domElement.Method("classList").SetCustomImplementation()
+	domElement.Method("matches")
 
 	domElement.MarkMembersAsNotImplemented(
 		"hasAttributes",
@@ -302,7 +303,6 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 
 	domElement.MarkMembersAsIgnored(
 		// HTMX fails if these exist but throw
-		"matches",
 		"webkitMatchesSelector",
 		"closest",
 	)

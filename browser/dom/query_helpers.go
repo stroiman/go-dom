@@ -24,6 +24,7 @@ func (d cssHelper) QuerySelectorAll(pattern string) (staticNodeList, error) {
 		return nil, err
 	}
 	htmlNode, m := toHtmlNodeAndMap(d)
+
 	nodes := sel.Select(htmlNode)
 	result := make([]Node, len(nodes))
 	for i, node := range nodes {

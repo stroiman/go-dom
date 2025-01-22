@@ -9,6 +9,13 @@ import (
 )
 
 var _ = Describe("Element", func() {
+	var doc Document
+
+	BeforeEach(func() {
+		doc = CreateHTMLDocument()
+		DeferCleanup(func() { doc = nil })
+	})
+
 	Describe("Get/Set attribute", func() {
 		It("Should add a new attribute when not existing", func() {
 			doc := CreateHTMLDocument()
@@ -19,7 +26,6 @@ var _ = Describe("Element", func() {
 		})
 
 		It("Should add overwrite an existing attribute", func() {
-			doc := CreateHTMLDocument()
 			elm := doc.CreateElement("div")
 			elm.SetAttribute("id", "1")
 			elm.SetAttribute("id", "2")
@@ -28,10 +34,54 @@ var _ = Describe("Element", func() {
 		})
 
 		It("Should return nil when the attribute does't exist", func() {
-			doc := CreateHTMLDocument()
 			elm := doc.CreateElement("div")
 			_, ok := elm.GetAttribute("non-existing")
 			Expect(ok).To(BeFalse())
+		})
+	})
+
+	Describe("Matches", func() {
+		It("Should return true for a simple string matching the root element", func() {
+			d := doc.CreateElement("div")
+			p := doc.CreateElement("p")
+			d.Append(p)
+			Expect(d.Matches("div")).To(BeTrue())
+		})
+
+		It("Should return false for a simple string matching a child element", func() {
+			d := doc.CreateElement("div")
+			p := doc.CreateElement("p")
+			d.Append(p)
+			Expect(d.Matches("p")).To(BeFalse())
+		})
+
+		It("Should return true for an existing attribute", func() {
+			d := doc.CreateElement("div")
+			d.SetAttribute("known-attribute", "")
+			Expect(d.Matches("[known-attribute]")).To(BeTrue())
+		})
+
+		It("Should return true if one attribute match", func() {
+			d := doc.CreateElement("div")
+			d.SetAttribute("known-attribute", "")
+			Expect(d.Matches("[unknown-attribute], [known-attribute]")).To(BeTrue())
+		})
+
+		It("Should return false for a non-existing attribute", func() {
+			d := doc.CreateElement("div")
+			Expect(d.Matches("[unknown-attribute]")).To(BeFalse())
+		})
+
+		It("Should return true if tagname + attribute key=value has right value", func() {
+			d := doc.CreateElement("div")
+			d.SetAttribute("a", "right")
+			Expect(d.Matches(`div[a="right"]`)).To(BeTrue())
+		})
+
+		It("Should return true if tagname + attribute key=value has wrong value", func() {
+			d := doc.CreateElement("div")
+			d.SetAttribute("a", "right")
+			Expect(d.Matches(`div[a="wrong"]`)).To(BeFalse())
 		})
 	})
 

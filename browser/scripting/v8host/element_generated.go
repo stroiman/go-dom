@@ -37,6 +37,7 @@ func createElementPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.Set("setAttributeNodeNS", v8.NewFunctionTemplateWithError(iso, wrapper.SetAttributeNodeNS))
 	prototypeTmpl.Set("removeAttributeNode", v8.NewFunctionTemplateWithError(iso, wrapper.RemoveAttributeNode))
 	prototypeTmpl.Set("attachShadow", v8.NewFunctionTemplateWithError(iso, wrapper.AttachShadow))
+	prototypeTmpl.Set("matches", v8.NewFunctionTemplateWithError(iso, wrapper.Matches))
 	prototypeTmpl.Set("getElementsByTagName", v8.NewFunctionTemplateWithError(iso, wrapper.GetElementsByTagName))
 	prototypeTmpl.Set("getElementsByTagNameNS", v8.NewFunctionTemplateWithError(iso, wrapper.GetElementsByTagNameNS))
 	prototypeTmpl.Set("getElementsByClassName", v8.NewFunctionTemplateWithError(iso, wrapper.GetElementsByClassName))
@@ -178,6 +179,26 @@ func (e elementV8Wrapper) RemoveAttributeNode(info *v8.FunctionCallbackInfo) (*v
 
 func (e elementV8Wrapper) AttachShadow(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.attachShadow: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+}
+
+func (e elementV8Wrapper) Matches(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := e.host.mustGetContext(info.Context())
+	args := newArgumentHelper(e.host, info)
+	instance, err0 := e.getInstance(info)
+	selectors, err1 := tryParseArg(args, 0, e.decodeDOMString)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
+		if err != nil {
+			return nil, err
+		}
+		result, callErr := instance.Matches(selectors)
+		if callErr != nil {
+			return nil, callErr
+		} else {
+			return e.toBoolean(ctx, result)
+		}
+	}
+	return nil, errors.New("Missing arguments")
 }
 
 func (e elementV8Wrapper) GetElementsByTagName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

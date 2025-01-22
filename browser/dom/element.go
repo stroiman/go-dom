@@ -3,10 +3,13 @@ package dom
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 
+	"github.com/stroiman/go-dom/browser/internal/constants"
 	. "github.com/stroiman/go-dom/browser/internal/dom"
+	"github.com/stroiman/go-dom/browser/internal/log"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -36,8 +39,10 @@ type Element interface {
 	OuterHTML() string
 	InnerHTML() string
 	TagName() string
+	Matches(string) (bool, error)
 	// unexported
 	getAttributes() Attributes
+	getSelfElement() Element
 }
 
 type element struct {
@@ -130,6 +135,16 @@ func (e *element) GetAttribute(name string) (string, bool) {
 
 func (e *element) getAttributes() Attributes {
 	return e.attributes
+}
+
+func (e *element) getSelfElement() Element {
+	r, ok := e.getSelf().(Element)
+	if !ok {
+		panic(
+			"Calling method on an element which isn't an element. Did a custom type forget to call 'setSelf()'?",
+		)
+	}
+	return r
 }
 
 func (e *element) Attributes() NamedNodeMap {
@@ -228,6 +243,94 @@ func renderElement(e Element, writer *strings.Builder) {
 	writer.WriteString("</")
 	writer.WriteString(tagName)
 	writer.WriteRune('>')
+}
+
+var tagNameRegExp = regexp.MustCompile("(?m:^[a-zA-Z]+$)")
+var attributeRegExp = regexp.MustCompile("(?m:^[[]([a-zA-Z-]+)[]]$)")
+var tagNameAndAttribute = regexp.MustCompile(`(?m:^([a-zA-Z]+)+[[]([a-zA-Z-]+)="([a-zA-Z-]+)"[]]$)`)
+
+// Element.Matches returns true if the current element matches the specified CSS
+// selectors; accepting a comma-separated list of selectors with any leading and
+// trailing whitespace trimmed. Returns an error if the patterns is not
+// supported (or invalid)
+//
+// Note: This only supports a subset of CSS selectors; primarily those used by
+// HTMX.
+func (e *element) Matches(pattern string) (bool, error) {
+	// Implementation note:
+	// This might have been implemented in terms of QuerySelector == self, but
+	// QuerySelector find child elements, not the element itself it is queried
+	// upon.
+
+	patterns := strings.Split(pattern, ",")
+	log.Info("Element.Matches", "pattern", pattern, "element", e.getSelfElement().OuterHTML())
+	log.Info("Patterns", "len", len(patterns), "p", patterns)
+
+	for _, p := range patterns {
+		p = strings.TrimSpace(p)
+		log.Debug("Element.Matches: iter", "pattern", p)
+
+		knownPattern := false
+
+		if tagNameRegExp.MatchString(p) {
+			knownPattern = true
+			if strings.ToLower(e.getSelfElement().TagName()) == strings.ToLower(p) {
+				return true, nil
+			}
+		}
+		if m := attributeRegExp.FindStringSubmatch(p); m != nil {
+			knownPattern = true
+			if len(m) != 2 {
+				panic(
+					fmt.Sprintf(
+						"Element.Matches: Unexpected no of matches\n%s\n%s\n - Pattern: %s\n - Element: %s",
+						constants.BUG_USSUE_URL,
+						constants.BUG_USSUE_DETAILS,
+						p,
+						e.getSelfElement().OuterHTML(),
+					),
+				)
+			}
+			_, hasAttribute := e.GetAttribute(m[1])
+			if hasAttribute {
+				return true, nil
+			}
+		}
+		if m := tagNameAndAttribute.FindStringSubmatch(p); m != nil {
+			knownPattern = true
+			if len(m) != 4 {
+				panic(
+					fmt.Sprintf(
+						"Element.Matches: Unexpected no of matches\n%s\n%s\n - Pattern: %s\n - Element: %s",
+						constants.BUG_USSUE_URL,
+						constants.BUG_USSUE_DETAILS,
+						p,
+						e.getSelfElement().OuterHTML(),
+					),
+				)
+			}
+			tag := m[1]
+			key := m[2]
+			val := m[3]
+			v, found := e.GetAttribute(key)
+			fmt.Println("Vals", tag, key, val, found, v, e.getSelfElement().OuterHTML())
+			fmt.Println("Tags", strings.ToLower(e.getSelfElement().TagName()), strings.ToLower(tag))
+			if strings.ToLower(e.getSelfElement().TagName()) == strings.ToLower(tag) && found &&
+				val == v {
+				return true, nil
+			}
+		}
+		if !knownPattern {
+			log.Error("Element.Matches: unsupported pattern", "pattern", p)
+			return false, fmt.Errorf(
+				"Element.matches: Unsupported pattern - patterns: %s\n%s\n",
+				p,
+				constants.MISSING_FEATURE_ISSUE_URL,
+			)
+		}
+	}
+	log.Error("Element.Matches: no match", "pattern", pattern, "e", e.getSelfElement().OuterHTML())
+	return false, nil
 }
 
 func (e *element) String() string {

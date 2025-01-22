@@ -15,6 +15,7 @@ func FilterLogAttributes(groups []string, a slog.Attr) slog.Attr {
 
 func CreateTestLogger(lvl slog.Level) *slog.Logger {
 	var logLevel = new(slog.LevelVar)
+	logLevel.Set(lvl)
 	var h slog.Handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level:       logLevel,
 		ReplaceAttr: FilterLogAttributes,
