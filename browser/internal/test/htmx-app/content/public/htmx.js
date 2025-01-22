@@ -2566,8 +2566,10 @@ var htmx = (function () {
    * @returns {boolean}
    */
   function shouldCancel(evt, node) {
+    console.log("TEST SHOULD CANCEL", evt.type, node.nodeName, node.outerHTML);
     const elt = asElement(node);
     if (!elt) {
+      console.log("Not element");
       return false;
     }
     if (evt.type === "submit" || evt.type === "click") {
@@ -2589,6 +2591,7 @@ var htmx = (function () {
         return true;
       }
     }
+    console.log("Not no handler");
     return false;
   }
 
@@ -2678,6 +2681,7 @@ var htmx = (function () {
           return;
         }
         if (explicitCancel || shouldCancel(evt, elt)) {
+          console.log("CANCELLING!");
           evt.preventDefault();
         }
         if (maybeFilterEvent(triggerSpec, elt, evt)) {
