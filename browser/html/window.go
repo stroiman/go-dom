@@ -201,11 +201,16 @@ func (w *window) Navigate(href string) error {
 	w.History().pushLoad(href)
 	w.initScriptEngine()
 	w.baseLocation = href
-	resp, err := w.httpClient.Get(href)
-	if err != nil {
-		return err
+	if href == "about:blank" {
+		w.document = NewHTMLDocument(w)
+		return nil
+	} else {
+		resp, err := w.httpClient.Get(href)
+		if err != nil {
+			return err
+		}
+		return w.handleResponse(resp)
 	}
-	return w.handleResponse(resp)
 }
 
 func (w *window) fetchRequest(req *http.Request) error {

@@ -15,17 +15,30 @@ type htmlDocument struct {
 	window Window
 }
 
-// NewHTMLDocument creates an HTML document with no content. The response is
-// equivalent to parsing an empty string using a DOMParser in client script.
+func mustAppendChild(p, c Node) Node {
+	_, err := p.AppendChild(c)
+	if err != nil {
+		panic(err)
+	}
+	return c
+}
+
+// NewHTMLDocument creates an HTML document for an about:blank page.
 //
-// The resulting document has the outer HTML
+// The resulting document has an outer HTML similar to this, but there are no
+// guarantees about the actual content, so do not depend on this value.
 //
-//	<html><head></head><body></body></html>
+//	<html><head></head><body><h1>Go-DOM</h1></body></html>
 func NewHTMLDocument(window Window) HTMLDocument {
 	doc := newHTMLDocument(window)
+	body := doc.CreateElement("body")
 	docEl := doc.CreateElement("html")
-	docEl.AppendChild(doc.CreateElement("head"))
-	docEl.AppendChild(doc.CreateElement("body"))
+	h1 := mustAppendChild(body, doc.CreateElement("h1"))
+	h1.SetTextContent("Go-DOM")
+	docEl.Append(
+		doc.CreateElement("head"),
+		body,
+	)
 	doc.AppendChild(docEl)
 	return doc
 }

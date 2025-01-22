@@ -20,7 +20,7 @@ var _ = Describe("HTMLDocument", func() {
 			Expect(doc.Head()).To(HaveTag("HEAD"))
 		})
 
-		It("Should have an empty BODY", func() {
+		It("Should have a BODY", func() {
 			doc := NewHTMLDocument(nil)
 			Expect(doc.Body()).To(HaveTag("BODY"))
 		})

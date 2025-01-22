@@ -77,7 +77,14 @@ var _ = Describe("Window", func() {
 			Expect(window.Location().Pathname()).To(Equal("/index"))
 		})
 
-		Describe("User navigates", func() {
+		Describe("Navigate", func() {
+			It("Should load a blank page when loading about:blank", func() {
+				Expect(window.Navigate("about:blank")).To(Succeed())
+				Expect(window.Document().QuerySelector("h1")).To(HaveTextContent("Go-DOM"))
+			})
+		})
+
+		Describe("User navigation (clicking links)", func() {
 			var links []dom.Node
 
 			BeforeEach(func() {
