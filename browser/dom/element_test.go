@@ -86,7 +86,10 @@ var _ = Describe("Element", func() {
 	})
 
 	It("Should support Get/SetTextContent", func() {
-		Skip("Only setter created yet")
+		d := doc.CreateElement("div")
+		d.AppendChild(doc.CreateElement("p"))
+		d.SetTextContent("Replace the p")
+		Expect(d).To(HaveTextContent("Replace the p"))
 	})
 
 	Describe("InsertAdjacentHTML", func() {

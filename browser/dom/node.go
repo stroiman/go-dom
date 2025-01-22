@@ -412,7 +412,7 @@ func (n *node) getSelf() Node     { return n.self }
 
 func (n *node) SetTextContent(val string) {
 	for x := n.FirstChild(); x != nil; x = n.FirstChild() {
-		x.RemoveChild(x)
+		n.RemoveChild(x)
 	}
 	n.AppendChild(NewText(val))
 }
