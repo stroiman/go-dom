@@ -68,21 +68,22 @@ func newWindow(windowOptions ...WindowOption) *window {
 	for _, option := range windowOptions {
 		option.Apply(&options)
 	}
-	result := &window{
+	win := &window{
 		EventTarget:         NewEventTarget(),
 		httpClient:          options.HttpClient,
 		baseLocation:        options.BaseLocation,
 		scriptEngineFactory: options.ScriptHost,
 		history:             new(History),
 	}
-	if result.baseLocation == "" {
-		result.baseLocation = "about:blank"
+	if win.baseLocation == "" {
+		win.baseLocation = "about:blank"
 	}
-	result.history.pushLoad(result.baseLocation)
-	result.domParser = domParser{}
-	result.initScriptEngine()
-	result.document = NewHTMLDocument(result)
-	return result
+	win.history.window = win
+	win.history.pushLoad(win.baseLocation)
+	win.domParser = domParser{}
+	win.initScriptEngine()
+	win.document = NewHTMLDocument(win)
+	return win
 }
 
 func NewWindow(windowOptions ...WindowOption) Window {
@@ -199,6 +200,24 @@ func (w *window) handleResponse(resp *http.Response) error {
 func (w *window) Navigate(href string) error {
 	log.Info("Window.navigate:", "href", href)
 	w.History().pushLoad(href)
+	w.initScriptEngine()
+	w.baseLocation = href
+	if href == "about:blank" {
+		w.document = NewHTMLDocument(w)
+		return nil
+	} else {
+		resp, err := w.httpClient.Get(href)
+		if err != nil {
+			return err
+		}
+		return w.handleResponse(resp)
+	}
+}
+
+// reload is used internally to load a page into the browser, but without
+// affecting the history
+func (w *window) reload(href string) error {
+	log.Debug("Window.reload:", "href", href)
 	w.initScriptEngine()
 	w.baseLocation = href
 	if href == "about:blank" {

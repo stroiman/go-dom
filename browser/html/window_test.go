@@ -57,6 +57,27 @@ var _ = Describe("Window", func() {
 			Expect(win.History().Length()).To(Equal(2))
 			Expect(win.Document().QuerySelector("h1")).To(HaveTextContent("/page-2"))
 		})
+
+		It("Should go back, but keep the length", func() {
+			Expect(win.Navigate("/page-2")).To(Succeed())
+			Expect(win.History().Go(-1)).To(Succeed())
+			Expect(win.Document().QuerySelector("h1")).To(HaveTextContent("Go-DOM"))
+			Expect(win.Location().Href()).To(Equal("about:blank"))
+		})
+
+		It("Should truncate history when going forward", func() {
+			Expect(win.Navigate("/page-2")).To(Succeed())
+			Expect(win.Navigate("/page-3")).To(Succeed())
+			Expect(win.Navigate("/page-4")).To(Succeed())
+			Expect(win.Navigate("/page-5")).To(Succeed())
+			Expect(win.History().Length()).To(Equal(5))
+			Expect(win.History().Go(-3)).To(Succeed())
+			Expect(win.History().Length()).To(Equal(5))
+			Expect(win.Navigate("/page-6")).To(Succeed())
+			Expect(win.History().Length()).To(Equal(3))
+			Expect(win.Location().Pathname()).To(Equal("/page-6"))
+
+		})
 	})
 
 	Describe("Location()", func() {
