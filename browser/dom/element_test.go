@@ -28,7 +28,10 @@ var _ = Describe("Element", func() {
 		})
 
 		It("Should return nil when the attribute does't exist", func() {
-
+			doc := CreateHTMLDocument()
+			elm := doc.CreateElement("div")
+			_, ok := elm.GetAttribute("non-existing")
+			Expect(ok).To(BeFalse())
 		})
 	})
 
