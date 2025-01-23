@@ -82,6 +82,53 @@ var _ = Describe("Window", func() {
 			Expect(win.Location().Pathname()).To(Equal("/page-6"))
 		})
 
+		Describe("popstate event", func() {
+			// Initial state is about:blank
+			BeforeEach(func() {
+				Expect(win.Navigate("/page-2")).To(Succeed())
+			})
+
+			It("Should do what when the target entry has a state, but was reloaded?", func() {
+				Skip("Research")
+			})
+
+			Describe("Call replaceState with state, then pustState", func() {
+				BeforeEach(func() {
+					Expect(win.History().ReplaceState("page-2 state", "")).To(Succeed())
+					Expect(win.History().PushState(nil, "/page-3")).To(Succeed())
+				})
+
+				It("Should dispatch a popstate event with the state", func() {
+					var actualEvent dom.Event
+					win.AddEventListener(
+						"popstate",
+						dom.NewEventHandlerFunc(func(e dom.Event) error {
+							actualEvent = e
+							return nil
+						}),
+					)
+					Expect(win.History().Go(-1)).To(Succeed())
+
+					Expect(actualEvent).ToNot(BeNil(), "Event was dispatched")
+					popEvent, ok := actualEvent.(PopStateEvent)
+					Expect(ok).To(BeTrue(), "Event is a popstateevent")
+					Expect(popEvent.State()).To(Equal("page-2 state"), "Event state")
+				})
+			})
+		})
+
+		It("Go should return a Security error if the document is not fully active", func() {
+			Skip("TODO")
+			/*
+			   https://developer.mozilla.org/en-US/docs/Web/API/History/go
+
+			   Thrown if the associated document is not fully active, or if the
+			   provided url parameter is not a valid URL. Browsers also throttle navigations
+			   and may throw this error, generate a warning, or ignore the call if it's called
+			   too frequently
+			*/
+		})
+
 		Describe("ReplaceState", func() {
 			It("Should change 'location' but keep stack count", func() {
 				Expect(win.Navigate("/page-2")).To(Succeed())
@@ -97,11 +144,23 @@ var _ = Describe("Window", func() {
 			})
 
 			It("Should keep the same URL when the href is empty", func() {
-
+				Skip("TODO")
 			})
 		})
 
 		Describe("PushState", func() {
+			It("Should return a Security error if the document is not fully active", func() {
+				Skip("TODO")
+				/*
+				   https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
+
+				   Thrown if the associated document is not fully active, or if the
+				   provided url parameter is not a valid URL. Browsers also throttle navigations
+				   and may throw this error, generate a warning, or ignore the call if it's called
+				   too frequently
+				*/
+			})
+
 			Describe("Simple push and back", func() {
 				BeforeEach(func() {
 					Expect(win.Navigate("/page-2")).To(Succeed())
@@ -109,6 +168,19 @@ var _ = Describe("Window", func() {
 
 					Expect(win.History().Length()).To(Equal(3))
 					Expect(win.History().PushState(nil, "/page-4"))
+				})
+
+				It("Should not emit a hashchange event when just adding a hash", func() {
+					eventDispatched := false
+					win.AddEventListener(
+						"hashchange",
+						dom.NewEventHandlerFunc(func(e dom.Event) error {
+							eventDispatched = true
+							return nil
+						}),
+					)
+					Expect(win.History().PushState(nil, "/page-4#target"))
+					Expect(eventDispatched).To(BeFalse())
 				})
 
 				It("Should change 'location' and increase stack count, without a request", func() {

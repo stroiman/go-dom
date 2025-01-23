@@ -127,6 +127,9 @@ func (w *window) initScriptEngine() {
 }
 
 func (w *window) setBaseLocation(href string) string {
+	if href == "" {
+		return w.baseLocation
+	}
 	w.baseLocation = w.resolveHref(href).Href()
 	return w.baseLocation
 }
