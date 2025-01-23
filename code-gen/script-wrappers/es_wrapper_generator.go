@@ -180,7 +180,12 @@ func (a ESOperationArgument) OptionalInGo() bool {
 
 func (a ESOperationArgument) DefaultValueInGo() (string, bool) {
 	hasDefaultInGo := a.Optional && a.ArgumentSpec != nil && a.ArgumentSpec.hasDefault
-	return fmt.Sprintf("default%s", a.Type), hasDefaultInGo
+	defaultValue := a.ArgumentSpec.defaultValue
+	if defaultValue != "" {
+		return defaultValue, hasDefaultInGo
+	} else {
+		return fmt.Sprintf("default%s", a.Type), hasDefaultInGo
+	}
 }
 
 type ESOperation struct {

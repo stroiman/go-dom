@@ -3,12 +3,18 @@ package wrappers
 type TypeCustomization []string
 
 type ESMethodArgument struct {
-	required   bool
-	hasDefault bool
+	required     bool
+	hasDefault   bool
+	defaultValue string
 }
 
 func (a *ESMethodArgument) Required()   { a.required = true }
 func (a *ESMethodArgument) HasDefault() { a.hasDefault = true }
+
+func (a *ESMethodArgument) HasDefaultValue(value string) {
+	a.hasDefault = true
+	a.defaultValue = value
+}
 
 // ESMethodWrapper contains information about how to generate ES wrapper code
 // around a single class method.

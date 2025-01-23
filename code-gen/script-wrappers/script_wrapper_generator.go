@@ -369,6 +369,9 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	window.Method("originAgentCluster").SetNotImplemented()
 	window.Method("length").SetNotImplemented()
 
+	history := htmlSpecs.Type("History")
+	history.Method("go").Argument("delta").HasDefaultValue("0")
+
 	return ScriptWrapperModulesGenerator{
 		IdlSources:       idlSources,
 		Specs:            specs,

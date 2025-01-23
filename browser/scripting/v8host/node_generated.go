@@ -79,11 +79,7 @@ func (n nodeV8Wrapper) GetRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, er
 		result := instance.GetRootNode(options)
 		return ctx.getInstanceForNode(result)
 	}
-	if err0 != nil {
-		return nil, err0
-	}
-	result := instance.GetRootNode()
-	return ctx.getInstanceForNode(result)
+	return nil, errors.New("Missing arguments")
 }
 
 func (n nodeV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

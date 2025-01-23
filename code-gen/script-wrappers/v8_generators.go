@@ -288,6 +288,7 @@ func CreateV8WrapperMethodInstanceInvocations(
 		callInstance := createCallInstance(functionName, argnames, op)
 		if i > 0 {
 			arg := arguments[i-1]
+			optional := arg.Optional && !arg.ArgumentSpec.hasDefault
 			statements.Append(g.StatementList(
 				g.IfStmt{
 					Condition: g.Raw(jen.Id("args").Dot("noOfReadArguments").Op(">=").Lit(i)),
@@ -296,7 +297,7 @@ func CreateV8WrapperMethodInstanceInvocations(
 						callInstance,
 					),
 				}))
-			if !(arg.Optional) {
+			if !(optional) {
 				statements.Append(
 					g.Return(
 						g.Nil,
