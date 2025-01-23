@@ -7,8 +7,8 @@ require (
 	github.com/ericchiang/css v1.4.0
 	github.com/onsi/ginkgo/v2 v2.21.0
 	github.com/onsi/gomega v1.35.1
-	github.com/tommie/v8go v0.22.0
-	golang.org/x/net v0.31.0
+	github.com/tommie/v8go v0.28.0
+	golang.org/x/net v0.34.0
 )
 
 require (
@@ -18,16 +18,16 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/pprof v0.0.0-20241210010833-40e02aabc2ad // indirect
-	github.com/tommie/v8go/deps/android_amd64 v0.0.0-20241219041445-22cac2951eb8 // indirect
-	github.com/tommie/v8go/deps/android_arm64 v0.0.0-20241219041445-22cac2951eb8 // indirect
-	github.com/tommie/v8go/deps/darwin_amd64 v0.0.0-20241219041445-22cac2951eb8 // indirect
-	github.com/tommie/v8go/deps/darwin_arm64 v0.0.0-20241219041445-22cac2951eb8 // indirect
-	github.com/tommie/v8go/deps/linux_amd64 v0.0.0-20241219041445-22cac2951eb8 // indirect
-	github.com/tommie/v8go/deps/linux_arm64 v0.0.0-20241219041445-22cac2951eb8 // indirect
-	golang.org/x/sys v0.27.0 // indirect
+	github.com/tommie/v8go/deps/android_amd64 v0.0.0-20250116090852-b2a925bc7092 // indirect
+	github.com/tommie/v8go/deps/android_arm64 v0.0.0-20250116090852-b2a925bc7092 // indirect
+	github.com/tommie/v8go/deps/darwin_amd64 v0.0.0-20250116090852-b2a925bc7092 // indirect
+	github.com/tommie/v8go/deps/darwin_arm64 v0.0.0-20250116090852-b2a925bc7092 // indirect
+	github.com/tommie/v8go/deps/linux_amd64 v0.0.0-20250116090852-b2a925bc7092 // indirect
+	github.com/tommie/v8go/deps/linux_arm64 v0.0.0-20250116090852-b2a925bc7092 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/tommie/v8go v0.22.0 => github.com/stroiman/v8go v0.0.0-20250103174507-bbe1222bfaa0
+replace github.com/tommie/v8go => github.com/stroiman/v8go v0.0.0-20250116094955-dcf3ee9ea30c
