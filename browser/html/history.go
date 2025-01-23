@@ -131,6 +131,10 @@ func (h *History) pushLoad(href string) {
 	h.pushHistoryEntry(entry)
 }
 
+func (h History) State() HistoryState {
+	return h.entries[h.currentIdx()].state
+}
+
 type popStateEvent struct {
 	dom.Event
 	state HistoryState
