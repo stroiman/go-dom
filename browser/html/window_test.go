@@ -59,13 +59,13 @@ var _ = Describe("Window", func() {
 		It("Should have a length of two when navigating", func() {
 			Expect(win.Navigate("/page-2")).To(Succeed())
 			Expect(win.History().Length()).To(Equal(2))
-			Expect(win.Document().QuerySelector("h1")).To(HaveTextContent("/page-2"))
+			Expect(win.Document()).To(HaveH1("/page-2"))
 		})
 
 		It("Should go back, but keep the length", func() {
 			Expect(win.Navigate("/page-2")).To(Succeed())
 			Expect(win.History().Go(-1)).To(Succeed())
-			Expect(win.Document().QuerySelector("h1")).To(HaveTextContent("Go-DOM"))
+			Expect(win.Document()).To(HaveH1("Go-DOM"))
 			Expect(win.Location().Href()).To(Equal("about:blank"))
 		})
 
@@ -287,7 +287,7 @@ var _ = Describe("Window", func() {
 		Describe("Navigate", func() {
 			It("Should load a blank page when loading about:blank", func() {
 				Expect(window.Navigate("about:blank")).To(Succeed())
-				Expect(window.Document().QuerySelector("h1")).To(HaveTextContent("Go-DOM"))
+				Expect(window.Document()).To(HaveH1("Go-DOM"))
 			})
 		})
 
