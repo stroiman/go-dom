@@ -81,6 +81,53 @@ var _ = Describe("Window", func() {
 			Expect(win.History().Length()).To(Equal(3))
 			Expect(win.Location().Pathname()).To(Equal("/page-6"))
 		})
+
+		Describe("ReplaceState", func() {
+			It("Should change 'location' but keep stack count", func() {
+				Expect(win.Navigate("/page-2")).To(Succeed())
+				Expect(win.History().Length()).To(Equal(2))
+				Expect(win.History().ReplaceState(nil, "/page-3"))
+				Expect(h.RequestCount()).To(Equal(1))
+				Expect(win.History().Length()).To(Equal(2))
+				Expect(win.Location().Pathname()).To(Equal("/page-3"))
+			})
+
+			It("Should return an error on different origin", func() {
+				Skip("TODO")
+			})
+
+			It("Should keep the same URL when the href is empty", func() {
+
+			})
+		})
+
+		Describe("PushState", func() {
+			BeforeEach(func() {
+				Expect(win.Navigate("/page-2")).To(Succeed())
+				Expect(win.Navigate("/page-3")).To(Succeed())
+
+				Expect(win.History().Length()).To(Equal(3))
+				Expect(win.History().PushState(nil, "/page-4"))
+
+			})
+			It("Should change 'location' and increase stack count, without a request", func() {
+				Expect(win.History().Length()).To(Equal(4))
+				Expect(win.History().Length()).To(Equal(4))
+				Expect(win.Location().Pathname()).To(Equal("/page-4"))
+				Expect(h.RequestCount()).To(Equal(2), "No of request _after_ replaceState")
+			})
+
+			It("Navigates back without a request", func() {
+				Expect(win.History().Back()).To(Succeed())
+				Expect(win.History().Length()).To(Equal(4))
+				Expect(win.Location().Pathname()).To(Equal("/page-3"))
+				Expect(h.RequestCount()).To(Equal(2), "No of request _after_ back")
+			})
+
+			It("Should push the current URL if called with empty URL", func() {
+				Skip("TODO")
+			})
+		})
 	})
 
 	Describe("Location()", func() {

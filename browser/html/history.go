@@ -2,10 +2,19 @@ package html
 
 // Will eventually contain more information, e.g. state
 type historyEntry struct {
-	href string
+	// remote is true when the history entry was caused by a normal navigation,
+	// e.g., clicking a link. remote is false when a history entry was added
+	// through [pushState]
+	remote bool
+	state  HistoryState
+	href   string
 }
 
 // History implements the [History API]
+//
+// Note: Currently, state is represented by an interface{} type. THIS MAY
+// CHANGE. The data must be JSON serializable data, and once stored, it must not
+// be changed. Another datatype will eventually be used.
 //
 // [History API]: https://developer.mozilla.org/en-US/docs/Web/API/History
 type History struct {
@@ -13,6 +22,8 @@ type History struct {
 	entries    []historyEntry
 	currentPos int
 }
+
+type HistoryState = interface{}
 
 // Length returns the number of entries in the history. When navigating back,
 // the length doesn't change, as they last viewed page is still in history.
@@ -39,18 +50,55 @@ func (h *History) Forward() error { return h.Go(1) }
 //
 // See also: https://developer.mozilla.org/en-US/docs/Web/API/History/go
 func (h *History) Go(relative int) error {
+	prevEntry := h.entries[h.currentPos-1]
 	newPos := h.currentPos + relative
 	if newPos <= 0 || newPos > h.Length() {
 		return nil
 	}
 	h.currentPos = newPos
-	return h.window.reload(h.entries[h.currentPos-1].href)
+	newCurrentEntry := h.entries[h.currentPos-1]
+	newHref := newCurrentEntry.href
+	if prevEntry.remote {
+		return h.window.reload(newHref)
+	} else {
+		h.window.baseLocation = newHref
+		return nil
+	}
 }
 
-func (h *History) pushLoad(href string) {
+// ReplaceState the current [Window.Location] and history entry without making a
+// new request.
+//
+// The function corresponds to [replaceState on the History API] with the
+// following notes. If href is empty, the URL will not be updated; as if the
+// argument was not specified in the JS API.
+//
+// [replaceState on the History API]: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
+func (h *History) ReplaceState(state interface{}, href string) error {
+	idx := h.currentPos - 1
+	if href != "" {
+		newHref := h.window.setBaseLocation(href)
+		h.entries[idx].href = newHref
+	}
+	h.entries[idx].state = state
+	return nil
+}
+
+func (h *History) PushState(state HistoryState, href string) error {
+	newHref := h.window.setBaseLocation(href)
+	h.pushHistoryEntry(historyEntry{state: state, href: newHref, remote: false})
+	return nil
+}
+
+func (h *History) pushHistoryEntry(entry historyEntry) {
 	if h.currentPos < h.Length() {
 		h.entries = h.entries[0:h.currentPos]
 	}
 	h.currentPos++
-	h.entries = append(h.entries, historyEntry{href: href})
+	h.entries = append(h.entries, entry)
+}
+
+func (h *History) pushLoad(href string) {
+	entry := historyEntry{href: href, remote: true}
+	h.pushHistoryEntry(entry)
 }

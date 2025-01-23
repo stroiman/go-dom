@@ -126,9 +126,15 @@ func (w *window) initScriptEngine() {
 	}
 }
 
+func (w *window) setBaseLocation(href string) string {
+	w.baseLocation = w.resolveHref(href).Href()
+	return w.baseLocation
+}
+
 func (w *window) History() *History {
 	return w.history
 }
+
 func (w *window) ParseFragment(
 	ownerDocument Document,
 	reader io.Reader,
