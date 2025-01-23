@@ -26,9 +26,8 @@ type historyEntry struct {
 
 // History implements the [History API]
 //
-// Note: Currently, state is represented by an interface{} type. THIS MAY
-// CHANGE. The data must be JSON serializable data, and once stored, it must not
-// be changed. Another datatype will eventually be used.
+// Note: Currently, state is represented by string, but may change to a
+// different type representing a JSON object.
 //
 // [History API]: https://developer.mozilla.org/en-US/docs/Web/API/History
 type History struct {
@@ -102,7 +101,7 @@ func (h *History) Go(relative int) error {
 // argument was not specified in the JS API.
 //
 // [replaceState on the History API]: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-func (h *History) ReplaceState(state interface{}, href string) error {
+func (h *History) ReplaceState(state HistoryState, href string) error {
 	idx := h.currentIdx()
 	h.entries[idx].href = h.window.setBaseLocation(href)
 	h.entries[idx].state = state
@@ -145,4 +144,6 @@ func (e popStateEvent) State() HistoryState {
 	return e.state
 }
 
-type HistoryState = interface{}
+type HistoryState string
+
+const EMPTY_STATE HistoryState = ""

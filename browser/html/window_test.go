@@ -95,7 +95,7 @@ var _ = Describe("Window", func() {
 			Describe("Call replaceState with state, then pustState", func() {
 				BeforeEach(func() {
 					Expect(win.History().ReplaceState("page-2 state", "")).To(Succeed())
-					Expect(win.History().PushState(nil, "/page-3")).To(Succeed())
+					Expect(win.History().PushState(EMPTY_STATE, "/page-3")).To(Succeed())
 				})
 
 				It("Should dispatch a popstate event with the state", func() {
@@ -112,7 +112,7 @@ var _ = Describe("Window", func() {
 					Expect(actualEvent).ToNot(BeNil(), "Event was dispatched")
 					popEvent, ok := actualEvent.(PopStateEvent)
 					Expect(ok).To(BeTrue(), "Event is a popstateevent")
-					Expect(popEvent.State()).To(Equal("page-2 state"), "Event state")
+					Expect(popEvent.State()).To(BeEquivalentTo("page-2 state"), "Event state")
 				})
 			})
 		})
@@ -133,7 +133,7 @@ var _ = Describe("Window", func() {
 			It("Should change 'location' but keep stack count", func() {
 				Expect(win.Navigate("/page-2")).To(Succeed())
 				Expect(win.History().Length()).To(Equal(2))
-				Expect(win.History().ReplaceState(nil, "/page-3"))
+				Expect(win.History().ReplaceState(EMPTY_STATE, "/page-3"))
 				Expect(h.RequestCount()).To(Equal(1))
 				Expect(win.History().Length()).To(Equal(2))
 				Expect(win.Location().Pathname()).To(Equal("/page-3"))
@@ -167,7 +167,7 @@ var _ = Describe("Window", func() {
 					Expect(win.Navigate("/page-3")).To(Succeed())
 
 					Expect(win.History().Length()).To(Equal(3))
-					Expect(win.History().PushState(nil, "/page-4"))
+					Expect(win.History().PushState(EMPTY_STATE, "/page-4"))
 				})
 
 				It("Should not emit a hashchange event when just adding a hash", func() {
@@ -179,7 +179,7 @@ var _ = Describe("Window", func() {
 							return nil
 						}),
 					)
-					Expect(win.History().PushState(nil, "/page-4#target"))
+					Expect(win.History().PushState(EMPTY_STATE, "/page-4#target"))
 					Expect(eventDispatched).To(BeFalse())
 				})
 
@@ -207,12 +207,12 @@ var _ = Describe("Window", func() {
 					Expect(win.Navigate("/page-2")).To(Succeed())
 					Expect(win.Navigate("/page-3")).To(Succeed())
 					Expect(win.History().Length()).To(Equal(3))
-					Expect(win.History().PushState(nil, "/page-4"))
-					Expect(win.History().PushState(nil, "/page-5"))
+					Expect(win.History().PushState(EMPTY_STATE, "/page-4"))
+					Expect(win.History().PushState(EMPTY_STATE, "/page-5"))
 					Expect(win.Navigate("/page-6")).To(Succeed())
 					Expect(win.Navigate("/page-7")).To(Succeed())
-					Expect(win.History().PushState(nil, "/page-8"))
-					Expect(win.History().PushState(nil, "/page-9"))
+					Expect(win.History().PushState(EMPTY_STATE, "/page-8"))
+					Expect(win.History().PushState(EMPTY_STATE, "/page-9"))
 					Expect(win.History().Length()).To(Equal(9))
 					Expect(h.RequestCount()).To(Equal(4))
 				})
