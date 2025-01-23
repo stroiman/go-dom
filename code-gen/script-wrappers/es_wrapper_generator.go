@@ -140,7 +140,13 @@ func createOperation(typeSpec WrapperTypeSpec, member MemberSpec) ESOperation {
 		Arguments:            []ESOperationArgument{},
 	}
 	for _, arg := range member.Arguments {
-		esArgumentSpec := methodCustomization.Argument(arg.Name)
+		var esArgumentSpec ESMethodArgument
+		if arg := methodCustomization.Argument(arg.Name); arg != nil {
+			esArgumentSpec = *arg
+		}
+		if esArgumentSpec.ignored {
+			continue
+		}
 		esArg := ESOperationArgument{
 			Name:         arg.Name,
 			Optional:     arg.Optional && !esArgumentSpec.required,
@@ -170,17 +176,22 @@ type ESOperationArgument struct {
 	Optional     bool
 	Variadic     bool
 	IdlType      IdlTypes
-	ArgumentSpec *ESMethodArgument
+	ArgumentSpec ESMethodArgument
 }
 
 func (a ESOperationArgument) OptionalInGo() bool {
-	hasDefault := a.ArgumentSpec != nil && a.ArgumentSpec.hasDefault
+	hasDefault := a.ArgumentSpec.hasDefault
 	return a.Optional && !hasDefault
 }
 
-func (a ESOperationArgument) DefaultValueInGo() (string, bool) {
-	hasDefaultInGo := a.Optional && a.ArgumentSpec != nil && a.ArgumentSpec.hasDefault
-	return fmt.Sprintf("default%s", a.Type), hasDefaultInGo
+func (a ESOperationArgument) DefaultValueInGo() (name string, ok bool) {
+	ok = a.Optional && a.ArgumentSpec.hasDefault
+	if defaultValue := a.ArgumentSpec.defaultValue; defaultValue != "" {
+		name = defaultValue
+	} else {
+		name = fmt.Sprintf("default%s", a.Type)
+	}
+	return
 }
 
 type ESOperation struct {
@@ -199,6 +210,18 @@ func (op ESOperation) GetHasError() bool {
 
 func (op ESOperation) HasResult() bool {
 	return op.RetType.IsDefined()
+}
+
+func (o ESOperation) Encoder() string {
+	if e := o.MethodCustomization.Encoder; e != "" {
+		return e
+	}
+	converter := "to"
+	if o.RetType.Nullable {
+		converter += "Nullable"
+	}
+	converter += idlNameToGoName(o.RetType.TypeName)
+	return converter
 }
 
 type ESAttribute struct {

@@ -239,6 +239,7 @@ func tryParseArgWithDefault[T any](
 	parsers ...func(*V8ScriptContext, *v8.Value) (T, error),
 ) (result T, err error) {
 	if index >= len(args.Args()) {
+		args.noOfReadArguments++
 		return defaultValue(), nil
 	} else {
 		return tryParseArg(args, index, parsers...)

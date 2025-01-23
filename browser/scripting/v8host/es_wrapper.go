@@ -72,8 +72,12 @@ func (w converters) decodeBoolean(ctx *V8ScriptContext, val *v8.Value) (bool, er
 	return val.Boolean(), nil
 }
 
-func (w converters) decodeUnsignedLong(ctx *V8ScriptContext, val *v8.Value) (int, error) {
+func (w converters) decodeLong(ctx *V8ScriptContext, val *v8.Value) (int, error) {
 	return int(val.Int32()), nil
+}
+
+func (w converters) decodeUnsignedLong(ctx *V8ScriptContext, val *v8.Value) (int, error) {
+	return int(val.Uint32()), nil
 }
 
 func (w converters) decodeNode(ctx *V8ScriptContext, val *v8.Value) (dom.Node, error) {

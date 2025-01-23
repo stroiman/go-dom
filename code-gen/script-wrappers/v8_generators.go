@@ -288,6 +288,7 @@ func CreateV8WrapperMethodInstanceInvocations(
 		callInstance := createCallInstance(functionName, argnames, op)
 		if i > 0 {
 			arg := arguments[i-1]
+			// optional := arg.OptionalInGo()
 			statements.Append(g.StatementList(
 				g.IfStmt{
 					Condition: g.Raw(jen.Id("args").Dot("noOfReadArguments").Op(">=").Lit(i)),
@@ -296,7 +297,7 @@ func CreateV8WrapperMethodInstanceInvocations(
 						callInstance,
 					),
 				}))
-			if !(arg.Optional) {
+			if !arg.OptionalInGo() {
 				statements.Append(
 					g.Return(
 						g.Nil,
@@ -399,11 +400,7 @@ func (c V8InstanceInvocation) GetGenerator() V8InstanceInvocationResult {
 				list.Append(valueReturn)
 			}
 		} else {
-			converter := "to"
-			if retType.Nullable {
-				converter += "Nullable"
-			}
-			converter += idlNameToGoName(retType.TypeName)
+			converter := c.Op.Encoder()
 			genRes.RequireContext = true
 			valueReturn := g.Return(c.Receiver.Method(converter).Call(g.Id("ctx"), g.Id("result")))
 			if genRes.HasError {
