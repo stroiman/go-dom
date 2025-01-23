@@ -14,7 +14,7 @@ type EchoHandler struct {
 
 func (h *EchoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.Requests = append(h.Requests, r)
-	w.Write([]byte(fmt.Sprintf("<body><h1>%s</h1></body>", r.URL.Path)))
+	w.Write([]byte(fmt.Sprintf(`<body><h1 id="heading">%s</h1></body>`, r.URL.Path)))
 }
 
 // RequestCount returns how many HTTP requests have been made to the handler

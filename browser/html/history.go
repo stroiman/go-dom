@@ -51,14 +51,31 @@ func (h *History) Forward() error { return h.Go(1) }
 // See also: https://developer.mozilla.org/en-US/docs/Web/API/History/go
 func (h *History) Go(relative int) error {
 	prevEntry := h.entries[h.currentPos-1]
+	if relative == 0 {
+		return h.window.reload(prevEntry.href)
+	}
+
+	shouldReload := false
 	newPos := h.currentPos + relative
 	if newPos <= 0 || newPos > h.Length() {
 		return nil
 	}
+	if relative < 0 {
+		// go back
+		for i := h.currentPos; i > newPos; i-- {
+			shouldReload = shouldReload || h.entries[i-1].remote
+		}
+	} else {
+		// go forward
+		for i := h.currentPos; i < newPos; i++ {
+			shouldReload = shouldReload || h.entries[i].remote
+		}
+	}
+
 	h.currentPos = newPos
 	newCurrentEntry := h.entries[h.currentPos-1]
 	newHref := newCurrentEntry.href
-	if prevEntry.remote {
+	if shouldReload {
 		return h.window.reload(newHref)
 	} else {
 		h.window.baseLocation = newHref

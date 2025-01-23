@@ -102,30 +102,94 @@ var _ = Describe("Window", func() {
 		})
 
 		Describe("PushState", func() {
-			BeforeEach(func() {
-				Expect(win.Navigate("/page-2")).To(Succeed())
-				Expect(win.Navigate("/page-3")).To(Succeed())
+			Describe("Simple push and back", func() {
+				BeforeEach(func() {
+					Expect(win.Navigate("/page-2")).To(Succeed())
+					Expect(win.Navigate("/page-3")).To(Succeed())
 
-				Expect(win.History().Length()).To(Equal(3))
-				Expect(win.History().PushState(nil, "/page-4"))
+					Expect(win.History().Length()).To(Equal(3))
+					Expect(win.History().PushState(nil, "/page-4"))
+				})
 
+				It("Should change 'location' and increase stack count, without a request", func() {
+					Expect(win.History().Length()).To(Equal(4))
+					Expect(win.History().Length()).To(Equal(4))
+					Expect(win.Location().Pathname()).To(Equal("/page-4"))
+					Expect(h.RequestCount()).To(Equal(2), "No of request _after_ replaceState")
+				})
+
+				It("Navigates back without a request", func() {
+					Expect(win.History().Back()).To(Succeed())
+					Expect(win.History().Length()).To(Equal(4))
+					Expect(win.Location().Pathname()).To(Equal("/page-3"))
+					Expect(h.RequestCount()).To(Equal(2), "No of request _after_ back")
+				})
+
+				It("Should push the current URL if called with empty URL", func() {
+					Skip("TODO")
+				})
 			})
-			It("Should change 'location' and increase stack count, without a request", func() {
-				Expect(win.History().Length()).To(Equal(4))
-				Expect(win.History().Length()).To(Equal(4))
-				Expect(win.Location().Pathname()).To(Equal("/page-4"))
-				Expect(h.RequestCount()).To(Equal(2), "No of request _after_ replaceState")
-			})
 
-			It("Navigates back without a request", func() {
-				Expect(win.History().Back()).To(Succeed())
-				Expect(win.History().Length()).To(Equal(4))
-				Expect(win.Location().Pathname()).To(Equal("/page-3"))
-				Expect(h.RequestCount()).To(Equal(2), "No of request _after_ back")
-			})
+			Describe("History with multiple pushState and navigation intermixed", func() {
+				BeforeEach(func() {
+					Expect(win.Navigate("/page-2")).To(Succeed())
+					Expect(win.Navigate("/page-3")).To(Succeed())
+					Expect(win.History().Length()).To(Equal(3))
+					Expect(win.History().PushState(nil, "/page-4"))
+					Expect(win.History().PushState(nil, "/page-5"))
+					Expect(win.Navigate("/page-6")).To(Succeed())
+					Expect(win.Navigate("/page-7")).To(Succeed())
+					Expect(win.History().PushState(nil, "/page-8"))
+					Expect(win.History().PushState(nil, "/page-9"))
+					Expect(win.History().Length()).To(Equal(9))
+					Expect(h.RequestCount()).To(Equal(4))
+				})
 
-			It("Should push the current URL if called with empty URL", func() {
-				Skip("TODO")
+				It("Should not issue an HTTP request on go(-2)", func() {
+					Expect(win.History().Go(-2)).To(Succeed())
+					Expect(win.History().Length()).To(Equal(9))
+					Expect(h.RequestCount()).To(Equal(4))
+					Expect(win.Document().GetElementById("heading")).To(HaveTextContent("/page-7"))
+				})
+
+				It("Should issue an HTTP request on go(-3)", func() {
+					Expect(win.History().Go(-3)).To(Succeed())
+					Expect(win.History().Length()).To(Equal(9))
+					Expect(h.RequestCount()).To(Equal(5))
+					Expect(win.Document().GetElementById("heading")).To(HaveTextContent("/page-6"))
+				})
+
+				Describe("After history.go(-5)", func() {
+					BeforeEach(func() {
+						Expect(win.History().Go(-5)).To(Succeed())
+					})
+
+					It("Should have loaded page 4", func() {
+						Expect(
+							win.Document().GetElementById("heading"),
+						).To(HaveTextContent("/page-4"))
+					})
+
+					It("Should have issued a new request", func() {
+						Expect(win.History().Length()).To(Equal(9))
+						Expect(h.RequestCount()).To(Equal(5))
+					})
+
+					It("Should not issue a new request on go(1)", func() {
+						Expect(win.History().Go(1)).To(Succeed())
+						Expect(win.History().Length()).To(Equal(9))
+						Expect(h.RequestCount()).To(Equal(5))
+					})
+
+					It("Should issue a new request on go(2)", func() {
+						Expect(win.History().Go(2)).To(Succeed())
+						Expect(win.History().Length()).To(Equal(9))
+						Expect(h.RequestCount()).To(Equal(6))
+						Expect(
+							win.Document().GetElementById("heading"),
+						).To(HaveTextContent("/page-6"))
+					})
+				})
 			})
 		})
 	})
