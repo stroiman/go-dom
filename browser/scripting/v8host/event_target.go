@@ -2,10 +2,8 @@ package v8host
 
 import (
 	"errors"
-	"runtime/cgo"
 
 	"github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser/internal/entity"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -33,57 +31,6 @@ func (l v8EventListener) HandleEvent(e dom.Event) error {
 func (l v8EventListener) Equals(other dom.EventHandler) bool {
 	x, ok := other.(v8EventListener)
 	return ok && x.val == l.val
-}
-
-func createEvent(host *V8ScriptHost) *v8.FunctionTemplate {
-	result := newIllegalConstructorBuilder[dom.Event](host)
-	result.SetDefaultInstanceLookup()
-	protoBuilder := result.NewPrototypeBuilder()
-	protoBuilder.CreateReadonlyProp("type", dom.Event.Type)
-	protoBuilder.CreateFunction(
-		"preventDefault",
-		func(instance dom.Event, a argumentHelper) (*v8.Value, error) {
-			instance.PreventDefault()
-			return nil, nil
-		},
-	)
-	return result.constructor
-}
-
-func createCustomEvent(host *V8ScriptHost) *v8.FunctionTemplate {
-	iso := host.iso
-	res := v8.NewFunctionTemplateWithError(
-		iso,
-		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-			ctx := host.mustGetContext(info.Context())
-			args := info.Args()
-			if len(args) < 1 {
-				return nil, v8.NewTypeError(iso, "Must have at least one constructor argument")
-			}
-			var eventOptions []dom.EventOption
-			if len(args) > 1 {
-				if options, err := args[1].AsObject(); err == nil {
-					bubbles, err1 := options.Get("bubbles")
-					cancelable, err2 := options.Get("cancelable")
-					err = errors.Join(err1, err2)
-					if err != nil {
-						return nil, err
-					}
-					eventOptions = []dom.EventOption{
-						dom.EventBubbles(bubbles.Boolean()),
-						dom.EventCancelable(cancelable.Boolean()),
-					}
-				}
-			}
-			e := dom.NewCustomEvent(args[0].String(), eventOptions...)
-			handle := cgo.NewHandle(e)
-			ctx.addDisposer(handleDisposable(handle))
-			info.This().SetInternalField(0, v8.NewValueExternalHandle(iso, handle))
-			return v8.Undefined(iso), nil
-		},
-	)
-	res.InstanceTemplate().SetInternalFieldCount(1)
-	return res
 }
 
 type eventTargetV8Wrapper struct {
@@ -159,50 +106,4 @@ func createEventTarget(host *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTemplate := res.InstanceTemplate()
 	instanceTemplate.SetInternalFieldCount(1)
 	return res
-}
-
-func (w eventV8Wrapper) decodeEventInit(
-	ctx *V8ScriptContext,
-	v *v8.Value,
-) (dom.EventOption, error) {
-	var eventOptions []dom.EventOption
-	options, err0 := v.AsObject()
-
-	bubbles, err1 := options.Get("bubbles")
-	cancelable, err2 := options.Get("cancelable")
-	err := errors.Join(err0, err1, err2)
-	if err == nil {
-		eventOptions = []dom.EventOption{
-			dom.EventBubbles(bubbles.Boolean()),
-			dom.EventCancelable(cancelable.Boolean()),
-		}
-	}
-	return dom.EventOptions(eventOptions), nil
-}
-
-func (w eventV8Wrapper) defaultEventInit() dom.EventOption {
-	return dom.EventOptions(nil)
-}
-
-func (w eventV8Wrapper) CreateInstance(
-	ctx *V8ScriptContext,
-	this *v8.Object,
-	type_ string,
-	o dom.EventOption,
-) (*v8.Value, error) {
-	e := dom.NewEvent(type_, o)
-	return w.store(e, ctx, this)
-}
-
-func (w eventV8Wrapper) toNullableEventTarget(
-	ctx *V8ScriptContext,
-	e dom.EventTarget,
-) (*v8.Value, error) {
-	if e == nil {
-		return v8.Null(w.scriptHost.iso), nil
-	}
-	if entity, ok := e.(entity.Entity); ok {
-		return ctx.getInstanceForNode(entity)
-	}
-	return nil, v8.NewError(w.iso(), "TODO, Not yet supported")
 }
