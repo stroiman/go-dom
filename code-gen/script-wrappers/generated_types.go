@@ -15,6 +15,10 @@ type WrapperInstance struct{ g.Value }
 
 func (i WrapperInstance) GetScriptHost() g.Value { return i.Field("host") }
 
+func (i WrapperInstance) MustGetContext(info g.Generator) g.Generator {
+	return i.Method("mustGetContext").Call(info)
+}
+
 type v8PrototypeTemplate struct{ g.Value }
 
 func (proto v8PrototypeTemplate) Set(name string, handler g.Generator) g.Generator {

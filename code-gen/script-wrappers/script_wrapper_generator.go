@@ -247,17 +247,17 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	url.InnerTypeName = "Url"
 	url.Receiver = "u"
 	url.MarkMembersAsNotImplemented(
-		"SetHref",
-		"SetProtocol",
+		"setHref",
+		"setProtocol",
 		"username",
 		"password",
-		"SetHost",
-		"SetPort",
-		"SetHostname",
-		"SetPathname",
+		"setHost",
+		"setPort",
+		"setHostname",
+		"setPathname",
 		"searchParams",
-		"SetHash",
-		"SetSearch",
+		"setHash",
+		"setSearch",
 	)
 
 	domSpecs := specs.Module("dom")

@@ -95,6 +95,6 @@ func (xhr xmlHttpRequestV8Wrapper) open(
 	return
 }
 
-func (xhr xmlHttpRequestV8Wrapper) Upload(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) upload(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return info.This().Value, nil
 }

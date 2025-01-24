@@ -68,10 +68,10 @@ func (builder ConstructorBuilder) InstallAttributeHandler(
 	if getter == nil {
 		return g.Noop
 	}
-	getterFt := builder.NewFunctionTemplate(wrapper.Field(getter.Name))
+	getterFt := builder.NewFunctionTemplate(wrapper.Field(getter.WrapperMethodName()))
 	setterFt := g.Nil
 	if setter != nil {
-		setterFt = builder.NewFunctionTemplate(wrapper.Field(setter.Name))
+		setterFt = builder.NewFunctionTemplate(wrapper.Field(setter.WrapperMethodName()))
 	}
 	return builder.Proto.SetAccessorProperty(
 		op.Name,

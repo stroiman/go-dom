@@ -11,9 +11,9 @@ func init() {
 	registerJSClass("Element", "Node", createElementPrototype)
 }
 
-func createElementPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
-	iso := host.iso
-	wrapper := newElementV8Wrapper(host)
+func createElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
+	iso := scriptHost.iso
+	wrapper := newElementV8Wrapper(scriptHost)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()
@@ -45,43 +45,43 @@ func createElementPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.Set("insertAdjacentText", v8.NewFunctionTemplateWithError(iso, wrapper.insertAdjacentText))
 
 	prototypeTmpl.SetAccessorProperty("namespaceURI",
-		v8.NewFunctionTemplateWithError(iso, wrapper.NamespaceURI),
+		v8.NewFunctionTemplateWithError(iso, wrapper.namespaceURI),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("prefix",
-		v8.NewFunctionTemplateWithError(iso, wrapper.Prefix),
+		v8.NewFunctionTemplateWithError(iso, wrapper.prefix),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("localName",
-		v8.NewFunctionTemplateWithError(iso, wrapper.LocalName),
+		v8.NewFunctionTemplateWithError(iso, wrapper.localName),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("tagName",
-		v8.NewFunctionTemplateWithError(iso, wrapper.TagName),
+		v8.NewFunctionTemplateWithError(iso, wrapper.tagName),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("id",
-		v8.NewFunctionTemplateWithError(iso, wrapper.Id),
-		v8.NewFunctionTemplateWithError(iso, wrapper.SetId),
+		v8.NewFunctionTemplateWithError(iso, wrapper.id),
+		v8.NewFunctionTemplateWithError(iso, wrapper.setId),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("className",
-		v8.NewFunctionTemplateWithError(iso, wrapper.ClassName),
-		v8.NewFunctionTemplateWithError(iso, wrapper.SetClassName),
+		v8.NewFunctionTemplateWithError(iso, wrapper.className),
+		v8.NewFunctionTemplateWithError(iso, wrapper.setClassName),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("classList",
-		v8.NewFunctionTemplateWithError(iso, wrapper.ClassList),
+		v8.NewFunctionTemplateWithError(iso, wrapper.classList),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("slot",
-		v8.NewFunctionTemplateWithError(iso, wrapper.Slot),
-		v8.NewFunctionTemplateWithError(iso, wrapper.SetSlot),
+		v8.NewFunctionTemplateWithError(iso, wrapper.slot),
+		v8.NewFunctionTemplateWithError(iso, wrapper.setSlot),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("attributes",
-		v8.NewFunctionTemplateWithError(iso, wrapper.Attributes),
+		v8.NewFunctionTemplateWithError(iso, wrapper.attributes),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("shadowRoot",
-		v8.NewFunctionTemplateWithError(iso, wrapper.ShadowRoot),
+		v8.NewFunctionTemplateWithError(iso, wrapper.shadowRoot),
 		nil,
 		v8.None)
 
@@ -138,7 +138,7 @@ func (e elementV8Wrapper) toggleAttribute(info *v8.FunctionCallbackInfo) (*v8.Va
 }
 
 func (e elementV8Wrapper) hasAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := e.host.mustGetContext(info.Context())
+	ctx := e.mustGetContext(info)
 	args := newArgumentHelper(e.host, info)
 	instance, err0 := e.getInstance(info)
 	qualifiedName, err1 := tryParseArg(args, 0, e.decodeDOMString)
@@ -182,7 +182,7 @@ func (e elementV8Wrapper) attachShadow(info *v8.FunctionCallbackInfo) (*v8.Value
 }
 
 func (e elementV8Wrapper) matches(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := e.host.mustGetContext(info.Context())
+	ctx := e.mustGetContext(info)
 	args := newArgumentHelper(e.host, info)
 	instance, err0 := e.getInstance(info)
 	selectors, err1 := tryParseArg(args, 0, e.decodeDOMString)
@@ -221,20 +221,20 @@ func (e elementV8Wrapper) insertAdjacentText(info *v8.FunctionCallbackInfo) (*v8
 	return nil, errors.New("Element.insertAdjacentText: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) NamespaceURI(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Element.NamespaceURI: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (e elementV8Wrapper) namespaceURI(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Element.namespaceURI: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) Prefix(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Element.Prefix: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (e elementV8Wrapper) prefix(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Element.prefix: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) LocalName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Element.LocalName: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (e elementV8Wrapper) localName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Element.localName: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) TagName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := e.host.mustGetContext(info.Context())
+func (e elementV8Wrapper) tagName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := e.mustGetContext(info)
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -243,32 +243,32 @@ func (e elementV8Wrapper) TagName(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	return e.toDOMString(ctx, result)
 }
 
-func (e elementV8Wrapper) Id(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Element.Id: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (e elementV8Wrapper) id(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Element.id: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) SetId(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Element.SetId: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (e elementV8Wrapper) setId(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Element.setId: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) ClassName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Element.ClassName: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (e elementV8Wrapper) className(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Element.className: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) SetClassName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Element.SetClassName: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (e elementV8Wrapper) setClassName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Element.setClassName: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) Slot(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Element.Slot: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (e elementV8Wrapper) slot(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Element.slot: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) SetSlot(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Element.SetSlot: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (e elementV8Wrapper) setSlot(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Element.setSlot: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) Attributes(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := e.host.mustGetContext(info.Context())
+func (e elementV8Wrapper) attributes(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := e.mustGetContext(info)
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -277,6 +277,6 @@ func (e elementV8Wrapper) Attributes(info *v8.FunctionCallbackInfo) (*v8.Value, 
 	return e.toNamedNodeMap(ctx, result)
 }
 
-func (e elementV8Wrapper) ShadowRoot(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Element.ShadowRoot: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (e elementV8Wrapper) shadowRoot(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("Element.shadowRoot: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }

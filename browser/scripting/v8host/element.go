@@ -75,7 +75,7 @@ func (w *elementV8Wrapper) setTextContent(info *v8.FunctionCallbackInfo) (*v8.Va
 	return nil, err
 }
 
-func (e elementV8Wrapper) ClassList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) classList(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	tokenList := e.host.globals.namedGlobals["DOMTokenList"]
 	ctx := e.host.mustGetContext(info.Context())
 	instance, err := tokenList.InstanceTemplate().NewInstance(ctx.v8ctx)

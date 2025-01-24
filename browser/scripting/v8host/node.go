@@ -13,7 +13,7 @@ func newNodeV8Wrapper(host *V8ScriptHost) nodeV8Wrapper {
 	return nodeV8Wrapper{newNodeV8WrapperBase[dom.Node](host)}
 }
 
-func (n nodeV8Wrapper) NodeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (n nodeV8Wrapper) nodeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	instance, err := n.getInstance(info)
 	if err != nil {
 		return nil, err

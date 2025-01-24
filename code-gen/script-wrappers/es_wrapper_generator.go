@@ -88,7 +88,6 @@ func CreateAttributes(
 		if methodCustomization.Ignored {
 			continue
 		}
-
 		var (
 			getter *ESOperation
 			setter *ESOperation
@@ -102,15 +101,14 @@ func CreateAttributes(
 			RetType:              attribute.AttributeType(),
 			MethodCustomization:  methodCustomization,
 		}
-		getter.Name = idlNameToGoName(getter.Name)
-		if attribute.Readonly {
-		} else {
+		if !attribute.Readonly {
 			setter = new(ESOperation)
 			*setter = *getter
-			setter.Name = fmt.Sprintf("Set%s", getter.Name)
+			setter.Name = fmt.Sprintf("set%s", idlNameToGoName(getter.Name))
 			methodCustomization := dataData.GetMethodCustomization(setter.Name)
 			setter.NotImplemented = setter.NotImplemented || methodCustomization.NotImplemented
-			setter.CustomImplementation = setter.CustomImplementation || methodCustomization.CustomImplementation
+			setter.CustomImplementation = setter.CustomImplementation ||
+				methodCustomization.CustomImplementation
 			setter.RetType = NewRetTypeUndefined()
 			setter.Arguments = []ESOperationArgument{{
 				Name:     "val",
@@ -208,6 +206,8 @@ func (o ESOperation) WrapperMethodName() string {
 	switch o.Name {
 	case "go":
 		return "go_"
+	case "host":
+		return "host_"
 	default:
 		return o.Name
 	}

@@ -11,9 +11,9 @@ func init() {
 	registerJSClass("History", "", createHistoryPrototype)
 }
 
-func createHistoryPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
-	iso := host.iso
-	wrapper := newHistoryV8Wrapper(host)
+func createHistoryPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
+	iso := scriptHost.iso
+	wrapper := newHistoryV8Wrapper(scriptHost)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()
@@ -27,11 +27,11 @@ func createHistoryPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.Set("replaceState", v8.NewFunctionTemplateWithError(iso, wrapper.replaceState))
 
 	prototypeTmpl.SetAccessorProperty("length",
-		v8.NewFunctionTemplateWithError(iso, wrapper.Length),
+		v8.NewFunctionTemplateWithError(iso, wrapper.length),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("state",
-		v8.NewFunctionTemplateWithError(iso, wrapper.State),
+		v8.NewFunctionTemplateWithError(iso, wrapper.state),
 		nil,
 		v8.None)
 
@@ -107,8 +107,8 @@ func (h historyV8Wrapper) replaceState(info *v8.FunctionCallbackInfo) (*v8.Value
 	return nil, errors.New("Missing arguments")
 }
 
-func (h historyV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := h.host.mustGetContext(info.Context())
+func (h historyV8Wrapper) length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := h.mustGetContext(info)
 	instance, err := h.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -117,8 +117,8 @@ func (h historyV8Wrapper) Length(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	return h.toUnsignedLong(ctx, result)
 }
 
-func (h historyV8Wrapper) State(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := h.host.mustGetContext(info.Context())
+func (h historyV8Wrapper) state(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := h.mustGetContext(info)
 	instance, err := h.getInstance(info)
 	if err != nil {
 		return nil, err

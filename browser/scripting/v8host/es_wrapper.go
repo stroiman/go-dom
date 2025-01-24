@@ -19,6 +19,10 @@ type nodeV8WrapperBase[T entity.Entity] struct {
 	host *V8ScriptHost
 }
 
+func (w nodeV8WrapperBase[T]) mustGetContext(info *v8.FunctionCallbackInfo) *V8ScriptContext {
+	return w.host.mustGetContext(info.Context())
+}
+
 func newNodeV8WrapperBase[T entity.Entity](host *V8ScriptHost) nodeV8WrapperBase[T] {
 	return nodeV8WrapperBase[T]{converters{}, host}
 }
@@ -150,6 +154,10 @@ func (w converters) toNodeList(ctx *V8ScriptContext, val NodeList) (*v8.Value, e
 type handleReffedObject[T any] struct {
 	host *V8ScriptHost
 	converters
+}
+
+func (o handleReffedObject[T]) mustGetContext(info *v8.FunctionCallbackInfo) *V8ScriptContext {
+	return o.host.mustGetContext(info.Context())
 }
 
 func newHandleReffedObject[T any](host *V8ScriptHost) handleReffedObject[T] {

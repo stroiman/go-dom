@@ -9,7 +9,7 @@ func (w nodeWrapper) constructor(call g.ConstructorCall, r *g.Runtime) *g.Object
 	panic(r.NewTypeError("Illegal Constructor"))
 }
 
-func (w nodeWrapper) NodeType(c g.FunctionCall) g.Value {
+func (w nodeWrapper) nodeType(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	return w.toUnsignedShort(int(instance.NodeType()))
 }

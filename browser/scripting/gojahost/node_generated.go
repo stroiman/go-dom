@@ -24,14 +24,14 @@ func (w nodeWrapper) initializePrototype(prototype *g.Object, vm *g.Runtime) {
 	prototype.Set("insertBefore", w.insertBefore)
 	prototype.Set("appendChild", w.appendChild)
 	prototype.Set("removeChild", w.removeChild)
-	prototype.DefineAccessorProperty("nodeType", w.ctx.vm.ToValue(w.NodeType), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("nodeName", w.ctx.vm.ToValue(w.NodeName), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("isConnected", w.ctx.vm.ToValue(w.IsConnected), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("ownerDocument", w.ctx.vm.ToValue(w.OwnerDocument), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("childNodes", w.ctx.vm.ToValue(w.ChildNodes), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("firstChild", w.ctx.vm.ToValue(w.FirstChild), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("previousSibling", w.ctx.vm.ToValue(w.PreviousSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
-	prototype.DefineAccessorProperty("nextSibling", w.ctx.vm.ToValue(w.NextSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("nodeType", w.ctx.vm.ToValue(w.nodeType), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("nodeName", w.ctx.vm.ToValue(w.nodeName), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("isConnected", w.ctx.vm.ToValue(w.isConnected), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("ownerDocument", w.ctx.vm.ToValue(w.ownerDocument), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("childNodes", w.ctx.vm.ToValue(w.childNodes), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("firstChild", w.ctx.vm.ToValue(w.firstChild), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("previousSibling", w.ctx.vm.ToValue(w.previousSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("nextSibling", w.ctx.vm.ToValue(w.nextSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 }
 
 func (w nodeWrapper) getRootNode(c g.FunctionCall) g.Value {
@@ -79,41 +79,41 @@ func (w nodeWrapper) removeChild(c g.FunctionCall) g.Value {
 	return w.toNode(result)
 }
 
-func (w nodeWrapper) NodeName(c g.FunctionCall) g.Value {
+func (w nodeWrapper) nodeName(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	result := instance.NodeName()
 	return w.toDOMString(result)
 }
 
-func (w nodeWrapper) IsConnected(c g.FunctionCall) g.Value {
+func (w nodeWrapper) isConnected(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	result := instance.IsConnected()
 	return w.toBoolean(result)
 }
 
-func (w nodeWrapper) OwnerDocument(c g.FunctionCall) g.Value {
+func (w nodeWrapper) ownerDocument(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	result := instance.OwnerDocument()
 	return w.toDocument(result)
 }
 
-func (w nodeWrapper) ChildNodes(c g.FunctionCall) g.Value {
-	panic("Node.ChildNodes: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (w nodeWrapper) childNodes(c g.FunctionCall) g.Value {
+	panic("Node.childNodes: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (w nodeWrapper) FirstChild(c g.FunctionCall) g.Value {
+func (w nodeWrapper) firstChild(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	result := instance.FirstChild()
 	return w.toNode(result)
 }
 
-func (w nodeWrapper) PreviousSibling(c g.FunctionCall) g.Value {
+func (w nodeWrapper) previousSibling(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	result := instance.PreviousSibling()
 	return w.toNode(result)
 }
 
-func (w nodeWrapper) NextSibling(c g.FunctionCall) g.Value {
+func (w nodeWrapper) nextSibling(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	result := instance.NextSibling()
 	return w.toNode(result)

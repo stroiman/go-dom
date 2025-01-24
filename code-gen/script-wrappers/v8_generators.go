@@ -8,6 +8,8 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
+var scriptHost = g.NewValue("scriptHost")
+
 type NewV8FunctionTemplate struct {
 	iso JenGenerator
 	f   JenGenerator
@@ -68,11 +70,13 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 
 	wrapperConstructor := g.FunctionDefinition{
 		Name:     constructorName,
-		Args:     g.Arg(g.Id("host"), scriptHostPtr),
+		Args:     g.Arg(scriptHost, scriptHostPtr),
 		RtnTypes: g.List(g.NewType(typeName).Pointer()),
 		Body: g.Return(g.Raw(
 			jen.Op("&").Id(typeName).Values(
-				jen.Id("newNodeV8WrapperBase").Index(innerType.Generate()).Call(jen.Id("host")),
+				jen.Id("newNodeV8WrapperBase").
+					Index(innerType.Generate()).
+					Call(scriptHost.Generate()),
 			),
 		)),
 	}
@@ -186,7 +190,7 @@ func prototypeFactoryFunctionName(data ESConstructorData) string {
 func CreateV8Constructor(data ESConstructorData) g.Generator {
 	return g.FunctionDefinition{
 		Name:     prototypeFactoryFunctionName(data),
-		Args:     g.Arg(g.Id("host"), scriptHostPtr),
+		Args:     g.Arg(scriptHost, scriptHostPtr),
 		RtnTypes: g.List(v8FunctionTemplatePtr),
 		Body:     CreateV8ConstructorBody(data),
 	}
@@ -194,7 +198,6 @@ func CreateV8Constructor(data ESConstructorData) g.Generator {
 
 func CreateV8ConstructorBody(data ESConstructorData) g.Generator {
 	builder := NewConstructorBuilder()
-	scriptHost := g.NewValue("host")
 	constructor := v8FunctionTemplate{g.NewValue("constructor")}
 
 	createWrapperFunction := g.NewValue(fmt.Sprintf("new%s", data.WrapperTypeBaseName))
@@ -317,7 +320,8 @@ func V8RequireContext(wrapper WrapperInstance) g.Generator {
 	info := v8ArgInfo(g.NewValue("info"))
 	return g.Assign(
 		g.Id("ctx"),
-		wrapper.GetScriptHost().Method("mustGetContext").Call(info.GetV8Context()),
+		wrapper.MustGetContext(info),
+		// wrapper.GetScriptHost().Method("mustGetContext").Call(info.GetV8Context()),
 	)
 }
 

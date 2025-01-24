@@ -7,9 +7,9 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-func createXmlHttpRequestPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
-	iso := host.iso
-	wrapper := newXmlHttpRequestV8Wrapper(host)
+func createXmlHttpRequestPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
+	iso := scriptHost.iso
+	wrapper := newXmlHttpRequestV8Wrapper(scriptHost)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()
@@ -25,47 +25,47 @@ func createXmlHttpRequestPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	prototypeTmpl.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, wrapper.overrideMimeType))
 
 	prototypeTmpl.SetAccessorProperty("readyState",
-		v8.NewFunctionTemplateWithError(iso, wrapper.ReadyState),
+		v8.NewFunctionTemplateWithError(iso, wrapper.readyState),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("timeout",
-		v8.NewFunctionTemplateWithError(iso, wrapper.Timeout),
-		v8.NewFunctionTemplateWithError(iso, wrapper.SetTimeout),
+		v8.NewFunctionTemplateWithError(iso, wrapper.timeout),
+		v8.NewFunctionTemplateWithError(iso, wrapper.setTimeout),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("withCredentials",
-		v8.NewFunctionTemplateWithError(iso, wrapper.WithCredentials),
-		v8.NewFunctionTemplateWithError(iso, wrapper.SetWithCredentials),
+		v8.NewFunctionTemplateWithError(iso, wrapper.withCredentials),
+		v8.NewFunctionTemplateWithError(iso, wrapper.setWithCredentials),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("upload",
-		v8.NewFunctionTemplateWithError(iso, wrapper.Upload),
+		v8.NewFunctionTemplateWithError(iso, wrapper.upload),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseURL",
-		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseURL),
+		v8.NewFunctionTemplateWithError(iso, wrapper.responseURL),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("status",
-		v8.NewFunctionTemplateWithError(iso, wrapper.Status),
+		v8.NewFunctionTemplateWithError(iso, wrapper.status),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("statusText",
-		v8.NewFunctionTemplateWithError(iso, wrapper.StatusText),
+		v8.NewFunctionTemplateWithError(iso, wrapper.statusText),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseType",
-		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseType),
-		v8.NewFunctionTemplateWithError(iso, wrapper.SetResponseType),
+		v8.NewFunctionTemplateWithError(iso, wrapper.responseType),
+		v8.NewFunctionTemplateWithError(iso, wrapper.setResponseType),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("response",
-		v8.NewFunctionTemplateWithError(iso, wrapper.Response),
+		v8.NewFunctionTemplateWithError(iso, wrapper.response),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseText",
-		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseText),
+		v8.NewFunctionTemplateWithError(iso, wrapper.responseText),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseXML",
-		v8.NewFunctionTemplateWithError(iso, wrapper.ResponseXML),
+		v8.NewFunctionTemplateWithError(iso, wrapper.responseXML),
 		nil,
 		v8.None)
 
@@ -73,7 +73,7 @@ func createXmlHttpRequestPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 }
 
 func (xhr xmlHttpRequestV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.mustGetContext(info.Context())
+	ctx := xhr.mustGetContext(info)
 	return xhr.CreateInstance(ctx, info.This())
 }
 
@@ -122,7 +122,7 @@ func (xhr xmlHttpRequestV8Wrapper) abort(info *v8.FunctionCallbackInfo) (*v8.Val
 }
 
 func (xhr xmlHttpRequestV8Wrapper) getResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.mustGetContext(info.Context())
+	ctx := xhr.mustGetContext(info)
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	name, err1 := tryParseArg(args, 0, xhr.decodeByteString)
@@ -138,7 +138,7 @@ func (xhr xmlHttpRequestV8Wrapper) getResponseHeader(info *v8.FunctionCallbackIn
 }
 
 func (xhr xmlHttpRequestV8Wrapper) getAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.mustGetContext(info.Context())
+	ctx := xhr.mustGetContext(info)
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -166,12 +166,12 @@ func (xhr xmlHttpRequestV8Wrapper) overrideMimeType(info *v8.FunctionCallbackInf
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr xmlHttpRequestV8Wrapper) ReadyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("XMLHttpRequest.ReadyState: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (xhr xmlHttpRequestV8Wrapper) readyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("XMLHttpRequest.readyState: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (xhr xmlHttpRequestV8Wrapper) Timeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.mustGetContext(info.Context())
+func (xhr xmlHttpRequestV8Wrapper) timeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := xhr.mustGetContext(info)
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -180,7 +180,7 @@ func (xhr xmlHttpRequestV8Wrapper) Timeout(info *v8.FunctionCallbackInfo) (*v8.V
 	return xhr.toUnsignedLong(ctx, result)
 }
 
-func (xhr xmlHttpRequestV8Wrapper) SetTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) setTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	val, err1 := tryParseArg(args, 0, xhr.decodeUnsignedLong)
@@ -195,8 +195,8 @@ func (xhr xmlHttpRequestV8Wrapper) SetTimeout(info *v8.FunctionCallbackInfo) (*v
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr xmlHttpRequestV8Wrapper) WithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.mustGetContext(info.Context())
+func (xhr xmlHttpRequestV8Wrapper) withCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := xhr.mustGetContext(info)
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -205,7 +205,7 @@ func (xhr xmlHttpRequestV8Wrapper) WithCredentials(info *v8.FunctionCallbackInfo
 	return xhr.toBoolean(ctx, result)
 }
 
-func (xhr xmlHttpRequestV8Wrapper) SetWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) setWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	val, err1 := tryParseArg(args, 0, xhr.decodeBoolean)
@@ -220,8 +220,8 @@ func (xhr xmlHttpRequestV8Wrapper) SetWithCredentials(info *v8.FunctionCallbackI
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr xmlHttpRequestV8Wrapper) ResponseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.mustGetContext(info.Context())
+func (xhr xmlHttpRequestV8Wrapper) responseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := xhr.mustGetContext(info)
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -230,8 +230,8 @@ func (xhr xmlHttpRequestV8Wrapper) ResponseURL(info *v8.FunctionCallbackInfo) (*
 	return xhr.toUSVString(ctx, result)
 }
 
-func (xhr xmlHttpRequestV8Wrapper) Status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.mustGetContext(info.Context())
+func (xhr xmlHttpRequestV8Wrapper) status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := xhr.mustGetContext(info)
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -240,8 +240,8 @@ func (xhr xmlHttpRequestV8Wrapper) Status(info *v8.FunctionCallbackInfo) (*v8.Va
 	return xhr.toUnsignedShort(ctx, result)
 }
 
-func (xhr xmlHttpRequestV8Wrapper) StatusText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.mustGetContext(info.Context())
+func (xhr xmlHttpRequestV8Wrapper) statusText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := xhr.mustGetContext(info)
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -250,16 +250,16 @@ func (xhr xmlHttpRequestV8Wrapper) StatusText(info *v8.FunctionCallbackInfo) (*v
 	return xhr.toByteString(ctx, result)
 }
 
-func (xhr xmlHttpRequestV8Wrapper) ResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("XMLHttpRequest.ResponseType: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (xhr xmlHttpRequestV8Wrapper) responseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("XMLHttpRequest.responseType: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (xhr xmlHttpRequestV8Wrapper) SetResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("XMLHttpRequest.SetResponseType: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (xhr xmlHttpRequestV8Wrapper) setResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("XMLHttpRequest.setResponseType: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (xhr xmlHttpRequestV8Wrapper) Response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.mustGetContext(info.Context())
+func (xhr xmlHttpRequestV8Wrapper) response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := xhr.mustGetContext(info)
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -268,8 +268,8 @@ func (xhr xmlHttpRequestV8Wrapper) Response(info *v8.FunctionCallbackInfo) (*v8.
 	return xhr.toAny(ctx, result)
 }
 
-func (xhr xmlHttpRequestV8Wrapper) ResponseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := xhr.host.mustGetContext(info.Context())
+func (xhr xmlHttpRequestV8Wrapper) responseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := xhr.mustGetContext(info)
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -278,6 +278,6 @@ func (xhr xmlHttpRequestV8Wrapper) ResponseText(info *v8.FunctionCallbackInfo) (
 	return xhr.toUSVString(ctx, result)
 }
 
-func (xhr xmlHttpRequestV8Wrapper) ResponseXML(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("XMLHttpRequest.ResponseXML: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+func (xhr xmlHttpRequestV8Wrapper) responseXML(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, errors.New("XMLHttpRequest.responseXML: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
