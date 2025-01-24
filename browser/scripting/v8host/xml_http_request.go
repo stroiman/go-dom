@@ -69,7 +69,7 @@ func (xhr xmlHttpRequestV8Wrapper) CreateInstance(
 	return nil, nil
 }
 
-func (xhr xmlHttpRequestV8Wrapper) Open(
+func (xhr xmlHttpRequestV8Wrapper) open(
 	info *v8.FunctionCallbackInfo,
 ) (result *v8.Value, err error) {
 	args := newArgumentHelper(xhr.host, info)

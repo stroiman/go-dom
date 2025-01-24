@@ -16,13 +16,13 @@ func createXmlHttpRequestPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl.SetInternalFieldCount(1)
 
 	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("open", v8.NewFunctionTemplateWithError(iso, wrapper.Open))
-	prototypeTmpl.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, wrapper.SetRequestHeader))
-	prototypeTmpl.Set("send", v8.NewFunctionTemplateWithError(iso, wrapper.Send))
-	prototypeTmpl.Set("abort", v8.NewFunctionTemplateWithError(iso, wrapper.Abort))
-	prototypeTmpl.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, wrapper.GetResponseHeader))
-	prototypeTmpl.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, wrapper.GetAllResponseHeaders))
-	prototypeTmpl.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, wrapper.OverrideMimeType))
+	prototypeTmpl.Set("open", v8.NewFunctionTemplateWithError(iso, wrapper.open))
+	prototypeTmpl.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, wrapper.setRequestHeader))
+	prototypeTmpl.Set("send", v8.NewFunctionTemplateWithError(iso, wrapper.send))
+	prototypeTmpl.Set("abort", v8.NewFunctionTemplateWithError(iso, wrapper.abort))
+	prototypeTmpl.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, wrapper.getResponseHeader))
+	prototypeTmpl.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, wrapper.getAllResponseHeaders))
+	prototypeTmpl.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, wrapper.overrideMimeType))
 
 	prototypeTmpl.SetAccessorProperty("readyState",
 		v8.NewFunctionTemplateWithError(iso, wrapper.ReadyState),
@@ -77,7 +77,7 @@ func (xhr xmlHttpRequestV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*
 	return xhr.CreateInstance(ctx, info.This())
 }
 
-func (xhr xmlHttpRequestV8Wrapper) SetRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) setRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	name, err1 := tryParseArg(args, 0, xhr.decodeByteString)
@@ -93,7 +93,7 @@ func (xhr xmlHttpRequestV8Wrapper) SetRequestHeader(info *v8.FunctionCallbackInf
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr xmlHttpRequestV8Wrapper) Send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	body, err1 := tryParseArg(args, 0, xhr.decodeDocument, xhr.decodeXMLHttpRequestBodyInit)
@@ -112,7 +112,7 @@ func (xhr xmlHttpRequestV8Wrapper) Send(info *v8.FunctionCallbackInfo) (*v8.Valu
 	return nil, callErr
 }
 
-func (xhr xmlHttpRequestV8Wrapper) Abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -121,7 +121,7 @@ func (xhr xmlHttpRequestV8Wrapper) Abort(info *v8.FunctionCallbackInfo) (*v8.Val
 	return nil, callErr
 }
 
-func (xhr xmlHttpRequestV8Wrapper) GetResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) getResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.mustGetContext(info.Context())
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
@@ -137,7 +137,7 @@ func (xhr xmlHttpRequestV8Wrapper) GetResponseHeader(info *v8.FunctionCallbackIn
 	return nil, errors.New("Missing arguments")
 }
 
-func (xhr xmlHttpRequestV8Wrapper) GetAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) getAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.host.mustGetContext(info.Context())
 	instance, err := xhr.getInstance(info)
 	if err != nil {
@@ -151,7 +151,7 @@ func (xhr xmlHttpRequestV8Wrapper) GetAllResponseHeaders(info *v8.FunctionCallba
 	}
 }
 
-func (xhr xmlHttpRequestV8Wrapper) OverrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (xhr xmlHttpRequestV8Wrapper) overrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(xhr.host, info)
 	instance, err0 := xhr.getInstance(info)
 	mime, err1 := tryParseArg(args, 0, xhr.decodeDOMString)

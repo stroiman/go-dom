@@ -49,7 +49,7 @@ func (l domTokenListV8Wrapper) GetIterator(info *v8.FunctionCallbackInfo) (*v8.V
 	return l.Iterator.newIteratorInstanceOfIterable(ctx, instance)
 }
 
-func (l domTokenListV8Wrapper) Toggle(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (l domTokenListV8Wrapper) toggle(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(l.host, info)
 	token, err0 := tryParseArg(args, 0, l.decodeUSVString)
 	force, err1 := tryParseArg(args, 1, l.decodeBoolean)

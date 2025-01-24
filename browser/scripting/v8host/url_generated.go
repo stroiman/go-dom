@@ -20,7 +20,7 @@ func createUrlPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl.SetInternalFieldCount(1)
 
 	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("toJSON", v8.NewFunctionTemplateWithError(iso, wrapper.ToJSON))
+	prototypeTmpl.Set("toJSON", v8.NewFunctionTemplateWithError(iso, wrapper.toJSON))
 
 	prototypeTmpl.SetAccessorProperty("href",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Href),
@@ -95,7 +95,7 @@ func (u urlV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	return nil, errors.New("Missing arguments")
 }
 
-func (u urlV8Wrapper) ToJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u urlV8Wrapper) toJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.host.mustGetContext(info.Context())
 	instance, err := u.getInstance(info)
 	if err != nil {

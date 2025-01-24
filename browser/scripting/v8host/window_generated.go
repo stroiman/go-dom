@@ -29,16 +29,16 @@ func createWindowPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl.SetInternalFieldCount(1)
 
 	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("close", v8.NewFunctionTemplateWithError(iso, wrapper.Close))
-	prototypeTmpl.Set("stop", v8.NewFunctionTemplateWithError(iso, wrapper.Stop))
-	prototypeTmpl.Set("focus", v8.NewFunctionTemplateWithError(iso, wrapper.Focus))
-	prototypeTmpl.Set("blur", v8.NewFunctionTemplateWithError(iso, wrapper.Blur))
-	prototypeTmpl.Set("open", v8.NewFunctionTemplateWithError(iso, wrapper.Open))
-	prototypeTmpl.Set("alert", v8.NewFunctionTemplateWithError(iso, wrapper.Alert))
-	prototypeTmpl.Set("confirm", v8.NewFunctionTemplateWithError(iso, wrapper.Confirm))
-	prototypeTmpl.Set("prompt", v8.NewFunctionTemplateWithError(iso, wrapper.Prompt))
-	prototypeTmpl.Set("print", v8.NewFunctionTemplateWithError(iso, wrapper.Print))
-	prototypeTmpl.Set("postMessage", v8.NewFunctionTemplateWithError(iso, wrapper.PostMessage))
+	prototypeTmpl.Set("close", v8.NewFunctionTemplateWithError(iso, wrapper.close))
+	prototypeTmpl.Set("stop", v8.NewFunctionTemplateWithError(iso, wrapper.stop))
+	prototypeTmpl.Set("focus", v8.NewFunctionTemplateWithError(iso, wrapper.focus))
+	prototypeTmpl.Set("blur", v8.NewFunctionTemplateWithError(iso, wrapper.blur))
+	prototypeTmpl.Set("open", v8.NewFunctionTemplateWithError(iso, wrapper.open))
+	prototypeTmpl.Set("alert", v8.NewFunctionTemplateWithError(iso, wrapper.alert))
+	prototypeTmpl.Set("confirm", v8.NewFunctionTemplateWithError(iso, wrapper.confirm))
+	prototypeTmpl.Set("prompt", v8.NewFunctionTemplateWithError(iso, wrapper.prompt))
+	prototypeTmpl.Set("print", v8.NewFunctionTemplateWithError(iso, wrapper.print))
+	prototypeTmpl.Set("postMessage", v8.NewFunctionTemplateWithError(iso, wrapper.postMessage))
 
 	prototypeTmpl.SetAccessorProperty("window",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Window),
@@ -140,43 +140,43 @@ func (w windowV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, 
 	return nil, v8.NewTypeError(w.host.iso, "Illegal Constructor")
 }
 
-func (w windowV8Wrapper) Close(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) close(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.close: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (w windowV8Wrapper) Stop(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) stop(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.stop: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (w windowV8Wrapper) Focus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) focus(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.focus: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (w windowV8Wrapper) Blur(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) blur(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.blur: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (w windowV8Wrapper) Open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) open(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.open: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (w windowV8Wrapper) Alert(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) alert(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.alert: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (w windowV8Wrapper) Confirm(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) confirm(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.confirm: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (w windowV8Wrapper) Prompt(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) prompt(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.prompt: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (w windowV8Wrapper) Print(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) print(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.print: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (w windowV8Wrapper) PostMessage(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w windowV8Wrapper) postMessage(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.postMessage: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 

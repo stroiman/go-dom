@@ -36,7 +36,7 @@ func (builder ConstructorBuilder) InstallFunctionHandlers(
 			generators = append(generators,
 				builder.Proto.Set(
 					op.Name,
-					builder.NewFunctionTemplate(builder.Wrapper.Field(idlNameToGoName(op.Name))),
+					builder.NewFunctionTemplate(builder.Wrapper.Field(op.WrapperMethodName())),
 				),
 			)
 		}

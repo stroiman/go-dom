@@ -20,11 +20,11 @@ func createHistoryPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl.SetInternalFieldCount(1)
 
 	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("go", v8.NewFunctionTemplateWithError(iso, wrapper.Go))
-	prototypeTmpl.Set("back", v8.NewFunctionTemplateWithError(iso, wrapper.Back))
-	prototypeTmpl.Set("forward", v8.NewFunctionTemplateWithError(iso, wrapper.Forward))
-	prototypeTmpl.Set("pushState", v8.NewFunctionTemplateWithError(iso, wrapper.PushState))
-	prototypeTmpl.Set("replaceState", v8.NewFunctionTemplateWithError(iso, wrapper.ReplaceState))
+	prototypeTmpl.Set("go", v8.NewFunctionTemplateWithError(iso, wrapper.go_))
+	prototypeTmpl.Set("back", v8.NewFunctionTemplateWithError(iso, wrapper.back))
+	prototypeTmpl.Set("forward", v8.NewFunctionTemplateWithError(iso, wrapper.forward))
+	prototypeTmpl.Set("pushState", v8.NewFunctionTemplateWithError(iso, wrapper.pushState))
+	prototypeTmpl.Set("replaceState", v8.NewFunctionTemplateWithError(iso, wrapper.replaceState))
 
 	prototypeTmpl.SetAccessorProperty("length",
 		v8.NewFunctionTemplateWithError(iso, wrapper.Length),
@@ -42,7 +42,7 @@ func (h historyV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value,
 	return nil, v8.NewTypeError(h.host.iso, "Illegal Constructor")
 }
 
-func (h historyV8Wrapper) Go(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (h historyV8Wrapper) go_(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(h.host, info)
 	instance, err0 := h.getInstance(info)
 	delta, err1 := tryParseArgWithDefault(args, 0, h.defaultDelta, h.decodeLong)
@@ -57,7 +57,7 @@ func (h historyV8Wrapper) Go(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Missing arguments")
 }
 
-func (h historyV8Wrapper) Back(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (h historyV8Wrapper) back(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	instance, err := h.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (h historyV8Wrapper) Back(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 	return nil, callErr
 }
 
-func (h historyV8Wrapper) Forward(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (h historyV8Wrapper) forward(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	instance, err := h.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (h historyV8Wrapper) Forward(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	return nil, callErr
 }
 
-func (h historyV8Wrapper) PushState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (h historyV8Wrapper) pushState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(h.host, info)
 	instance, err0 := h.getInstance(info)
 	data, err1 := tryParseArg(args, 0, h.decodeAny)
@@ -91,7 +91,7 @@ func (h historyV8Wrapper) PushState(info *v8.FunctionCallbackInfo) (*v8.Value, e
 	return nil, errors.New("Missing arguments")
 }
 
-func (h historyV8Wrapper) ReplaceState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (h historyV8Wrapper) replaceState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(h.host, info)
 	instance, err0 := h.getInstance(info)
 	data, err1 := tryParseArg(args, 0, h.decodeAny)

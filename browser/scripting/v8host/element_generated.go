@@ -20,29 +20,29 @@ func createElementPrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl.SetInternalFieldCount(1)
 
 	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("hasAttributes", v8.NewFunctionTemplateWithError(iso, wrapper.HasAttributes))
-	prototypeTmpl.Set("getAttributeNames", v8.NewFunctionTemplateWithError(iso, wrapper.GetAttributeNames))
-	prototypeTmpl.Set("getAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.GetAttribute))
-	prototypeTmpl.Set("getAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.GetAttributeNS))
-	prototypeTmpl.Set("setAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.SetAttribute))
-	prototypeTmpl.Set("setAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.SetAttributeNS))
-	prototypeTmpl.Set("removeAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.RemoveAttribute))
-	prototypeTmpl.Set("removeAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.RemoveAttributeNS))
-	prototypeTmpl.Set("toggleAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.ToggleAttribute))
-	prototypeTmpl.Set("hasAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.HasAttribute))
-	prototypeTmpl.Set("hasAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.HasAttributeNS))
-	prototypeTmpl.Set("getAttributeNode", v8.NewFunctionTemplateWithError(iso, wrapper.GetAttributeNode))
-	prototypeTmpl.Set("getAttributeNodeNS", v8.NewFunctionTemplateWithError(iso, wrapper.GetAttributeNodeNS))
-	prototypeTmpl.Set("setAttributeNode", v8.NewFunctionTemplateWithError(iso, wrapper.SetAttributeNode))
-	prototypeTmpl.Set("setAttributeNodeNS", v8.NewFunctionTemplateWithError(iso, wrapper.SetAttributeNodeNS))
-	prototypeTmpl.Set("removeAttributeNode", v8.NewFunctionTemplateWithError(iso, wrapper.RemoveAttributeNode))
-	prototypeTmpl.Set("attachShadow", v8.NewFunctionTemplateWithError(iso, wrapper.AttachShadow))
-	prototypeTmpl.Set("matches", v8.NewFunctionTemplateWithError(iso, wrapper.Matches))
-	prototypeTmpl.Set("getElementsByTagName", v8.NewFunctionTemplateWithError(iso, wrapper.GetElementsByTagName))
-	prototypeTmpl.Set("getElementsByTagNameNS", v8.NewFunctionTemplateWithError(iso, wrapper.GetElementsByTagNameNS))
-	prototypeTmpl.Set("getElementsByClassName", v8.NewFunctionTemplateWithError(iso, wrapper.GetElementsByClassName))
-	prototypeTmpl.Set("insertAdjacentElement", v8.NewFunctionTemplateWithError(iso, wrapper.InsertAdjacentElement))
-	prototypeTmpl.Set("insertAdjacentText", v8.NewFunctionTemplateWithError(iso, wrapper.InsertAdjacentText))
+	prototypeTmpl.Set("hasAttributes", v8.NewFunctionTemplateWithError(iso, wrapper.hasAttributes))
+	prototypeTmpl.Set("getAttributeNames", v8.NewFunctionTemplateWithError(iso, wrapper.getAttributeNames))
+	prototypeTmpl.Set("getAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.getAttribute))
+	prototypeTmpl.Set("getAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.getAttributeNS))
+	prototypeTmpl.Set("setAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.setAttribute))
+	prototypeTmpl.Set("setAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.setAttributeNS))
+	prototypeTmpl.Set("removeAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.removeAttribute))
+	prototypeTmpl.Set("removeAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.removeAttributeNS))
+	prototypeTmpl.Set("toggleAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.toggleAttribute))
+	prototypeTmpl.Set("hasAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.hasAttribute))
+	prototypeTmpl.Set("hasAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.hasAttributeNS))
+	prototypeTmpl.Set("getAttributeNode", v8.NewFunctionTemplateWithError(iso, wrapper.getAttributeNode))
+	prototypeTmpl.Set("getAttributeNodeNS", v8.NewFunctionTemplateWithError(iso, wrapper.getAttributeNodeNS))
+	prototypeTmpl.Set("setAttributeNode", v8.NewFunctionTemplateWithError(iso, wrapper.setAttributeNode))
+	prototypeTmpl.Set("setAttributeNodeNS", v8.NewFunctionTemplateWithError(iso, wrapper.setAttributeNodeNS))
+	prototypeTmpl.Set("removeAttributeNode", v8.NewFunctionTemplateWithError(iso, wrapper.removeAttributeNode))
+	prototypeTmpl.Set("attachShadow", v8.NewFunctionTemplateWithError(iso, wrapper.attachShadow))
+	prototypeTmpl.Set("matches", v8.NewFunctionTemplateWithError(iso, wrapper.matches))
+	prototypeTmpl.Set("getElementsByTagName", v8.NewFunctionTemplateWithError(iso, wrapper.getElementsByTagName))
+	prototypeTmpl.Set("getElementsByTagNameNS", v8.NewFunctionTemplateWithError(iso, wrapper.getElementsByTagNameNS))
+	prototypeTmpl.Set("getElementsByClassName", v8.NewFunctionTemplateWithError(iso, wrapper.getElementsByClassName))
+	prototypeTmpl.Set("insertAdjacentElement", v8.NewFunctionTemplateWithError(iso, wrapper.insertAdjacentElement))
+	prototypeTmpl.Set("insertAdjacentText", v8.NewFunctionTemplateWithError(iso, wrapper.insertAdjacentText))
 
 	prototypeTmpl.SetAccessorProperty("namespaceURI",
 		v8.NewFunctionTemplateWithError(iso, wrapper.NamespaceURI),
@@ -93,19 +93,19 @@ func (e elementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value,
 	return nil, v8.NewTypeError(e.host.iso, "Illegal Constructor")
 }
 
-func (e elementV8Wrapper) HasAttributes(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) hasAttributes(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.hasAttributes: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) GetAttributeNames(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) getAttributeNames(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.getAttributeNames: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) GetAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) getAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.getAttributeNS: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) SetAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) setAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(e.host, info)
 	instance, err0 := e.getInstance(info)
 	qualifiedName, err1 := tryParseArg(args, 0, e.decodeDOMString)
@@ -121,23 +121,23 @@ func (e elementV8Wrapper) SetAttribute(info *v8.FunctionCallbackInfo) (*v8.Value
 	return nil, errors.New("Missing arguments")
 }
 
-func (e elementV8Wrapper) SetAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) setAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.setAttributeNS: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) RemoveAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) removeAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.removeAttribute: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) RemoveAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) removeAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.removeAttributeNS: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) ToggleAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) toggleAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.toggleAttribute: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) HasAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) hasAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.host.mustGetContext(info.Context())
 	args := newArgumentHelper(e.host, info)
 	instance, err0 := e.getInstance(info)
@@ -153,35 +153,35 @@ func (e elementV8Wrapper) HasAttribute(info *v8.FunctionCallbackInfo) (*v8.Value
 	return nil, errors.New("Missing arguments")
 }
 
-func (e elementV8Wrapper) HasAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) hasAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.hasAttributeNS: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) GetAttributeNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) getAttributeNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.getAttributeNode: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) GetAttributeNodeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) getAttributeNodeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.getAttributeNodeNS: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) SetAttributeNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) setAttributeNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.setAttributeNode: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) SetAttributeNodeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) setAttributeNodeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.setAttributeNodeNS: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) RemoveAttributeNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) removeAttributeNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.removeAttributeNode: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) AttachShadow(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) attachShadow(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.attachShadow: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) Matches(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) matches(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.host.mustGetContext(info.Context())
 	args := newArgumentHelper(e.host, info)
 	instance, err0 := e.getInstance(info)
@@ -201,23 +201,23 @@ func (e elementV8Wrapper) Matches(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	return nil, errors.New("Missing arguments")
 }
 
-func (e elementV8Wrapper) GetElementsByTagName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) getElementsByTagName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.getElementsByTagName: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) GetElementsByTagNameNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) getElementsByTagNameNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.getElementsByTagNameNS: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) GetElementsByClassName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) getElementsByClassName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.getElementsByClassName: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) InsertAdjacentElement(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) insertAdjacentElement(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.insertAdjacentElement: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (e elementV8Wrapper) InsertAdjacentText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (e elementV8Wrapper) insertAdjacentText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Element.insertAdjacentText: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 

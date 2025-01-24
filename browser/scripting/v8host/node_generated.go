@@ -20,11 +20,11 @@ func createNodePrototype(host *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl.SetInternalFieldCount(1)
 
 	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("getRootNode", v8.NewFunctionTemplateWithError(iso, wrapper.GetRootNode))
-	prototypeTmpl.Set("contains", v8.NewFunctionTemplateWithError(iso, wrapper.Contains))
-	prototypeTmpl.Set("insertBefore", v8.NewFunctionTemplateWithError(iso, wrapper.InsertBefore))
-	prototypeTmpl.Set("appendChild", v8.NewFunctionTemplateWithError(iso, wrapper.AppendChild))
-	prototypeTmpl.Set("removeChild", v8.NewFunctionTemplateWithError(iso, wrapper.RemoveChild))
+	prototypeTmpl.Set("getRootNode", v8.NewFunctionTemplateWithError(iso, wrapper.getRootNode))
+	prototypeTmpl.Set("contains", v8.NewFunctionTemplateWithError(iso, wrapper.contains))
+	prototypeTmpl.Set("insertBefore", v8.NewFunctionTemplateWithError(iso, wrapper.insertBefore))
+	prototypeTmpl.Set("appendChild", v8.NewFunctionTemplateWithError(iso, wrapper.appendChild))
+	prototypeTmpl.Set("removeChild", v8.NewFunctionTemplateWithError(iso, wrapper.removeChild))
 
 	prototypeTmpl.SetAccessorProperty("nodeType",
 		v8.NewFunctionTemplateWithError(iso, wrapper.NodeType),
@@ -66,7 +66,7 @@ func (n nodeV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, er
 	return nil, v8.NewTypeError(n.host.iso, "Illegal Constructor")
 }
 
-func (n nodeV8Wrapper) GetRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (n nodeV8Wrapper) getRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.host.mustGetContext(info.Context())
 	args := newArgumentHelper(n.host, info)
 	instance, err0 := n.getInstance(info)
@@ -82,7 +82,7 @@ func (n nodeV8Wrapper) GetRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, er
 	return nil, errors.New("Missing arguments")
 }
 
-func (n nodeV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (n nodeV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.host.mustGetContext(info.Context())
 	args := newArgumentHelper(n.host, info)
 	instance, err0 := n.getInstance(info)
@@ -98,7 +98,7 @@ func (n nodeV8Wrapper) Contains(info *v8.FunctionCallbackInfo) (*v8.Value, error
 	return nil, errors.New("Missing arguments")
 }
 
-func (n nodeV8Wrapper) InsertBefore(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (n nodeV8Wrapper) insertBefore(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.host.mustGetContext(info.Context())
 	args := newArgumentHelper(n.host, info)
 	instance, err0 := n.getInstance(info)
@@ -119,7 +119,7 @@ func (n nodeV8Wrapper) InsertBefore(info *v8.FunctionCallbackInfo) (*v8.Value, e
 	return nil, errors.New("Missing arguments")
 }
 
-func (n nodeV8Wrapper) AppendChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (n nodeV8Wrapper) appendChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.host.mustGetContext(info.Context())
 	args := newArgumentHelper(n.host, info)
 	instance, err0 := n.getInstance(info)
@@ -139,7 +139,7 @@ func (n nodeV8Wrapper) AppendChild(info *v8.FunctionCallbackInfo) (*v8.Value, er
 	return nil, errors.New("Missing arguments")
 }
 
-func (n nodeV8Wrapper) RemoveChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (n nodeV8Wrapper) removeChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.host.mustGetContext(info.Context())
 	args := newArgumentHelper(n.host, info)
 	instance, err0 := n.getInstance(info)

@@ -121,7 +121,7 @@ func CreateV8WrapperMethod(
 				Name: g.Id(data.Receiver),
 				Type: g.Id(data.WrapperTypeName),
 			},
-			Name:     idlNameToGoName(op.Name),
+			Name:     op.WrapperMethodName(),
 			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
 			RtnTypes: g.List(v8Value, g.Id("error")),
 			Body:     CreateV8FunctionTemplateCallbackBody(data, op),
@@ -288,7 +288,6 @@ func CreateV8WrapperMethodInstanceInvocations(
 		callInstance := createCallInstance(functionName, argnames, op)
 		if i > 0 {
 			arg := arguments[i-1]
-			// optional := arg.OptionalInGo()
 			statements.Append(g.StatementList(
 				g.IfStmt{
 					Condition: g.Raw(jen.Id("args").Dot("noOfReadArguments").Op(">=").Lit(i)),

@@ -204,6 +204,15 @@ type ESOperation struct {
 	Arguments            []ESOperationArgument
 }
 
+func (o ESOperation) WrapperMethodName() string {
+	switch o.Name {
+	case "go":
+		return "go_"
+	default:
+		return o.Name
+	}
+}
+
 func (op ESOperation) GetHasError() bool {
 	return op.HasError
 }

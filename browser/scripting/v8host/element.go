@@ -101,7 +101,7 @@ func (e *elementV8Wrapper) toNamedNodeMap(
 	return ctx.getInstanceForNodeByName("NamedNodeMap", n)
 }
 
-func (w elementV8Wrapper) GetAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w elementV8Wrapper) getAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	helper := newArgumentHelper(w.host, info)
 	element, e0 := w.getInstance(info)
 	name, e1 := helper.getStringArg(0)
