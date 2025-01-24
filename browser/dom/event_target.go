@@ -15,12 +15,23 @@ type EventTarget interface {
 	// Unexported
 	dispatchError(err ErrorEvent)
 	dispatchEvent(event Event) bool
+	setSelf(e EventTarget)
 }
 
 type eventTarget struct {
 	parentTarget    EventTarget
 	lmap            map[string][]EventHandler
 	catchAllHandler EventHandler
+	self            EventTarget
+}
+
+func NewEventTarget() EventTarget {
+	res := newEventTarget()
+	return &res
+}
+
+func SetEventTargetSelf(t EventTarget) {
+	t.setSelf(t)
 }
 
 func newEventTarget() eventTarget {
@@ -29,9 +40,8 @@ func newEventTarget() eventTarget {
 	}
 }
 
-func NewEventTarget() EventTarget {
-	res := newEventTarget()
-	return &res
+func (e *eventTarget) setSelf(self EventTarget) {
+	e.self = self
 }
 
 func (e *eventTarget) AddEventListener(eventType string, listener EventHandler) {
@@ -70,12 +80,14 @@ func (e *eventTarget) SetCatchAllHandler(handler EventHandler) {
 }
 
 func (e *eventTarget) DispatchEvent(event Event) bool {
-	event.reset()
+	event.reset(e.self)
 	log.Debug("Dispatch event", "EventType", event.Type())
 	return e.dispatchEvent(event)
 }
 
 func (e *eventTarget) dispatchEvent(event Event) bool {
+	event.setCurrentTarget(e.self)
+	defer func() { event.setCurrentTarget(nil) }()
 	if e.catchAllHandler != nil {
 		if err := e.catchAllHandler.HandleEvent(event); err != nil {
 			log.Debug("Error occurred", "error", err.Error())
@@ -114,10 +126,13 @@ type Event interface {
 	PreventDefault()
 	Type() string
 	StopPropagation()
+	Target() EventTarget
+	CurrentTarget() EventTarget
 	// Unexported
-	reset()
+	reset(t EventTarget)
 	isCancelled() bool
 	shouldPropagate() bool
+	setCurrentTarget(t EventTarget)
 }
 
 type ErrorEvent interface {
@@ -128,20 +143,6 @@ type ErrorEvent interface {
 
 type CustomEvent interface {
 	Event
-}
-
-type event struct {
-	entity.Entity
-	cancelable bool
-	cancelled  bool
-	eventType  string
-	bubbles    bool
-	propagate  bool
-}
-
-type errorEvent struct {
-	event
-	err error
 }
 
 type EventOption interface {
@@ -159,6 +160,19 @@ func EventCancelable(cancelable bool) EventOption {
 	return eventOptionFunc(func(e *event) { e.cancelable = cancelable })
 }
 
+/* -------- event -------- */
+
+type event struct {
+	entity.Entity
+	cancelable    bool
+	cancelled     bool
+	eventType     string
+	bubbles       bool
+	propagate     bool
+	target        EventTarget
+	currentTarget EventTarget
+}
+
 func newEvent(eventType string) event {
 	return event{
 		Entity:    entity.New(),
@@ -166,10 +180,6 @@ func newEvent(eventType string) event {
 		bubbles:   false,
 		propagate: false,
 	}
-}
-
-type customEvent struct {
-	event
 }
 
 func NewEvent(eventType string, options ...EventOption) Event {
@@ -180,6 +190,29 @@ func NewEvent(eventType string, options ...EventOption) Event {
 	return &e
 }
 
+func (e *event) Type() string                   { return e.eventType }
+func (e *event) StopPropagation()               { e.propagate = false }
+func (e *event) PreventDefault()                { e.cancelled = true }
+func (e *event) Cancelable() bool               { return e.cancelable }
+func (e *event) Bubbles() bool                  { return e.bubbles }
+func (e *event) shouldPropagate() bool          { return e.propagate }
+func (e *event) isCancelled() bool              { return e.cancelable && e.cancelled }
+func (e *event) Target() EventTarget            { return e.target }
+func (e *event) CurrentTarget() EventTarget     { return e.currentTarget }
+func (e *event) setCurrentTarget(t EventTarget) { e.currentTarget = t }
+
+func (e *event) reset(t EventTarget) {
+	e.target = t
+	e.propagate = e.bubbles
+	e.cancelled = false
+}
+
+/* -------- customEvent -------- */
+
+type customEvent struct {
+	event
+}
+
 func NewCustomEvent(eventType string, options ...EventOption) CustomEvent {
 	e := &customEvent{newEvent(eventType)}
 	for _, o := range options {
@@ -188,17 +221,11 @@ func NewCustomEvent(eventType string, options ...EventOption) CustomEvent {
 	return e
 }
 
-func (e *event) Type() string          { return e.eventType }
-func (e *event) StopPropagation()      { e.propagate = false }
-func (e *event) PreventDefault()       { e.cancelled = true }
-func (e *event) Cancelable() bool      { return e.cancelable }
-func (e *event) Bubbles() bool         { return e.bubbles }
-func (e *event) shouldPropagate() bool { return e.propagate }
-func (e *event) isCancelled() bool     { return e.cancelable && e.cancelled }
+/* -------- errorEvent -------- */
 
-func (e *event) reset() {
-	e.propagate = e.bubbles
-	e.cancelled = false
+type errorEvent struct {
+	event
+	err error
 }
 
 func NewErrorEvent(err error) ErrorEvent {

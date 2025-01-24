@@ -407,7 +407,7 @@ func (n *node) nodes() []Node {
 	return n.childNodes.All()
 }
 
-func (n *node) SetSelf(node Node) { n.self = node }
+func (n *node) SetSelf(node Node) { n.self = node; SetEventTargetSelf(node) }
 func (n *node) getSelf() Node     { return n.self }
 
 func (n *node) SetTextContent(val string) {

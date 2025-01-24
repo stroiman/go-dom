@@ -83,6 +83,7 @@ func newWindow(windowOptions ...WindowOption) *window {
 	win.domParser = domParser{}
 	win.initScriptEngine()
 	win.document = NewHTMLDocument(win)
+	dom.SetEventTargetSelf(win)
 	return win
 }
 

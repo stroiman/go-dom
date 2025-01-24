@@ -109,6 +109,26 @@ var _ = Describe("EventTarget", func() {
 			Expect(called).To(BeTrue())
 		})
 
+		It("Should provide correct target and currentTarget", func() {
+			var actualEvent Event
+			var actualTarget EventTarget
+			var actualCurrentTarget EventTarget
+
+			// window.Document()
+			var l EventHandler = NewEventHandlerFunc(func(e Event) error {
+				actualEvent = e
+				actualTarget = e.Target()
+				actualCurrentTarget = e.CurrentTarget()
+				return nil
+			})
+			window.AddEventListener("custom", l)
+			target.DispatchEvent(NewCustomEvent("custom", EventBubbles(true)))
+			Expect(actualTarget).To(Equal(target), "Event target")
+			Expect(actualCurrentTarget).To(Equal(window), "CurrentEvent target")
+			Expect(actualEvent.CurrentTarget()).To(BeNil(), "CurrentTarget after event")
+			Expect(actualEvent.Target()).To(Equal(target), "Target after event")
+		})
+
 		It("Should propagate the event to the window if 'bubbles' is set", func() {
 			called := false
 
