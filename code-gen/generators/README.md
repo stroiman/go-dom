@@ -126,7 +126,7 @@ functionBody := StatementList(
 
 > [!NOTE]
 >
-> If you create custom support for new constructs, please add them
+> If you create custom support for new constructs, please create a PR.
 
 ### Creating a file
 
