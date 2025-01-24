@@ -62,7 +62,7 @@ func CreateInitFunction(data ESConstructorData) g.Generator {
 
 func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 	typeNameBase := fmt.Sprintf("%sV8Wrapper", data.Name())
-	typeName := lowerCaseFirstLetter(typeNameBase)
+	typeName := g.NewType(lowerCaseFirstLetter(typeNameBase))
 	constructorName := fmt.Sprintf("new%s", typeNameBase)
 	innerType := g.NewTypePackage(data.Name(), data.GetInternalPackage())
 	wrapperStruct := g.NewStruct(typeName)
@@ -71,9 +71,9 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 	wrapperConstructor := g.FunctionDefinition{
 		Name:     constructorName,
 		Args:     g.Arg(scriptHost, scriptHostPtr),
-		RtnTypes: g.List(g.NewType(typeName).Pointer()),
+		RtnTypes: g.List(typeName.Pointer()),
 		Body: g.Return(
-			g.NewType(typeName).CreateStruct(
+			typeName.CreateStruct(
 				g.NewValue("newNodeV8WrapperBase").
 					TypeParam(innerType).
 					Call(scriptHost),

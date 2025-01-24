@@ -3,7 +3,7 @@ package generators
 import "github.com/dave/jennifer/jen"
 
 type Struct struct {
-	Name            string
+	Name            Type
 	Members         []StructMember
 	DefaultReceiver string
 }
@@ -13,7 +13,13 @@ type StructMember struct {
 	Type Generator
 }
 
-func NewStruct(name string) Struct { return Struct{Name: name} }
+func NewStruct(name Generator) Struct {
+	n, ok := name.(Type)
+	if !ok {
+		n = Type{name}
+	}
+	return Struct{Name: n}
+}
 
 func (s *Struct) Field(name Generator, fieldType Generator) {
 	s.Members = append(s.Members, StructMember{name, fieldType})
@@ -34,7 +40,7 @@ func (s *Struct) MethodName(name string) FunctionDefinition {
 		Name: name,
 		Receiver: FunctionArgument{
 			Name: Id(s.DefaultReceiver),
-			Type: Id(s.Name),
+			Type: s.Name,
 		},
 	}
 }
@@ -44,7 +50,7 @@ func (s *Struct) PointerMethodName(name string) *FunctionDefinition {
 		Name: name,
 		Receiver: FunctionArgument{
 			Name: Id(s.DefaultReceiver),
-			Type: NewType(s.Name).Pointer(),
+			Type: s.Name.Pointer(),
 		},
 	}
 }
@@ -58,7 +64,7 @@ func (s Struct) Generate() *jen.Statement {
 			fields = append(fields, m.Name.Generate().Add(m.Type.Generate()))
 		}
 	}
-	return jen.Type().Id(s.Name).Struct(fields...)
+	return jen.Type().Add(s.Name.Generate()).Struct(fields...)
 }
 
 func InstantiateStruct(t Generator, values ...Generator) Generator {

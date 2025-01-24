@@ -25,10 +25,10 @@ func render(generator Generator) (string, error) {
 
 func TestStructGenerator(t *testing.T) {
 	expect := NewWithT(t).Expect
-	s := NewStruct("FooBar")
+	s := NewStruct(Id("FooBar"))
 	expect(render(s)).To(Equal("type FooBar struct{}"))
 
-	s2 := NewStruct("StructWithFields")
+	s2 := NewStruct(Id("StructWithFields"))
 	s2.Field(Id("Name"), Id("string"))
 	s2.Field(Id("Age"), Id("int"))
 	expect(render(s2)).To(Equal(
@@ -36,7 +36,7 @@ func TestStructGenerator(t *testing.T) {
 	Name string
 	Age  int
 }`))
-	s3 := NewStruct("StructWithEmbeds")
+	s3 := NewStruct(Id("StructWithEmbeds"))
 	s3.Embed(Id("EmbeddedType1"))
 	s3.Embed(Id("EmbeddedType2"))
 	s3.Field(Id("StringValue"), Id("string"))
@@ -52,7 +52,7 @@ func TestStructGenerator(t *testing.T) {
 
 func TestStructMethodGenerators(t *testing.T) {
 	expect := NewWithT(t).Expect
-	s := NewStruct("StructWithMembers")
+	s := NewStruct(Id("StructWithMembers"))
 	s.SetDefaultReceiver("rec")
 	foo := s.PointerMethodName("Foo").AddArgument(FunctionArgument{
 		Name: Id("str"),

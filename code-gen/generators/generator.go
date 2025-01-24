@@ -46,6 +46,10 @@ func AssignMany(ids []Generator, expression Generator) Generator {
 	return Raw(jen.List(gs...).Op(":=").Add(expression.Generate()))
 }
 
+func Reassign(id Generator, expression Generator) Generator {
+	return Raw(id.Generate().Op("=").Add(expression.Generate()))
+}
+
 func ReAssignMany(ids []Generator, expression Generator) Generator {
 	var gs []jen.Code
 	for _, id := range ids {
