@@ -105,7 +105,7 @@ func (gen GojaTargetGenerators) CreatePrototypeInitializer(data ESConstructorDat
 
 func (gen GojaTargetGenerators) CreateWrapperStruct(data ESConstructorData) g.Generator {
 	naming := GojaNamingStrategy{data}
-	typeName := naming.PrototypeWrapperTypeName()
+	typeName := g.Id(naming.PrototypeWrapperTypeName())
 	constructorName := naming.PrototypeWrapperConstructorName()
 	innerType := g.Raw(jen.Qual(dom, data.Name()))
 
@@ -116,7 +116,7 @@ func (gen GojaTargetGenerators) CreateWrapperStruct(data ESConstructorData) g.Ge
 		Name:     constructorName,
 		Args:     g.Arg(g.Id("instance"), g.NewType("GojaContext").Pointer()),
 		RtnTypes: g.List(g.NewType("wrapper")),
-		Body: g.Return(g.InstantiateStruct(g.Id(typeName),
+		Body: g.Return(g.InstantiateStruct(typeName,
 			g.NewValue("newBaseInstanceWrapper").TypeParam(innerType).Call(g.Id("instance")),
 		)),
 	}

@@ -50,7 +50,7 @@ func Reassign(id Generator, expression Generator) Generator {
 	return Raw(id.Generate().Op("=").Add(expression.Generate()))
 }
 
-func ReAssignMany(ids []Generator, expression Generator) Generator {
+func ReassignMany(ids []Generator, expression Generator) Generator {
 	var gs []jen.Code
 	for _, id := range ids {
 		gs = append(gs, id.Generate())

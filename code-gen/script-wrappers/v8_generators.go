@@ -73,7 +73,7 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 		Args:     g.Arg(scriptHost, scriptHostPtr),
 		RtnTypes: g.List(typeName.Pointer()),
 		Body: g.Return(
-			typeName.CreateStruct(
+			typeName.CreateInstance(
 				g.NewValue("newNodeV8WrapperBase").
 					TypeParam(innerType).
 					Call(scriptHost),

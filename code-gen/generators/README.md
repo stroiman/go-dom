@@ -10,24 +10,30 @@ However, the code is of general use, and exposed publicly.
 > This package is part of the code generator itself, which is of no interest
 > outside Go-DOM, and makes no guarantees about backwards compatibility.
 >
-> If you find it usefule, I suggest copy/paste the code to your own project.
+> If you find it useful, I suggest copy/paste the code to your own project.
+
+> [!NOTE]
+>
+> Code is poorly documented, I will improve as I work more with this.
 
 ## Build on top of Jennifer
 
 This library is a wrapper on top of [Jennifer](https://github.com/dave/jennifer)
 
-Jennifer is a very complete code generator, but I did not agree with the design
-choices in the interface.
+Jennifer is a comprehensive library for generating go code generators, but I did
+not agree with the design choices in the interface.
 
-- Jennifer has a more imperative API
+- Jennifer has an imperative API, i.e. it mutates values
 - IMHO, the API Jennifer exposes is too low-level
 
 ### Declarative vs. Imperative
 
-This type of problem lends itself very well to a declarative composition.
-Jennifer however, is designed around mutation.
+This type of problem lends itself very well to a declarative composition. In
+fact, this problem is very similar to building a UI. Modern web frameworks
+generally compose high level components of low level components, each component
+being a function of state.
 
-This library provides a more composition oriented API.
+Jennifer however, is designed around mutation.
 
 ### Level of abstraction
 
@@ -38,16 +44,22 @@ uses.
 - Declaring a function type
 - Declaring a function literal
 
-Likewise, `*` is created using `Op("*")`, but this has mutliple uses as well:
+Likewise, `*` is created using `Op("*")`, but this has multiple uses as well:
 
 - Declaring a pointer type
 - Dereferencing a pointer variable
 
-Index represents `[]`, which can be used to index a slice or map, as well as
-providing a type parameter to a generic type of function.
+`Index` represents `[]`, which can be used to index a slice or map, as well as
+providing a type parameter to a generic type or function.
 
-This library uses an abstraction level of "Variable assignment", "Pointer",
-"Reference", "Equals", rather than `Op(":=")`, `Op("*")`, `Op("&")`, `Op("==")`.
+This library tries to focus on what the code should do, not the pieces that they
+are constructed of, and uses an abstraction level of "Variable assignment",
+"Pointer", "Reference", "Equals", rather than `Op(":=")`, `Op("*")`, `Op("&")`,
+`Op("==")`.
+
+If `t` is a `Type` representing a type in code, `t.Pointer()` represents the
+pointer type to that type. If `v` is a `Value` representing an value, e.g., an
+identifier, a struct literal, `t.Reference()` gives the reference to the value.
 
 ## Examples
 
