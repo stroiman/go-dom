@@ -62,6 +62,14 @@ func NewType(name string) Type                    { return Type{Raw(jen.Id(name)
 func NewTypePackage(name string, pkg string) Type { return Type{Raw(jen.Qual(pkg, name))} }
 func (t Type) Pointer() Generator                 { return Raw(jen.Op("*").Add(t.Generate())) }
 
+func (t Type) TypeParam(g Generator) Value {
+	return Value{Raw(t.Generate().Index(g.Generate()))}
+}
+
+func (t Type) CreateStruct(values ...Generator) Value {
+	return Value{Raw(t.Generate().Values(ToJenCodes(values)...))}
+}
+
 func List(generators ...Generator) []Generator { return generators }
 
 var Noop = GeneratorFunc(func() *jen.Statement { return nil })
@@ -74,6 +82,11 @@ type Value struct{ Generator }
 
 func NewValue(name string) Value                    { return Value{Id(name)} }
 func NewValuePackage(name string, pkg string) Value { return Value{Raw(jen.Qual(pkg, name))} }
+
+// Reference takes the references of a value using operator &
+func (v Value) Reference() Generator {
+	return Raw(jen.Op("&").Add(v.Generate()))
+}
 
 func (v Value) Assign(expr Generator) Generator {
 	return GeneratorFunc(func() *jen.Statement {

@@ -64,21 +64,21 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 	typeNameBase := fmt.Sprintf("%sV8Wrapper", data.Name())
 	typeName := lowerCaseFirstLetter(typeNameBase)
 	constructorName := fmt.Sprintf("new%s", typeNameBase)
-	innerType := g.Raw(jen.Qual(data.GetInternalPackage(), data.Name()))
+	innerType := g.NewTypePackage(data.Name(), data.GetInternalPackage())
 	wrapperStruct := g.NewStruct(typeName)
-	wrapperStruct.Embed(g.Raw(jen.Id("nodeV8WrapperBase").Index(innerType)))
+	wrapperStruct.Embed(g.NewType("nodeV8WrapperBase").TypeParam(innerType))
 
 	wrapperConstructor := g.FunctionDefinition{
 		Name:     constructorName,
 		Args:     g.Arg(scriptHost, scriptHostPtr),
 		RtnTypes: g.List(g.NewType(typeName).Pointer()),
-		Body: g.Return(g.Raw(
-			jen.Op("&").Id(typeName).Values(
-				jen.Id("newNodeV8WrapperBase").
-					Index(innerType.Generate()).
-					Call(scriptHost.Generate()),
-			),
-		)),
+		Body: g.Return(
+			g.NewType(typeName).CreateStruct(
+				g.NewValue("newNodeV8WrapperBase").
+					TypeParam(innerType).
+					Call(scriptHost),
+			).Reference(),
+		),
 	}
 
 	return g.StatementList(wrapperStruct, wrapperConstructor, g.Line)
@@ -422,15 +422,9 @@ func (c V8InstanceInvocation) GetGenerator() V8InstanceInvocationResult {
 }
 
 func CreateV8IllegalConstructorBody(data ESConstructorData) g.Generator {
-	// return g.NewValuePackage("NewTypeError", v8).
-	// 	Call(g.NewValue(data.Receiver).Field("iso").Call(),
-	// 		g.Lit("IllegalConstructor"))
-
-	return g.Return(g.Nil,
-		g.Raw(jen.Qual(v8, "NewTypeError").Call(
-			jen.Id(data.Receiver).Dot("scriptHost").Dot("iso"), jen.Lit("Illegal Constructor"),
-		)),
-	)
+	return g.Return(g.Nil, g.NewValuePackage("NewTypeError", v8).
+		Call(g.NewValue(data.Receiver).Field("scriptHost").Field("iso"),
+			g.Lit("Illegal Constructor")))
 }
 
 type V8ReadArguments struct {
@@ -453,10 +447,9 @@ func AssignArgs(data ESConstructorData, op ESOperation) g.Generator {
 	}
 	return g.Assign(
 		g.Id("args"),
-		g.Raw(
-			jen.Id("newArgumentHelper").
-				Call(jen.Id(data.Receiver).Dot("scriptHost"), jen.Id("info")),
-		),
+		g.NewValue("newArgumentHelper").Call(
+			g.NewValue(data.Receiver).Field("scriptHost"),
+			g.Id("info")),
 	)
 }
 
@@ -491,12 +484,11 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments)
 			gConverters = append(gConverters, g.NewValue(data.Receiver).Field(n))
 		}
 		if hasDefault {
-			statements.Append(g.Assign(
-				g.Raw(jen.List(argName.Generate(), errName.Generate())),
+			statements.Append(g.AssignMany(g.List(argName, errName),
 				g.NewValue("tryParseArgWithDefault").Call(gConverters...)))
 		} else {
-			statements.Append(g.Assign(
-				g.Raw(jen.List(argName.Generate(), errName.Generate())),
+			statements.Append(g.AssignMany(
+				g.List(argName, errName),
 				g.NewValue("tryParseArg").Call(gConverters...)))
 		}
 	}
@@ -507,6 +499,6 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments)
 func GetInstanceAndError(id g.Generator, errId g.Generator, data ESConstructorData) g.Generator {
 	return g.AssignMany(
 		g.List(id, errId),
-		g.Raw(jen.Id(data.Receiver).Dot("getInstance").Call(jen.Id("info"))),
+		g.NewValue(data.Receiver).Field("getInstance").Call(g.Id("info")),
 	)
 }
