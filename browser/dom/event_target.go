@@ -149,6 +149,14 @@ type EventOption interface {
 	updateEvent(*event)
 }
 
+type EventOptions []EventOption
+
+func (o EventOptions) updateEvent(e *event) {
+	for _, option := range o {
+		option.updateEvent(e)
+	}
+}
+
 type eventOptionFunc func(*event)
 
 func (f eventOptionFunc) updateEvent(e *event) { f(e) }

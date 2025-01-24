@@ -62,6 +62,8 @@ func CreateConstructor(
 	dataData WrapperTypeSpec,
 	idlName IdlTypeSpec) *ESOperation {
 	if c, ok := idlName.Constructor(); ok {
+		fmt.Printf("Create constructor %s '%s'\n", dataData.TypeName, c.Name)
+		c.Name = "constructor"
 		result := createOperation(dataData, c)
 		return &result
 	} else {
@@ -208,6 +210,8 @@ func (o ESOperation) WrapperMethodName() string {
 		return "go_"
 	case "host":
 		return "host_"
+	case "type":
+		return "type_"
 	default:
 		return o.Name
 	}

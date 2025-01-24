@@ -262,6 +262,27 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 
 	domSpecs := specs.Module("dom")
 
+	event := domSpecs.Type("Event")
+	event.CreateWrapper()
+	event.Method("constructor").Argument("eventInitDict").HasDefault()
+	event.Method("initEvent").Ignore()
+	event.Method("composed").Ignore()
+	event.Method("composedPath").Ignore()
+	event.Method("stopPropagation").SetNoError()
+	event.Method("stopImmediatePropagation").Ignore()
+	event.Method("preventDefault").SetNoError()
+	event.Method("isTrusted").Ignore()
+	event.Method("CancelBubble").Ignore()
+	event.Method("cancelBubble").Ignore()
+	event.Method("EventPhase").Ignore()
+	event.Method("eventPhase").Ignore()
+	event.Method("TimeStamp").Ignore()
+	event.Method("timeStamp").Ignore()
+	event.Method("ReturnValue").Ignore()
+	event.Method("returnValue").Ignore()
+	event.Method("srcElement").Ignore()
+	event.Method("defaultPrevented").Ignore()
+
 	domElement := domSpecs.Type("Element")
 	domElement.RunCustomCode = true
 	domElement.Method("getAttribute").SetCustomImplementation()

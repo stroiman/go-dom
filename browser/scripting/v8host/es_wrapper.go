@@ -19,6 +19,10 @@ type nodeV8WrapperBase[T entity.Entity] struct {
 	scriptHost *V8ScriptHost
 }
 
+func (w nodeV8WrapperBase[T]) iso() *v8.Isolate {
+	return w.scriptHost.iso
+}
+
 func (w nodeV8WrapperBase[T]) mustGetContext(info *v8.FunctionCallbackInfo) *V8ScriptContext {
 	return w.scriptHost.mustGetContext(info.Context())
 }

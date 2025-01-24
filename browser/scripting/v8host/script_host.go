@@ -244,7 +244,7 @@ func registerJSClass(
 }
 
 func init() {
-	registerJSClass("Event", "", createEvent)
+	// registerJSClass("Event", "", createEvent)
 	registerJSClass("CustomEvent", "Event", createCustomEvent)
 	registerJSClass("NamedNodeMap", "", createNamedNodeMap)
 	registerJSClass("Location", "", createLocationPrototype)
