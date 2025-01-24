@@ -72,7 +72,7 @@ func (xhr xmlHttpRequestV8Wrapper) CreateInstance(
 func (xhr xmlHttpRequestV8Wrapper) open(
 	info *v8.FunctionCallbackInfo,
 ) (result *v8.Value, err error) {
-	args := newArgumentHelper(xhr.host, info)
+	args := newArgumentHelper(xhr.scriptHost, info)
 	method, err0 := tryParseArg(args, 0, xhr.decodeUSVString)
 	url, err1 := tryParseArg(args, 1, xhr.decodeUSVString)
 	async, err2 := tryParseArg(args, 1, xhr.decodeBoolean)

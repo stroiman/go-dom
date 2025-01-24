@@ -17,19 +17,22 @@ func newESContainerWrapper[T ElementContainer](host *V8ScriptHost) esElementCont
 
 func (e esElementContainerWrapper[T]) Install(ft *v8.FunctionTemplate) {
 	prototype := ft.PrototypeTemplate()
-	prototype.Set("querySelector", v8.NewFunctionTemplateWithError(e.host.iso, e.QuerySelector))
+	prototype.Set(
+		"querySelector",
+		v8.NewFunctionTemplateWithError(e.scriptHost.iso, e.QuerySelector),
+	)
 	prototype.Set(
 		"querySelectorAll",
-		v8.NewFunctionTemplateWithError(e.host.iso, e.QuerySelectorAll),
+		v8.NewFunctionTemplateWithError(e.scriptHost.iso, e.QuerySelectorAll),
 	)
-	prototype.Set("append", v8.NewFunctionTemplateWithError(e.host.iso, e.append))
+	prototype.Set("append", v8.NewFunctionTemplateWithError(e.scriptHost.iso, e.append))
 }
 
 func (e esElementContainerWrapper[T]) QuerySelector(
 	args *v8.FunctionCallbackInfo,
 ) (*v8.Value, error) {
-	host := e.host
-	iso := e.host.iso
+	host := e.scriptHost
+	iso := e.scriptHost.iso
 	ctx := host.mustGetContext(args.Context())
 	this, ok := ctx.getCachedNode(args.This())
 	if doc, e_ok := this.(ElementContainer); ok && e_ok {
@@ -48,8 +51,8 @@ func (e esElementContainerWrapper[T]) QuerySelector(
 func (e esElementContainerWrapper[T]) QuerySelectorAll(
 	args *v8.FunctionCallbackInfo,
 ) (*v8.Value, error) {
-	host := e.host
-	iso := e.host.iso
+	host := e.scriptHost
+	iso := e.scriptHost.iso
 	ctx := host.mustGetContext(args.Context())
 	this, ok := ctx.getCachedNode(args.This())
 	if doc, e_ok := this.(ElementContainer); ok && e_ok {
@@ -64,7 +67,7 @@ func (e esElementContainerWrapper[T]) QuerySelectorAll(
 
 func (w esElementContainerWrapper[T]) append(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	var err error
-	ctx := w.host.mustGetContext(info.Context())
+	ctx := w.scriptHost.mustGetContext(info.Context())
 	args := info.Args()
 	nodes := make([]dom.Node, len(args))
 	for i, a := range args {

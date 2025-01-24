@@ -39,11 +39,11 @@ func createHistoryPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 }
 
 func (h historyV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, v8.NewTypeError(h.host.iso, "Illegal Constructor")
+	return nil, v8.NewTypeError(h.scriptHost.iso, "Illegal Constructor")
 }
 
 func (h historyV8Wrapper) go_(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(h.host, info)
+	args := newArgumentHelper(h.scriptHost, info)
 	instance, err0 := h.getInstance(info)
 	delta, err1 := tryParseArgWithDefault(args, 0, h.defaultDelta, h.decodeLong)
 	if args.noOfReadArguments >= 1 {
@@ -76,7 +76,7 @@ func (h historyV8Wrapper) forward(info *v8.FunctionCallbackInfo) (*v8.Value, err
 }
 
 func (h historyV8Wrapper) pushState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(h.host, info)
+	args := newArgumentHelper(h.scriptHost, info)
 	instance, err0 := h.getInstance(info)
 	data, err1 := tryParseArg(args, 0, h.decodeAny)
 	url, err2 := tryParseArgWithDefault(args, 1, h.defaultUrl, h.decodeUSVString)
@@ -92,7 +92,7 @@ func (h historyV8Wrapper) pushState(info *v8.FunctionCallbackInfo) (*v8.Value, e
 }
 
 func (h historyV8Wrapper) replaceState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(h.host, info)
+	args := newArgumentHelper(h.scriptHost, info)
 	instance, err0 := h.getInstance(info)
 	data, err1 := tryParseArg(args, 0, h.decodeAny)
 	url, err2 := tryParseArgWithDefault(args, 1, h.defaultUrl, h.decodeUSVString)

@@ -12,7 +12,7 @@ type documentFragmentV8Wrapper struct {
 }
 
 func (w documentFragmentV8Wrapper) constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := w.host.mustGetContext(info.Context())
+	ctx := w.scriptHost.mustGetContext(info.Context())
 	result := dom.NewDocumentFragment(ctx.window.Document())
 	_, err := w.store(result, ctx, info.This())
 	return nil, err

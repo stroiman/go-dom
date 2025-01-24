@@ -42,12 +42,12 @@ func createDomTokenListPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate 
 }
 
 func (u domTokenListV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, v8.NewTypeError(u.host.iso, "Illegal Constructor")
+	return nil, v8.NewTypeError(u.scriptHost.iso, "Illegal Constructor")
 }
 
 func (u domTokenListV8Wrapper) item(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
-	args := newArgumentHelper(u.host, info)
+	args := newArgumentHelper(u.scriptHost, info)
 	instance, err0 := u.getInstance(info)
 	index, err1 := tryParseArg(args, 0, u.decodeUnsignedLong)
 	if args.noOfReadArguments >= 1 {
@@ -63,7 +63,7 @@ func (u domTokenListV8Wrapper) item(info *v8.FunctionCallbackInfo) (*v8.Value, e
 
 func (u domTokenListV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
-	args := newArgumentHelper(u.host, info)
+	args := newArgumentHelper(u.scriptHost, info)
 	instance, err0 := u.getInstance(info)
 	token, err1 := tryParseArg(args, 0, u.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
@@ -78,7 +78,7 @@ func (u domTokenListV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Valu
 }
 
 func (u domTokenListV8Wrapper) add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(u.host, info)
+	args := newArgumentHelper(u.scriptHost, info)
 	instance, err0 := u.getInstance(info)
 	tokens, err1 := tryParseArg(args, 0, u.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
@@ -93,7 +93,7 @@ func (u domTokenListV8Wrapper) add(info *v8.FunctionCallbackInfo) (*v8.Value, er
 }
 
 func (u domTokenListV8Wrapper) remove(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(u.host, info)
+	args := newArgumentHelper(u.scriptHost, info)
 	instance, err0 := u.getInstance(info)
 	tokens, err1 := tryParseArg(args, 0, u.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
@@ -109,7 +109,7 @@ func (u domTokenListV8Wrapper) remove(info *v8.FunctionCallbackInfo) (*v8.Value,
 
 func (u domTokenListV8Wrapper) replace(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
-	args := newArgumentHelper(u.host, info)
+	args := newArgumentHelper(u.scriptHost, info)
 	instance, err0 := u.getInstance(info)
 	token, err1 := tryParseArg(args, 0, u.decodeDOMString)
 	newToken, err2 := tryParseArg(args, 1, u.decodeDOMString)
@@ -149,7 +149,7 @@ func (u domTokenListV8Wrapper) value(info *v8.FunctionCallbackInfo) (*v8.Value, 
 }
 
 func (u domTokenListV8Wrapper) setValue(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(u.host, info)
+	args := newArgumentHelper(u.scriptHost, info)
 	instance, err0 := u.getInstance(info)
 	val, err1 := tryParseArg(args, 0, u.decodeDOMString)
 	if args.noOfReadArguments >= 1 {

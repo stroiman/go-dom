@@ -97,7 +97,7 @@ func (w eventTargetV8Wrapper) getInstance(info *v8.FunctionCallbackInfo) (dom.Ev
 	if info.This().GetInternalField(0).IsExternal() {
 		return w.handleReffedObject.getInstance(info)
 	} else {
-		ctx := w.host.mustGetContext(info.Context())
+		ctx := w.scriptHost.mustGetContext(info.Context())
 		entity, ok := ctx.getCachedNode(info.This())
 		if ok {
 			if target, ok := entity.(dom.EventTarget); ok {

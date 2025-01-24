@@ -75,7 +75,7 @@ func createUrlPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 }
 
 func (u urlV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(u.host, info)
+	args := newArgumentHelper(u.scriptHost, info)
 	url, err1 := tryParseArg(args, 0, u.decodeUSVString)
 	base, err2 := tryParseArg(args, 1, u.decodeUSVString)
 	ctx := u.mustGetContext(info)

@@ -63,12 +63,12 @@ func createNodePrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 }
 
 func (n nodeV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, v8.NewTypeError(n.host.iso, "Illegal Constructor")
+	return nil, v8.NewTypeError(n.scriptHost.iso, "Illegal Constructor")
 }
 
 func (n nodeV8Wrapper) getRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
-	args := newArgumentHelper(n.host, info)
+	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	options, err1 := tryParseArgWithDefault(args, 0, n.defaultGetRootNodeOptions, n.decodeGetRootNodeOptions)
 	if args.noOfReadArguments >= 1 {
@@ -84,7 +84,7 @@ func (n nodeV8Wrapper) getRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, er
 
 func (n nodeV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
-	args := newArgumentHelper(n.host, info)
+	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	other, err1 := tryParseArg(args, 0, n.decodeNode)
 	if args.noOfReadArguments >= 1 {
@@ -100,7 +100,7 @@ func (n nodeV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Value, error
 
 func (n nodeV8Wrapper) insertBefore(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
-	args := newArgumentHelper(n.host, info)
+	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	node, err1 := tryParseArg(args, 0, n.decodeNode)
 	child, err2 := tryParseArg(args, 1, n.decodeNode)
@@ -121,7 +121,7 @@ func (n nodeV8Wrapper) insertBefore(info *v8.FunctionCallbackInfo) (*v8.Value, e
 
 func (n nodeV8Wrapper) appendChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
-	args := newArgumentHelper(n.host, info)
+	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	node, err1 := tryParseArg(args, 0, n.decodeNode)
 	if args.noOfReadArguments >= 1 {
@@ -141,7 +141,7 @@ func (n nodeV8Wrapper) appendChild(info *v8.FunctionCallbackInfo) (*v8.Value, er
 
 func (n nodeV8Wrapper) removeChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
-	args := newArgumentHelper(n.host, info)
+	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	child, err1 := tryParseArg(args, 0, n.decodeNode)
 	if args.noOfReadArguments >= 1 {

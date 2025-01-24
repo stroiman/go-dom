@@ -16,11 +16,11 @@ import (
 // methods implemented.
 type nodeV8WrapperBase[T entity.Entity] struct {
 	converters
-	host *V8ScriptHost
+	scriptHost *V8ScriptHost
 }
 
 func (w nodeV8WrapperBase[T]) mustGetContext(info *v8.FunctionCallbackInfo) *V8ScriptContext {
-	return w.host.mustGetContext(info.Context())
+	return w.scriptHost.mustGetContext(info.Context())
 }
 
 func newNodeV8WrapperBase[T entity.Entity](host *V8ScriptHost) nodeV8WrapperBase[T] {
@@ -28,7 +28,7 @@ func newNodeV8WrapperBase[T entity.Entity](host *V8ScriptHost) nodeV8WrapperBase
 }
 
 func (w nodeV8WrapperBase[T]) getInstance(info *v8.FunctionCallbackInfo) (result T, err error) {
-	if ctx, ok := w.host.netContext(info.Context()); ok {
+	if ctx, ok := w.scriptHost.netContext(info.Context()); ok {
 		if instance, ok := ctx.getCachedNode(info.This()); ok {
 			if typedInstance, ok := instance.(T); ok {
 				return typedInstance, nil
@@ -152,17 +152,17 @@ func (w converters) toNodeList(ctx *V8ScriptContext, val NodeList) (*v8.Value, e
 }
 
 type handleReffedObject[T any] struct {
-	host *V8ScriptHost
+	scriptHost *V8ScriptHost
 	converters
 }
 
 func (o handleReffedObject[T]) mustGetContext(info *v8.FunctionCallbackInfo) *V8ScriptContext {
-	return o.host.mustGetContext(info.Context())
+	return o.scriptHost.mustGetContext(info.Context())
 }
 
 func newHandleReffedObject[T any](host *V8ScriptHost) handleReffedObject[T] {
 	return handleReffedObject[T]{
-		host: host,
+		scriptHost: host,
 	}
 }
 
@@ -170,7 +170,7 @@ func (o handleReffedObject[T]) store(value T, ctx *V8ScriptContext, this *v8.Obj
 	handle := cgo.NewHandle(value)
 	ctx.addDisposer(handleDisposable(handle))
 
-	internalField := v8.NewValueExternalHandle(o.host.iso, handle)
+	internalField := v8.NewValueExternalHandle(o.scriptHost.iso, handle)
 	this.SetInternalField(0, internalField)
 }
 

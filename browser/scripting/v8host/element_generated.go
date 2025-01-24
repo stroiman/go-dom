@@ -90,7 +90,7 @@ func createElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 }
 
 func (e elementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, v8.NewTypeError(e.host.iso, "Illegal Constructor")
+	return nil, v8.NewTypeError(e.scriptHost.iso, "Illegal Constructor")
 }
 
 func (e elementV8Wrapper) hasAttributes(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -106,7 +106,7 @@ func (e elementV8Wrapper) getAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Val
 }
 
 func (e elementV8Wrapper) setAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(e.host, info)
+	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	qualifiedName, err1 := tryParseArg(args, 0, e.decodeDOMString)
 	value, err2 := tryParseArg(args, 1, e.decodeDOMString)
@@ -139,7 +139,7 @@ func (e elementV8Wrapper) toggleAttribute(info *v8.FunctionCallbackInfo) (*v8.Va
 
 func (e elementV8Wrapper) hasAttribute(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
-	args := newArgumentHelper(e.host, info)
+	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	qualifiedName, err1 := tryParseArg(args, 0, e.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
@@ -183,7 +183,7 @@ func (e elementV8Wrapper) attachShadow(info *v8.FunctionCallbackInfo) (*v8.Value
 
 func (e elementV8Wrapper) matches(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
-	args := newArgumentHelper(e.host, info)
+	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	selectors, err1 := tryParseArg(args, 0, e.decodeDOMString)
 	if args.noOfReadArguments >= 1 {

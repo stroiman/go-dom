@@ -18,7 +18,7 @@ func (n nodeV8Wrapper) nodeType(info *v8.FunctionCallbackInfo) (*v8.Value, error
 	if err != nil {
 		return nil, err
 	}
-	return v8.NewValue(n.host.iso, int32(instance.NodeType()))
+	return v8.NewValue(n.scriptHost.iso, int32(instance.NodeType()))
 }
 
 func (n nodeV8Wrapper) decodeGetRootNodeOptions(

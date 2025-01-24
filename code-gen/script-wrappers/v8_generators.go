@@ -422,9 +422,13 @@ func (c V8InstanceInvocation) GetGenerator() V8InstanceInvocationResult {
 }
 
 func CreateV8IllegalConstructorBody(data ESConstructorData) g.Generator {
+	// return g.NewValuePackage("NewTypeError", v8).
+	// 	Call(g.NewValue(data.Receiver).Field("iso").Call(),
+	// 		g.Lit("IllegalConstructor"))
+
 	return g.Return(g.Nil,
 		g.Raw(jen.Qual(v8, "NewTypeError").Call(
-			jen.Id(data.Receiver).Dot("host").Dot("iso"), jen.Lit("Illegal Constructor"),
+			jen.Id(data.Receiver).Dot("scriptHost").Dot("iso"), jen.Lit("Illegal Constructor"),
 		)),
 	)
 }
@@ -451,7 +455,7 @@ func AssignArgs(data ESConstructorData, op ESOperation) g.Generator {
 		g.Id("args"),
 		g.Raw(
 			jen.Id("newArgumentHelper").
-				Call(jen.Id(data.Receiver).Dot("host"), jen.Id("info")),
+				Call(jen.Id(data.Receiver).Dot("scriptHost"), jen.Id("info")),
 		),
 	)
 }

@@ -19,9 +19,9 @@ func (w documentV8Wrapper) BuildInstanceTemplate(constructor *v8.FunctionTemplat
 	tmpl.SetAccessorProperty(
 		"location",
 		v8.NewFunctionTemplateWithError(
-			w.host.iso,
+			w.scriptHost.iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-				ctx := w.host.mustGetContext(info.Context())
+				ctx := w.scriptHost.mustGetContext(info.Context())
 				return ctx.v8ctx.Global().Get("location")
 			},
 		),

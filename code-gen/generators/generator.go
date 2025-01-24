@@ -72,9 +72,8 @@ func Lit(value any) Generator { return Raw(jen.Lit(value)) }
 
 type Value struct{ Generator }
 
-func NewValue(name string) Value {
-	return Value{Id(name)}
-}
+func NewValue(name string) Value                    { return Value{Id(name)} }
+func NewValuePackage(name string, pkg string) Value { return Value{Raw(jen.Qual(pkg, name))} }
 
 func (v Value) Assign(expr Generator) Generator {
 	return GeneratorFunc(func() *jen.Statement {

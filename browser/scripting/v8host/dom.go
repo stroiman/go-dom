@@ -35,13 +35,13 @@ func (l domTokenListV8Wrapper) getInstance(
 
 func (l domTokenListV8Wrapper) CustomInitialiser(constructor *v8.FunctionTemplate) {
 	constructor.InstanceTemplate().SetSymbol(
-		v8.SymbolIterator(l.host.iso),
-		v8.NewFunctionTemplateWithError(l.host.iso, l.GetIterator),
+		v8.SymbolIterator(l.scriptHost.iso),
+		v8.NewFunctionTemplateWithError(l.scriptHost.iso, l.GetIterator),
 	)
 }
 
 func (l domTokenListV8Wrapper) GetIterator(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := l.host.mustGetContext(info.Context())
+	ctx := l.scriptHost.mustGetContext(info.Context())
 	instance, err := l.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (l domTokenListV8Wrapper) GetIterator(info *v8.FunctionCallbackInfo) (*v8.V
 }
 
 func (l domTokenListV8Wrapper) toggle(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(l.host, info)
+	args := newArgumentHelper(l.scriptHost, info)
 	token, err0 := tryParseArg(args, 0, l.decodeUSVString)
 	force, err1 := tryParseArg(args, 1, l.decodeBoolean)
 	instance, errInstance := l.getInstance(info)
@@ -60,16 +60,16 @@ func (l domTokenListV8Wrapper) toggle(info *v8.FunctionCallbackInfo) (*v8.Value,
 		}
 		if force {
 			instance.Add(token)
-			return v8.NewValue(l.host.iso, true)
+			return v8.NewValue(l.scriptHost.iso, true)
 		} else {
 			instance.Remove(token)
-			return v8.NewValue(l.host.iso, false)
+			return v8.NewValue(l.scriptHost.iso, false)
 		}
 	}
 	if err := errors.Join(err0, errInstance); err != nil {
 		return nil, err
 	}
-	return v8.NewValue(l.host.iso, instance.Toggle(token))
+	return v8.NewValue(l.scriptHost.iso, instance.Toggle(token))
 }
 
 type htmlTemplateElementV8Wrapper struct {

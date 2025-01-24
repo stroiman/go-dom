@@ -137,7 +137,7 @@ func createWindowPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 }
 
 func (w windowV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, v8.NewTypeError(w.host.iso, "Illegal Constructor")
+	return nil, v8.NewTypeError(w.scriptHost.iso, "Illegal Constructor")
 }
 
 func (w windowV8Wrapper) close(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

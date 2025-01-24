@@ -78,7 +78,7 @@ func (xhr xmlHttpRequestV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*
 }
 
 func (xhr xmlHttpRequestV8Wrapper) setRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(xhr.host, info)
+	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	name, err1 := tryParseArg(args, 0, xhr.decodeByteString)
 	value, err2 := tryParseArg(args, 1, xhr.decodeByteString)
@@ -94,7 +94,7 @@ func (xhr xmlHttpRequestV8Wrapper) setRequestHeader(info *v8.FunctionCallbackInf
 }
 
 func (xhr xmlHttpRequestV8Wrapper) send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(xhr.host, info)
+	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	body, err1 := tryParseArg(args, 0, xhr.decodeDocument, xhr.decodeXMLHttpRequestBodyInit)
 	if args.noOfReadArguments >= 1 {
@@ -123,7 +123,7 @@ func (xhr xmlHttpRequestV8Wrapper) abort(info *v8.FunctionCallbackInfo) (*v8.Val
 
 func (xhr xmlHttpRequestV8Wrapper) getResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.mustGetContext(info)
-	args := newArgumentHelper(xhr.host, info)
+	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	name, err1 := tryParseArg(args, 0, xhr.decodeByteString)
 	if args.noOfReadArguments >= 1 {
@@ -152,7 +152,7 @@ func (xhr xmlHttpRequestV8Wrapper) getAllResponseHeaders(info *v8.FunctionCallba
 }
 
 func (xhr xmlHttpRequestV8Wrapper) overrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(xhr.host, info)
+	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	mime, err1 := tryParseArg(args, 0, xhr.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
@@ -181,7 +181,7 @@ func (xhr xmlHttpRequestV8Wrapper) timeout(info *v8.FunctionCallbackInfo) (*v8.V
 }
 
 func (xhr xmlHttpRequestV8Wrapper) setTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(xhr.host, info)
+	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	val, err1 := tryParseArg(args, 0, xhr.decodeUnsignedLong)
 	if args.noOfReadArguments >= 1 {
@@ -206,7 +206,7 @@ func (xhr xmlHttpRequestV8Wrapper) withCredentials(info *v8.FunctionCallbackInfo
 }
 
 func (xhr xmlHttpRequestV8Wrapper) setWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	args := newArgumentHelper(xhr.host, info)
+	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	val, err1 := tryParseArg(args, 0, xhr.decodeBoolean)
 	if args.noOfReadArguments >= 1 {

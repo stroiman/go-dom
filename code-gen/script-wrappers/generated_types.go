@@ -7,13 +7,15 @@ import (
 	g "github.com/stroiman/go-dom/code-gen/generators"
 )
 
+const scriptHostName = "scriptHost"
+
 type v8ArgInfo g.Value
 
 func (info v8ArgInfo) GetV8Context() g.Generator { return g.Value(info).Method("Context").Call() }
 
 type WrapperInstance struct{ g.Value }
 
-func (i WrapperInstance) GetScriptHost() g.Value { return i.Field("host") }
+func (i WrapperInstance) GetScriptHost() g.Value { return i.Field(scriptHostName) }
 
 func (i WrapperInstance) MustGetContext(info g.Generator) g.Generator {
 	return i.Method("mustGetContext").Call(info)
