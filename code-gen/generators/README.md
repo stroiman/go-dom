@@ -219,3 +219,5 @@ func (gg Getter) Generate() *jen.Statement {
 }
 ```
 
+I don't intend to add those kinds of types in this package, but could eventually
+appear in some kind of _support_ package.
