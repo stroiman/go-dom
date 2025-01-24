@@ -54,22 +54,6 @@ func ReAssignMany(ids []Generator, expression Generator) Generator {
 	return Raw(jen.List(gs...).Op("=").Add(expression.Generate()))
 }
 
-type Type struct {
-	RawStatement
-}
-
-func NewType(name string) Type                    { return Type{Raw(jen.Id(name))} }
-func NewTypePackage(name string, pkg string) Type { return Type{Raw(jen.Qual(pkg, name))} }
-func (t Type) Pointer() Generator                 { return Raw(jen.Op("*").Add(t.Generate())) }
-
-func (t Type) TypeParam(g Generator) Value {
-	return Value{Raw(t.Generate().Index(g.Generate()))}
-}
-
-func (t Type) CreateStruct(values ...Generator) Value {
-	return Value{Raw(t.Generate().Values(ToJenCodes(values)...))}
-}
-
 func List(generators ...Generator) []Generator { return generators }
 
 var Noop = GeneratorFunc(func() *jen.Statement { return nil })
@@ -77,42 +61,6 @@ var Nil Generator = Raw(jen.Nil())
 var Line Generator = Raw(jen.Line())
 
 func Lit(value any) Generator { return Raw(jen.Lit(value)) }
-
-type Value struct{ Generator }
-
-func NewValue(name string) Value                    { return Value{Id(name)} }
-func NewValuePackage(name string, pkg string) Value { return Value{Raw(jen.Qual(pkg, name))} }
-
-// Reference takes the references of a value using operator &
-func (v Value) Reference() Generator {
-	return Raw(jen.Op("&").Add(v.Generate()))
-}
-
-func (v Value) Assign(expr Generator) Generator {
-	return GeneratorFunc(func() *jen.Statement {
-		return v.Generate().Op(":=").Add(expr.Generate())
-	})
-}
-
-func (v Value) Field(name string) Value {
-	return Value{Raw(v.Generate().Dot(name))}
-}
-
-func (v Value) Method(name string) Value {
-	return Value{Raw(v.Generate().Dot(name))}
-}
-
-func (v Value) TypeParam(g Generator) Value {
-	return Value{Raw(v.Generate().Index(g.Generate()))}
-}
-
-func (m Value) Call(args ...Generator) Value {
-	return Value{Raw(m.Generate().CallFunc(func(g *jen.Group) {
-		for _, arg := range args {
-			g.Add(arg.Generate())
-		}
-	}))}
-}
 
 // WrapLine creates a generator that places a new line in front of the generated
 // code. Useful for function function calls or struct initialisation using many
