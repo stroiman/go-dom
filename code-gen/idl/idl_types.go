@@ -3,6 +3,7 @@ package idl
 import (
 	"encoding/json"
 	"fmt"
+	"iter"
 	"strings"
 )
 
@@ -110,6 +111,18 @@ type IdlName struct {
 	Partial     bool            `json:"partial"`
 	Href        string          `json:"href"`
 	Inheritance string          `json:"Inheritance"`
+}
+
+func (n IdlName) Attributes() iter.Seq[IdlNameMember] {
+	return func(yield func(IdlNameMember) bool) {
+		for _, m := range n.Members {
+			if m.Type == "attribute" {
+				if !yield(m) {
+					return
+				}
+			}
+		}
+	}
 }
 
 type IdlExtendedName struct {

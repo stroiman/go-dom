@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	g "github.com/stroiman/go-dom/code-gen/generators"
+	"github.com/stroiman/go-dom/code-gen/idl"
 	. "github.com/stroiman/go-dom/code-gen/idl"
 
 	"github.com/dave/jennifer/jen"
@@ -205,14 +206,7 @@ type ESOperation struct {
 }
 
 func (o ESOperation) WrapperMethodName() string {
-	switch o.Name {
-	case "go":
-		return "go_"
-	case "type":
-		return "type_"
-	default:
-		return o.Name
-	}
+	return idl.SanitizeName(o.Name)
 }
 
 func (op ESOperation) GetHasError() bool {

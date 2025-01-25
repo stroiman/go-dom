@@ -16,7 +16,7 @@ var _ = Describe("IDLAttribute", func() {
 				Name: g.Id("e"),
 				Type: g.NewType("htmlAnchorElement").Pointer(),
 			},
-		}).To(Render(
+		}).To(HaveRendered(
 			`func (e *htmlAnchorElement) Target() string {
 	return e.target
 }
@@ -34,7 +34,7 @@ func (e *htmlAnchorElement) SetTarget(val string) {
 				Type: g.NewType("htmlAnchorElement").Pointer(),
 			},
 			ReadOnly: true,
-		}).To(Render(
+		}).To(HaveRendered(
 			`func (e *htmlAnchorElement) Target() string {
 	return e.target
 }`))
