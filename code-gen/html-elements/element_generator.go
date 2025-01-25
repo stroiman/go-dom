@@ -1,6 +1,8 @@
 package htmlelements
 
 import (
+	"strings"
+
 	g "github.com/stroiman/go-dom/code-gen/generators"
 	"github.com/stroiman/go-dom/code-gen/idl"
 )
@@ -21,8 +23,23 @@ type htmlElementGenerator struct {
 
 func (gen htmlElementGenerator) Generator() g.Generator {
 	return g.StatementList(
+		gen.GenerateStruct(),
+		g.Line,
 		gen.GenerateAttributes(),
 	)
+}
+
+func toStructName(name string) string {
+	return strings.Replace(name, "HTML", "html", 1)
+}
+
+func (gen htmlElementGenerator) GenerateStruct() g.Generator {
+	res := g.Struct{Name: g.NewType(toStructName(gen.idlType.Name))}
+	res.Embed(g.Id("HTMLElement"))
+	for a := range gen.idlType.Attributes() {
+		res.Field(g.Id(idl.SanitizeName(a.Name)), g.Id("string"))
+	}
+	return res
 }
 
 func (gen htmlElementGenerator) GenerateAttributes() g.Generator {

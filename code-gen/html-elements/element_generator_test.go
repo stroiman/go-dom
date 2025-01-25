@@ -17,4 +17,9 @@ var _ = Describe("ElementGenerator", func() {
 		Expect(GenerateHtmlAnchor()).To(HaveRendered(ContainSubstring(
 			`func (e *htmlAnchorElement) Target() string {`)))
 	})
+
+	It("Should generate a struct with embedded htmlElement", func() {
+		Expect(GenerateHtmlAnchor()).To(HaveRendered(MatchRegexp(
+			`type htmlAnchorElement struct {\n\tHTMLElement`)))
+	})
 })
