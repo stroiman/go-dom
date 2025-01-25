@@ -44,16 +44,17 @@ func (a IDLAttribute) Generate() *jen.Statement {
 	}
 	l := g.StatementList(
 		getter,
-		g.Line,
 	)
 	if !a.ReadOnly {
 		argument := g.NewValue("val")
-		l.Append(g.FunctionDefinition{
-			Receiver: getter.Receiver,
-			Name:     fmt.Sprintf("Set%s", getter.Name),
-			Args:     g.Arg(argument, attrType),
-			Body:     g.Reassign(field, argument),
-		})
+		l.Append(
+			g.Line,
+			g.FunctionDefinition{
+				Receiver: getter.Receiver,
+				Name:     fmt.Sprintf("Set%s", getter.Name),
+				Args:     g.Arg(argument, attrType),
+				Body:     g.Reassign(field, argument),
+			})
 	}
 	return l.Generate()
 }
