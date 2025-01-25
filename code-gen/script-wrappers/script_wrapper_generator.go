@@ -91,12 +91,7 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 	writer io.Writer,
 	spec *WrapperGeneratorFileSpec,
 ) error {
-	file, err := idl.OpenIdlParsed(spec.Name)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	data, err := idl.ParseIdlJsonReader(file)
+	data, err := idl.LoadIdlParsed(spec.Name)
 	if err != nil {
 		return err
 	}
@@ -114,12 +109,7 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 func (gen ScriptWrapperModulesGenerator) writeModuleTypes(
 	spec *WrapperGeneratorFileSpec,
 ) error {
-	file, err := idl.OpenIdlParsed(spec.Name)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	data, err := idl.ParseIdlJsonReader(file)
+	data, err := idl.LoadIdlParsed(spec.Name)
 	if err != nil {
 		return err
 	}
