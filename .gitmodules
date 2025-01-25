@@ -1,4 +1,4 @@
 [submodule "internal/code-gen/webref"]
-	path = code-gen/webref
+	path = code-gen/idl/webref
 	url = https://github.com/w3c/webref.git
   ignore = untracked

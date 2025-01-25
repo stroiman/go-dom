@@ -1,21 +1,15 @@
 package main
 
 import (
-	"embed"
 	"flag"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 
+	"github.com/stroiman/go-dom/code-gen/idl"
 	wrappers "github.com/stroiman/go-dom/code-gen/script-wrappers"
 )
-
-//go:embed webref/ed/elements/html.json
-var html_defs []byte
-
-//go:embed webref/*/idlparsed/*.json
-var WebRef embed.FS
 
 type ElementJSON struct {
 	Name      string `json:"name"`
@@ -49,13 +43,13 @@ func main() {
 	flag.Parse()
 	switch *generatorType {
 	case "goja":
-		gen := wrappers.NewGojaWrapperModuleGenerator(WebRef)
+		gen := wrappers.NewGojaWrapperModuleGenerator(idl.WebRef)
 		err := gen.GenerateScriptWrappers()
 		exitOnError(err)
 		os.Exit(0)
 		return
 	case "scripting":
-		gen := wrappers.NewScriptWrapperModulesGenerator(WebRef)
+		gen := wrappers.NewScriptWrapperModulesGenerator(idl.WebRef)
 		err := gen.GenerateScriptWrappers()
 		exitOnError(err)
 		os.Exit(0)

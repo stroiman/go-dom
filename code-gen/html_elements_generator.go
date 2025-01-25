@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+
+	"github.com/stroiman/go-dom/code-gen/idl"
 )
 
 func WriteHeader(b *builder) {
@@ -51,7 +53,7 @@ func (b *builder) unIndentF(format string, args ...interface{}) {
 func generateHtmlElements(writer io.Writer) error {
 	file := newBuilder(writer)
 	output := ElementsJSON{}
-	json.Unmarshal(html_defs, &output)
+	json.Unmarshal(idl.Html_defs, &output)
 	WriteHeader(file)
 	fmt.Fprint(file, "var HtmlElements = map[string]string {\n")
 	file.indent()
