@@ -10,9 +10,24 @@ func GenerateHTMLElement(name string) (g.Generator, error) {
 	if err != nil {
 		return nil, err
 	}
-	a := html.IdlNames["HTMLAnchorElement"]
+	return htmlElementGenerator{
+		html.IdlNames[name],
+	}.Generator(), nil
+}
+
+type htmlElementGenerator struct {
+	idlType idl.IdlName
+}
+
+func (gen htmlElementGenerator) Generator() g.Generator {
+	return g.StatementList(
+		gen.GenerateAttributes(),
+	)
+}
+
+func (gen htmlElementGenerator) GenerateAttributes() g.Generator {
 	result := g.StatementList()
-	for a := range a.Attributes() {
+	for a := range gen.idlType.Attributes() {
 		result.Append(IDLAttribute{
 			AttributeName: idl.SanitizeName(a.Name),
 			Receiver: Receiver{
@@ -21,5 +36,5 @@ func GenerateHTMLElement(name string) (g.Generator, error) {
 			},
 		})
 	}
-	return result, nil
+	return result
 }
