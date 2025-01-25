@@ -15,7 +15,7 @@ import (
 var html_defs []byte
 
 //go:embed webref/*/idlparsed/*.json
-var idlParsedFS embed.FS
+var WebRef embed.FS
 
 type ElementJSON struct {
 	Name      string `json:"name"`
@@ -49,13 +49,13 @@ func main() {
 	flag.Parse()
 	switch *generatorType {
 	case "goja":
-		gen := wrappers.NewGojaWrapperModuleGenerator(idlParsedFS)
+		gen := wrappers.NewGojaWrapperModuleGenerator(WebRef)
 		err := gen.GenerateScriptWrappers()
 		exitOnError(err)
 		os.Exit(0)
 		return
 	case "scripting":
-		gen := wrappers.NewScriptWrapperModulesGenerator(idlParsedFS)
+		gen := wrappers.NewScriptWrapperModulesGenerator(WebRef)
 		err := gen.GenerateScriptWrappers()
 		exitOnError(err)
 		os.Exit(0)
