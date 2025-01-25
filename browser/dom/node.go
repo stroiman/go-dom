@@ -121,6 +121,7 @@ type Node interface {
 	NodeType() NodeType
 	OwnerDocument() Document
 	Parent() Node
+	ParentElement() Element
 	RemoveChild(node Node) (Node, error)
 	NextSibling() Node
 	PreviousSibling() Node
@@ -225,6 +226,11 @@ func (n *node) Contains(node Node) bool {
 }
 
 func (n *node) Parent() Node { return n.parent }
+
+func (n *node) ParentElement() Element {
+	r, _ := n.Parent().(Element)
+	return r
+}
 
 func (n *node) setParent(parent Node) {
 	n.parent = parent
