@@ -9,6 +9,8 @@ import (
 
 type HTMLElement interface {
 	Element
+	Renderer
+	ChildrenRenderer
 	getHTMLDocument() HTMLDocument
 	getWindow() Window
 }

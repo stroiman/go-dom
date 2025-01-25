@@ -47,11 +47,13 @@ type Element interface {
 
 type element struct {
 	node
-	tagName       string
-	namespace     string
-	attributes    Attributes
-	ownerDocument Document
-	selfElement   Element
+	tagName          string
+	namespace        string
+	attributes       Attributes
+	ownerDocument    Document
+	selfElement      Element
+	selfRenderer     Renderer
+	childrenRenderer ChildrenRenderer
 	// We might want a "prototype" as a value, rather than a Go type, as new types
 	// can be created at runtime. But if so, we probably want them on the node
 	// type.
@@ -60,14 +62,14 @@ type element struct {
 func NewElement(tagName string, ownerDocument Document) Element {
 	// return newElement(tagName, ownerDocument)
 	// // TODO: handle namespace
-	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument, nil}
+	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument, nil, nil, nil}
 	result.SetSelf(result)
 	return result
 }
 
 func newElement(tagName string, ownerDocument Document) *element {
 	// TODO: handle namespace
-	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument, nil}
+	result := &element{newNode(), tagName, "", Attributes(nil), ownerDocument, nil, nil, nil}
 	result.SetSelf(result)
 	return result
 }
@@ -77,11 +79,21 @@ func (e *element) ChildElementCount() int {
 }
 
 func (e *element) SetSelf(n Node) {
-	self, ok := n.(Element)
-	if !ok {
+	if self, ok := n.(Element); ok {
+		e.selfElement = self
+	} else {
 		panic("Setting a non-element as element self")
 	}
-	e.selfElement = self
+	if self, ok := n.(Renderer); ok {
+		e.selfRenderer = self
+	} else {
+		panic("Setting a non-renderer as element self")
+	}
+	if self, ok := n.(ChildrenRenderer); ok {
+		e.childrenRenderer = self
+	} else {
+		panic("Setting a non-child-renderer as element self")
+	}
 	e.node.SetSelf(n)
 }
 
@@ -103,9 +115,7 @@ func (e *element) ClassList() DOMTokenList {
 
 func (e *element) OuterHTML() string {
 	writer := &strings.Builder{}
-	if renderer, ok := e.self.(Renderer); ok {
-		renderer.Render(writer)
-	}
+	e.selfRenderer.Render(writer)
 	return writer.String()
 }
 
@@ -138,13 +148,12 @@ func (e *element) getAttributes() Attributes {
 }
 
 func (e *element) getSelfElement() Element {
-	r, ok := e.getSelf().(Element)
-	if !ok {
-		panic(
-			"Calling method on an element which isn't an element. Did a custom type forget to call 'setSelf()'?",
-		)
+	if r := e.selfElement; r != nil {
+		return r
 	}
-	return r
+	panic(
+		"Calling method on an element which isn't an element. Did a custom type forget to call 'setSelf()'?",
+	)
 }
 
 func (e *element) Attributes() NamedNodeMap {
@@ -225,7 +234,7 @@ func (e *element) Render(writer *strings.Builder) {
 	renderElement(e, writer)
 }
 
-func renderElement(e Element, writer *strings.Builder) {
+func renderElement(e *element, writer *strings.Builder) {
 	tagName := strings.ToLower(e.TagName())
 	writer.WriteRune('<')
 	writer.WriteString(tagName)
@@ -237,9 +246,7 @@ func renderElement(e Element, writer *strings.Builder) {
 		writer.WriteString("\"")
 	}
 	writer.WriteRune('>')
-	if childRenderer, ok := e.getSelf().(ChildrenRenderer); ok {
-		childRenderer.RenderChildren(writer)
-	}
+	e.childrenRenderer.RenderChildren(writer)
 	writer.WriteString("</")
 	writer.WriteString(tagName)
 	writer.WriteRune('>')
