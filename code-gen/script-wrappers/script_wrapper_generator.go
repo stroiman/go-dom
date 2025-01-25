@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"regexp"
 	"slices"
@@ -83,7 +82,6 @@ type TargetGenerators interface {
 }
 
 type ScriptWrapperModulesGenerator struct {
-	IdlSources       fs.FS
 	Specs            WrapperGeneratorsSpec
 	PackagePath      string
 	TargetGenerators TargetGenerators
@@ -93,8 +91,7 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 	writer io.Writer,
 	spec *WrapperGeneratorFileSpec,
 ) error {
-	filename := fmt.Sprintf("webref/curated/idlparsed/%s.json", spec.Name)
-	file, err := gen.IdlSources.Open(filename)
+	file, err := idl.OpenIdlParsed(spec.Name)
 	if err != nil {
 		return err
 	}
@@ -117,8 +114,7 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 func (gen ScriptWrapperModulesGenerator) writeModuleTypes(
 	spec *WrapperGeneratorFileSpec,
 ) error {
-	filename := fmt.Sprintf("webref/curated/idlparsed/%s.json", spec.Name)
-	file, err := gen.IdlSources.Open(filename)
+	file, err := idl.OpenIdlParsed(spec.Name)
 	if err != nil {
 		return err
 	}
@@ -224,7 +220,7 @@ func CreateSpecs() WrapperGeneratorsSpec {
 	return specs
 }
 
-func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGenerator {
+func NewScriptWrapperModulesGenerator() ScriptWrapperModulesGenerator {
 	specs := CreateSpecs()
 	xhrModule := specs.Module("xhr")
 	xhr := xhrModule.Type("XMLHttpRequest")
@@ -400,7 +396,6 @@ func NewScriptWrapperModulesGenerator(idlSources fs.FS) ScriptWrapperModulesGene
 	history.Method("state").SetEncoder("toJSON")
 
 	return ScriptWrapperModulesGenerator{
-		IdlSources:       idlSources,
 		Specs:            specs,
 		PackagePath:      v8host,
 		TargetGenerators: V8TargetGenerators{},

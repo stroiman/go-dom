@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/stroiman/go-dom/code-gen/idl"
 	wrappers "github.com/stroiman/go-dom/code-gen/script-wrappers"
 )
 
@@ -43,13 +42,13 @@ func main() {
 	flag.Parse()
 	switch *generatorType {
 	case "goja":
-		gen := wrappers.NewGojaWrapperModuleGenerator(idl.WebRef)
+		gen := wrappers.NewGojaWrapperModuleGenerator()
 		err := gen.GenerateScriptWrappers()
 		exitOnError(err)
 		os.Exit(0)
 		return
 	case "scripting":
-		gen := wrappers.NewScriptWrapperModulesGenerator(idl.WebRef)
+		gen := wrappers.NewScriptWrapperModulesGenerator()
 		err := gen.GenerateScriptWrappers()
 		exitOnError(err)
 		os.Exit(0)
