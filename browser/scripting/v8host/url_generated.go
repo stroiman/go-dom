@@ -43,7 +43,7 @@ func createUrlPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso, wrapper.setPassword),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("host",
-		v8.NewFunctionTemplateWithError(iso, wrapper.host_),
+		v8.NewFunctionTemplateWithError(iso, wrapper.host),
 		v8.NewFunctionTemplateWithError(iso, wrapper.setHost),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("hostname",
@@ -163,7 +163,7 @@ func (u urlV8Wrapper) setPassword(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	return nil, errors.New("URL.setPassword: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
 }
 
-func (u urlV8Wrapper) host_(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (u urlV8Wrapper) host(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
 	instance, err := u.getInstance(info)
 	if err != nil {

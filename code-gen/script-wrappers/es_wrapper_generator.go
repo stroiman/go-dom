@@ -208,8 +208,6 @@ func (o ESOperation) WrapperMethodName() string {
 	switch o.Name {
 	case "go":
 		return "go_"
-	case "host":
-		return "host_"
 	case "type":
 		return "type_"
 	default:
