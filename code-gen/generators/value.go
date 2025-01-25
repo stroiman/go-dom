@@ -23,6 +23,9 @@ type Value struct{ Generator }
 // current scope, i.e., a global or local value
 func NewValue(identifier string) Value { return Value{Id(identifier)} }
 
+// NewValueOf create a Value expressed by an existing Generator instance.
+func ValueOf(g Generator) Value { return Value{g} }
+
 // NewValuePackage create a Value representing a global var or constant in an
 // imported package. Identifier is the exported name, or identifier, and pkg is
 // the fully qualified package name.

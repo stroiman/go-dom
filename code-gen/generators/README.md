@@ -198,26 +198,74 @@ func Body() g.Generator {
 
 ### High-level general purpose generators
 
-A high-level general purpose generator could be a "Getter", retrieving a private
+A high-level general purpose generator could be an "Attribute", retrieving a private
 read-only field:
 
 ```Go
-type Getter struct {
-    FieldName    string
-    FieldType    Generator
-    ReceiverName Generator
-    ReceiverType Generator
+type Receiver struct {
+	Name g.Generator
+	Type g.Generator
 }
 
-func (gg Getter) Generate() *jen.Statement {
-    return Function{
-        Name: g.Id(fmt.Sprintf("Get%s", gg.FieldName),
-        Receiver: g.Arg(gg.ReceiverName, gg.ReceiverType),
-        RetType: gg.FieldType,
-        Body: g.Return(gg.ReceiverName.Field(gg.FieldName)),
-    }
+type Attribute struct {
+	Name string
+	Type g.Generator
+	Receiver      Receiver
+	ReadOnly      bool
+}
+
+func (a Attribute) Generate() *jen.Statement {
+	field := g.ValueOf(a.Receiver.Name).Field(a.Name)
+	getter := g.FunctionDefinition{
+		Receiver: g.FunctionArgument(a.Receiver),
+		Name:     upperCaseFirstLetter(a.Name),
+		RtnTypes: g.List(a.Type),
+		Body:     g.Return(field),
+	}
+	l := g.StatementList(
+		getter,
+		g.Line,
+	)
+	if !a.ReadOnly {
+		argument := g.NewValue("val")
+		l.Append(g.FunctionDefinition{
+			Receiver: getter.Receiver,
+			Name:     fmt.Sprintf("Set%s", getter.Name),
+			Args:     g.Arg(argument, a.Type),
+			Body:     g.Reassign(field, argument),
+		})
+	}
+	return l.Generate()
+}
+```
+
+From this, you can easily generate multiple, e.g. from a list of names:
+
+```go
+func GenerateAttribute(names []string) Generator {
+	r := Receiver{
+		Name: g.Id("t"),
+		Type: g.Id("MyType"),
+	}
+	gg := make([]Generator, len(names))
+	for i, n := range names {
+		gg[i] = Attribute {
+			Receiver: Receiver{
+				Name: g.Id("t"),
+				Type: g.Id("MyType"),
+			},
+			Name: g.Id(n),
+			Type: g.Id("string"), // or: getTypeForAttribute(n)
+		}
+	}
+	return StatementList(gg...)
 }
 ```
 
 I don't intend to add those kinds of types in this package, but could eventually
 appear in some kind of _support_ package.
+
+### Low-level general purpose generators
+
+From the previous example, you could have extracted, e.g. just a Getter and a
+Setter. Or AssignField, or ...
