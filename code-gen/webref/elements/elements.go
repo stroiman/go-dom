@@ -34,6 +34,8 @@ func (n Elements) GetTagNameForInterface(i string) (string, bool) {
 // GetTagNameForInterfaceError is like [Elements.GetTagNameForInterface], but
 // returns an error instead of a boolean if the element is not found.
 func (n Elements) GetTagNameForInterfaceError(i string) (res string, err error) {
+	// TODO: Take into account is multiple tag names can result in the same
+	// elements. Then the caller needs to specify the tag.
 	var ok bool
 	if res, ok = n.GetTagNameForInterface(i); !ok {
 		err = fmt.Errorf("Could not find the tag name corresponding to IDL interface: %s", i)

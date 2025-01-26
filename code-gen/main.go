@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	htmlelements "github.com/stroiman/go-dom/code-gen/html-elements"
 	wrappers "github.com/stroiman/go-dom/code-gen/script-wrappers"
 )
 
@@ -34,17 +35,20 @@ func main() {
 	switch *generatorType {
 	case "goja":
 		gen := wrappers.NewGojaWrapperModuleGenerator()
-		err := gen.GenerateScriptWrappers()
-		exitOnError(err)
+		exitOnError(gen.GenerateScriptWrappers())
 		os.Exit(0)
 		return
 	case "scripting":
 		gen := wrappers.NewScriptWrapperModulesGenerator()
-		err := gen.GenerateScriptWrappers()
-		exitOnError(err)
+		exitOnError(gen.GenerateScriptWrappers())
+		os.Exit(0)
+		return
+	case "htmlelements":
+		exitOnError(htmlelements.GenerateHTMLElements())
 		os.Exit(0)
 		return
 	}
+
 	if *outputFile == "" || *generatorType == "" {
 		fmt.Println("Internal code generator from IDL definitions")
 		flag.PrintDefaults()

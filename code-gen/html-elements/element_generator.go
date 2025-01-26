@@ -48,9 +48,9 @@ func toStructName(name string) string {
 func (gen htmlElementGenerator) GenerateStruct() g.Generator {
 	res := g.Struct{Name: g.NewType(toStructName(gen.idlType.Name))}
 	res.Embed(g.Id("HTMLElement"))
-	for a := range gen.idlType.Attributes() {
-		res.Field(g.Id(idl.SanitizeName(a.Name)), g.Id("string"))
-	}
+	// for a := range gen.idlType.Attributes() {
+	// 	res.Field(g.Id(idl.SanitizeName(a.Name)), g.Id("string"))
+	// }
 	return res
 }
 
@@ -87,4 +87,16 @@ func (gen htmlElementGenerator) GenerateAttributes() g.Generator {
 		})
 	}
 	return result
+}
+
+type FileGeneratorSpec struct {
+	Name      string
+	Generator g.Generator
+}
+
+func CreateHTMLElementGenerators() ([]FileGeneratorSpec, error) {
+	generator, error := GenerateHTMLElement("HTMLAnchorElement")
+	return []FileGeneratorSpec{
+		{"html_anchor_element_generated", generator},
+	}, error
 }

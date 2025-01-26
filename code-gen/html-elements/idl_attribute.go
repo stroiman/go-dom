@@ -35,12 +35,19 @@ type IDLAttribute struct {
 
 func (a IDLAttribute) Generate() *jen.Statement {
 	attrType := g.NewType("string")
-	field := g.ValueOf(a.Receiver.Name).Field(a.AttributeName)
+	receiver := g.ValueOf(a.Receiver.Name)
+	result := g.Id("result")
 	getter := g.FunctionDefinition{
 		Receiver: g.FunctionArgument(a.Receiver),
 		Name:     upperCaseFirstLetter(a.AttributeName),
 		RtnTypes: g.List(attrType),
-		Body:     g.Return(field),
+		Body: g.StatementList(
+			g.AssignMany(
+				g.List(result, g.Id("_")),
+				receiver.Field("GetAttribute").Call(g.Lit(a.AttributeName)),
+			),
+			g.Return(result),
+		),
 	}
 	l := g.StatementList(
 		getter,
@@ -53,7 +60,7 @@ func (a IDLAttribute) Generate() *jen.Statement {
 				Receiver: getter.Receiver,
 				Name:     fmt.Sprintf("Set%s", getter.Name),
 				Args:     g.Arg(argument, attrType),
-				Body:     g.Reassign(field, argument),
+				Body:     receiver.Field("SetAttribute").Call(g.Lit(a.AttributeName), argument),
 			})
 	}
 	return l.Generate()
