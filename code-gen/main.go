@@ -10,15 +10,6 @@ import (
 	wrappers "github.com/stroiman/go-dom/code-gen/script-wrappers"
 )
 
-type ElementJSON struct {
-	Name      string `json:"name"`
-	Interface string `json:"interface"`
-}
-
-type ElementsJSON struct {
-	Elements []ElementJSON `json:"elements"`
-}
-
 func getWriter(output string) io.Writer {
 	if output == "stdout" {
 		return os.Stdout

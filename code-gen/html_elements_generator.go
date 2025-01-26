@@ -1,11 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 
-	"github.com/stroiman/go-dom/code-gen/idl"
+	"github.com/stroiman/go-dom/code-gen/idl/elements"
 )
 
 func WriteHeader(b *builder) {
@@ -51,15 +50,16 @@ func (b *builder) unIndentF(format string, args ...interface{}) {
 }
 
 func generateHtmlElements(writer io.Writer) error {
-	file := newBuilder(writer)
-	output := ElementsJSON{}
-	json.Unmarshal(idl.Html_defs, &output)
-	WriteHeader(file)
-	fmt.Fprint(file, "var HtmlElements = map[string]string {\n")
-	file.indent()
-	defer file.unIndentF("}\n")
-	for _, element := range output.Elements {
-		file.Printf("\"%s\": \"%s\",\n", element.Name, element.Interface)
+	e, err := elements.Load()
+	if err == nil {
+		file := newBuilder(writer)
+		WriteHeader(file)
+		fmt.Fprint(file, "var HtmlElements = map[string]string {\n")
+		file.indent()
+		defer file.unIndentF("}\n")
+		for _, element := range e.Elements {
+			file.Printf("\"%s\": \"%s\",\n", element.Name, element.Interface)
+		}
 	}
-	return nil
+	return err
 }
