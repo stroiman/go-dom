@@ -1,27 +1,34 @@
 package htmlelements
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	g "github.com/stroiman/go-dom/code-gen/generators"
+	"github.com/stroiman/go-dom/code-gen/webref/elements"
 	"github.com/stroiman/go-dom/code-gen/webref/idl"
 )
 
 func GenerateHTMLElement(name string) (g.Generator, error) {
-	html, err := idl.LoadIdlParsed("html")
+	html, err1 := idl.LoadIdlParsed("html")
+	el, err2 := elements.Load()
+	tagName, err3 := el.GetTagNameForInterfaceError(name)
+	err := errors.Join(err1, err2, err3)
 	if err != nil {
 		return nil, err
 	}
 	return htmlElementGenerator{
 		html.IdlNames[name],
 		g.NewType(toStructName(name)),
+		tagName,
 	}.Generator(), nil
 }
 
 type htmlElementGenerator struct {
 	idlType idl.Name
 	type_   g.Type
+	tagName string
 }
 
 func (gen htmlElementGenerator) Generator() g.Generator {
@@ -59,7 +66,8 @@ func (gen htmlElementGenerator) GenerateConstructor() g.Generator {
 		Body: g.StatementList(
 			g.Assign(
 				res,
-				t.CreateInstance(g.NewValue("NewHTMLElement").Call(g.Lit("a"), owner)).Reference(),
+				t.CreateInstance(g.NewValue("NewHTMLElement").Call(g.Lit(gen.tagName), owner)).
+					Reference(),
 			),
 			res.Field("SetSelf").Call(res),
 			g.Return(res),
