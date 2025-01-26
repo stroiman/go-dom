@@ -14,6 +14,10 @@ type Interface struct {
 	// Don't rely on this, it only exists during a refactoring process
 	InternalSpec Name
 	Name         string
+	// Includes represent interfaces included using the includes IDL statement.
+	//
+	// See also: https://webidl.spec.whatwg.org/#includes-statement
+	Includes []Interface
 }
 
 // NOTE: This will be removed in favour of a slice on the type

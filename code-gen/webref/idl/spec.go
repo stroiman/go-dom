@@ -32,15 +32,26 @@ type Spec struct {
 	Interfaces map[string]Interface
 }
 
+func (s *Spec) createInterface(n Name) Interface {
+	includedNames := s.IdlExtendedNames[n.Name].includes()
+
+	intf := Interface{
+		InternalSpec: n,
+		Name:         n.Name,
+		Includes:     make([]Interface, len(includedNames)),
+	}
+	for i, n := range includedNames {
+		intf.Includes[i] = s.createInterface(s.IdlNames[n])
+	}
+	return intf
+}
+
 // initialize fills out the high-level representations from the low level parsed
 // JSON data.
 func (s *Spec) initialize() {
 	s.Interfaces = make(map[string]Interface)
 	for name, spec := range s.IdlNames {
-		s.Interfaces[name] = Interface{
-			InternalSpec: spec,
-			Name:         name,
-		}
+		s.Interfaces[name] = s.createInterface(spec)
 	}
 }
 

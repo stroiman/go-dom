@@ -146,6 +146,16 @@ type ExtendedName struct {
 
 type ExtendedNames []ExtendedName
 
+func (nn ExtendedNames) includes() []string {
+	res := make([]string, 0)
+	for _, n := range nn {
+		if n.Type == "includes" {
+			res = append(res, n.Includes)
+		}
+	}
+	return res
+}
+
 type Parsed struct {
 	IdlNames         map[string]Name
 	IdlExtendedNames map[string]ExtendedNames
