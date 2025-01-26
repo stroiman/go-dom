@@ -7,8 +7,6 @@ import (
 )
 
 type url struct {
-	// Cannot be named `url` conflicts with `net/url` import in other files in
-	// same package.
 	url *netURL.URL
 }
 
