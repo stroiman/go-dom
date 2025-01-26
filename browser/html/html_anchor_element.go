@@ -1,15 +1,9 @@
 package html
 
-type htmlAnchorElement struct {
+type HTMLAnchorElement interface {
 	HTMLElement
-}
-
-func NewHTMLAnchorElement(ownerDocument HTMLDocument) HTMLElement {
-	result := &htmlAnchorElement{
-		NewHTMLElement("a", ownerDocument),
-	}
-	result.SetSelf(result)
-	return result
+	Target() string
+	SetTarget(val string)
 }
 
 func (e *htmlAnchorElement) Click() bool {
