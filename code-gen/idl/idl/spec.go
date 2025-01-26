@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"slices"
 	"strings"
+
+	"github.com/stroiman/go-dom/code-gen/idl"
 )
 
 type RetType struct {
@@ -18,6 +20,17 @@ func NewRetTypeUndefined() RetType { return RetType{TypeName: "undefined", Nulla
 
 type IdlSpec struct {
 	ParsedIdlFile
+}
+
+// LoadIdlParsed loads a files from the /curated/idlpased directory containing
+// specifications of the interfaces.
+func LoadIdlParsed(name string) (IdlSpec, error) {
+	file, err := idl.OpenIdlParsed(name)
+	if err != nil {
+		return IdlSpec{}, err
+	}
+	defer file.Close()
+	return ParseIdlJsonReader(file)
 }
 
 type IdlTypeSpec struct {

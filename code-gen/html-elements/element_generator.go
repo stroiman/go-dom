@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	g "github.com/stroiman/go-dom/code-gen/generators"
-	"github.com/stroiman/go-dom/code-gen/idl"
+	"github.com/stroiman/go-dom/code-gen/idl/idl"
 )
 
 func GenerateHTMLElement(name string) (g.Generator, error) {
