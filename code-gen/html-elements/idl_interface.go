@@ -27,11 +27,11 @@ func (i IdlInterface) Generate() *jen.Statement {
 
 	for _, a := range i.Attributes {
 		getterName := upperCaseFirstLetter(a.Name)
-		setterName := fmt.Sprintf("Set%s", getterName)
 		fields = append(fields, generators.Raw(
 			jen.Id(getterName).Params().Params(jen.Id("string")),
 		))
 		if !a.ReadOnly {
+			setterName := fmt.Sprintf("Set%s", getterName)
 			fields = append(fields, generators.Raw(
 				jen.Id(setterName).Params(jen.Id("string")),
 			))

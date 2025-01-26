@@ -9,7 +9,7 @@ import (
 )
 
 func GenerateHtmlAnchor() (g.Generator, error) {
-	return GenerateHTMLElement("HTMLAnchorElement")
+	return CreateHTMLElementGenerator("HTMLAnchorElement")
 }
 
 var _ = Describe("ElementGenerator", func() {
@@ -40,5 +40,21 @@ var _ = Describe("ElementGenerator", func() {
 	result.SetSelf(result)
 	return result
 }`)))
+	})
+
+	Describe("HTMLAnchorElement", func() {
+		It("Should have interface for URL properties", func() {
+			Expect(GenerateHtmlAnchor()).To(HaveRendered(ContainSubstring("\n\tHost() string\n")))
+		})
+
+		It("Should not setters for read-only properties", func() {
+			Expect(GenerateHtmlAnchor()).ToNot(HaveRendered(ContainSubstring("\tSetOrigin(")))
+		})
+
+		It("Should not have an implementation for URL properties", func() {
+			Expect(
+				GenerateHtmlAnchor(),
+			).ToNot(HaveRendered(MatchRegexp(`func \([^(]+\) Host\(\) string`)))
+		})
 	})
 })

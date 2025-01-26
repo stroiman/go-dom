@@ -10,7 +10,8 @@ import (
 	"github.com/stroiman/go-dom/code-gen/webref/idl"
 )
 
-func GenerateHTMLElement(name string) (g.Generator, error) {
+// CreateHTMLElementGenerator creates a generator for the element with
+func CreateHTMLElementGenerator(name string) (g.Generator, error) {
 	html, err1 := idl.LoadIdlParsed("html")
 	el, err2 := elements.Load()
 	tagName, err3 := el.GetTagNameForInterfaceError(name)
@@ -49,11 +50,18 @@ func toStructName(name string) string {
 
 func (gen htmlElementGenerator) GenerateInterface() g.Generator {
 	attributes := make([]IdlInterfaceAttribute, 0)
-	for _, a := range gen.idlType.Attributes {
-		attributes = append(attributes, IdlInterfaceAttribute{
-			Name:     a.Name,
-			ReadOnly: a.Readonly,
-		})
+
+	interfaces := make([]idl.Interface, 1+len(gen.idlType.Includes))
+	interfaces[0] = gen.idlType
+	copy(interfaces[1:], gen.idlType.Includes)
+
+	for _, i := range interfaces {
+		for _, a := range i.Attributes {
+			attributes = append(attributes, IdlInterfaceAttribute{
+				Name:     a.Name,
+				ReadOnly: a.Readonly,
+			})
+		}
 	}
 	return IdlInterface{
 		Name:       gen.idlType.Name,
@@ -112,7 +120,7 @@ type FileGeneratorSpec struct {
 }
 
 func CreateHTMLElementGenerators() ([]FileGeneratorSpec, error) {
-	generator, error := GenerateHTMLElement("HTMLAnchorElement")
+	generator, error := CreateHTMLElementGenerator("HTMLAnchorElement")
 	return []FileGeneratorSpec{
 		{"html_anchor_element", generator},
 	}, error

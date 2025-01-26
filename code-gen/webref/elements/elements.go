@@ -1,3 +1,6 @@
+// Package elements contains functionality to tell which HTML tags correspond to
+// which IDL interface names. E.g., the <a> tag corresponds to the
+// HTMLAnchorElement IDL interface specification.
 package elements
 
 import (
