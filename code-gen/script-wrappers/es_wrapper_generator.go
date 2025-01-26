@@ -9,7 +9,6 @@ import (
 
 	g "github.com/stroiman/go-dom/code-gen/generators"
 	"github.com/stroiman/go-dom/code-gen/idl/idl"
-	. "github.com/stroiman/go-dom/code-gen/idl/idl"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -32,7 +31,7 @@ const (
 	gojaSrc  = "github.com/dop251/goja"
 )
 
-func createData(spec IdlSpec, dataData WrapperTypeSpec) ESConstructorData {
+func createData(spec idl.Spec, dataData WrapperTypeSpec) ESConstructorData {
 	idlName, ok := spec.GetType(dataData.TypeName)
 	if !ok {
 		panic("Missing type")
@@ -61,7 +60,7 @@ func createData(spec IdlSpec, dataData WrapperTypeSpec) ESConstructorData {
 
 func CreateConstructor(
 	dataData WrapperTypeSpec,
-	idlName IdlTypeSpec) *ESOperation {
+	idlName idl.TypeSpec) *ESOperation {
 	if c, ok := idlName.Constructor(); ok {
 		fmt.Printf("Create constructor %s '%s'\n", dataData.TypeName, c.Name)
 		c.Name = "constructor"
@@ -74,7 +73,7 @@ func CreateConstructor(
 
 func CreateInstanceMethods(
 	dataData WrapperTypeSpec,
-	idlName IdlTypeSpec) (result []ESOperation) {
+	idlName idl.TypeSpec) (result []ESOperation) {
 	for instanceMethod := range idlName.InstanceMethods() {
 		op := createOperation(dataData, instanceMethod)
 		result = append(result, op)
@@ -84,7 +83,7 @@ func CreateInstanceMethods(
 
 func CreateAttributes(
 	dataData WrapperTypeSpec,
-	idlName IdlTypeSpec,
+	idlName idl.TypeSpec,
 ) (res []ESAttribute) {
 	for attribute := range idlName.Attributes() {
 		methodCustomization := dataData.GetMethodCustomization(attribute.Name)
@@ -112,7 +111,7 @@ func CreateAttributes(
 			setter.NotImplemented = setter.NotImplemented || methodCustomization.NotImplemented
 			setter.CustomImplementation = setter.CustomImplementation ||
 				methodCustomization.CustomImplementation
-			setter.RetType = NewRetTypeUndefined()
+			setter.RetType = idl.NewRetTypeUndefined()
 			setter.Arguments = []ESOperationArgument{{
 				Name:     "val",
 				Type:     idlNameToGoName(rtnType),
@@ -129,7 +128,7 @@ func CreateAttributes(
 	return
 }
 
-func createOperation(typeSpec WrapperTypeSpec, member MemberSpec) ESOperation {
+func createOperation(typeSpec WrapperTypeSpec, member idl.MemberSpec) ESOperation {
 	methodCustomization := typeSpec.GetMethodCustomization(member.Name)
 	op := ESOperation{
 		Name:                 member.Name,
@@ -176,7 +175,7 @@ type ESOperationArgument struct {
 	Type         string
 	Optional     bool
 	Variadic     bool
-	IdlType      IdlTypes
+	IdlType      idl.Types
 	ArgumentSpec ESMethodArgument
 }
 
@@ -198,7 +197,7 @@ func (a ESOperationArgument) DefaultValueInGo() (name string, ok bool) {
 type ESOperation struct {
 	Name                 string
 	NotImplemented       bool
-	RetType              RetType
+	RetType              idl.RetType
 	HasError             bool
 	CustomImplementation bool
 	MethodCustomization  ESMethodWrapper

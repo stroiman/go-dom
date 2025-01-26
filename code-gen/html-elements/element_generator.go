@@ -20,7 +20,7 @@ func GenerateHTMLElement(name string) (g.Generator, error) {
 }
 
 type htmlElementGenerator struct {
-	idlType idl.IdlName
+	idlType idl.Name
 	type_   g.Type
 }
 

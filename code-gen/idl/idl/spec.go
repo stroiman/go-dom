@@ -18,35 +18,35 @@ type RetType struct {
 
 func NewRetTypeUndefined() RetType { return RetType{TypeName: "undefined", Nullable: false} }
 
-type IdlSpec struct {
+type Spec struct {
 	ParsedIdlFile
 }
 
 // LoadIdlParsed loads a files from the /curated/idlpased directory containing
 // specifications of the interfaces.
-func LoadIdlParsed(name string) (IdlSpec, error) {
+func LoadIdlParsed(name string) (Spec, error) {
 	file, err := idl.OpenIdlParsed(name)
 	if err != nil {
-		return IdlSpec{}, err
+		return Spec{}, err
 	}
 	defer file.Close()
 	return ParseIdlJsonReader(file)
 }
 
-type IdlTypeSpec struct {
-	Spec *IdlSpec
-	Type IdlName
+type TypeSpec struct {
+	Spec *Spec
+	Type Name
 }
 
-type MemberSpec struct{ IdlNameMember }
-type AttributeSpec struct{ IdlNameMember }
+type MemberSpec struct{ NameMember }
+type AttributeSpec struct{ NameMember }
 
-func (t *IdlTypeSpec) Members() []IdlNameMember {
+func (t *TypeSpec) Members() []NameMember {
 	return t.Type.Members
 }
 
-func (t *IdlTypeSpec) Constructor() (res MemberSpec, found bool) {
-	idx := slices.IndexFunc(t.Type.Members, func(n IdlNameMember) bool {
+func (t *TypeSpec) Constructor() (res MemberSpec, found bool) {
+	idx := slices.IndexFunc(t.Type.Members, func(n NameMember) bool {
 		return n.Type == "constructor"
 	})
 	found = idx >= 0
@@ -56,11 +56,11 @@ func (t *IdlTypeSpec) Constructor() (res MemberSpec, found bool) {
 	return
 }
 
-func (t *IdlTypeSpec) Inheritance() string {
+func (t *TypeSpec) Inheritance() string {
 	return t.Type.Inheritance
 }
 
-func (t *IdlTypeSpec) InstanceMethods() iter.Seq[MemberSpec] {
+func (t *TypeSpec) InstanceMethods() iter.Seq[MemberSpec] {
 	return func(yield func(v MemberSpec) bool) {
 		for i, member := range t.Type.Members {
 			if member.Special == "static" {
@@ -68,7 +68,7 @@ func (t *IdlTypeSpec) InstanceMethods() iter.Seq[MemberSpec] {
 			}
 			if member.Type == "operation" && member.Name != "" {
 				// Empty name seems to indicate a named property getter. Not sure yet.
-				firstIndex := slices.IndexFunc(t.Type.Members, func(m IdlNameMember) bool {
+				firstIndex := slices.IndexFunc(t.Type.Members, func(m NameMember) bool {
 					return m.Name == member.Name
 				})
 				if firstIndex < i {
@@ -82,7 +82,7 @@ func (t *IdlTypeSpec) InstanceMethods() iter.Seq[MemberSpec] {
 	}
 }
 
-func (t *IdlTypeSpec) Attributes() iter.Seq[AttributeSpec] {
+func (t *TypeSpec) Attributes() iter.Seq[AttributeSpec] {
 	return func(yield func(v AttributeSpec) bool) {
 		for _, member := range t.Type.Members {
 			if member.IsAttribute() {
@@ -92,8 +92,8 @@ func (t *IdlTypeSpec) Attributes() iter.Seq[AttributeSpec] {
 	}
 }
 
-func ParseIdlJsonReader(reader io.Reader) (IdlSpec, error) {
-	spec := IdlSpec{}
+func ParseIdlJsonReader(reader io.Reader) (Spec, error) {
+	spec := Spec{}
 	b, err := io.ReadAll(reader)
 	if err == nil {
 		err = json.Unmarshal(b, &spec)
@@ -101,18 +101,18 @@ func ParseIdlJsonReader(reader io.Reader) (IdlSpec, error) {
 	return spec, err
 }
 
-func (s *IdlSpec) GetType(name string) (IdlTypeSpec, bool) {
+func (s *Spec) GetType(name string) (TypeSpec, bool) {
 	result, ok := s.IdlNames[name]
-	return IdlTypeSpec{s, result}, ok
+	return TypeSpec{s, result}, ok
 }
 
 func (s AttributeSpec) AttributeType() RetType {
-	r, n := FindMemberAttributeType(s.IdlNameMember)
+	r, n := FindMemberAttributeType(s.NameMember)
 	return RetType{r, n}
 }
 
 func (s MemberSpec) ReturnType() RetType {
-	r, n := FindMemberReturnType(s.IdlNameMember)
+	r, n := FindMemberReturnType(s.NameMember)
 	return RetType{r, n}
 }
 

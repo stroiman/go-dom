@@ -26,19 +26,19 @@ type ExtAttr struct {
 	} `json:"rhs"`
 }
 
-type IdlType struct {
+type Type struct {
 	Type     string    `json:"type"`
 	ExtAttrs []ExtAttr `json:"extAttrs"`
 	Generic  string    `json:"generic"`
 	Nullable bool      `json:"nullable"`
 	Union    bool      `json:"union"`
-	IType    IdlTypes  `json:"idlType"`
+	IType    Types     `json:"idlType"`
 }
 
-func (t *IdlTypes) UnmarshalJSON(bytes []byte) error {
+func (t *Types) UnmarshalJSON(bytes []byte) error {
 	err := json.Unmarshal(bytes, &t.Types)
 	if err != nil {
-		typ := new(IdlType)
+		typ := new(Type)
 		err = json.Unmarshal(bytes, &typ)
 		if err == nil {
 			t.IdlType = typ
@@ -55,16 +55,16 @@ type Stuff struct {
 	Type     string    `json:"type"`
 	Name     string    `json:"name"`
 	ExtAttrs []ExtAttr `json:"extAttrs"`
-	IdlType  IdlTypes  `json:"idlType"`
+	IdlType  Types     `json:"idlType"`
 }
 
-type IdlTypes struct {
-	Types    []IdlType
-	IdlType  *IdlType
+type Types struct {
+	Types    []Type
+	IdlType  *Type
 	TypeName string
 }
 
-func (i IdlTypes) String() string {
+func (i Types) String() string {
 	if len(i.Types) > 0 {
 		return fmt.Sprintf("%v", i.Types)
 	}
@@ -96,7 +96,7 @@ type ArgumentType struct {
 	Variadic bool `json:"variadic"`
 }
 
-type IdlNameMember struct {
+type NameMember struct {
 	Stuff
 	Arguments []ArgumentType `json:"arguments"`
 	Special   string         `json:"special"`
@@ -104,17 +104,17 @@ type IdlNameMember struct {
 	Href      string         `json:"href"`
 }
 
-type IdlName struct {
-	Type        string          `json:"type"`
-	Name        string          `json:"name"`
-	Members     []IdlNameMember `json:"members"`
-	Partial     bool            `json:"partial"`
-	Href        string          `json:"href"`
-	Inheritance string          `json:"Inheritance"`
+type Name struct {
+	Type        string       `json:"type"`
+	Name        string       `json:"name"`
+	Members     []NameMember `json:"members"`
+	Partial     bool         `json:"partial"`
+	Href        string       `json:"href"`
+	Inheritance string       `json:"Inheritance"`
 }
 
-func (n IdlName) Attributes() iter.Seq[IdlNameMember] {
-	return func(yield func(IdlNameMember) bool) {
+func (n Name) Attributes() iter.Seq[NameMember] {
+	return func(yield func(NameMember) bool) {
 		for _, m := range n.Members {
 			if m.Type == "attribute" {
 				if !yield(m) {
@@ -125,7 +125,7 @@ func (n IdlName) Attributes() iter.Seq[IdlNameMember] {
 	}
 }
 
-type IdlExtendedName struct {
+type ExtendedName struct {
 	Fragment string
 	Type     string
 	ExtAttrs []ExtAttr `json:"extAttrs"`
@@ -133,46 +133,46 @@ type IdlExtendedName struct {
 	Includes string
 }
 
-type IdlExtendedNames []IdlExtendedName
+type ExtendedNames []ExtendedName
 
-type IdlParsed struct {
-	IdlNames         map[string]IdlName
-	IdlExtendedNames map[string]IdlExtendedNames
+type Parsed struct {
+	IdlNames         map[string]Name
+	IdlExtendedNames map[string]ExtendedNames
 }
 
 type ParsedIdlFile struct {
-	IdlParsed `json:"idlParsed"`
+	Parsed `json:"idlParsed"`
 }
 
-func FindIdlTypeValue(idl IdlTypes, expectedType string) (IdlType, bool) {
+func FindIdlTypeValue(idl Types, expectedType string) (Type, bool) {
 	types := idl.Types
 	if len(types) == 0 && idl.IdlType != nil {
-		types = []IdlType{*idl.IdlType}
+		types = []Type{*idl.IdlType}
 	}
 	for _, t := range types {
 		if t.Type == expectedType {
 			return t, true
 		}
 	}
-	return IdlType{}, false
+	return Type{}, false
 }
 
-func FindIdlType(idl IdlTypes, expectedType string) (string, bool) {
+func FindIdlType(idl Types, expectedType string) (string, bool) {
 	if t, ok := FindIdlTypeValue(idl, expectedType); ok {
 		return t.IType.TypeName, t.Nullable
 	}
 	return "", false
 }
 
-func FindMemberReturnType(member IdlNameMember) (string, bool) {
+func FindMemberReturnType(member NameMember) (string, bool) {
 	return FindIdlType(member.IdlType, "return-type")
 }
 
-func FindMemberAttributeType(member IdlNameMember) (string, bool) {
+func FindMemberAttributeType(member NameMember) (string, bool) {
 	return FindIdlType(member.IdlType, "attribute-type")
 }
 
-func (member IdlNameMember) IsAttribute() bool {
+func (member NameMember) IsAttribute() bool {
 	if member.Type != "attribute" {
 		return false
 	}
