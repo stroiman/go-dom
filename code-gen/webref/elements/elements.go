@@ -3,7 +3,7 @@ package elements
 import (
 	"encoding/json"
 
-	"github.com/stroiman/go-dom/code-gen/idl"
+	"github.com/stroiman/go-dom/code-gen/webref"
 )
 
 type ElementJSON struct {
@@ -19,6 +19,6 @@ type Elements ElementsJSON
 
 func Load() (Elements, error) {
 	output := ElementsJSON{}
-	err := json.Unmarshal(idl.Html_defs, &output)
+	err := json.Unmarshal(webref.Html_defs, &output)
 	return Elements(output), err
 }

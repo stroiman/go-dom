@@ -13,7 +13,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/stroiman/go-dom/code-gen/generators"
 	g "github.com/stroiman/go-dom/code-gen/generators"
-	"github.com/stroiman/go-dom/code-gen/idl/idl"
+	"github.com/stroiman/go-dom/code-gen/webref/idl"
 )
 
 // WrapperGeneratorsSpec is a list of specifications for generating ES wrapper

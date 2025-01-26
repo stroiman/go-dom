@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/stroiman/go-dom/code-gen/idl/elements"
+	"github.com/stroiman/go-dom/code-gen/webref/elements"
 )
 
 func WriteHeader(b *builder) {

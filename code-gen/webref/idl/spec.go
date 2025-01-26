@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stroiman/go-dom/code-gen/idl"
+	"github.com/stroiman/go-dom/code-gen/webref"
 )
 
 type RetType struct {
@@ -25,7 +25,7 @@ type Spec struct {
 // LoadIdlParsed loads a files from the /curated/idlpased directory containing
 // specifications of the interfaces.
 func LoadIdlParsed(name string) (Spec, error) {
-	file, err := idl.OpenIdlParsed(name)
+	file, err := webref.OpenIdlParsed(name)
 	if err != nil {
 		return Spec{}, err
 	}
