@@ -22,4 +22,13 @@ var _ = Describe("ElementGenerator", func() {
 		Expect(GenerateHtmlAnchor()).To(HaveRendered(MatchRegexp(
 			`type htmlAnchorElement struct {\n\tHTMLElement`)))
 	})
+
+	It("Should generate a constructor", func() {
+		Expect(GenerateHtmlAnchor()).To(HaveRendered(ContainSubstring(
+			`func NewHTMLAnchorElement(ownerDoc HTMLDocument) HTMLAnchorElement {
+	result := &htmlAnchorElement{NewHTMLElement("a", ownerDoc)}
+	result.SetSelf(result)
+	return result
+}`)))
+	})
 })
