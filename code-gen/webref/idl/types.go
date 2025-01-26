@@ -7,6 +7,17 @@ import (
 	"strings"
 )
 
+// IdlNameType represent the value of "type" of an exported name in an IDL
+// files, and affects how the data is to be interpreted. Corresponds to the
+// values in the json path:
+//
+//	idlParsed.idlNames[name].type
+type IdlNameType string
+
+const (
+	IdlNameInterface IdlNameType = "interface"
+)
+
 type ValueType struct {
 	Value ValueTypes `json:"value"`
 }

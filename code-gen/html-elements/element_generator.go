@@ -19,14 +19,14 @@ func GenerateHTMLElement(name string) (g.Generator, error) {
 		return nil, err
 	}
 	return htmlElementGenerator{
-		html.IdlNames[name],
+		html.Interfaces[name],
 		g.NewType(toStructName(name)),
 		tagName,
 	}.Generator(), nil
 }
 
 type htmlElementGenerator struct {
-	idlType idl.Name
+	idlType idl.Interface
 	type_   g.Type
 	tagName string
 }

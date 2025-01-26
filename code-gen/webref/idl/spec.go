@@ -18,8 +18,30 @@ type RetType struct {
 
 func NewRetTypeUndefined() RetType { return RetType{TypeName: "undefined", Nullable: false} }
 
+// Spec represents the information stored in Web IDL files.
 type Spec struct {
+	// ParsedIdlFile is a direct JSON deserialisation of the data.
+	//
+	// Note: This was the first implementation and is most complete in terms of
+	// available data, but has a lower level of abstraction. Use the other
+	// properties, When data is available on those, e.g., find an interface from
+	// the Interfaces map.
+	//
+	// This property will eventually be removed
 	ParsedIdlFile
+	Interfaces map[string]Interface
+}
+
+// initialize fills out the high-level representations from the low level parsed
+// JSON data.
+func (s *Spec) initialize() {
+	s.Interfaces = make(map[string]Interface)
+	for name, spec := range s.IdlNames {
+		s.Interfaces[name] = Interface{
+			InternalSpec: spec,
+			Name:         name,
+		}
+	}
 }
 
 // LoadIdlParsed loads a files from the /curated/idlpased directory containing
@@ -98,6 +120,7 @@ func ParseIdlJsonReader(reader io.Reader) (Spec, error) {
 	if err == nil {
 		err = json.Unmarshal(b, &spec)
 	}
+	spec.initialize()
 	return spec, err
 }
 
