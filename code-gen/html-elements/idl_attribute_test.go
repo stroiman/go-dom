@@ -57,4 +57,17 @@ func (e *htmlAnchorElement) SetTarget(val string) {
 		Expect(actual).To(HaveRendered(ContainSubstring(`Target() string`)))
 		Expect(actual).ToNot(HaveRendered(ContainSubstring(`SetTarget()`)))
 	})
+
+	It("Should NOT sanitize Type", func() {
+		actual := IDLAttribute{
+			AttributeName: "type",
+			Receiver: Receiver{
+				Name: g.Id("e"),
+				Type: g.NewType("htmlAnchorElement").Pointer(),
+			},
+			ReadOnly: true,
+		}
+		Expect(actual).To(HaveRendered(ContainSubstring(`Type() string`)))
+		Expect(actual).ToNot(HaveRendered(ContainSubstring(`SetType()`)))
+	})
 })

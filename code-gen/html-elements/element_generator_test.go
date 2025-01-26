@@ -23,6 +23,16 @@ var _ = Describe("ElementGenerator", func() {
 			`type htmlAnchorElement struct {\n\tHTMLElement`)))
 	})
 
+	It("Should generate an interface ", func() {
+		Expect(GenerateHtmlAnchor()).To(HaveRendered(MatchRegexp(
+			`type HTMLAnchorElement interface {\n\tHTMLElement`)))
+	})
+
+	It("Should NOT sanitize type", func() {
+		Expect(GenerateHtmlAnchor()).To(HaveRendered(ContainSubstring(
+			`func (e *htmlAnchorElement) Type() string`)))
+	})
+
 	It("Should generate a constructor", func() {
 		Expect(GenerateHtmlAnchor()).To(HaveRendered(ContainSubstring(
 			`func NewHTMLAnchorElement(ownerDoc HTMLDocument) HTMLAnchorElement {

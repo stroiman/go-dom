@@ -33,6 +33,8 @@ type htmlElementGenerator struct {
 
 func (gen htmlElementGenerator) Generator() g.Generator {
 	return g.StatementList(
+		gen.GenerateInterface(),
+		g.Line,
 		gen.GenerateStruct(),
 		g.Line,
 		gen.GenerateConstructor(),
@@ -45,6 +47,20 @@ func toStructName(name string) string {
 	return strings.Replace(name, "HTML", "html", 1)
 }
 
+func (gen htmlElementGenerator) GenerateInterface() g.Generator {
+	attributes := make([]IdlInterfaceAttribute, 0)
+	for a := range gen.idlType.Attributes() {
+		attributes = append(attributes, IdlInterfaceAttribute{
+			Name:     a.Name,
+			ReadOnly: a.Readonly,
+		})
+	}
+	return IdlInterface{
+		Name:       gen.idlType.Name,
+		Inherits:   gen.idlType.InternalSpec.Inheritance,
+		Attributes: attributes,
+	}
+}
 func (gen htmlElementGenerator) GenerateStruct() g.Generator {
 	res := g.Struct{Name: g.NewType(toStructName(gen.idlType.Name))}
 	res.Embed(g.Id("HTMLElement"))
@@ -79,7 +95,7 @@ func (gen htmlElementGenerator) GenerateAttributes() g.Generator {
 	result := g.StatementList()
 	for a := range gen.idlType.Attributes() {
 		result.Append(IDLAttribute{
-			AttributeName: idl.SanitizeName(a.Name),
+			AttributeName: a.Name,
 			Receiver: Receiver{
 				Name: g.NewValue("e"),
 				Type: g.NewType("htmlAnchorElement").Pointer(),

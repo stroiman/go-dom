@@ -2,6 +2,28 @@
 
 package html
 
+type HTMLAnchorElement interface {
+	HTMLElement
+	Target() string
+	SetTarget(string)
+	Download() string
+	SetDownload(string)
+	Ping() string
+	SetPing(string)
+	Rel() string
+	SetRel(string)
+	RelList() string
+	SetRelList(string)
+	Hreflang() string
+	SetHreflang(string)
+	Type() string
+	SetType(string)
+	Text() string
+	SetText(string)
+	ReferrerPolicy() string
+	SetReferrerPolicy(string)
+}
+
 type htmlAnchorElement struct {
 	HTMLElement
 }
@@ -60,13 +82,13 @@ func (e *htmlAnchorElement) Hreflang() string {
 func (e *htmlAnchorElement) SetHreflang(val string) {
 	e.SetAttribute("hreflang", val)
 }
-func (e *htmlAnchorElement) Type_() string {
-	result, _ := e.GetAttribute("type_")
+func (e *htmlAnchorElement) Type() string {
+	result, _ := e.GetAttribute("type")
 	return result
 }
 
-func (e *htmlAnchorElement) SetType_(val string) {
-	e.SetAttribute("type_", val)
+func (e *htmlAnchorElement) SetType(val string) {
+	e.SetAttribute("type", val)
 }
 func (e *htmlAnchorElement) Text() string {
 	result, _ := e.GetAttribute("text")

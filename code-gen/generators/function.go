@@ -51,8 +51,8 @@ func (f *FunctionDefinition) WithBody(body Generator) *FunctionDefinition {
 
 func (f FunctionDefinition) Generate() *jen.Statement {
 	var (
-		args     []jen.Code
-		rtnTypes []jen.Code
+		args     []jen.Code = []jen.Code{}
+		rtnTypes []jen.Code = []jen.Code{}
 	)
 	for _, arg := range f.Args {
 		args = append(args, arg.Generate())
@@ -71,5 +71,8 @@ func (f FunctionDefinition) Generate() *jen.Statement {
 	if len(rtnTypes) > 0 {
 		stmt.Params(rtnTypes...)
 	}
-	return stmt.Block(f.Body.Generate())
+	if f.Body != nil {
+		stmt.Block(f.Body.Generate())
+	}
+	return stmt
 }
