@@ -117,6 +117,28 @@ var _ = Describe("URL", func() {
 			Expect(u.Search()).To(Equal("?q=help"))
 		})
 	})
+
+	Describe("Port", func() {
+		It("Should remove the host part when set to empty string", func() {
+			u := ParseURL("https://example.com:1234/path/name?foo=bar")
+			u.SetPort("")
+			Expect(u.Host()).To(Equal("example.com"))
+			Expect(u.Hostname()).To(Equal("example.com"))
+
+			u.SetPort("1234")
+			Expect(u.Host()).To(Equal("example.com:1234"))
+			Expect(u.Hostname()).To(Equal("example.com"))
+		})
+	})
+
+	Describe("Hostname", func() {
+		It("Should keep the same port", func() {
+			u := ParseURL("https://example.com:1234/path/name?foo=bar")
+			u.SetHostname("m.example.com")
+			Expect(u.Host()).To(Equal("m.example.com:1234"))
+			Expect(u.Hostname()).To(Equal("m.example.com"))
+		})
+	})
 })
 
 func HaveHRef(expected interface{}) types.GomegaMatcher {

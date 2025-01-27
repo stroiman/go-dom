@@ -170,7 +170,13 @@ func (l *url) SetHref(val string) {
 	l.url = v
 }
 func (l *url) SetPathname(val string) { l.url.Path = val }
-func (l *url) SetPort(val string)     { l.url.Host = fmt.Sprintf("%s:%s", l.Host(), val) }
+func (l *url) SetPort(val string) {
+	if val == "" {
+		l.url.Host = l.url.Hostname()
+	} else {
+		l.url.Host = fmt.Sprintf("%s:%s", l.Hostname(), val)
+	}
+}
 func (l *url) SetProtocol(val string) { l.url.Scheme = val }
 func (l *url) SetSearch(val string) {
 	if strings.HasPrefix(val, "?") {
