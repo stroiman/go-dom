@@ -9,7 +9,7 @@ import (
 //go:embed definitions/ed/elements/html.json
 var Html_defs []byte
 
-//go:embed definitions/*/idlparsed/*.json
+//go:embed definitions/curated/idlparsed/*.json
 var WebRef embed.FS
 
 func OpenIdlParsed(name string) (fs.File, error) {
