@@ -13,7 +13,6 @@ type HTMLAnchorElement interface {
 	Rel() string
 	SetRel(string)
 	RelList() string
-	SetRelList(string)
 	Hreflang() string
 	SetHreflang(string)
 	Type() string
@@ -69,10 +68,6 @@ func (e *htmlAnchorElement) SetRel(val string) {
 func (e *htmlAnchorElement) RelList() string {
 	result, _ := e.GetAttribute("relList")
 	return result
-}
-
-func (e *htmlAnchorElement) SetRelList(val string) {
-	e.SetAttribute("relList", val)
 }
 func (e *htmlAnchorElement) Hreflang() string {
 	result, _ := e.GetAttribute("hreflang")

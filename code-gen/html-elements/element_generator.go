@@ -49,7 +49,7 @@ func toStructName(name string) string {
 
 func (gen htmlElementGenerator) GenerateInterface() g.Generator {
 	attributes := make([]IdlInterfaceAttribute, 0)
-	for a := range gen.idlType.Attributes() {
+	for _, a := range gen.idlType.Attributes {
 		attributes = append(attributes, IdlInterfaceAttribute{
 			Name:     a.Name,
 			ReadOnly: a.Readonly,
@@ -93,9 +93,10 @@ func (gen htmlElementGenerator) GenerateConstructor() g.Generator {
 
 func (gen htmlElementGenerator) GenerateAttributes() g.Generator {
 	result := g.StatementList()
-	for a := range gen.idlType.Attributes() {
+	for _, a := range gen.idlType.Attributes {
 		result.Append(IDLAttribute{
 			AttributeName: a.Name,
+			ReadOnly:      a.Readonly,
 			Receiver: Receiver{
 				Name: g.NewValue("e"),
 				Type: g.NewType("htmlAnchorElement").Pointer(),

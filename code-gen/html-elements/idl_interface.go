@@ -31,9 +31,11 @@ func (i IdlInterface) Generate() *jen.Statement {
 		fields = append(fields, generators.Raw(
 			jen.Id(getterName).Params().Params(jen.Id("string")),
 		))
-		fields = append(fields, generators.Raw(
-			jen.Id(setterName).Params(jen.Id("string")),
-		))
+		if !a.ReadOnly {
+			fields = append(fields, generators.Raw(
+				jen.Id(setterName).Params(jen.Id("string")),
+			))
+		}
 	}
 	return jen.Type().Add(jen.Id(i.Name)).Interface(generators.ToJenCodes(fields)...)
 }

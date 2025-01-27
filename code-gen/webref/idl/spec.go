@@ -35,13 +35,24 @@ type Spec struct {
 func (s *Spec) createInterface(n Name) Interface {
 	includedNames := s.IdlExtendedNames[n.Name].includes()
 
+	jsonAttributes := slices.Collect(n.Attributes())
+
 	intf := Interface{
 		InternalSpec: n,
 		Name:         n.Name,
 		Includes:     make([]Interface, len(includedNames)),
+		Attributes:   make([]Attribute, len(jsonAttributes)),
 	}
 	for i, n := range includedNames {
 		intf.Includes[i] = s.createInterface(s.IdlNames[n])
+	}
+	for i, a := range jsonAttributes {
+		name, nullable := FindMemberAttributeType(a)
+		intf.Attributes[i] = Attribute{
+			Name:     a.Name,
+			Type:     AttributeType{Name: name, Nullable: nullable},
+			Readonly: a.Readonly,
+		}
 	}
 	return intf
 }
