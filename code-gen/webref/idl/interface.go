@@ -1,5 +1,7 @@
 package idl
 
+import "iter"
+
 // Interface represents an interface specification in the webref IDL files.
 //
 // For example, the following interface Animal is represented by an _interface_
@@ -21,9 +23,11 @@ type Interface struct {
 
 // Represents an attribute on an IDL interface
 type Attribute struct {
-	Name     string
-	Type     AttributeType
-	Readonly bool
+	// Don't rely on this, it only exists during a refactoring process
+	InternalSpec NameMember
+	Name         string
+	Type         AttributeType
+	Readonly     bool
 }
 
 type AttributeType struct {
@@ -35,3 +39,25 @@ type AttributeType struct {
 // func (i Interface) Attributes() iter.Seq[NameMember] {
 // 	return i.InternalSpec.Attributes()
 // }
+
+// Attributes iterates and return all attributes from the IDO interface i. If
+// included is true, this will also iterate attributes from interfaces that i
+// includes.
+func (i Interface) AllAttributes(included bool) iter.Seq[Attribute] {
+	return func(yield func(Attribute) bool) {
+		for _, a := range i.Attributes {
+			if !yield(a) {
+				return
+			}
+		}
+		if included {
+			for _, ii := range i.Includes {
+				for _, a := range ii.Attributes {
+					if !yield(a) {
+						return
+					}
+				}
+			}
+		}
+	}
+}

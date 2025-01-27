@@ -85,23 +85,26 @@ func CreateAttributes(
 	dataData WrapperTypeSpec,
 	idlName idl.TypeSpec,
 ) (res []ESAttribute) {
-	for attribute := range idlName.Attributes() {
+	for attribute := range idlName.IdlInterface.AllAttributes(dataData.IncludeIncludes) {
 		methodCustomization := dataData.GetMethodCustomization(attribute.Name)
-		if methodCustomization.Ignored {
+		if methodCustomization.Ignored || attribute.Type.Name == "EventHandler" {
 			continue
 		}
 		var (
 			getter *ESOperation
 			setter *ESOperation
 		)
-		r := attribute.AttributeType()
-		rtnType := r.TypeName
+		// r := attribute.AttributeType()
+		// rtnType := r.TypeName
 		getter = &ESOperation{
 			Name:                 attribute.Name,
 			NotImplemented:       methodCustomization.NotImplemented,
 			CustomImplementation: methodCustomization.CustomImplementation,
-			RetType:              attribute.AttributeType(),
-			MethodCustomization:  methodCustomization,
+			RetType: idl.RetType{
+				TypeName: attribute.Type.Name,
+				Nullable: attribute.Type.Nullable,
+			},
+			MethodCustomization: methodCustomization,
 		}
 		if !attribute.Readonly {
 			setter = new(ESOperation)
@@ -114,7 +117,7 @@ func CreateAttributes(
 			setter.RetType = idl.NewRetTypeUndefined()
 			setter.Arguments = []ESOperationArgument{{
 				Name:     "val",
-				Type:     idlNameToGoName(rtnType),
+				Type:     idlNameToGoName(attribute.Type.Name),
 				Optional: false,
 				Variadic: false,
 			}}

@@ -46,6 +46,7 @@ type ESClassWrapper struct {
 	RunCustomCode             bool
 	WrapperStruct             bool
 	SkipPrototypeRegistration bool
+	IncludeIncludes           bool
 	Customization             map[string]*ESMethodWrapper
 }
 

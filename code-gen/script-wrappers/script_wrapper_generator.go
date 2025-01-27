@@ -227,6 +227,7 @@ func NewScriptWrapperModulesGenerator() ScriptWrapperModulesGenerator {
 	xhr.Method("upload").SetCustomImplementation()
 	xhr.Method("getResponseHeader").HasNoError = true
 	xhr.Method("setRequestHeader").HasNoError = true
+	xhr.Method("onreadystatechange").Ignore()
 
 	urlSpecs := specs.Module("url")
 	url := urlSpecs.Type("URL")

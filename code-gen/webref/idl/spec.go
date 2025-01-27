@@ -49,9 +49,10 @@ func (s *Spec) createInterface(n Name) Interface {
 	for i, a := range jsonAttributes {
 		name, nullable := FindMemberAttributeType(a)
 		intf.Attributes[i] = Attribute{
-			Name:     a.Name,
-			Type:     AttributeType{Name: name, Nullable: nullable},
-			Readonly: a.Readonly,
+			InternalSpec: a,
+			Name:         a.Name,
+			Type:         AttributeType{Name: name, Nullable: nullable},
+			Readonly:     a.Readonly,
 		}
 	}
 	return intf
