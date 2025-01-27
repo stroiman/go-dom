@@ -108,6 +108,15 @@ var _ = Describe("URL", func() {
 			Expect(IsNotImplementedError(err)).To(BeTrue())
 		})
 	})
+	Describe("Search", func() {
+		It("Should accept both with and without a ?", func() {
+			u := ParseURL("https://example.com:1234/path/name?foo=bar")
+			u.SetSearch("q=help")
+			Expect(u.Search()).To(Equal("?q=help"))
+			u.SetSearch("?q=help")
+			Expect(u.Search()).To(Equal("?q=help"))
+		})
+	})
 })
 
 func HaveHRef(expected interface{}) types.GomegaMatcher {

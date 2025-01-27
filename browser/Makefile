@@ -5,6 +5,8 @@ main: codegen-watch
 codegen-clean:
 	rm -f scripting/*_generated.go
 	rm -f scripting/**/*_generated.go
+	rm -f dom/*_generated.go
+	rm -f html/*_generated.go
 
 .PHONY: codegen-watch
 codegen-watch: codegen-clean

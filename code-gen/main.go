@@ -47,6 +47,10 @@ func main() {
 		exitOnError(htmlelements.GenerateHTMLElements())
 		os.Exit(0)
 		return
+	case "dom":
+		exitOnError(htmlelements.GenerateDOMTypes())
+		os.Exit(0)
+		return
 	}
 
 	if *outputFile == "" || *generatorType == "" {

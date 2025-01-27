@@ -8,7 +8,7 @@ import (
 )
 
 func writeFile(s FileGeneratorSpec) error {
-	jf := jen.NewFilePath("github.com/stroiman/go-dom/browser/html")
+	jf := jen.NewFilePath(s.Package)
 	jf.HeaderComment("This file is generated. Do not edit.")
 	jf.Add(s.Generator.Generate())
 	outputFileName := fmt.Sprintf("%s_generated.go", s.Name)
@@ -25,6 +25,19 @@ func writeFile(s FileGeneratorSpec) error {
 
 func GenerateHTMLElements() error {
 	files, err := CreateHTMLElementGenerators()
+	if err != nil {
+		return err
+	}
+	for _, f := range files {
+		if err = writeFile(f); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func GenerateDOMTypes() error {
+	files, err := CreateDOMGenerators()
 	if err != nil {
 		return err
 	}

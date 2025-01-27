@@ -10,46 +10,33 @@ import (
 	"github.com/stroiman/go-dom/code-gen/webref/idl"
 )
 
-// CreateHTMLElementGenerator creates a generator for the element with
-func CreateHTMLElementGenerator(name string) (g.Generator, error) {
-	html, err1 := idl.LoadIdlParsed("html")
-	el, err2 := elements.Load()
-	tagName, err3 := el.GetTagNameForInterfaceError(name)
-	err := errors.Join(err1, err2, err3)
-	if err != nil {
-		return nil, err
-	}
-	return htmlElementGenerator{
-		html.Interfaces[name],
-		g.NewType(toStructName(name)),
-		tagName,
-	}.Generator(), nil
+type HTMLGeneratorReq struct {
+	InterfaceName       string
+	Spec                string
+	GenerateStruct      bool
+	GenerateConstructor bool
+	GenerateInterface   bool
+	GenerateAttributes  bool
 }
 
-type htmlElementGenerator struct {
+/* -------- baseGenerator -------- */
+
+type baseGenerator struct {
+	req     HTMLGeneratorReq
 	idlType idl.Interface
 	type_   g.Type
-	tagName string
 }
 
-func (gen htmlElementGenerator) Generator() g.Generator {
-	return g.StatementList(
-		gen.GenerateInterface(),
-		g.Line,
-		// TODO: Make this configuratble
-		// gen.GenerateStruct(),
-		// g.Line,
-		// gen.GenerateConstructor(),
-		g.Line,
-		gen.GenerateAttributes(),
-	)
+func CreateGenerator(req HTMLGeneratorReq) (baseGenerator, error) {
+	html, err := idl.LoadIdlParsed(req.Spec)
+	return baseGenerator{
+		req,
+		html.Interfaces[req.InterfaceName],
+		g.NewType(toStructName(req.InterfaceName)),
+	}, err
 }
 
-func toStructName(name string) string {
-	return strings.Replace(name, "HTML", "html", 1)
-}
-
-func (gen htmlElementGenerator) GenerateInterface() g.Generator {
+func (gen baseGenerator) GenerateInterface() g.Generator {
 	attributes := make([]IdlInterfaceAttribute, 0)
 
 	interfaces := make([]idl.Interface, 1+len(gen.idlType.Includes))
@@ -70,6 +57,58 @@ func (gen htmlElementGenerator) GenerateInterface() g.Generator {
 		Attributes: attributes,
 	}
 }
+
+/* -------- htmlElementGenerator -------- */
+
+// CreateHTMLElementGenerator creates a generator for the element with
+func CreateHTMLElementGenerator(req HTMLGeneratorReq) (htmlElementGenerator, error) {
+	base, err1 := CreateGenerator(req)
+	el, err2 := elements.Load()
+	tagName, err3 := el.GetTagNameForInterfaceError(req.InterfaceName)
+	err := errors.Join(err1, err2, err3)
+	if err != nil {
+		return htmlElementGenerator{}, err
+	}
+	return htmlElementGenerator{
+		base,
+		tagName,
+	}, nil
+}
+
+type htmlElementGenerator struct {
+	baseGenerator
+	tagName string
+}
+
+func (gen htmlElementGenerator) Generator() g.Generator {
+	result := g.StatementList()
+	if gen.req.GenerateInterface {
+		result.Append(
+			gen.GenerateInterface(),
+			g.Line,
+		)
+	}
+	if gen.req.GenerateStruct {
+		result.Append(gen.GenerateStruct(),
+			g.Line,
+		)
+	}
+	if gen.req.GenerateConstructor {
+		result.Append(
+			gen.GenerateConstructor(),
+			g.Line,
+		)
+	}
+	if gen.req.GenerateAttributes {
+		result.Append(gen.GenerateAttributes())
+	}
+	return result
+}
+
+func toStructName(name string) string {
+	return strings.Replace(name, "HTML", "html", 1)
+}
+
 func (gen htmlElementGenerator) GenerateStruct() g.Generator {
 	res := g.Struct{Name: g.NewType(toStructName(gen.idlType.Name))}
 	res.Embed(g.Id("HTMLElement"))
@@ -108,7 +147,7 @@ func (gen htmlElementGenerator) GenerateAttributes() g.Generator {
 			ReadOnly:      a.Readonly,
 			Receiver: Receiver{
 				Name: g.NewValue("e"),
-				Type: g.NewType("htmlAnchorElement").Pointer(),
+				Type: gen.type_.Pointer(),
 			},
 		})
 	}
@@ -117,12 +156,38 @@ func (gen htmlElementGenerator) GenerateAttributes() g.Generator {
 
 type FileGeneratorSpec struct {
 	Name      string
+	Package   string
 	Generator g.Generator
 }
 
+var HTMLAnchorElementSpecs = HTMLGeneratorReq{
+	InterfaceName:      "HTMLAnchorElement",
+	Spec:               "html",
+	GenerateInterface:  true,
+	GenerateAttributes: true,
+}
+
 func CreateHTMLElementGenerators() ([]FileGeneratorSpec, error) {
-	generator, error := CreateHTMLElementGenerator("HTMLAnchorElement")
+	generator, error := CreateHTMLElementGenerator(HTMLAnchorElementSpecs)
 	return []FileGeneratorSpec{
-		{"html_anchor_element", generator},
-	}, error
+		{"html_anchor_element",
+			"github.com/stroiman/go-dom/browser/html",
+			generator.Generator(),
+		},
+	}, errors.Join(error)
+}
+
+func CreateDOMGenerators() ([]FileGeneratorSpec, error) {
+	return []FileGeneratorSpec{}, nil
+	// generator, error := CreateGenerator(HTMLGeneratorReq{
+	// 	InterfaceName:      "URL",
+	// 	Spec:               "url",
+	// 	GenerateInterface:  true,
+	// 	GenerateAttributes: true,
+	// })
+	// return []FileGeneratorSpec{{
+	// 	"url",
+	// 	"github.com/stroiman/go-dom/browser/dom",
+	// 	generator.GenerateInterface(),
+	// }}, errors.Join(error)
 }

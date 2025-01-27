@@ -1,22 +1,34 @@
 package dom
 
 import (
+	"fmt"
 	netURL "net/url"
 	"strings"
 )
 
 type URL interface {
-	Hash() string
-	Host() string
-	Hostname() string
 	Href() string
-	// TODO
-	// SetHref(href string)
+	SetHref(string)
 	Origin() string
-	Pathname() string
-	Port() string
 	Protocol() string
+	SetProtocol(string)
+	Username() string
+	SetUsername(string)
+	Password() string
+	SetPassword(string)
+	Host() string
+	SetHost(string)
+	Hostname() string
+	SetHostname(string)
+	Port() string
+	SetPort(string)
+	Pathname() string
+	SetPathname(string)
 	Search() string
+	SetSearch(string)
+	SearchParams() string
+	Hash() string
+	SetHash(string)
 	ToJSON() (string, error)
 }
 
@@ -86,7 +98,7 @@ func RevokeObjectURL(object any) (URL, error) {
 }
 
 func NewURLFromNetURL(u *netURL.URL) URL {
-	return url{u}
+	return &url{u}
 }
 
 func (l url) Hash() string {
@@ -121,3 +133,48 @@ func (l url) Search() string {
 }
 
 func (l url) ToJSON() (string, error) { return l.Href(), nil }
+
+func (l url) Password() string { p, _ := l.url.User.Password(); return p }
+func (l *url) SetPassword(val string) {
+	l.url.User = netURL.UserPassword(l.Username(), val)
+}
+
+func (l *url) SetUsername(
+	val string,
+) {
+	p, _ := l.url.User.Password()
+	l.url.User = netURL.UserPassword(val, p)
+}
+func (l url) Username() string { return l.url.User.Username() }
+func (l url) SearchParams() string {
+	// TODO
+	panic("URL.SearchParams Not implemented. Please file a feature request")
+}
+
+func (l *url) SetHash(val string) { l.url.Fragment = val }
+func (l *url) SetHost(val string) { l.url.Host = val }
+func (l *url) SetHostname(val string) {
+	port := l.Port()
+	if port == "" {
+		l.url.Host = val
+	} else {
+		l.url.Host = fmt.Sprintf("%s:%s", val, port)
+	}
+}
+func (l *url) SetHref(val string) {
+	v, err := netURL.Parse(val)
+	// TODO: Generate error
+	if err != nil {
+		panic(err)
+	}
+	l.url = v
+}
+func (l *url) SetPathname(val string) { l.url.Path = val }
+func (l *url) SetPort(val string)     { l.url.Host = fmt.Sprintf("%s:%s", l.Host(), val) }
+func (l *url) SetProtocol(val string) { l.url.Scheme = val }
+func (l *url) SetSearch(val string) {
+	if strings.HasPrefix(val, "?") {
+		val = val[1:]
+	}
+	l.url.RawQuery = val
+}
