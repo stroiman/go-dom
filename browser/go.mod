@@ -30,4 +30,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/tommie/v8go => github.com/stroiman/v8go v0.0.0-20250116094955-dcf3ee9ea30c
+replace github.com/tommie/v8go => github.com/stroiman/v8go v0.0.0-20250127134419-01d759522fb4
