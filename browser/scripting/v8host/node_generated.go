@@ -42,6 +42,10 @@ func createNodePrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso, wrapper.ownerDocument),
 		nil,
 		v8.None)
+	prototypeTmpl.SetAccessorProperty("parentElement",
+		v8.NewFunctionTemplateWithError(iso, wrapper.parentElement),
+		nil,
+		v8.None)
 	prototypeTmpl.SetAccessorProperty("childNodes",
 		v8.NewFunctionTemplateWithError(iso, wrapper.childNodes),
 		nil,
@@ -186,6 +190,16 @@ func (n nodeV8Wrapper) ownerDocument(info *v8.FunctionCallbackInfo) (*v8.Value, 
 		return nil, err
 	}
 	result := instance.OwnerDocument()
+	return ctx.getInstanceForNode(result)
+}
+
+func (n nodeV8Wrapper) parentElement(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := n.mustGetContext(info)
+	instance, err := n.getInstance(info)
+	if err != nil {
+		return nil, err
+	}
+	result := instance.ParentElement()
 	return ctx.getInstanceForNode(result)
 }
 

@@ -28,6 +28,7 @@ func (w nodeWrapper) initializePrototype(prototype *g.Object, vm *g.Runtime) {
 	prototype.DefineAccessorProperty("nodeName", w.ctx.vm.ToValue(w.nodeName), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("isConnected", w.ctx.vm.ToValue(w.isConnected), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("ownerDocument", w.ctx.vm.ToValue(w.ownerDocument), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("parentElement", w.ctx.vm.ToValue(w.parentElement), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("childNodes", w.ctx.vm.ToValue(w.childNodes), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("firstChild", w.ctx.vm.ToValue(w.firstChild), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("previousSibling", w.ctx.vm.ToValue(w.previousSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
@@ -95,6 +96,12 @@ func (w nodeWrapper) ownerDocument(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	result := instance.OwnerDocument()
 	return w.toDocument(result)
+}
+
+func (w nodeWrapper) parentElement(c g.FunctionCall) g.Value {
+	instance := w.getInstance(c)
+	result := instance.ParentElement()
+	return w.toElement(result)
 }
 
 func (w nodeWrapper) childNodes(c g.FunctionCall) g.Value {

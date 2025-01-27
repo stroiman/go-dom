@@ -95,8 +95,16 @@ func (c *GojaContext) toNode(e entity.Entity) g.Value {
 	return obj
 }
 
+func (c *GojaContext) toElement(e entity.Entity) g.Value {
+	return c.toNode(e)
+}
+
 func (w baseInstanceWrapper[T]) toNode(e entity.Entity) g.Value {
 	return w.ctx.toNode(e)
+}
+
+func (w baseInstanceWrapper[T]) toElement(e entity.Entity) g.Value {
+	return w.toNode(e)
 }
 
 func (w baseInstanceWrapper[T]) toBoolean(b bool) g.Value {

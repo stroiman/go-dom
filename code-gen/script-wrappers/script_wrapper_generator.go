@@ -202,7 +202,6 @@ func CreateSpecs() WrapperGeneratorsSpec {
 	domNode.Method("replaceChild").Ignore()
 	domNode.Method("baseURI").Ignore()
 	domNode.Method("parentNode").Ignore()
-	domNode.Method("parentElement").Ignore()
 	domNode.Method("lastChild").Ignore()
 	domNode.Method("nodeValue").Ignore()
 	domNode.Method("textContent").Ignore()
