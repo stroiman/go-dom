@@ -67,43 +67,46 @@ func LoadIdlParsed(name string) (Spec, error) {
 }
 
 type TypeSpec struct {
-	Spec *Spec
-	Type Name
+	Spec         *Spec
+	IdlInterface Interface
 }
 
 type MemberSpec struct{ NameMember }
 type AttributeSpec struct{ NameMember }
 
 func (t *TypeSpec) Members() []NameMember {
-	return t.Type.Members
+	return t.IdlInterface.InternalSpec.Members
 }
 
 func (t *TypeSpec) Constructor() (res MemberSpec, found bool) {
-	idx := slices.IndexFunc(t.Type.Members, func(n NameMember) bool {
+	idx := slices.IndexFunc(t.IdlInterface.InternalSpec.Members, func(n NameMember) bool {
 		return n.Type == "constructor"
 	})
 	found = idx >= 0
 	if found {
-		res = MemberSpec{t.Type.Members[idx]}
+		res = MemberSpec{t.IdlInterface.InternalSpec.Members[idx]}
 	}
 	return
 }
 
 func (t *TypeSpec) Inheritance() string {
-	return t.Type.Inheritance
+	return t.IdlInterface.InternalSpec.Inheritance
 }
 
 func (t *TypeSpec) InstanceMethods() iter.Seq[MemberSpec] {
 	return func(yield func(v MemberSpec) bool) {
-		for i, member := range t.Type.Members {
+		for i, member := range t.IdlInterface.InternalSpec.Members {
 			if member.Special == "static" {
 				continue
 			}
 			if member.Type == "operation" && member.Name != "" {
 				// Empty name seems to indicate a named property getter. Not sure yet.
-				firstIndex := slices.IndexFunc(t.Type.Members, func(m NameMember) bool {
-					return m.Name == member.Name
-				})
+				firstIndex := slices.IndexFunc(
+					t.IdlInterface.InternalSpec.Members,
+					func(m NameMember) bool {
+						return m.Name == member.Name
+					},
+				)
 				if firstIndex < i {
 					slog.Warn("Function overloads", "Name", member.Name)
 					continue
@@ -117,7 +120,7 @@ func (t *TypeSpec) InstanceMethods() iter.Seq[MemberSpec] {
 
 func (t *TypeSpec) Attributes() iter.Seq[AttributeSpec] {
 	return func(yield func(v AttributeSpec) bool) {
-		for _, member := range t.Type.Members {
+		for _, member := range t.IdlInterface.InternalSpec.Members {
 			if member.IsAttribute() {
 				yield(AttributeSpec{member})
 			}
@@ -136,7 +139,7 @@ func ParseIdlJsonReader(reader io.Reader) (Spec, error) {
 }
 
 func (s *Spec) GetType(name string) (TypeSpec, bool) {
-	result, ok := s.IdlNames[name]
+	result, ok := s.Interfaces[name]
 	return TypeSpec{s, result}, ok
 }
 

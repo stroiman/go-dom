@@ -38,7 +38,7 @@ func createData(spec idl.Spec, dataData WrapperTypeSpec) ESConstructorData {
 	}
 	wrappedTypeName := dataData.InnerTypeName
 	if wrappedTypeName == "" {
-		wrappedTypeName = idlName.Type.Name
+		wrappedTypeName = idlName.IdlInterface.Name
 	}
 	wrapperTypeBaseName := dataData.WrapperTypeName
 	if wrapperTypeBaseName == "" {
