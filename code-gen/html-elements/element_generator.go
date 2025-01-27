@@ -36,9 +36,10 @@ func (gen htmlElementGenerator) Generator() g.Generator {
 	return g.StatementList(
 		gen.GenerateInterface(),
 		g.Line,
-		gen.GenerateStruct(),
-		g.Line,
-		gen.GenerateConstructor(),
+		// TODO: Make this configuratble
+		// gen.GenerateStruct(),
+		// g.Line,
+		// gen.GenerateConstructor(),
 		g.Line,
 		gen.GenerateAttributes(),
 	)

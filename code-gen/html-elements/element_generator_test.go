@@ -19,6 +19,7 @@ var _ = Describe("ElementGenerator", func() {
 	})
 
 	It("Should generate a struct with embedded htmlElement", func() {
+		Skip("Disabled for HTMLAnchorElement, custom data in struct")
 		Expect(GenerateHtmlAnchor()).To(HaveRendered(MatchRegexp(
 			`type htmlAnchorElement struct {\n\tHTMLElement`)))
 	})
@@ -34,6 +35,7 @@ var _ = Describe("ElementGenerator", func() {
 	})
 
 	It("Should generate a constructor", func() {
+		Skip("Disabled for HTMLAnchorElement, custom construction")
 		Expect(GenerateHtmlAnchor()).To(HaveRendered(ContainSubstring(
 			`func NewHTMLAnchorElement(ownerDoc HTMLDocument) HTMLAnchorElement {
 	result := &htmlAnchorElement{NewHTMLElement("a", ownerDoc)}

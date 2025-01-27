@@ -2,6 +2,20 @@ package html
 
 import "github.com/stroiman/go-dom/browser/dom"
 
+type htmlAnchorElement struct {
+	HTMLElement
+	dom.URL
+}
+
+func NewHTMLAnchorElement(ownerDoc HTMLDocument) HTMLAnchorElement {
+	result := &htmlAnchorElement{
+		HTMLElement: NewHTMLElement("a", ownerDoc),
+		URL:         dom.ParseURL(ownerDoc.getWindow().History().window.baseLocation),
+	}
+	result.SetSelf(result)
+	return result
+}
+
 func (e *htmlAnchorElement) Click() bool {
 	result := e.HTMLElement.Click()
 	if href, found := e.GetAttribute("href"); found && result {
@@ -11,42 +25,24 @@ func (e *htmlAnchorElement) Click() bool {
 	}
 	return result
 }
-func (e *htmlAnchorElement) Href() string {
-	return dom.ParseURL(e.getWindow().History().window.baseLocation).Href()
+
+func (e *htmlAnchorElement) SetAttribute(name string, val string) {
+	win := e.getWindow().History().window
+	e.HTMLElement.SetAttribute(name, val)
+	if name == "href" {
+		e.URL = dom.ParseURLBase(val, win.baseLocation)
+	}
 }
-func (e *htmlAnchorElement) SetHref(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) Origin() string {
-	return dom.ParseURL(e.getWindow().History().window.baseLocation).Origin()
-}
-func (e *htmlAnchorElement) Protocol() string {
-	return dom.ParseURL(e.getWindow().History().window.baseLocation).Protocol()
-}
+
+func (e *htmlAnchorElement) SetHref(string)     { panic("Not implemented, sorry") }
 func (e *htmlAnchorElement) SetProtocol(string) { panic("Not implemented, sorry") }
 func (e *htmlAnchorElement) Username() string   { panic("Not implemented, sorry") }
 func (e *htmlAnchorElement) SetUsername(string) { panic("Not implemented, sorry") }
 func (e *htmlAnchorElement) Password() string   { panic("Not implemented, sorry") }
 func (e *htmlAnchorElement) SetPassword(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) Host() string {
-	return dom.ParseURL(e.getWindow().History().window.baseLocation).Host()
-}
-func (e *htmlAnchorElement) SetHost(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) Hostname() string {
-	return dom.ParseURL(e.getWindow().History().window.baseLocation).Hostname()
-}
+func (e *htmlAnchorElement) SetHost(string)     { panic("Not implemented, sorry") }
 func (e *htmlAnchorElement) SetHostname(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) Port() string {
-	return dom.ParseURL(e.getWindow().History().window.baseLocation).Port()
-}
-func (e *htmlAnchorElement) SetPort(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) Pathname() string {
-	return dom.ParseURL(e.getWindow().History().window.baseLocation).Pathname()
-}
+func (e *htmlAnchorElement) SetPort(string)     { panic("Not implemented, sorry") }
 func (e *htmlAnchorElement) SetPathname(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) Search() string {
-	return dom.ParseURL(e.getWindow().History().window.baseLocation).Search()
-}
-func (e *htmlAnchorElement) SetSearch(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) Hash() string {
-	return dom.ParseURL(e.getWindow().History().window.baseLocation).Hash()
-}
-func (e *htmlAnchorElement) SetHash(string) { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetSearch(string)   { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetHash(string)     { panic("Not implemented, sorry") }

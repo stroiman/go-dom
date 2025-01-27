@@ -44,16 +44,6 @@ type HTMLAnchorElement interface {
 	SetHash(string)
 }
 
-type htmlAnchorElement struct {
-	HTMLElement
-}
-
-func NewHTMLAnchorElement(ownerDoc HTMLDocument) HTMLAnchorElement {
-	result := &htmlAnchorElement{NewHTMLElement("a", ownerDoc)}
-	result.SetSelf(result)
-	return result
-}
-
 func (e *htmlAnchorElement) Target() string {
 	result, _ := e.GetAttribute("target")
 	return result
