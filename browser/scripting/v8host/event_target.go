@@ -88,6 +88,25 @@ func createEventTarget(host *V8ScriptHost) *v8.FunctionTemplate {
 				return v8.Undefined(iso), err
 			}), v8.ReadOnly)
 	proto.Set(
+		"removeEventListener",
+		v8.NewFunctionTemplateWithError(iso,
+			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+				ctx := host.mustGetContext(info.Context())
+				target, err := wrapper.getInstance(info)
+				if err != nil {
+					return nil, err
+				}
+				args := newArgumentHelper(host, info)
+				eventType, e1 := args.getStringArg(0)
+				fn, e2 := args.getFunctionArg(1)
+				err = errors.Join(e1, e2)
+				if err == nil {
+					listener := newV8EventListener(ctx, fn.Value)
+					target.RemoveEventListener(eventType, listener)
+				}
+				return v8.Undefined(iso), err
+			}), v8.ReadOnly)
+	proto.Set(
 		"dispatchEvent",
 		v8.NewFunctionTemplateWithError(iso,
 			func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
