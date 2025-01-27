@@ -114,6 +114,6 @@ type FileGeneratorSpec struct {
 func CreateHTMLElementGenerators() ([]FileGeneratorSpec, error) {
 	generator, error := GenerateHTMLElement("HTMLAnchorElement")
 	return []FileGeneratorSpec{
-		{"html_anchor_element_generated", generator},
+		{"html_anchor_element", generator},
 	}, error
 }
