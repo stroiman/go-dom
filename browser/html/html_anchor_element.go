@@ -33,3 +33,16 @@ func (e *htmlAnchorElement) SetAttribute(name string, val string) {
 		e.URL = dom.ParseURLBase(val, win.baseLocation)
 	}
 }
+
+func (e *htmlAnchorElement) SetHref(string)     { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetProtocol(string) { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) Username() string   { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetUsername(string) { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) Password() string   { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetPassword(string) { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetHost(string)     { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetHostname(string) { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetPort(string)     { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetPathname(string) { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetSearch(string)   { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) SetHash(string)     { panic("Not implemented, sorry") }
