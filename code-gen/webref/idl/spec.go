@@ -51,7 +51,7 @@ func (s *Spec) createInterface(n Name) Interface {
 		intf.Attributes[i] = Attribute{
 			InternalSpec: a,
 			Name:         a.Name,
-			Type:         AttributeType{Name: name, Nullable: nullable},
+			Type:         Type{Name: name, Nullable: nullable},
 			Readonly:     a.Readonly,
 		}
 	}
