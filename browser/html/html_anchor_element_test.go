@@ -23,12 +23,22 @@ var _ = Describe("htmlAnchorElement", func() {
 		a = doc.CreateElement("a").(html.HTMLAnchorElement)
 	})
 
+	It("Should not have an href", func() {
+		Expect(a.Href()).To(Equal(""))
+	})
+
 	It("Should provide an absolute href", func() {
 		a.SetAttribute("href", "/local")
 		Expect(a.Href()).To(Equal("http://example.com/local"))
 	})
 
+	It("Should ignore the most data properties when there's no href", func() {
+		a.SetPathname("/local")
+		Expect(a.Pathname()).To(Equal(""))
+	})
+
 	It("Should update the href data attribute when stetting an idl attribute", func() {
+		a.SetHref("/")
 		a.SetPathname("/local")
 		Expect(a).To(matchers.HaveAttribute("href", "http://example.com/local"))
 	})
