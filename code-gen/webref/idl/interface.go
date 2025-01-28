@@ -39,6 +39,7 @@ type Operation struct {
 	Name       string
 	ReturnType Type
 	Arguments  []Argument
+	Static     bool
 	// Don't rely on this, it only exists during a refactoring process
 	InternalSpec NameMember
 }

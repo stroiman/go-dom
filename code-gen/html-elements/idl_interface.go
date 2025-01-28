@@ -5,6 +5,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/stroiman/go-dom/code-gen/generators"
+	"github.com/stroiman/go-dom/code-gen/webref/idl"
 )
 
 /* -------- IdlInterface -------- */
@@ -13,6 +14,7 @@ type IdlInterface struct {
 	Name       string
 	Inherits   string
 	Attributes []IdlInterfaceAttribute
+	Operations []IdlInterfaceOperation
 }
 
 func (i IdlInterface) Generate() *jen.Statement {
@@ -37,6 +39,17 @@ func (i IdlInterface) Generate() *jen.Statement {
 			))
 		}
 	}
+	for _, o := range i.Operations {
+		if !o.Static {
+			// Todo: Parameters
+			// Todo: Return type
+			fields = append(fields, generators.Raw(
+				jen.Id(upperCaseFirstLetter(o.Name)).
+					Params().
+					Params(jen.Id("string"), jen.Id("error")),
+			))
+		}
+	}
 	return jen.Type().Add(jen.Id(i.Name)).Interface(generators.ToJenCodes(fields)...)
 }
 
@@ -49,4 +62,10 @@ type IdlInterfaceAttribute struct {
 
 func NewStringAttribute(name string) IdlInterfaceAttribute {
 	return IdlInterfaceAttribute{Name: name}
+}
+
+/* -------- IdlInterfaceOperation -------- */
+
+type IdlInterfaceOperation struct {
+	idl.Operation
 }

@@ -20,4 +20,17 @@ var _ = Describe("Idl/Interface", func() {
 			// Equal([]string{"HTMLHyperlinkElementUtils"}))
 		})
 	})
+
+	Describe("Includes", func() {
+		It("Should have right operations on url.URL", func() {
+			idl, err := LoadIdlParsed("url")
+			Expect(err).ToNot(HaveOccurred())
+			ops := idl.Interfaces["URL"].Operations
+			Expect(ops).To(ContainElement(HaveField("Name", "toJSON")))
+			Expect(ops).To(ContainElement(SatisfyAll(
+				HaveField("Name", "parse"),
+				HaveField("Static", true)),
+			))
+		})
+	})
 })

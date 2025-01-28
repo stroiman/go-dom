@@ -10,9 +10,23 @@ import (
 	"github.com/stroiman/go-dom/code-gen/webref/idl"
 )
 
+// HTMLGeneratorReq specifies what to generate for a specific Web IDL spec. The
+// name of the spec is in the SpecName field, and the interface to generate is in
+// the Interface field. The Generate... fields specify what to generate.
+//
+// Note: As more needs for customisation arises, so will the Generate... fields
+// also more likely become more complex.
+//
+// E.g., the URL type is loaded from url.json, and has the interface name URL in
+// the idl, so this is specified by:
+//
+//	HTMLGeneratorReq {
+//		InterfaceName: "URL",
+//		SpecName:      "url",
+//	}
 type HTMLGeneratorReq struct {
 	InterfaceName       string
-	Spec                string
+	SpecName            string
 	GenerateStruct      bool
 	GenerateConstructor bool
 	GenerateInterface   bool
@@ -28,7 +42,7 @@ type baseGenerator struct {
 }
 
 func CreateGenerator(req HTMLGeneratorReq) (baseGenerator, error) {
-	html, err := idl.LoadIdlParsed(req.Spec)
+	html, err := idl.LoadIdlParsed(req.SpecName)
 	return baseGenerator{
 		req,
 		html.Interfaces[req.InterfaceName],
@@ -38,6 +52,7 @@ func CreateGenerator(req HTMLGeneratorReq) (baseGenerator, error) {
 
 func (gen baseGenerator) GenerateInterface() g.Generator {
 	attributes := make([]IdlInterfaceAttribute, 0)
+	operations := make([]IdlInterfaceOperation, 0)
 
 	interfaces := make([]idl.Interface, 1+len(gen.idlType.Includes))
 	interfaces[0] = gen.idlType
@@ -50,11 +65,15 @@ func (gen baseGenerator) GenerateInterface() g.Generator {
 				ReadOnly: a.Readonly,
 			})
 		}
+		for _, o := range i.Operations {
+			operations = append(operations, IdlInterfaceOperation{o})
+		}
 	}
 	return IdlInterface{
 		Name:       gen.idlType.Name,
 		Inherits:   gen.idlType.InternalSpec.Inheritance,
 		Attributes: attributes,
+		Operations: operations,
 	}
 }
 
@@ -162,7 +181,7 @@ type FileGeneratorSpec struct {
 
 var HTMLAnchorElementSpecs = HTMLGeneratorReq{
 	InterfaceName:      "HTMLAnchorElement",
-	Spec:               "html",
+	SpecName:           "html",
 	GenerateInterface:  true,
 	GenerateAttributes: true,
 }
@@ -177,17 +196,23 @@ func CreateHTMLElementGenerators() ([]FileGeneratorSpec, error) {
 	}, errors.Join(error)
 }
 
+var URLSpec = HTMLGeneratorReq{
+	InterfaceName:     "URL",
+	SpecName:          "url",
+	GenerateInterface: true,
+}
+
 func CreateDOMGenerators() ([]FileGeneratorSpec, error) {
-	return []FileGeneratorSpec{}, nil
-	// generator, error := CreateGenerator(HTMLGeneratorReq{
-	// 	InterfaceName:      "URL",
-	// 	Spec:               "url",
-	// 	GenerateInterface:  true,
-	// 	GenerateAttributes: true,
-	// })
-	// return []FileGeneratorSpec{{
-	// 	"url",
-	// 	"github.com/stroiman/go-dom/browser/dom",
-	// 	generator.GenerateInterface(),
-	// }}, errors.Join(error)
+	// return []FileGeneratorSpec{}, nil
+	generator, error := CreateGenerator(HTMLGeneratorReq{
+		InterfaceName:      "URL",
+		SpecName:           "url",
+		GenerateInterface:  true,
+		GenerateAttributes: true,
+	})
+	return []FileGeneratorSpec{{
+		"url",
+		"github.com/stroiman/go-dom/browser/dom",
+		generator.GenerateInterface(),
+	}}, errors.Join(error)
 }

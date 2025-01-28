@@ -36,12 +36,14 @@ func (s *Spec) createInterface(n Name) Interface {
 	includedNames := s.IdlExtendedNames[n.Name].includes()
 
 	jsonAttributes := slices.Collect(n.Attributes())
+	jsonOperations := slices.Collect(n.Operations())
 
 	intf := Interface{
 		InternalSpec: n,
 		Name:         n.Name,
 		Includes:     make([]Interface, len(includedNames)),
 		Attributes:   make([]Attribute, len(jsonAttributes)),
+		Operations:   make([]Operation, len(jsonOperations)),
 	}
 	for i, n := range includedNames {
 		intf.Includes[i] = s.createInterface(s.IdlNames[n])
@@ -55,7 +57,30 @@ func (s *Spec) createInterface(n Name) Interface {
 			Readonly:     a.Readonly,
 		}
 	}
+	for i, a := range jsonOperations {
+		typeName, nullable := FindMemberReturnType(a)
+		intf.Operations[i] = Operation{
+			Name:         a.Name,
+			ReturnType:   Type{Name: typeName, Nullable: nullable},
+			Arguments:    createMethodArguments(a),
+			Static:       a.Special == "static",
+			InternalSpec: a,
+		}
+	}
 	return intf
+}
+
+func createMethodArguments(n NameMember) []Argument {
+	result := make([]Argument, len(n.Arguments))
+	for i, a := range n.Arguments {
+		argType := a.IdlType.IdlType.Type
+		nullable := a.IdlType.IdlType.Nullable
+		result[i] = Argument{
+			Name: a.Name,
+			Type: Type{Name: argType, Nullable: nullable},
+		}
+	}
+	return result
 }
 
 // initialize fills out the high-level representations from the low level parsed

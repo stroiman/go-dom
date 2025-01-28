@@ -6,32 +6,6 @@ import (
 	"strings"
 )
 
-type URL interface {
-	Href() string
-	SetHref(string)
-	Origin() string
-	Protocol() string
-	SetProtocol(string)
-	Username() string
-	SetUsername(string)
-	Password() string
-	SetPassword(string)
-	Host() string
-	SetHost(string)
-	Hostname() string
-	SetHostname(string)
-	Port() string
-	SetPort(string)
-	Pathname() string
-	SetPathname(string)
-	Search() string
-	SetSearch(string)
-	SearchParams() string
-	Hash() string
-	SetHash(string)
-	ToJSON() (string, error)
-}
-
 type url struct {
 	// Cannot be named `url` conflicts with `net/url` import in other files in
 	// same package.
