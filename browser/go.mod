@@ -1,4 +1,4 @@
-module github.com/stroiman/go-dom/browser
+module github.com/gost-dom/browser/browser
 
 go 1.23.2
 

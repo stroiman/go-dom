@@ -1,4 +1,4 @@
-module github.com/stroiman/go-dom/code-gen
+module github.com/gost-dom/browser/code-gen
 
 go 1.23.4
 
