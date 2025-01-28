@@ -34,15 +34,20 @@ func (e *htmlAnchorElement) SetAttribute(name string, val string) {
 	}
 }
 
-func (e *htmlAnchorElement) SetHref(string)     { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) SetProtocol(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) Username() string   { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) SetUsername(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) Password() string   { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) SetPassword(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) SetHost(string)     { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) SetHostname(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) SetPort(string)     { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) SetPathname(string) { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) SetSearch(string)   { panic("Not implemented, sorry") }
-func (e *htmlAnchorElement) SetHash(string)     { panic("Not implemented, sorry") }
+func (e *htmlAnchorElement) setUrl(f func(dom.URL, string), val string) {
+	f(e.URL, val)
+	e.HTMLElement.SetAttribute("href", e.URL.Href())
+}
+
+func (e *htmlAnchorElement) SetHref(val string) {
+	e.setUrl(dom.URL.SetHref, val)
+}
+func (e *htmlAnchorElement) SetProtocol(val string) { e.setUrl(dom.URL.SetProtocol, val) }
+func (e *htmlAnchorElement) SetUsername(val string) { e.setUrl(dom.URL.SetUsername, val) }
+func (e *htmlAnchorElement) SetPassword(val string) { e.setUrl(dom.URL.SetPassword, val) }
+func (e *htmlAnchorElement) SetHost(val string)     { e.setUrl(dom.URL.SetHost, val) }
+func (e *htmlAnchorElement) SetHostname(val string) { e.setUrl(dom.URL.SetHostname, val) }
+func (e *htmlAnchorElement) SetPort(val string)     { e.setUrl(dom.URL.SetPort, val) }
+func (e *htmlAnchorElement) SetPathname(val string) { e.setUrl(dom.URL.SetPathname, val) }
+func (e *htmlAnchorElement) SetSearch(val string)   { e.setUrl(dom.URL.SetSearch, val) }
+func (e *htmlAnchorElement) SetHash(val string)     { e.setUrl(dom.URL.SetHash, val) }
