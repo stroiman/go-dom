@@ -1,6 +1,8 @@
 package html
 
-import "github.com/stroiman/go-dom/browser/dom"
+import (
+	"github.com/stroiman/go-dom/browser/dom"
+)
 
 type htmlAnchorElement struct {
 	HTMLElement
@@ -42,6 +44,7 @@ func (e *htmlAnchorElement) setUrl(f func(dom.URL, string), val string) {
 func (e *htmlAnchorElement) SetHref(val string) {
 	e.setUrl(dom.URL.SetHref, val)
 }
+
 func (e *htmlAnchorElement) SetProtocol(val string) { e.setUrl(dom.URL.SetProtocol, val) }
 func (e *htmlAnchorElement) SetUsername(val string) { e.setUrl(dom.URL.SetUsername, val) }
 func (e *htmlAnchorElement) SetPassword(val string) { e.setUrl(dom.URL.SetPassword, val) }
