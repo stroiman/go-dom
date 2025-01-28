@@ -1,6 +1,6 @@
 package html
 
-import "github.com/stroiman/go-dom/browser/dom"
+import "github.com/gost-dom/browser/browser/dom"
 
 const HistoryEventPopState = "popstate"
 

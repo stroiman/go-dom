@@ -1,8 +1,8 @@
 package dom
 
 import (
-	"github.com/stroiman/go-dom/browser/internal/entity"
-	"github.com/stroiman/go-dom/browser/internal/log"
+	"github.com/gost-dom/browser/browser/internal/entity"
+	"github.com/gost-dom/browser/browser/internal/log"
 )
 
 type EventTarget interface {

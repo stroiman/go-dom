@@ -3,9 +3,9 @@ package html_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser/html"
-	matchers "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
+	"github.com/gost-dom/browser/browser/dom"
+	"github.com/gost-dom/browser/browser/html"
+	matchers "github.com/gost-dom/browser/browser/testing/gomega-matchers"
 )
 
 var _ = Describe("htmlAnchorElement", func() {

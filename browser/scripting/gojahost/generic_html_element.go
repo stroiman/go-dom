@@ -2,7 +2,7 @@ package gojahost
 
 import (
 	g "github.com/dop251/goja"
-	"github.com/stroiman/go-dom/browser/internal/entity"
+	"github.com/gost-dom/browser/browser/internal/entity"
 )
 
 type genericElementWrapper struct {

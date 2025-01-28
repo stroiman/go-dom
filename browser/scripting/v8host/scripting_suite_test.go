@@ -7,12 +7,12 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/internal/http"
-	"github.com/stroiman/go-dom/browser/internal/test"
-	suite "github.com/stroiman/go-dom/browser/internal/test/script-test-suite"
-	"github.com/stroiman/go-dom/browser/logger"
-	. "github.com/stroiman/go-dom/browser/scripting/v8host"
+	"github.com/gost-dom/browser/browser/html"
+	. "github.com/gost-dom/browser/browser/internal/http"
+	"github.com/gost-dom/browser/browser/internal/test"
+	suite "github.com/gost-dom/browser/browser/internal/test/script-test-suite"
+	"github.com/gost-dom/browser/browser/logger"
+	. "github.com/gost-dom/browser/browser/scripting/v8host"
 )
 
 func TestScripting(t *testing.T) {

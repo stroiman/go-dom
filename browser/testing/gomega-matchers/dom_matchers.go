@@ -4,7 +4,7 @@ import (
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/gcustom"
 	. "github.com/onsi/gomega/types"
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/gost-dom/browser/browser/dom"
 )
 
 func HaveAttribute(name string, expected interface{}) GomegaMatcher {

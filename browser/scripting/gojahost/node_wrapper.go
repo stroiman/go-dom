@@ -2,7 +2,7 @@ package gojahost
 
 import (
 	g "github.com/dop251/goja"
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/gost-dom/browser/browser/dom"
 )
 
 func (w nodeWrapper) constructor(call g.ConstructorCall, r *g.Runtime) *g.Object {

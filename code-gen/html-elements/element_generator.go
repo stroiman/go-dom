@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	g "github.com/stroiman/go-dom/code-gen/generators"
-	"github.com/stroiman/go-dom/code-gen/webref/elements"
-	"github.com/stroiman/go-dom/code-gen/webref/idl"
+	g "github.com/gost-dom/browser/code-gen/generators"
+	"github.com/gost-dom/browser/code-gen/webref/elements"
+	"github.com/gost-dom/browser/code-gen/webref/idl"
 )
 
 // HTMLGeneratorReq specifies what to generate for a specific Web IDL spec. The
@@ -190,7 +190,7 @@ func CreateHTMLElementGenerators() ([]FileGeneratorSpec, error) {
 	generator, error := CreateHTMLElementGenerator(HTMLAnchorElementSpecs)
 	return []FileGeneratorSpec{
 		{"html_anchor_element",
-			"github.com/stroiman/go-dom/browser/html",
+			"github.com/gost-dom/browser/browser/html",
 			generator.Generator(),
 		},
 	}, errors.Join(error)

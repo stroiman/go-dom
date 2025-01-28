@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stroiman/go-dom/code-gen/webref"
+	"github.com/gost-dom/browser/code-gen/webref"
 )
 
 type RetType struct {

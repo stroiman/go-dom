@@ -3,8 +3,8 @@ package dom_test
 import (
 	"net/http"
 
-	"github.com/stroiman/go-dom/browser/html"
-	domHTTP "github.com/stroiman/go-dom/browser/internal/http"
+	"github.com/gost-dom/browser/browser/html"
+	domHTTP "github.com/gost-dom/browser/browser/internal/http"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

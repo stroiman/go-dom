@@ -1,6 +1,6 @@
 // Package logger provides the basic functionality of supplying a custom logger.
 //
-// go-dom will write log messages to an [slog.Logger] instance, but the default
+// gost-dom will write log messages to an [slog.Logger] instance, but the default
 // logger discards all messages. You can provide your own logger, allowing
 // control over where log messages appear.
 package logger
@@ -8,7 +8,7 @@ package logger
 import (
 	"log/slog"
 
-	"github.com/stroiman/go-dom/browser/internal/log"
+	"github.com/gost-dom/browser/browser/internal/log"
 )
 
 // SetDefault sets the [slog.Logger] that will receive log messages from the

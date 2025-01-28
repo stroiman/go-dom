@@ -3,7 +3,7 @@ package v8host_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	matchers "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
+	matchers "github.com/gost-dom/browser/browser/testing/gomega-matchers"
 )
 
 var _ = Describe("V8 Element.classList", func() {

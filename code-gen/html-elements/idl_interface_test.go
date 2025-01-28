@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	. "github.com/stroiman/go-dom/code-gen/html-elements"
+	. "github.com/gost-dom/browser/code-gen/html-elements"
 )
 
 var _ = Describe("IdlInterface", func() {

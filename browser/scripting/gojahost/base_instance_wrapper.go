@@ -4,10 +4,10 @@ import (
 	"strings"
 
 	g "github.com/dop251/goja"
-	"github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser/html"
-	"github.com/stroiman/go-dom/browser/internal/entity"
-	"github.com/stroiman/go-dom/browser/scripting"
+	"github.com/gost-dom/browser/browser/dom"
+	"github.com/gost-dom/browser/browser/html"
+	"github.com/gost-dom/browser/browser/internal/entity"
+	"github.com/gost-dom/browser/browser/scripting"
 )
 
 type baseInstanceWrapper[T any] struct {

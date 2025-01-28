@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	htmlelements "github.com/stroiman/go-dom/code-gen/html-elements"
-	wrappers "github.com/stroiman/go-dom/code-gen/script-wrappers"
+	htmlelements "github.com/gost-dom/browser/code-gen/html-elements"
+	wrappers "github.com/gost-dom/browser/code-gen/script-wrappers"
 )
 
 func getWriter(output string) io.Writer {

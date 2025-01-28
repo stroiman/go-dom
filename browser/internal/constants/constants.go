@@ -5,10 +5,10 @@
 // that only support a subset of CSS selectors.
 package constants
 
-const PACKAGE_NAME = "Go-DOM"
+const PACKAGE_NAME = "Gost-DOM"
 
-const MISSING_FEATURE_ISSUE_URL = "Create feature request here: https://github.com/stroiman/go-dom/issues"
+const MISSING_FEATURE_ISSUE_URL = "Create feature request here: https://github.com/gost-dom/browser/issues"
 
-const BUG_USSUE_URL = "This is a bug in " + PACKAGE_NAME + ". Please fill a bug report here: https://github.com/stroiman/go-dom/issues"
+const BUG_USSUE_URL = "This is a bug in " + PACKAGE_NAME + ". Please fill a bug report here: https://github.com/gost-dom/browser/issues"
 
 const BUG_USSUE_DETAILS = "Please include the contents below, as well as other contextual information you might have"

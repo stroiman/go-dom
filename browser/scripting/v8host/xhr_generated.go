@@ -167,7 +167,7 @@ func (xhr xmlHttpRequestV8Wrapper) overrideMimeType(info *v8.FunctionCallbackInf
 }
 
 func (xhr xmlHttpRequestV8Wrapper) readyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("XMLHttpRequest.readyState: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+	return nil, errors.New("XMLHttpRequest.readyState: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) timeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -251,11 +251,11 @@ func (xhr xmlHttpRequestV8Wrapper) statusText(info *v8.FunctionCallbackInfo) (*v
 }
 
 func (xhr xmlHttpRequestV8Wrapper) responseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("XMLHttpRequest.responseType: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+	return nil, errors.New("XMLHttpRequest.responseType: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) setResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("XMLHttpRequest.setResponseType: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+	return nil, errors.New("XMLHttpRequest.setResponseType: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -279,5 +279,5 @@ func (xhr xmlHttpRequestV8Wrapper) responseText(info *v8.FunctionCallbackInfo) (
 }
 
 func (xhr xmlHttpRequestV8Wrapper) responseXML(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("XMLHttpRequest.responseXML: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+	return nil, errors.New("XMLHttpRequest.responseXML: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }

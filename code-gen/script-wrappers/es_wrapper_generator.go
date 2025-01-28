@@ -7,8 +7,8 @@ import (
 	"strings"
 	"unicode"
 
-	g "github.com/stroiman/go-dom/code-gen/generators"
-	"github.com/stroiman/go-dom/code-gen/webref/idl"
+	g "github.com/gost-dom/browser/code-gen/generators"
+	"github.com/gost-dom/browser/code-gen/webref/idl"
 
 	"github.com/dave/jennifer/jen"
 )

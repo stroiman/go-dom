@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/internal/http"
-	"github.com/stroiman/go-dom/browser/internal/log"
-	"github.com/stroiman/go-dom/browser/scripting/v8host"
+	"github.com/gost-dom/browser/browser/html"
+	. "github.com/gost-dom/browser/browser/html"
+	. "github.com/gost-dom/browser/browser/internal/http"
+	"github.com/gost-dom/browser/browser/internal/log"
+	"github.com/gost-dom/browser/browser/scripting/v8host"
 )
 
 // Pretty stupid right now, but should _probably_ allow handling multiple

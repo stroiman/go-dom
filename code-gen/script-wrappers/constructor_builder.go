@@ -1,7 +1,7 @@
 package wrappers
 
 import (
-	g "github.com/stroiman/go-dom/code-gen/generators"
+	g "github.com/gost-dom/browser/code-gen/generators"
 )
 
 // The ConstructorBuilder is the function that creates the ES constructor

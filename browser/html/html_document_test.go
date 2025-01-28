@@ -1,8 +1,8 @@
 package html_test
 
 import (
-	. "github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
+	. "github.com/gost-dom/browser/browser/html"
+	. "github.com/gost-dom/browser/browser/testing/gomega-matchers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

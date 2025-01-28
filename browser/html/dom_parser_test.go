@@ -3,8 +3,8 @@ package html_test
 import (
 	"fmt"
 
-	"github.com/stroiman/go-dom/browser/dom"
-	matchers "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
+	"github.com/gost-dom/browser/browser/dom"
+	matchers "github.com/gost-dom/browser/browser/testing/gomega-matchers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

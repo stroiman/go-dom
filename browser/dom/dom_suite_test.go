@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"testing"
 
-	"github.com/stroiman/go-dom/browser/internal/test"
-	"github.com/stroiman/go-dom/browser/logger"
+	"github.com/gost-dom/browser/browser/internal/test"
+	"github.com/gost-dom/browser/browser/logger"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

@@ -1,7 +1,7 @@
 package html
 
 import (
-	. "github.com/stroiman/go-dom/browser/dom"
+	. "github.com/gost-dom/browser/browser/dom"
 )
 
 type HTMLDocument interface {
@@ -28,13 +28,13 @@ func mustAppendChild(p, c Node) Node {
 // The resulting document has an outer HTML similar to this, but there are no
 // guarantees about the actual content, so do not depend on this value.
 //
-//	<html><head></head><body><h1>Go-DOM</h1></body></html>
+//	<html><head></head><body><h1>Gost-DOM</h1></body></html>
 func NewHTMLDocument(window Window) HTMLDocument {
 	doc := newHTMLDocument(window)
 	body := doc.CreateElement("body")
 	docEl := doc.CreateElement("html")
 	h1 := mustAppendChild(body, doc.CreateElement("h1"))
-	h1.SetTextContent("Go-DOM")
+	h1.SetTextContent("Gost-DOM")
 	docEl.Append(
 		doc.CreateElement("head"),
 		body,

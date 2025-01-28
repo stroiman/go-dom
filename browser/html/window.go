@@ -7,10 +7,10 @@ import (
 	netURL "net/url"
 	"strings"
 
-	"github.com/stroiman/go-dom/browser/dom"
-	. "github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser/internal/entity"
-	"github.com/stroiman/go-dom/browser/internal/log"
+	"github.com/gost-dom/browser/browser/dom"
+	. "github.com/gost-dom/browser/browser/dom"
+	"github.com/gost-dom/browser/browser/internal/entity"
+	"github.com/gost-dom/browser/browser/internal/log"
 )
 
 type ScriptHost interface {

@@ -2,7 +2,7 @@ package gojahost
 
 import (
 	"github.com/dop251/goja"
-	"github.com/stroiman/go-dom/browser/html"
+	"github.com/gost-dom/browser/browser/html"
 )
 
 type windowWrapper struct {

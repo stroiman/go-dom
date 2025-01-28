@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/stroiman/go-dom/browser/internal/test/htmx-app/content"
+	"github.com/gost-dom/browser/browser/internal/test/htmx-app/content"
 )
 
 func CreateServer() http.Handler {

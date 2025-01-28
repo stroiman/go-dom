@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/internal/http"
-	domHttp "github.com/stroiman/go-dom/browser/internal/http"
+	"github.com/gost-dom/browser/browser/dom"
+	"github.com/gost-dom/browser/browser/html"
+	. "github.com/gost-dom/browser/browser/internal/http"
+	domHttp "github.com/gost-dom/browser/browser/internal/http"
 )
 
 func ParseHtmlString(s string) (res dom.Document) {

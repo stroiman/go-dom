@@ -7,9 +7,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stroiman/go-dom/browser/internal/constants"
-	. "github.com/stroiman/go-dom/browser/internal/dom"
-	"github.com/stroiman/go-dom/browser/internal/log"
+	"github.com/gost-dom/browser/browser/internal/constants"
+	. "github.com/gost-dom/browser/browser/internal/dom"
+	"github.com/gost-dom/browser/browser/internal/log"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"

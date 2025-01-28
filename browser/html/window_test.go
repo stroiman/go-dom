@@ -6,13 +6,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/html"
-	"github.com/stroiman/go-dom/browser/internal/domslices"
-	"github.com/stroiman/go-dom/browser/internal/testing"
-	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
-	"github.com/stroiman/go-dom/browser/testing/testservers"
+	"github.com/gost-dom/browser/browser/dom"
+	"github.com/gost-dom/browser/browser/html"
+	. "github.com/gost-dom/browser/browser/html"
+	"github.com/gost-dom/browser/browser/internal/domslices"
+	"github.com/gost-dom/browser/browser/internal/testing"
+	. "github.com/gost-dom/browser/browser/testing/gomega-matchers"
+	"github.com/gost-dom/browser/browser/testing/testservers"
 )
 
 var _ = Describe("Window", func() {
@@ -65,7 +65,7 @@ var _ = Describe("Window", func() {
 		It("Should go back, but keep the length", func() {
 			Expect(win.Navigate("/page-2")).To(Succeed())
 			Expect(win.History().Go(-1)).To(Succeed())
-			Expect(win.Document()).To(HaveH1("Go-DOM"))
+			Expect(win.Document()).To(HaveH1("Gost-DOM"))
 			Expect(win.Location().Href()).To(Equal("about:blank"))
 		})
 
@@ -287,7 +287,7 @@ var _ = Describe("Window", func() {
 		Describe("Navigate", func() {
 			It("Should load a blank page when loading about:blank", func() {
 				Expect(window.Navigate("about:blank")).To(Succeed())
-				Expect(window.Document()).To(HaveH1("Go-DOM"))
+				Expect(window.Document()).To(HaveH1("Gost-DOM"))
 			})
 		})
 

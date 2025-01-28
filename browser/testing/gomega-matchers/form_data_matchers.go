@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gcustom"
 	"github.com/onsi/gomega/types"
-	"github.com/stroiman/go-dom/browser/html"
+	"github.com/gost-dom/browser/browser/html"
 )
 
 func HaveFormDataValue(key, expected string) types.GomegaMatcher {

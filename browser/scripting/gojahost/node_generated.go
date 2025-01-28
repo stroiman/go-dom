@@ -4,7 +4,7 @@ package gojahost
 
 import (
 	g "github.com/dop251/goja"
-	dom "github.com/stroiman/go-dom/browser/dom"
+	dom "github.com/gost-dom/browser/browser/dom"
 )
 
 func init() {
@@ -105,7 +105,7 @@ func (w nodeWrapper) parentElement(c g.FunctionCall) g.Value {
 }
 
 func (w nodeWrapper) childNodes(c g.FunctionCall) g.Value {
-	panic("Node.childNodes: Not implemented. Create an issue: https://github.com/stroiman/go-dom/issues")
+	panic("Node.childNodes: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (w nodeWrapper) firstChild(c g.FunctionCall) g.Value {

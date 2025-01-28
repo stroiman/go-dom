@@ -5,9 +5,9 @@ import (
 	"io"
 	"strings"
 
-	. "github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/internal/html"
+	. "github.com/gost-dom/browser/browser/dom"
+	"github.com/gost-dom/browser/browser/html"
+	. "github.com/gost-dom/browser/browser/internal/html"
 
 	v8 "github.com/tommie/v8go"
 )

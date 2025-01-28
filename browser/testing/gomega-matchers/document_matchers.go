@@ -5,8 +5,8 @@ import (
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/gcustom"
 	. "github.com/onsi/gomega/types"
-	"github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser/html"
+	"github.com/gost-dom/browser/browser/dom"
+	"github.com/gost-dom/browser/browser/html"
 )
 
 func FormatDocument(value any) (result string, ok bool) {

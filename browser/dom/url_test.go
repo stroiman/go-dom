@@ -3,7 +3,7 @@ package dom_test
 import (
 	"errors"
 
-	. "github.com/stroiman/go-dom/browser/dom"
+	. "github.com/gost-dom/browser/browser/dom"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

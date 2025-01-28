@@ -3,10 +3,10 @@ package browser_test
 import (
 	"net/http"
 
-	. "github.com/stroiman/go-dom/browser"
-	. "github.com/stroiman/go-dom/browser/dom"
-	. "github.com/stroiman/go-dom/browser/html"
-	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
+	. "github.com/gost-dom/browser/browser"
+	. "github.com/gost-dom/browser/browser/dom"
+	. "github.com/gost-dom/browser/browser/html"
+	. "github.com/gost-dom/browser/browser/testing/gomega-matchers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

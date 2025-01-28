@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/gost-dom/browser/browser/dom"
 )
 
 // TODO: Events for async

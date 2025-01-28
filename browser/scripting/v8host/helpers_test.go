@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
-	"github.com/stroiman/go-dom/browser/html"
+	"github.com/gost-dom/browser/browser/html"
 )
 
 type TestScriptContext struct {

@@ -5,7 +5,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
-	. "github.com/stroiman/go-dom/code-gen/generators"
+	. "github.com/gost-dom/browser/code-gen/generators"
 )
 
 func HaveRendered(expected interface{}) types.GomegaMatcher {

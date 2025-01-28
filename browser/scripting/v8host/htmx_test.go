@@ -4,10 +4,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	// . "github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser"
-	app "github.com/stroiman/go-dom/browser/internal/test/htmx-app"
-	. "github.com/stroiman/go-dom/browser/testing/gomega-matchers"
+	// . "github.com/gost-dom/browser/browser/dom"
+	"github.com/gost-dom/browser/browser"
+	app "github.com/gost-dom/browser/browser/internal/test/htmx-app"
+	. "github.com/gost-dom/browser/browser/testing/gomega-matchers"
 )
 
 var _ = Describe("Load from server", Ordered, func() {

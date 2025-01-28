@@ -1,7 +1,7 @@
 package v8host
 
 import (
-	"github.com/stroiman/go-dom/browser/dom"
+	"github.com/gost-dom/browser/browser/dom"
 	v8 "github.com/tommie/v8go"
 )
 

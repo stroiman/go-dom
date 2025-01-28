@@ -3,7 +3,7 @@ package dom
 import (
 	"iter"
 
-	"github.com/stroiman/go-dom/browser/internal/entity"
+	"github.com/gost-dom/browser/browser/internal/entity"
 	"golang.org/x/net/html"
 )
 

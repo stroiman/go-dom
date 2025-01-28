@@ -7,10 +7,10 @@ import (
 	"runtime"
 	"strings"
 
-	. "github.com/stroiman/go-dom/browser/dom"
-	"github.com/stroiman/go-dom/browser/html"
-	"github.com/stroiman/go-dom/browser/internal/entity"
-	"github.com/stroiman/go-dom/browser/scripting"
+	. "github.com/gost-dom/browser/browser/dom"
+	"github.com/gost-dom/browser/browser/html"
+	"github.com/gost-dom/browser/browser/internal/entity"
+	"github.com/gost-dom/browser/browser/scripting"
 
 	"github.com/tommie/v8go"
 	v8 "github.com/tommie/v8go"

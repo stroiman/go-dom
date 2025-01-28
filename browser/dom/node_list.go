@@ -1,6 +1,6 @@
 package dom
 
-import "github.com/stroiman/go-dom/browser/internal/entity"
+import "github.com/gost-dom/browser/browser/internal/entity"
 
 type NodeList interface {
 	entity.Entity

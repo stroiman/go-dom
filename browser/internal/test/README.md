@@ -1,7 +1,7 @@
 # HTMX Test app
 
 This folder contains a simple HTMX test app, that is being used in the test
-suite for go-dom.
+suite for gost-dom.
 
 ```sh
 htmx-app/ # The actual HTML server implementation as an http.Handler
