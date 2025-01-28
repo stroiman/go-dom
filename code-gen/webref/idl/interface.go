@@ -15,6 +15,7 @@ type Interface struct {
 	InternalSpec Name
 	Name         string
 	Attributes   []Attribute
+	Methods      Method
 	// Includes represent interfaces included using the includes IDL statement.
 	//
 	// See also: https://webidl.spec.whatwg.org/#includes-statement
@@ -23,6 +24,15 @@ type Interface struct {
 
 // Represents an attribute on an IDL interface
 type Attribute struct {
+	// Don't rely on this, it only exists during a refactoring process
+	InternalSpec NameMember
+	Name         string
+	Type         AttributeType
+	Readonly     bool
+}
+
+// Represents a method on an IDL interface
+type Method struct {
 	// Don't rely on this, it only exists during a refactoring process
 	InternalSpec NameMember
 	Name         string

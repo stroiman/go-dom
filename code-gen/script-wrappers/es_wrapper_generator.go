@@ -178,7 +178,7 @@ type ESOperationArgument struct {
 	Type         string
 	Optional     bool
 	Variadic     bool
-	IdlType      idl.Types
+	IdlType      idl.IdlTypes
 	ArgumentSpec ESMethodArgument
 }
 

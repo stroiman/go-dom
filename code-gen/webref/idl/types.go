@@ -37,19 +37,19 @@ type ExtAttr struct {
 	} `json:"rhs"`
 }
 
-type Type struct {
+type IdlType struct {
 	Type     string    `json:"type"`
 	ExtAttrs []ExtAttr `json:"extAttrs"`
 	Generic  string    `json:"generic"`
 	Nullable bool      `json:"nullable"`
 	Union    bool      `json:"union"`
-	IType    Types     `json:"idlType"`
+	IType    IdlTypes  `json:"idlType"`
 }
 
-func (t *Types) UnmarshalJSON(bytes []byte) error {
+func (t *IdlTypes) UnmarshalJSON(bytes []byte) error {
 	err := json.Unmarshal(bytes, &t.Types)
 	if err != nil {
-		typ := new(Type)
+		typ := new(IdlType)
 		err = json.Unmarshal(bytes, &typ)
 		if err == nil {
 			t.IdlType = typ
@@ -66,16 +66,16 @@ type Stuff struct {
 	Type     string    `json:"type"`
 	Name     string    `json:"name"`
 	ExtAttrs []ExtAttr `json:"extAttrs"`
-	IdlType  Types     `json:"idlType"`
+	IdlType  IdlTypes  `json:"idlType"`
 }
 
-type Types struct {
-	Types    []Type
-	IdlType  *Type
+type IdlTypes struct {
+	Types    []IdlType
+	IdlType  *IdlType
 	TypeName string
 }
 
-func (i Types) String() string {
+func (i IdlTypes) String() string {
 	if len(i.Types) > 0 {
 		return fmt.Sprintf("%v", i.Types)
 	}
@@ -165,20 +165,20 @@ type ParsedIdlFile struct {
 	Parsed `json:"idlParsed"`
 }
 
-func FindIdlTypeValue(idl Types, expectedType string) (Type, bool) {
+func FindIdlTypeValue(idl IdlTypes, expectedType string) (IdlType, bool) {
 	types := idl.Types
 	if len(types) == 0 && idl.IdlType != nil {
-		types = []Type{*idl.IdlType}
+		types = []IdlType{*idl.IdlType}
 	}
 	for _, t := range types {
 		if t.Type == expectedType {
 			return t, true
 		}
 	}
-	return Type{}, false
+	return IdlType{}, false
 }
 
-func FindIdlType(idl Types, expectedType string) (string, bool) {
+func FindIdlType(idl IdlTypes, expectedType string) (string, bool) {
 	if t, ok := FindIdlTypeValue(idl, expectedType); ok {
 		return t.IType.TypeName, t.Nullable
 	}
