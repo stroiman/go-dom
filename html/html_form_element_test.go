@@ -266,6 +266,47 @@ var _ = Describe("HTML Form", func() {
 		})
 
 		Describe("Dispatched events", func() {
+			Describe("Submit event", func() {
+				It("Should not be dispatched when form.submit is called", func() {
+					var actualEvent dom.Event
+					form.AddEventListener(
+						"submit",
+						dom.NewEventHandlerFunc(func(e dom.Event) error {
+							actualEvent = e
+							return nil
+						}),
+					)
+					form.Submit()
+					Expect(actualEvent).To(BeNil())
+				})
+
+				It("Should be dispatched when form.requestSubmit is called", func() {
+					var actualEvent dom.Event
+					form.AddEventListener(
+						"submit",
+						dom.NewEventHandlerFunc(func(e dom.Event) error {
+							actualEvent = e
+							return nil
+						}),
+					)
+					form.RequestSubmit(nil)
+					Expect(actualEvent).ToNot(BeNil())
+					Expect(actualRequest).ToNot(BeNil())
+				})
+
+				It("Should be abort the request on preventDefault()", func() {
+					form.AddEventListener(
+						"submit",
+						dom.NewEventHandlerFunc(func(e dom.Event) error {
+							e.PreventDefault()
+							return nil
+						}),
+					)
+					form.RequestSubmit(nil)
+					Expect(actualRequest).To(BeNil())
+				})
+			})
+
 			Describe("formdata event", func() {
 				It("Should be dispatched when a form is submitted", func() {
 					var actualEvent dom.Event

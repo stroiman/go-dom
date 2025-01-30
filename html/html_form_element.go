@@ -26,9 +26,25 @@ type FormDataEvent interface {
 	FormData() *FormData
 }
 
+type FormSubmitEvent interface {
+	dom.Event
+	Submitter() dom.Element
+}
+
 type formDataEvent struct {
 	dom.Event
 	formData *FormData
+}
+
+func (e *formDataEvent) FormData() *FormData { return e.formData }
+
+type formSubmitEvent struct {
+	dom.Event
+	submitter dom.Element
+}
+
+func (e *formSubmitEvent) Submitter() dom.Element {
+	return e.submitter
 }
 
 func newFormDataEvent(data *FormData) FormDataEvent {
@@ -36,7 +52,10 @@ func newFormDataEvent(data *FormData) FormDataEvent {
 	return &formDataEvent{e, data}
 }
 
-func (e *formDataEvent) FormData() *FormData { return e.formData }
+func newSubmitEvent(submitter dom.Element) FormSubmitEvent {
+	e := dom.NewEvent(string(FormEventSubmit), dom.EventBubbles(true), dom.EventCancelable(true))
+	return &formSubmitEvent{e, submitter}
+}
 
 type HTMLFormElement interface {
 	HTMLElement
@@ -91,6 +110,9 @@ func (e *htmlFormElement) RequestSubmit(submitter dom.Element) error {
 	if submitter != nil {
 		formData.AddElement(submitter)
 	}
+	if !e.DispatchEvent(newSubmitEvent(submitter)) {
+		return nil
+	}
 	return e.submitFormData(formData)
 }
 
@@ -121,18 +143,6 @@ func (e *htmlFormElement) getAction() dom.URL {
 }
 func (e *htmlFormElement) GetAction() string {
 	return e.getAction().Href()
-	// window := e.getWindow()
-	// action := e.GetAttribute("action")
-	// target := dom.URL(window.Location())
-	// var err error
-	// if action != "" {
-	// 	if target, err = dom.NewUrlBase(action, window.Location().GetHref()); err != nil {
-	// 		// This _shouldn't_ happen. But let's refactor code, so err isn't a
-	// 		// possible return value
-	// 		panic(err)
-	// 	}
-	// }
-	// return target.GetHref()
 }
 
 func (e *htmlFormElement) SetMethod(value string) {
