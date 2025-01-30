@@ -37,14 +37,12 @@ jobs:
       with:
         go-version: stable
         cache-dependency-path: |
-          browser/go.sum
-          code-gen/go.sum
+          go.sum
 
     - name: Add GOPATH to GITHUB_ENV
       run: echo "GOPATH=$(go env GOPATH)" >>"$GITHUB_ENV"
 
     - name: Build
-      working-directory: ./browser
       run: |
         go build -v ./...
         go test -v ./...
