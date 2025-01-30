@@ -17,7 +17,7 @@ jobs:
       matrix:
         os: 
           - darwin
-          # - linux
+          - linux
         arch: [amd64, arm64]
         go-version:
         # Check the earliest and two trailing versions, to keep
@@ -26,8 +26,8 @@ jobs:
         include:
         - os: darwin
           platform: macos-latest
-        # - os: linux
-        #   platform: ubuntu-latest
+        - os: linux
+          platform: ubuntu-latest
     runs-on: ${{ matrix.platform }}
     steps:
     - uses: actions/checkout@v4
