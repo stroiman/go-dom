@@ -94,44 +94,41 @@ locally.
 
 ## Project background
 
-While the SPA[^1] dominates the web today, some applications still render
-server-side HTML, and HTMX is gaining in popularity. Go has some popularity as a
-back-end language for HTMX.
+Go and HTMX is gaining in popularity as a stack.
 
 While Go has great tooling for verifying request/responses of HTTP applications,
-if you need to test at a higher level, for example verify how any JavaScript
-code effects the page; you would need to use browser automation which introduce
-a significant overhead; not only from out-of-process communication with the
-browser, but also the necessity of launching your server.
+but for HTMX, or just client-side scripting with server side rendering, you need
+browser automation to test the behaviour.
+
+This introduces a significant overhead; not only from out-of-process
+communication with the browser, but also the necessity of launching your server.
 
 This overhead discourages a TDD loop.
 
-The purpose of this project is to support a TDD feedback loop for code
-delivering HTML, and where merely verifying the HTTP response isn't enough, but
-you want to verify:
+The purpose of this project is to enable a fast TDD feedback loop these types of
+project, where verification depend on
 
-- JavaScript code has the desired behaviour
-- General browser behaviour is verified, e.g. 
-  - clicking a `<button type="submit">` submits the form and a redirect response
-    is followed.
+- Behaviour of client-side scripts.
+- Browser behaviour when interacting with browser elements, e.g., clicking the
+  submit button submits a form, and redirects are followed.
 
-Some advantages of a native headless browser are:
+### Unique features
 
-- No need to wait for a browser to launch.
-- Everything works in-process, so interacting with the browser from test does
-  not incur the overhead of out-of-process communication, and you could for
-  example redirect all console output to go code easily.
-- You can request application directly through the 
-  [`http.Handler`](https://pkg.go.dev/net/http#Handler); so no need to start an
-  HTTP server.
-- You can run parallel tests in isolation as each can create their own _instance_
-  of the HTTP handler.[^2]
+Being written in Go, this library supports consuming an
+[`http.Handler`](https://pkg.go.dev/net/http#Handler) directly. This removes the
+necessity managing TCP ports, and start a server on a real port. Your HTTP
+server is consumed by test code, like any other Go component would, also
+allowing you to replace dependencies for the test if applicable.
 
-Some disadvantages compared to browser automation.
+This also makes it easy to run parallel tests in isolation as each can create
+their own _instance_ of the HTTP handler.[^2]
 
-- You cannot verify how it look; e.g. you cannot get a screenshot of a failing test
-  - This means you cannot create snap-shot tests detect undesired UI changes.[^3]
-- You cannot verify that everything works in _all supported browsers_.
+### Drawbacks to Browser automation
+
+- You cannot verify how it look; e.g. you cannot get a screenshot of a failing
+test, nor use such screenshots for snapshot tests.[^3]
+- The verification doesn't prove that it works as intended in _all browsers_ you
+want to support.
 
 This isn't intended as a replacement for the cases where an end-2-end test is
 the right choice. It is intended as a tool to help when you want a smaller
@@ -141,32 +138,19 @@ isolated test, e.g. mocking out part of the behaviour;
 
 This is still in early development, and the structure may still change.
 
-The main library is in a subfolder, `browser`, to separate it from the code
-generator that generates pieces of code from IDL specs. The browser and code
-generator bases do not have any inter-dependencies, and they have different sets
-of unrelated external dependencies.
-
 ```sh
-browser/
-  dom/ # Core DOM implementation
-  html/ # Window, HTMLDocument, HTMLElement, 
-  # ...
-  scripting/ # Client-side script support
-    v8host/ # v8 engine, and bindings
-    gojahost/ # goja javascript engine,
-  browser.go # Main module
-code-gen/
-  webref/ # Git submodule -> https://github.com/w3c/webref
+dom/ # Core DOM implementation
+html/ # Window, HTMLDocument, HTMLElement, 
+scripting/ # Client-side script support
+v8host/ # v8 engine, and bindings
+gojahost/ # goja javascript engine,
+browser.go # Main module
 ```
 
-The subfolders under `browser/` reflects the [web
-APIs](https://developer.mozilla.org/en-US/docs/Web/API), and the naming
-reflects the corresponding idl files. E.g., `browser/dom/` will have types
-corresponding to the types specified in `code-gen/webref/ed/idl/dom.idl`.
-`browser/html/` corresponds to `html.idl`, etc.[^4]
-
-The `webref/` folder is not necessary for normal use, only when working with the
-code-generator.
+The folders, `dom`, and `html` correspond to the [web
+APIs](https://developer.mozilla.org/en-US/docs/Web/API). It was the intention to
+have a folder for each supported web API, but that may turn out to be
+impossible, as there are circular dependencies between some of the specs.
 
 ### Modularisation
 
@@ -235,32 +219,32 @@ have postponed dealing with that issue.
 
 ### Next up
 
-The following two areas are the next focus of attention
+The following are main focus areas ATM
 
-- Navigation. Some actions, e.g. clicking a link, or submitting a normal
-  (non-JS) form should result in a new HTTP reqest, and the response loaded in a
-  new script context (global state reset).
-- Form handling. Add code supporting typeing form values, and submitting the
-  form, building a request body.
+- Complete form handling
+- Handle redirect responses
 - Replace early hand-written JS wrappers with auto-generated code, helping drive
   a more complete implementation.
+
+A parallel project is adding Goda support. A little is added from time to time,
+to eventually replace V8 with Goja as the default script engine. V8 support will
+stay, so there's a fallback, if important JS features are lacking from Goja.
 
 ### Future goals
 
 There is much to do, which includes (but this is not a full list):
 
-- Support all DOM elements, including SVG elements and other namespaces.
 - Support web-sockets and server events.
+- A proper event loop with time travel. `setTimeout` and `setImmediate` are
+  not implemented by v8. When testing code that has to wait, it is very useful
+  to be able to fast forward simulated time.
 - Implement all standard JavaScript classes that a browser should support; but
-  not provided by the V8 engine.
-  - JavaScript polyfills would be a good starting point. This is used for xpath
-    evaluator.
-      - Conversion to native go implementations would be prioritized on usage, e.g.
-        [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) 
-        would be high in the list of priorities.
-  - A proper event loop with time travel. `setTimeout` and `setImmediate` are
-    not implemented by v8. When testing code that has to wait, it is very useful
-    to be able to fast forward simulated time.
+  not part of the ECMAScript standard itself.
+  - JavaScript polyfills would be a good starting point; which is how xpath is
+    implemented at the moment.
+    - Conversion to native go implementations would be prioritized on usage, e.g.
+      [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) 
+      would be high in the list of priorities.
 - Implement default browser behaviour for user interaction, e.g. pressing 
   <key>enter</key> when an input field has focus should submit the form.
 
@@ -332,17 +316,13 @@ depending only on the interface from here.
 ---
 
 [^1]: Single-Page app
-[^2]: This approach allows you to mock databases, and other external services;
-A few integration tests that use a real database, message bus, or other external
-services, is a good idea. Here, isolation of parallel tests may be
-non-trivial; depending on the type of application.
+[^2]: This is not entirely true. The script host only supports one OS
+    thread running JS code. But true parallelism will eventually be supported.
 [^3]: I generally dislike snapshot tests; as they don't _describe_ expected
 behaviour, only that the outcome mustn't change. There are a few cases where
 where snapshot tests are the right choice, but they should be avoided for a TDD
 process.
-[^4]: This code structure may not be completely possible due to circular
-dependencies between web APIs. E.g., `HTMLFormElement` and `FormData` have
-circular dependencies.
+[^4]: E.g., `HTMLFormElement` and `FormData` have circular dependencies.
 [^5]: The engine is based on the v8go project by originally by @rogchap, later
 kept up-to-date by @tommie; who did a remarkale job of automatically keeping the
 v8 dependencies up-to-date. But many necessary features of V8 are not exported;
