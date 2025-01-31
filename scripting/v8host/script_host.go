@@ -3,13 +3,13 @@ package v8host
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"runtime"
 	"strings"
 
 	. "github.com/gost-dom/browser/dom"
 	"github.com/gost-dom/browser/html"
 	"github.com/gost-dom/browser/internal/entity"
+	"github.com/gost-dom/browser/internal/log"
 	"github.com/gost-dom/browser/scripting"
 
 	"github.com/tommie/v8go"
@@ -199,14 +199,14 @@ func (host *V8ScriptHost) consoleAPIMessage(message v8.ConsoleAPIMessage) {
 	fmt.Println("Message", message)
 	switch message.ErrorLevel {
 	case v8.ErrorLevelDebug:
-		slog.Debug(message.Message)
+		log.Debug(message.Message)
 	case v8.ErrorLevelInfo:
 	case v8.ErrorLevelLog:
-		slog.Info(message.Message)
+		log.Info(message.Message)
 	case v8.ErrorLevelWarning:
-		slog.Warn(message.Message)
+		log.Warn(message.Message)
 	case v8.ErrorLevelError:
-		slog.Error(message.Message)
+		log.Error(message.Message)
 	}
 }
 
@@ -296,7 +296,7 @@ func (host *V8ScriptHost) Close() {
 	undisposedCount := len(undiposedContexts)
 
 	if undisposedCount > 0 {
-		slog.Warn("Script host shutdown: Not all contexts disposed", "count", len(host.contexts))
+		log.Warn("Script host shutdown: Not all contexts disposed", "count", len(host.contexts))
 		for _, ctx := range undiposedContexts {
 			ctx.Close()
 		}
@@ -342,7 +342,7 @@ func must(err error) {
 
 func (ctx *V8ScriptContext) Close() {
 	ctx.host.inspector.ContextDestroyed(ctx.v8ctx)
-	slog.Debug("ScriptContext: Dispose")
+	log.Debug("ScriptContext: Dispose")
 	for _, dispose := range ctx.disposers {
 		dispose.dispose()
 	}
