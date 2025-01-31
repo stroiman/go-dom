@@ -384,5 +384,13 @@ func (e *element) CloneNode(deep bool) Node {
 	for a := range e.Attributes().All() {
 		res.SetAttributeNode(a.CloneNode(deep).(Attr))
 	}
+	children := e.ChildNodes().All()
+	nodes := make([]Node, len(children))
+	for i, n := range children {
+		nodes[i] = n
+	}
+	if deep {
+		res.Append(nodes...)
+	}
 	return res
 }
