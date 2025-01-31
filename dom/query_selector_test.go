@@ -15,6 +15,14 @@ var _ = Describe("QuerySelector", func() {
 		).To(HaveOuterHTML("<div>hello</div>"))
 	})
 
+	It("Should work with upper-case tag names", func() {
+		doc := ParseHtmlString("<body><div>hello</div><p>world!</p><div>Selector</div></body>")
+		Expect(
+			(doc.QuerySelector("DIV")),
+		).To(HaveOuterHTML("<div>hello</div>"))
+
+	})
+
 	It("Should find by attribute", func() {
 		doc := ParseHtmlString(
 			`<body><div>hello</div><p>world!</p><div data-foo="bar">Selector</div></body>`,

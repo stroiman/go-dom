@@ -1,0 +1,3 @@
+#!/bin/sh
+go mod edit -replace="github.com/ericchiang/css=$HOME/go/src/github.com/gost-dom/css"
+go mod tidy
