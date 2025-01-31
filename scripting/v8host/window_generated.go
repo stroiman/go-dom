@@ -202,10 +202,6 @@ func (w windowV8Wrapper) setName(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 	return nil, errors.New("Window.setName: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
-func (w windowV8Wrapper) history(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("Window.history: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
-}
-
 func (w windowV8Wrapper) navigation(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, errors.New("Window.navigation: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
