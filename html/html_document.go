@@ -1,6 +1,8 @@
 package html
 
 import (
+	"strings"
+
 	. "github.com/gost-dom/browser/dom"
 )
 
@@ -59,7 +61,7 @@ func (d *htmlDocument) CreateElementNS(namespace string, name string) Element {
 }
 
 func (d *htmlDocument) CreateElement(name string) Element {
-	switch name {
+	switch strings.ToLower(name) {
 	case "template":
 		return NewHTMLTemplateElement(d)
 	case "form":

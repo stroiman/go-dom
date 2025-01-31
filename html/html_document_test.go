@@ -25,4 +25,20 @@ var _ = Describe("HTMLDocument", func() {
 			Expect(doc.Body()).To(HaveTag("BODY"))
 		})
 	})
+
+	Describe("CreateElement", func() {
+		It("Should create the right subclass for an 'a' tag", func() {
+			doc := NewHTMLDocument(nil)
+			e := doc.CreateElement("a")
+			_, ok := e.(HTMLAnchorElement)
+			Expect(ok).To(BeTrue(), "Element was an HTMLAnchorElement")
+		})
+
+		It("Should create the right subclass for an 'A' tag", func() {
+			doc := NewHTMLDocument(nil)
+			e := doc.CreateElement("A")
+			_, ok := e.(HTMLAnchorElement)
+			Expect(ok).To(BeTrue(), "Element was an HTMLAnchorElement")
+		})
+	})
 })
