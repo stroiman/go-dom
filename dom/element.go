@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/gost-dom/browser/internal/constants"
@@ -37,6 +38,7 @@ type Element interface {
 	SetAttribute(name string, value string)
 	GetAttributeNode(string) *Attribute
 	SetAttributeNode(*Attribute) *Attribute
+	RemoveAttributeNode(*Attribute) (*Attribute, error)
 	Attributes() NamedNodeMap
 	InsertAdjacentHTML(position string, text string) error
 	OuterHTML() string
@@ -155,7 +157,24 @@ func (e *element) GetAttributeNode(name string) *Attribute {
 }
 
 func (e *element) SetAttributeNode(node *Attribute) *Attribute {
+	for i, a := range e.attributes {
+		if a.Key == node.Key && a.Namespace == node.Namespace {
+			e.attributes[i] = node
+			return a
+		}
+	}
+	e.attributes = append(e.attributes, node)
 	return nil
+}
+
+func (e *element) RemoveAttributeNode(node *Attribute) (*Attribute, error) {
+	for i, a := range e.attributes {
+		if a == node {
+			e.attributes = slices.Delete(e.attributes, i, i+1)
+			return node, nil
+		}
+	}
+	return nil, newDomErrorCode("Node was not found", domErrorNotFound)
 }
 
 func (e *element) getAttributes() Attributes {

@@ -57,6 +57,55 @@ var _ = Describe("Element", func() {
 			actual, _ := elm.GetAttribute("class")
 			Expect(actual).To(Equal("bar"), "Attribute value after mutation")
 		})
+
+		Describe("SetAttribute", func() {
+			It("Should add an attribute if not existing", func() {
+				elm := doc.CreateElement("div")
+				result := elm.SetAttributeNode(&Attribute{
+					Key: "class",
+					Val: "foo",
+				})
+				Expect(result).To(BeNil())
+				Expect(elm.Attributes().Length()).To(Equal(1))
+				actual, _ := elm.GetAttribute("class")
+				Expect(actual).To(Equal("foo"))
+			})
+
+			It("Should replace an attribute if it already exists", func() {
+				elm := doc.CreateElement("div")
+				elm.SetAttribute("class", "bar")
+				result := elm.SetAttributeNode(&Attribute{
+					Key: "class",
+					Val: "foo",
+				})
+				Expect(result).To(And(HaveField("Key", "class"), HaveField("Val", "bar")))
+				Expect(elm.Attributes().Length()).To(Equal(1))
+				actual, _ := elm.GetAttribute("class")
+				Expect(actual).To(Equal("foo"))
+			})
+		})
+
+		Describe("RemoveAttribute", func() {
+			It("Should remove the attribute if it is on the element", func() {
+				elm := doc.CreateElement("div")
+				elm.SetAttribute("class", "bar")
+				nodeToRemove := elm.GetAttributeNode("class")
+				removedNode, err := elm.RemoveAttributeNode(nodeToRemove)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(elm.Attributes().Length()).To(Equal(0))
+				Expect(removedNode).To(Equal(nodeToRemove))
+			})
+
+			It("Should return a DOMError when attribute doesn't exist on the node", func() {
+				elm := doc.CreateElement("div")
+				elm2 := doc.CreateElement("div")
+				elm2.SetAttribute("class", "bar")
+				attributeFromAnotherElement := elm2.GetAttributeNode("class")
+				Expect(
+					elm.RemoveAttributeNode(attributeFromAnotherElement),
+				).Error().To(BeADOMError())
+			})
+		})
 	})
 
 	Describe("Matches", func() {

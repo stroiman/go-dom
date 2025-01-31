@@ -26,6 +26,7 @@ const (
 const (
 	domErrorSyntaxError int = iota
 	domErrorInvalidCharacter
+	domErrorNotFound
 )
 
 type DOMError struct {
