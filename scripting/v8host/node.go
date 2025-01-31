@@ -31,3 +31,7 @@ func (n nodeV8Wrapper) decodeGetRootNodeOptions(
 func (n nodeV8Wrapper) defaultGetRootNodeOptions() dom.GetRootNodeOptions {
 	return false
 }
+
+func (w nodeV8Wrapper) defaultboolean() bool {
+	return false
+}

@@ -20,6 +20,7 @@ func newNodeWrapper(instance *GojaContext) wrapper {
 }
 func (w nodeWrapper) initializePrototype(prototype *g.Object, vm *g.Runtime) {
 	prototype.Set("getRootNode", w.getRootNode)
+	prototype.Set("cloneNode", w.cloneNode)
 	prototype.Set("contains", w.contains)
 	prototype.Set("insertBefore", w.insertBefore)
 	prototype.Set("appendChild", w.appendChild)
@@ -39,6 +40,13 @@ func (w nodeWrapper) getRootNode(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	options := w.decodeGetRootNodeOptions(c.Arguments[0])
 	result := instance.GetRootNode(options)
+	return w.toNode(result)
+}
+
+func (w nodeWrapper) cloneNode(c g.FunctionCall) g.Value {
+	instance := w.getInstance(c)
+	subtree := w.decodeboolean(c.Arguments[0])
+	result := instance.CloneNode(subtree)
 	return w.toNode(result)
 }
 

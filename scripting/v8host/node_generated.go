@@ -21,6 +21,7 @@ func createNodePrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 
 	prototypeTmpl := constructor.PrototypeTemplate()
 	prototypeTmpl.Set("getRootNode", v8.NewFunctionTemplateWithError(iso, wrapper.getRootNode))
+	prototypeTmpl.Set("cloneNode", v8.NewFunctionTemplateWithError(iso, wrapper.cloneNode))
 	prototypeTmpl.Set("contains", v8.NewFunctionTemplateWithError(iso, wrapper.contains))
 	prototypeTmpl.Set("insertBefore", v8.NewFunctionTemplateWithError(iso, wrapper.insertBefore))
 	prototypeTmpl.Set("appendChild", v8.NewFunctionTemplateWithError(iso, wrapper.appendChild))
@@ -84,6 +85,22 @@ func (n nodeV8Wrapper) getRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, er
 		return ctx.getInstanceForNode(result)
 	}
 	return nil, errors.New("Node.getRootNode: Missing arguments")
+}
+
+func (n nodeV8Wrapper) cloneNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := n.mustGetContext(info)
+	args := newArgumentHelper(n.scriptHost, info)
+	instance, err0 := n.getInstance(info)
+	subtree, err1 := tryParseArgWithDefault(args, 0, n.defaultboolean, n.decodeBoolean)
+	if args.noOfReadArguments >= 1 {
+		err := errors.Join(err0, err1)
+		if err != nil {
+			return nil, err
+		}
+		result := instance.CloneNode(subtree)
+		return ctx.getInstanceForNode(result)
+	}
+	return nil, errors.New("Node.cloneNode: Missing arguments")
 }
 
 func (n nodeV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
