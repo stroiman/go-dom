@@ -147,6 +147,7 @@ type Node interface {
 	setParent(Node)
 	nodes() []Node
 	assertCanAddNode(Node) error
+	cloneChildren() []Node
 }
 
 type node struct {
@@ -159,6 +160,15 @@ type node struct {
 
 func newNode() node {
 	return node{newEventTarget(), entity.New(), nil, newNodeList(), nil}
+}
+
+func (n *node) cloneChildren() []Node {
+	children := n.ChildNodes().All()
+	nodes := make([]Node, len(children))
+	for i, n := range children {
+		nodes[i] = n.CloneNode(true)
+	}
+	return nodes
 }
 
 func (n *node) append(nodes ...Node) error {
@@ -205,7 +215,7 @@ func (n *node) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
 
 func (n *node) ChildNodes() NodeList { return n.childNodes }
 
-func (n *node) CloneNode(deep bool) Node { return nil }
+// func (n *node) CloneNode(deep bool) Node { return nil }
 
 func (n *node) GetRootNode(options ...GetRootNodeOptions) Node {
 	if len(options) > 1 {

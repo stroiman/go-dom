@@ -21,6 +21,10 @@ func NewDocumentType(name string) DocumentType {
 func (t *documentType) Name() string       { return t.name }
 func (t *documentType) NodeType() NodeType { return NodeTypeDocumentType }
 
+func (t *documentType) CloneNode(deep bool) Node {
+	return NewDocumentType(t.name)
+}
+
 func (t *documentType) createHtmlNode() *html.Node {
 	return &html.Node{
 		Type: html.DoctypeNode,

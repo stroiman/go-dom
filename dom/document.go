@@ -52,6 +52,14 @@ func NewDocument(window DocumentParentWindow) Document {
 	return result
 }
 
+func (d *document) CloneNode(deep bool) Node {
+	result := NewDocument(d.ownerWindow)
+	if deep {
+		result.Append(d.cloneChildren()...)
+	}
+	return result
+}
+
 func (d *document) parseFragment(reader io.Reader) (DocumentFragment, error) {
 	return d.ownerWindow.ParseFragment(d, reader)
 }

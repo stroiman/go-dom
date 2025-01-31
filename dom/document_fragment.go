@@ -17,6 +17,14 @@ func NewDocumentFragment(ownerDocument Document) DocumentFragment {
 	return result
 }
 
+func (f *documentFragment) CloneNode(deep bool) Node {
+	result := NewDocumentFragment(f.ownerDocument)
+	if deep {
+		result.Append(f.cloneChildren()...)
+	}
+	return result
+}
+
 func (f *documentFragment) ChildElementCount() int {
 	return len(f.childElements())
 }

@@ -28,6 +28,8 @@ func (n *characterData) Length() int {
 	return utf8.RuneCountInString(n.data)
 }
 
+func (d *characterData) cloneChildren() []Node { return nil }
+
 /* -------- Comment -------- */
 
 type Comment interface {
@@ -61,6 +63,10 @@ func (n *comment) createHtmlNode() *html.Node {
 	}
 }
 
+func (c *comment) CloneNode(bool) Node {
+	return NewComment(c.TextContent())
+}
+
 /* -------- Text -------- */
 
 type Text interface {
@@ -75,6 +81,10 @@ func NewText(text string) Text {
 	result := &textNode{characterData{newNode(), text}}
 	result.SetSelf(result)
 	return result
+}
+
+func (n *textNode) CloneNode(bool) Node {
+	return NewText(n.characterData.data)
 }
 
 func (n *textNode) Render(builder *strings.Builder) {

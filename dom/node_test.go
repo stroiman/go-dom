@@ -13,10 +13,7 @@ var _ = Describe("Node", func() {
 	Describe("CloneNode", func() {
 		It("Should create a shallow copy when called with false", func() {
 			doc := ParseHtmlString(`<body id='body'><div>First</div><div id="1">1</div></body>`)
-			_, ok := doc.(html.HTMLDocument)
-			Expect(ok).To(BeTrue(), "Doc is an HTML Document")
-			node := doc.Body()
-			clone := node.CloneNode(false)
+			clone := doc.Body().CloneNode(false)
 			Expect(clone).ToNot(BeNil())
 			Expect(clone).To(HaveTag("BODY"))
 			elm := clone.(html.HTMLElement)
@@ -25,13 +22,15 @@ var _ = Describe("Node", func() {
 
 		It("Should create a shallow copy when called with true", func() {
 			doc := ParseHtmlString(`<body id="body"><div>First</div><div id="1">1</div></body>`)
-			_, ok := doc.(html.HTMLDocument)
-			Expect(ok).To(BeTrue(), "Doc is an HTML Document")
-			node := doc.Body()
-			clone := node.CloneNode(true)
+			clone := doc.Body().CloneNode(true)
 			Expect(
 				clone,
 			).To(HaveOuterHTML(`<body id="body"><div>First</div><div id="1">1</div></body>`))
+			Expect(
+				doc.Body(),
+			).To(HaveOuterHTML(`<body id="body"><div>First</div><div id="1">1</div></body>`),
+				"Original node was not mutated",
+			)
 		})
 	})
 
