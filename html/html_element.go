@@ -3,6 +3,7 @@ package html
 import (
 	"strings"
 
+	"github.com/gost-dom/browser/dom"
 	. "github.com/gost-dom/browser/dom"
 	. "github.com/gost-dom/browser/internal/dom"
 )
@@ -41,4 +42,12 @@ func (e *htmlElement) getWindow() Window { return e.getHTMLDocument().getWindow(
 
 func (e *htmlElement) TagName() string {
 	return strings.ToUpper(e.Element.TagName())
+}
+
+func (e *htmlElement) CloneNode(deep bool) dom.Node {
+	res := e.htmlDocument.CreateElement(e.TagName())
+	for a := range e.Attributes().All() {
+		res.SetAttribute(a.Name(), a.Value())
+	}
+	return res
 }

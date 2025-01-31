@@ -48,7 +48,7 @@ func NewHTMLDocument(window Window) HTMLDocument {
 // newHTMLDocument is used internally to create an empty HTML when parsing an
 // HTML input.
 func newHTMLDocument(window Window) HTMLDocument {
-	result := &htmlDocument{NewDocument(window), window}
+	var result HTMLDocument = &htmlDocument{NewDocument(window), window}
 	result.SetSelf(result)
 	return result
 }

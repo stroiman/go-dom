@@ -114,6 +114,7 @@ type Node interface {
 	AppendChild(node Node) (Node, error)
 	GetRootNode(options ...GetRootNodeOptions) Node
 	ChildNodes() NodeList
+	CloneNode(deep bool) Node
 	IsConnected() bool
 	Contains(node Node) bool
 	InsertBefore(newNode Node, referenceNode Node) (Node, error)
@@ -203,6 +204,8 @@ func (n *node) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
 }
 
 func (n *node) ChildNodes() NodeList { return n.childNodes }
+
+func (n *node) CloneNode(deep bool) Node { return nil }
 
 func (n *node) GetRootNode(options ...GetRootNodeOptions) Node {
 	if len(options) > 1 {

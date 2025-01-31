@@ -2,6 +2,7 @@ package dom_test
 
 import (
 	. "github.com/gost-dom/browser/dom"
+	"github.com/gost-dom/browser/html"
 	. "github.com/gost-dom/browser/testing/gomega-matchers"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -9,6 +10,20 @@ import (
 )
 
 var _ = Describe("Node", func() {
+	Describe("CloneNode", func() {
+		It("Should create a shallow copy when called with false", func() {
+			doc := ParseHtmlString(`<body id='body'><div>First</div><div id="1">1</div></body>`)
+			_, ok := doc.(html.HTMLDocument)
+			Expect(ok).To(BeTrue(), "Doc is an HTML Document")
+			node := doc.Body()
+			clone := node.CloneNode(false)
+			Expect(clone).ToNot(BeNil())
+			Expect(clone).To(HaveTag("BODY"))
+			elm := clone.(html.HTMLElement)
+			Expect(elm).To(HaveAttribute("id", "body"))
+		})
+	})
+
 	Describe("InsertBefore", func() {
 		It("Should insert the element if it's a new element", func() {
 			doc := ParseHtmlString(`<body><div>First</div><div id="1">1</div></body>`)
