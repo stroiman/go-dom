@@ -15,10 +15,8 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-type Attribute = html.Attribute
-
 // TODO: In the DOM, this is a `NamedNodeMap`. Is that useful in Go?
-type Attributes []*html.Attribute
+type Attributes []Attr
 
 func (attrs Attributes) Length() int {
 	return len(attrs)
@@ -36,9 +34,9 @@ type Element interface {
 	HasAttribute(name string) bool
 	GetAttribute(name string) (string, bool)
 	SetAttribute(name string, value string)
-	GetAttributeNode(string) *Attribute
-	SetAttributeNode(*Attribute) *Attribute
-	RemoveAttributeNode(*Attribute) (*Attribute, error)
+	GetAttributeNode(string) Attr
+	SetAttributeNode(Attr) (Attr, error)
+	RemoveAttributeNode(Attr) (Attr, error)
 	Attributes() NamedNodeMap
 	InsertAdjacentHTML(position string, text string) error
 	OuterHTML() string
@@ -132,7 +130,7 @@ func (e *element) InnerHTML() string {
 
 func (e *element) HasAttribute(name string) bool {
 	for _, a := range e.attributes {
-		if a.Key == name {
+		if a.Name() == name {
 			return true
 		}
 	}
@@ -141,36 +139,40 @@ func (e *element) HasAttribute(name string) bool {
 
 func (e *element) GetAttribute(name string) (string, bool) {
 	if a := e.GetAttributeNode(name); a != nil {
-		return a.Val, true
+		return a.Value(), true
 	} else {
 		return "", false
 	}
 }
 
-func (e *element) GetAttributeNode(name string) *Attribute {
+func (e *element) GetAttributeNode(name string) Attr {
 	for _, a := range e.attributes {
-		if a.Key == name && a.Namespace == e.namespace {
+		if a.Name() == name && a.NamespaceURI() == e.namespace {
 			return a
 		}
 	}
 	return nil
 }
 
-func (e *element) SetAttributeNode(node *Attribute) *Attribute {
+func (e *element) SetAttributeNode(node Attr) (Attr, error) {
+	if node.Parent() != nil {
+		return nil, newDomError("Attribute already in use")
+	}
 	for i, a := range e.attributes {
-		if a.Key == node.Key && a.Namespace == node.Namespace {
+		if a.Name() == node.Name() && a.NamespaceURI() == node.NamespaceURI() {
 			e.attributes[i] = node
-			return a
+			return a, nil
 		}
 	}
 	e.attributes = append(e.attributes, node)
-	return nil
+	return nil, nil
 }
 
-func (e *element) RemoveAttributeNode(node *Attribute) (*Attribute, error) {
+func (e *element) RemoveAttributeNode(node Attr) (Attr, error) {
 	for i, a := range e.attributes {
 		if a == node {
 			e.attributes = slices.Delete(e.attributes, i, i+1)
+			node.setParent(nil)
 			return node, nil
 		}
 	}
@@ -196,12 +198,11 @@ func (e *element) Attributes() NamedNodeMap {
 
 func (e *element) SetAttribute(name string, value string) {
 	if a := e.GetAttributeNode(name); a != nil {
-		a.Val = value
+		a.SetValue(value)
 	} else {
-		e.attributes = append(e.attributes, &html.Attribute{
-			Key:       name,
-			Val:       value,
-			Namespace: e.namespace})
+		a := newAttr(name, value)
+		a.setParent(e.selfElement)
+		e.attributes = append(e.attributes, a)
 	}
 }
 
@@ -209,7 +210,7 @@ func (e *element) createHtmlNode() *html.Node {
 	tag := strings.ToLower(e.tagName)
 	attrs := make([]html.Attribute, len(e.attributes))
 	for i, a := range e.attributes {
-		attrs[i] = *a
+		attrs[i] = a.htmlAttr()
 	}
 	return &html.Node{
 		Type:      html.ElementNode,

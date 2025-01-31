@@ -26,6 +26,7 @@ type Document interface {
 	Body() Element
 	Head() Element
 	CreateDocumentFragment() DocumentFragment
+	CreateAttribute(string) Attr
 	CreateElement(string) Element
 	CreateElementNS(string, string) Element
 	DocumentElement() Element
@@ -85,6 +86,10 @@ func (d *document) Head() Element {
 		}
 	}
 	return nil
+}
+
+func (d *document) CreateAttribute(name string) Attr {
+	return newAttr(name, "")
 }
 
 func (d *document) CreateElement(name string) Element {

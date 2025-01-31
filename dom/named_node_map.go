@@ -26,6 +26,7 @@ type Attr interface {
 	Prefix() string
 	Value() string
 	SetValue(val string)
+	htmlAttr() html.Attribute
 }
 
 type namedNodeMap struct {
@@ -37,6 +38,31 @@ type attr struct {
 	node
 	ownerElement Element
 	attr         *html.Attribute
+}
+
+func newAttr(n, v string) Attr {
+	res := &attr{
+		node: newNode(),
+		attr: &html.Attribute{
+			Key: n,
+			Val: v,
+		},
+	}
+	res.setSelf(res)
+	return res
+}
+
+func (a *attr) setParent(parent Node) {
+	var ok bool
+	a.ownerElement = nil
+	if a.ownerElement, ok = parent.(Element); !ok && parent != nil {
+		panic("Setting non-element owner on an attribute")
+	}
+	a.node.setParent(parent)
+}
+
+func (a *attr) htmlAttr() html.Attribute {
+	return *a.attr
 }
 
 func newNamedNodeMapForElement(ownerElement Element) NamedNodeMap {
@@ -67,16 +93,15 @@ func (m *namedNodeMap) Item(index int) Attr {
 		return nil
 	}
 
-	result := &attr{newNode(), m.ownerElement, attributes[index]}
-	result.SetSelf(result)
+	result := attributes[index]
 	return result
 }
 
-func (a *attr) LocalName() string     { panic("TODO") }
+func (a *attr) LocalName() string     { return a.attr.Key }
 func (a *attr) Name() string          { return a.attr.Key }
-func (a *attr) NamespaceURI() string  { panic("TODO") }
+func (a *attr) NamespaceURI() string  { return "" }
 func (a *attr) OwnerElement() Element { return a.ownerElement }
-func (a *attr) Prefix() string        { panic("TODO") }
+func (a *attr) Prefix() string        { return "" }
 func (a *attr) Value() string         { return a.attr.Val }
 func (a *attr) SetValue(val string)   { a.attr.Val = val }
 func (a *attr) NodeType() NodeType    { return NodeTypeAttribute }
