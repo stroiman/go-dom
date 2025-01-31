@@ -68,7 +68,7 @@ func (e eventV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, e
 		}
 		return e.CreateInstance(ctx, info.This(), type_, eventInitDict)
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("Event.constructor: Missing arguments")
 }
 
 func (e eventV8Wrapper) stopPropagation(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

@@ -54,7 +54,7 @@ func (h historyV8Wrapper) go_(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 		callErr := instance.Go(delta)
 		return nil, callErr
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("History.go: Missing arguments")
 }
 
 func (h historyV8Wrapper) back(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -79,32 +79,32 @@ func (h historyV8Wrapper) pushState(info *v8.FunctionCallbackInfo) (*v8.Value, e
 	args := newArgumentHelper(h.scriptHost, info)
 	instance, err0 := h.getInstance(info)
 	data, err1 := tryParseArg(args, 0, h.decodeAny)
-	url, err2 := tryParseArgWithDefault(args, 1, h.defaultUrl, h.decodeUSVString)
+	url, err3 := tryParseArgWithDefault(args, 2, h.defaultUrl, h.decodeUSVString)
 	if args.noOfReadArguments >= 2 {
-		err := errors.Join(err0, err1, err2)
+		err := errors.Join(err0, err1, err3)
 		if err != nil {
 			return nil, err
 		}
 		callErr := instance.PushState(data, url)
 		return nil, callErr
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("History.pushState: Missing arguments")
 }
 
 func (h historyV8Wrapper) replaceState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	args := newArgumentHelper(h.scriptHost, info)
 	instance, err0 := h.getInstance(info)
 	data, err1 := tryParseArg(args, 0, h.decodeAny)
-	url, err2 := tryParseArgWithDefault(args, 1, h.defaultUrl, h.decodeUSVString)
+	url, err3 := tryParseArgWithDefault(args, 2, h.defaultUrl, h.decodeUSVString)
 	if args.noOfReadArguments >= 2 {
-		err := errors.Join(err0, err1, err2)
+		err := errors.Join(err0, err1, err3)
 		if err != nil {
 			return nil, err
 		}
 		callErr := instance.ReplaceState(data, url)
 		return nil, callErr
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("History.replaceState: Missing arguments")
 }
 
 func (h historyV8Wrapper) length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

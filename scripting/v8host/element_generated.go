@@ -118,7 +118,7 @@ func (e elementV8Wrapper) setAttribute(info *v8.FunctionCallbackInfo) (*v8.Value
 		instance.SetAttribute(qualifiedName, value)
 		return nil, nil
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("Element.setAttribute: Missing arguments")
 }
 
 func (e elementV8Wrapper) setAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -150,7 +150,7 @@ func (e elementV8Wrapper) hasAttribute(info *v8.FunctionCallbackInfo) (*v8.Value
 		result := instance.HasAttribute(qualifiedName)
 		return e.toBoolean(ctx, result)
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("Element.hasAttribute: Missing arguments")
 }
 
 func (e elementV8Wrapper) hasAttributeNS(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -198,7 +198,7 @@ func (e elementV8Wrapper) matches(info *v8.FunctionCallbackInfo) (*v8.Value, err
 			return e.toBoolean(ctx, result)
 		}
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("Element.matches: Missing arguments")
 }
 
 func (e elementV8Wrapper) getElementsByTagName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

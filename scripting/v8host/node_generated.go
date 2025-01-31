@@ -83,7 +83,7 @@ func (n nodeV8Wrapper) getRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, er
 		result := instance.GetRootNode(options)
 		return ctx.getInstanceForNode(result)
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("Node.getRootNode: Missing arguments")
 }
 
 func (n nodeV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -99,7 +99,7 @@ func (n nodeV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Value, error
 		result := instance.Contains(other)
 		return n.toBoolean(ctx, result)
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("Node.contains: Missing arguments")
 }
 
 func (n nodeV8Wrapper) insertBefore(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -120,7 +120,7 @@ func (n nodeV8Wrapper) insertBefore(info *v8.FunctionCallbackInfo) (*v8.Value, e
 			return ctx.getInstanceForNode(result)
 		}
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("Node.insertBefore: Missing arguments")
 }
 
 func (n nodeV8Wrapper) appendChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -140,7 +140,7 @@ func (n nodeV8Wrapper) appendChild(info *v8.FunctionCallbackInfo) (*v8.Value, er
 			return ctx.getInstanceForNode(result)
 		}
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("Node.appendChild: Missing arguments")
 }
 
 func (n nodeV8Wrapper) removeChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -160,7 +160,7 @@ func (n nodeV8Wrapper) removeChild(info *v8.FunctionCallbackInfo) (*v8.Value, er
 			return ctx.getInstanceForNode(result)
 		}
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("Node.removeChild: Missing arguments")
 }
 
 func (n nodeV8Wrapper) nodeName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

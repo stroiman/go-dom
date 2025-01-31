@@ -58,7 +58,7 @@ func (u domTokenListV8Wrapper) item(info *v8.FunctionCallbackInfo) (*v8.Value, e
 		result := instance.Item(index)
 		return u.toNullableDOMString(ctx, result)
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("DOMTokenList.item: Missing arguments")
 }
 
 func (u domTokenListV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -74,7 +74,7 @@ func (u domTokenListV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Valu
 		result := instance.Contains(token)
 		return u.toBoolean(ctx, result)
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("DOMTokenList.contains: Missing arguments")
 }
 
 func (u domTokenListV8Wrapper) add(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -89,7 +89,7 @@ func (u domTokenListV8Wrapper) add(info *v8.FunctionCallbackInfo) (*v8.Value, er
 		callErr := instance.Add(tokens)
 		return nil, callErr
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("DOMTokenList.add: Missing arguments")
 }
 
 func (u domTokenListV8Wrapper) remove(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -104,7 +104,7 @@ func (u domTokenListV8Wrapper) remove(info *v8.FunctionCallbackInfo) (*v8.Value,
 		instance.Remove(tokens)
 		return nil, nil
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("DOMTokenList.remove: Missing arguments")
 }
 
 func (u domTokenListV8Wrapper) replace(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -121,7 +121,7 @@ func (u domTokenListV8Wrapper) replace(info *v8.FunctionCallbackInfo) (*v8.Value
 		result := instance.Replace(token, newToken)
 		return u.toBoolean(ctx, result)
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("DOMTokenList.replace: Missing arguments")
 }
 
 func (u domTokenListV8Wrapper) supports(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -160,5 +160,5 @@ func (u domTokenListV8Wrapper) setValue(info *v8.FunctionCallbackInfo) (*v8.Valu
 		instance.SetValue(val)
 		return nil, nil
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("DOMTokenList.setValue: Missing arguments")
 }

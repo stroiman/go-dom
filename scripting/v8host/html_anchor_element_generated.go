@@ -64,5 +64,5 @@ func (e hTMLAnchorElementV8Wrapper) setTarget(info *v8.FunctionCallbackInfo) (*v
 		instance.SetTarget(val)
 		return nil, nil
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("HTMLAnchorElement.setTarget: Missing arguments")
 }

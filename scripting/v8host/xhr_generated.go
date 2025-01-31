@@ -90,7 +90,7 @@ func (xhr xmlHttpRequestV8Wrapper) setRequestHeader(info *v8.FunctionCallbackInf
 		instance.SetRequestHeader(name, value)
 		return nil, nil
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("XMLHttpRequest.setRequestHeader: Missing arguments")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -134,7 +134,7 @@ func (xhr xmlHttpRequestV8Wrapper) getResponseHeader(info *v8.FunctionCallbackIn
 		result := instance.GetResponseHeader(name)
 		return xhr.toNullableByteString(ctx, result)
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("XMLHttpRequest.getResponseHeader: Missing arguments")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) getAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -163,7 +163,7 @@ func (xhr xmlHttpRequestV8Wrapper) overrideMimeType(info *v8.FunctionCallbackInf
 		callErr := instance.OverrideMimeType(mime)
 		return nil, callErr
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("XMLHttpRequest.overrideMimeType: Missing arguments")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) readyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -192,7 +192,7 @@ func (xhr xmlHttpRequestV8Wrapper) setTimeout(info *v8.FunctionCallbackInfo) (*v
 		instance.SetTimeout(val)
 		return nil, nil
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("XMLHttpRequest.setTimeout: Missing arguments")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) withCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
@@ -217,7 +217,7 @@ func (xhr xmlHttpRequestV8Wrapper) setWithCredentials(info *v8.FunctionCallbackI
 		instance.SetWithCredentials(val)
 		return nil, nil
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("XMLHttpRequest.setWithCredentials: Missing arguments")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) responseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

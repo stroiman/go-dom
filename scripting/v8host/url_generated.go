@@ -92,7 +92,7 @@ func (u urlV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, err
 		}
 		return u.CreateInstance(ctx, info.This(), url)
 	}
-	return nil, errors.New("Missing arguments")
+	return nil, errors.New("URL.constructor: Missing arguments")
 }
 
 func (u urlV8Wrapper) toJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
