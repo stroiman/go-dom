@@ -77,3 +77,5 @@ func (d *htmlDocument) CreateElement(name string) Element {
 }
 
 func (d *htmlDocument) getWindow() Window { return d.window }
+
+func (d *htmlDocument) OwnerDocument() Document { return d }

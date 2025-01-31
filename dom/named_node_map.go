@@ -26,6 +26,7 @@ type Attr interface {
 	Prefix() string
 	Value() string
 	SetValue(val string)
+
 	htmlAttr() html.Attribute
 }
 
@@ -64,6 +65,8 @@ func (a *attr) setParent(parent Node) {
 func (a *attr) htmlAttr() html.Attribute {
 	return *a.attr
 }
+
+func (a *attr) CloneNode(deep bool) Node { return newAttr(a.attr.Key, a.attr.Val) }
 
 func newNamedNodeMapForElement(ownerElement Element) NamedNodeMap {
 	return &namedNodeMap{entity.New(), ownerElement}
