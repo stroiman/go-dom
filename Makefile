@@ -18,8 +18,8 @@ test:
 	gow -c -e=go -e=js -e=html -v -w=./.. test -vet=off ./...
 
 .PHONY: test-dom
-test-dom: 
-	cd dom && ginkgo watch -vet=off
+test-browser: 
+	gow -s -w=./dom -w=./html -w=. test -vet=off . ./dom ./html
 
 .PHONY: test-html
 test-html: 
