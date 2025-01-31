@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"slices"
 	"strings"
 
 	"github.com/gost-dom/browser/internal/constants"
@@ -14,6 +13,8 @@ import (
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
+
+type Attribute = html.Attribute
 
 // TODO: In the DOM, this is a `NamedNodeMap`. Is that useful in Go?
 type Attributes []*html.Attribute
@@ -34,6 +35,8 @@ type Element interface {
 	HasAttribute(name string) bool
 	GetAttribute(name string) (string, bool)
 	SetAttribute(name string, value string)
+	GetAttributeNode(string) *Attribute
+	SetAttributeNode(*Attribute) *Attribute
 	Attributes() NamedNodeMap
 	InsertAdjacentHTML(position string, text string) error
 	OuterHTML() string
@@ -135,12 +138,24 @@ func (e *element) HasAttribute(name string) bool {
 }
 
 func (e *element) GetAttribute(name string) (string, bool) {
+	if a := e.GetAttributeNode(name); a != nil {
+		return a.Val, true
+	} else {
+		return "", false
+	}
+}
+
+func (e *element) GetAttributeNode(name string) *Attribute {
 	for _, a := range e.attributes {
-		if a.Key == name {
-			return a.Val, true
+		if a.Key == name && a.Namespace == e.namespace {
+			return a
 		}
 	}
-	return "", false
+	return nil
+}
+
+func (e *element) SetAttributeNode(node *Attribute) *Attribute {
+	return nil
 }
 
 func (e *element) getAttributes() Attributes {
@@ -161,18 +176,16 @@ func (e *element) Attributes() NamedNodeMap {
 }
 
 func (e *element) SetAttribute(name string, value string) {
-	idx := slices.IndexFunc(e.attributes, func(a *html.Attribute) bool {
-		return a.Key == name && a.Namespace == e.namespace
-	})
-	if idx == -1 {
+	if a := e.GetAttributeNode(name); a != nil {
+		a.Val = value
+	} else {
 		e.attributes = append(e.attributes, &html.Attribute{
 			Key:       name,
 			Val:       value,
 			Namespace: e.namespace})
-	} else {
-		e.attributes[idx].Val = value
 	}
 }
+
 func (e *element) createHtmlNode() *html.Node {
 	tag := strings.ToLower(e.tagName)
 	attrs := make([]html.Attribute, len(e.attributes))

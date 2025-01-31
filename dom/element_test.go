@@ -40,6 +40,25 @@ var _ = Describe("Element", func() {
 		})
 	})
 
+	Describe("Get/SetAttributeNode", func() {
+		It("getAttributeNode should return nil on missing name", func() {
+			elm := doc.CreateElement("div")
+			attr := elm.GetAttributeNode("class")
+			Expect(attr).To(BeNil())
+		})
+
+		It("getAttributeNode should return a mutable node on a valid name", func() {
+			elm := doc.CreateElement("div")
+			elm.SetAttribute("class", "foo")
+			attr := elm.GetAttributeNode("class")
+			Expect(attr).ToNot(BeNil())
+			Expect(attr.Val).To(Equal("foo"), "Attribute value before mutation")
+			attr.Val = "bar"
+			actual, _ := elm.GetAttribute("class")
+			Expect(actual).To(Equal("bar"), "Attribute value after mutation")
+		})
+	})
+
 	Describe("Matches", func() {
 		It("Should return true for a simple string matching the root element", func() {
 			d := doc.CreateElement("div")
