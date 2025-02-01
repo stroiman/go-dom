@@ -64,6 +64,10 @@ func (w baseInstanceWrapper[T]) decodeNode(v g.Value) dom.Node {
 	}
 }
 
+func (w baseInstanceWrapper[T]) decodeboolean(v g.Value) bool {
+	return v.ToBoolean()
+}
+
 func (c *GojaContext) getPrototype(e entity.Entity) function {
 	switch v := e.(type) {
 	case html.HTMLDocument:
