@@ -12,7 +12,7 @@ type HTMLElement interface {
 	Renderer
 	ChildrenRenderer
 	getHTMLDocument() HTMLDocument
-	getWindow() Window
+	window() Window
 }
 
 type htmlElement struct {
@@ -37,7 +37,7 @@ func newHTMLElement(tagName string, ownerDocument HTMLDocument) *htmlElement {
 
 func (e *htmlElement) getHTMLDocument() HTMLDocument { return e.htmlDocument }
 
-func (e *htmlElement) getWindow() Window { return e.getHTMLDocument().getWindow() }
+func (e *htmlElement) window() Window { return e.getHTMLDocument().getWindow() }
 
 func (e *htmlElement) TagName() string {
 	return strings.ToUpper(e.Element.TagName())

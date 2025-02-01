@@ -20,17 +20,15 @@ func NewHTMLAnchorElement(ownerDoc HTMLDocument) HTMLAnchorElement {
 
 func (e *htmlAnchorElement) Click() bool {
 	result := e.HTMLElement.Click()
-	if href, found := e.GetAttribute("href"); found && result {
-		// Just lokup e.Href()
-		window := e.getHTMLDocument().getWindow()
-		newUrl := window.resolveHref(href)
-		window.Navigate(newUrl.Href())
+	if href := e.Href(); result && href != "" {
+		w := e.window()
+		w.Navigate(w.resolveHref(href).Href())
 	}
 	return result
 }
 
 func (e *htmlAnchorElement) SetAttribute(name string, val string) {
-	win := e.getWindow().History().window
+	win := e.window().History().window
 	e.HTMLElement.SetAttribute(name, val)
 	if name == "href" {
 		e.URL = dom.ParseURLBase(val, win.baseLocation)

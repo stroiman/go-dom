@@ -128,7 +128,7 @@ func (e *htmlFormElement) GetMethod() string {
 func (e *htmlFormElement) SetAction(val string) { e.SetAttribute("action", val) }
 
 func (e *htmlFormElement) getAction() dom.URL {
-	window := e.getWindow()
+	window := e.window()
 	action, found := e.GetAttribute("action")
 	target := dom.URL(window.Location())
 	var err error
