@@ -28,7 +28,7 @@ var _ = Describe("HTMX Tests", Ordered, func() {
 		Expect(counter).To(HaveInnerHTML(Equal("Count: 2")))
 	})
 
-	It("Should not update the location when a link has hx-get", Focus, func() {
+	It("Should not update the location when a link has hx-get", func() {
 		win, err := b.Open("/navigation/page-a.html")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(win.ScriptContext().Eval("window.pageA")).To(BeTrue())
