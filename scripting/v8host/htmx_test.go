@@ -1,12 +1,9 @@
 package v8host_test
 
 import (
-	"fmt"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	// . "github.com/gost-dom/browser/dom"
 	"github.com/gost-dom/browser"
 	app "github.com/gost-dom/browser/internal/test/htmx-app"
 	. "github.com/gost-dom/browser/testing/gomega-matchers"
@@ -36,12 +33,18 @@ var _ = Describe("HTMX Tests", Ordered, func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(win.ScriptContext().Eval("window.pageA")).To(BeTrue())
 		Expect(win.ScriptContext().Eval("window.pageB")).To(BeNil())
-		fmt.Println("\n\nClick\n\n--")
+
+		// Click an hx-get link
 		win.Document().GetElementById("link-to-b").Click()
-		Expect(win.ScriptContext().Eval("window.pageA")).To(BeTrue())
-		Expect(win.ScriptContext().Eval("window.pageB")).To(BeTrue())
-		Expect(win.Document()).To(HaveH1("Page B"), "Page heading")
-		Expect(win.Location().Pathname()).To(Equal("/navigation/page-a.html"))
+
+		Expect(
+			win.ScriptContext().Eval("window.pageA"),
+		).To(BeTrue(), "Script context cleared from first page")
+		Expect(win.ScriptContext().Eval("window.pageB")).To(
+			BeTrue(), "Scripts executed on second page")
+		Expect(win.Document()).To(
+			HaveH1("Page B"), "Page heading", "Heading updated, i.e. htmx swapped")
+		Expect(win.Location().Pathname()).To(Equal("/navigation/page-a.html"), "Location updated")
 	})
 
 	It("Should update the location when a link with href is boosted", func() {
@@ -49,14 +52,16 @@ var _ = Describe("HTMX Tests", Ordered, func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(win.ScriptContext().Eval("window.pageA")).To(BeTrue())
 		Expect(win.ScriptContext().Eval("window.pageB")).To(BeNil())
-		fmt.Println("\n\nClick\n\n--")
+
+		// Click an hx-boost link
 		win.Document().GetElementById("link-to-b-boosted").Click()
-		Expect(win.ScriptContext().Eval("window.pageA")).ToNot(BeNil(), "pageA exists")
-		Expect(win.ScriptContext().Eval("window.pageA")).To(BeTrue(), "pageA value")
-		Expect(win.ScriptContext().Eval("window.pageB")).ToNot(BeNil(), "pageB exists")
-		Expect(win.ScriptContext().Eval("window.pageB")).To(BeTrue(), "pageB value")
-		Expect(win.Document()).ToNot(BeNil())
-		Expect(win.Document()).To(HaveH1("Page B"), "Page heading")
-		Expect(win.Location().Pathname()).To(Equal("/navigation/page-b.html"))
+
+		Expect(win.ScriptContext().Eval("window.pageA")).To(
+			BeTrue(), "Script context cleared from first page")
+		Expect(win.ScriptContext().Eval("window.pageB")).To(
+			BeTrue(), "Scripts executed on second page")
+		Expect(win.Document()).To(
+			HaveH1("Page B"), "Page heading", "Heading updated, i.e. htmx swapped")
+		Expect(win.Location().Pathname()).To(Equal("/navigation/page-b.html"), "Location updated")
 	})
 })
