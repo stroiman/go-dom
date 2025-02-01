@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/gost-dom/browser/dom"
+	"github.com/gost-dom/browser/internal/log"
 )
 
 // TODO: Events for async
@@ -64,6 +65,7 @@ type xmlHttpRequest struct {
 }
 
 func NewXmlHttpRequest(client http.Client, location string) XmlHttpRequest {
+	log.Info("NewXmlHttpRequest", "location", location)
 	return &xmlHttpRequest{
 		EventTarget: dom.NewEventTarget(),
 		location:    location,
@@ -81,6 +83,7 @@ func (req *xmlHttpRequest) Open(
 	// binding layer? Or different methods?
 	url string,
 	options ...RequestOption) {
+	log.Info("XmlHttpRequest.Open", "method", method, "url", url)
 
 	req.method = method
 	req.url = url
@@ -95,6 +98,7 @@ func (req *xmlHttpRequest) send(body io.Reader) error {
 	if u := dom.ParseURLBase(req.url, req.location); u != nil {
 		url = u.Href()
 	}
+	log.Info("XmlHttpRequest.send", "url", url)
 	httpRequest, err := http.NewRequest(req.method, url, body)
 	if err != nil {
 		return err
@@ -109,6 +113,7 @@ func (req *xmlHttpRequest) send(body io.Reader) error {
 	b := new(bytes.Buffer) // TODO, branch out depending on content-type
 	_, err = b.ReadFrom(res.Body)
 	req.response = b.Bytes()
+	log.Info("Response received", "Status", res.StatusCode, "body", string(req.response))
 	req.DispatchEvent(dom.NewCustomEvent(XHREventLoad))
 	return err
 }
