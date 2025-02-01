@@ -38,7 +38,7 @@ func OpenTestWindowFromHandler(location string, handler http.Handler) (html.Wind
 }
 
 func init() {
-	logger.SetDefault(test.CreateTestLogger(slog.LevelInfo))
+	logger.SetDefault(test.CreateTestLogger(slog.LevelDebug))
 
 	host = New()
 	scriptTestSuite = suite.NewScriptTestSuite(host, "v8")

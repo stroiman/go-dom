@@ -5,7 +5,8 @@
   </head>
   <body hx-swap-oob="true">
     <h1>Page A</h1>
-    <a hx-get="page-b.html" hx-target="body">To page b</a>
+    <a id="link-to-b" hx-get="page-b.html" hx-target="body">To page b</a>
+    <a id="link-to-b-boosted" href="page-b.html" hx-boost="true">To page b</a>
     <script>var pageA = true</script>
   </body>
 </html>
