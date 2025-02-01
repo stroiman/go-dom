@@ -1,11 +1,11 @@
 package html_test
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	"github.com/gost-dom/browser/dom"
 	"github.com/gost-dom/browser/html"
 	matchers "github.com/gost-dom/browser/testing/gomega-matchers"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("htmlAnchorElement", func() {
@@ -25,6 +25,16 @@ var _ = Describe("htmlAnchorElement", func() {
 
 	It("Should not have an href", func() {
 		Expect(a.Href()).To(Equal(""))
+	})
+
+	It("Should not have a hostname when no href is set", func() {
+		Expect(a.Hostname()).To(Equal(""))
+	})
+
+	It("Should not have a hostname when href is set", func() {
+		a.SetAttribute("href", "/foo/bar")
+		Expect(a.Hostname()).To(Equal("example.com"))
+		Expect(a.Hostname()).To(Equal(win.Location().Hostname()))
 	})
 
 	It("Should provide an absolute href", func() {
