@@ -17,6 +17,10 @@ func NewDocumentFragment(ownerDocument Document) DocumentFragment {
 	return result
 }
 
+func (f *documentFragment) OwnerDocument() Document {
+	return f.ownerDocument
+}
+
 func (f *documentFragment) CloneNode(deep bool) Node {
 	result := NewDocumentFragment(f.ownerDocument)
 	if deep {
