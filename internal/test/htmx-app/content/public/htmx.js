@@ -462,6 +462,7 @@ var htmx = (function () {
     var inherit = getAttributeValue(ancestor, "hx-inherit");
     if (initialElement !== ancestor) {
       if (htmx.config.disableInheritance) {
+        console.log("DisableIneritance");
         if (
           inherit &&
           (inherit === "*" || inherit.split(" ").indexOf(attributeName) >= 0)
@@ -496,6 +497,7 @@ var htmx = (function () {
         attributeName,
       ));
     });
+    console.log("Closest", closestAttr);
     if (closestAttr !== "unset") {
       return closestAttr;
     }
@@ -1187,6 +1189,7 @@ var htmx = (function () {
    */
   function querySelectorAllExt(elt, selector, global) {
     elt = resolveTarget(elt);
+    console.log("QuerySelectorAll");
     if (selector.indexOf("closest ") === 0) {
       return [closest(asElement(elt), normalizeSelector(selector.substr(8)))];
     } else if (selector.indexOf("find ") === 0) {
@@ -1508,6 +1511,7 @@ var htmx = (function () {
     let selector = "#" + getRawAttribute(oobElement, "id");
     /** @type HtmxSwapStyle */
     let swapStyle = "outerHTML";
+    console.log("OOBswap");
     if (oobValue === "true") {
       // do nothing
     } else if (oobValue.indexOf(":") > 0) {
@@ -2019,6 +2023,7 @@ var htmx = (function () {
         for (let i = 0; i < oobSelectValues.length; i++) {
           const oobSelectValue = oobSelectValues[i].split(":", 2);
           let id = oobSelectValue[0].trim();
+          console.log("Id.indexof");
           if (id.indexOf("#") === 0) {
             id = id.substring(1);
           }
@@ -2147,6 +2152,7 @@ var htmx = (function () {
    */
   function handleTriggerHeader(xhr, header, elt) {
     const triggerBody = xhr.getResponseHeader(header);
+    console.log("TriggerBudy indexof");
     if (triggerBody.indexOf("{") === 0) {
       const triggers = parseJSON(triggerBody);
       for (const eventName in triggers) {
@@ -2499,6 +2505,7 @@ var htmx = (function () {
    * @returns {boolean}
    */
   function isLocalLink(elt) {
+    console.log("locallink");
     return (
       location.hostname === elt.hostname &&
       getRawAttribute(elt, "href") &&
@@ -2519,6 +2526,13 @@ var htmx = (function () {
    * @param {HtmxTriggerSpecification[]} triggerSpecs
    */
   function boostElement(elt, nodeData, triggerSpecs) {
+    console.log(
+      "BOOST",
+      elt instanceof HTMLAnchorElement,
+      isLocalLink(elt),
+      location.hostname,
+      elt.hostname,
+    );
     if (
       (elt instanceof HTMLAnchorElement &&
         isLocalLink(elt) &&
@@ -2526,6 +2540,7 @@ var htmx = (function () {
       (elt.tagName === "FORM" &&
         String(getRawAttribute(elt, "method")).toLowerCase() !== "dialog")
     ) {
+      console.log("BOOSTED");
       nodeData.boosted = true;
       let verb, path;
       if (elt.tagName === "A") {
@@ -2568,6 +2583,7 @@ var htmx = (function () {
   function shouldCancel(evt, node) {
     const elt = asElement(node);
     if (!elt) {
+      console.log("Not element");
       return false;
     }
     if (evt.type === "submit" || evt.type === "click") {
@@ -2580,15 +2596,19 @@ var htmx = (function () {
       ) {
         return true;
       }
+      console.log("llokup href");
       if (
         elt instanceof HTMLAnchorElement &&
         elt.href &&
         (elt.getAttribute("href") === "#" ||
           elt.getAttribute("href").indexOf("#") !== 0)
       ) {
+        console.log("Return");
         return true;
       }
+      console.log("Return");
     }
+    console.log("Not no handler");
     return false;
   }
 
@@ -2678,6 +2698,7 @@ var htmx = (function () {
           return;
         }
         if (explicitCancel || shouldCancel(evt, elt)) {
+          console.log("CANCELLING!");
           evt.preventDefault();
         }
         if (maybeFilterEvent(triggerSpec, elt, evt)) {
@@ -2688,6 +2709,7 @@ var htmx = (function () {
         if (eventData.handledFor == null) {
           eventData.handledFor = [];
         }
+        console.log("Handleerror");
         if (eventData.handledFor.indexOf(elt) < 0) {
           eventData.handledFor.push(elt);
           if (triggerSpec.consume) {
@@ -3084,6 +3106,7 @@ var htmx = (function () {
       const name = elt.attributes[i].name;
       const value = elt.attributes[i].value;
       if (startsWith(name, "hx-on") || startsWith(name, "data-hx-on")) {
+        console.log("AfterPosition");
         const afterOnPosition = name.indexOf("-on") + 3;
         const nextChar = name.slice(afterOnPosition, afterOnPosition + 1);
         if (nextChar === "-" || nextChar === ":") {
@@ -3109,10 +3132,17 @@ var htmx = (function () {
   function initNode(elt) {
     if (closest(elt, htmx.config.disableSelector)) {
       cleanUpElement(elt);
+      console.log("Return!");
       return;
     }
     const nodeData = getInternalData(elt);
+    console.log(
+      "Got internal data",
+      JSON.stringify(nodeData),
+      attributeHash(elt),
+    );
     if (nodeData.initHash !== attributeHash(elt)) {
+      console.log("SETUP STUFF");
       // clean up any previously processed info
       deInitNode(elt);
 
@@ -3123,10 +3153,14 @@ var htmx = (function () {
       const triggerSpecs = getTriggerSpecs(elt);
       const hasExplicitHttpAction = processVerbs(elt, nodeData, triggerSpecs);
 
+      console.log("Specs", JSON.stringify(triggerSpecs), hasExplicitHttpAction);
+
       if (!hasExplicitHttpAction) {
         if (getClosestAttributeValue(elt, "hx-boost") === "true") {
+          console.log("A");
           boostElement(elt, nodeData, triggerSpecs);
         } else if (hasAttribute(elt, "hx-trigger")) {
+          console.log("B");
           triggerSpecs.forEach(function (triggerSpec) {
             // For "naked" triggers, don't do anything at all
             addTriggerHandler(elt, triggerSpec, nodeData, function () {});
@@ -3162,6 +3196,7 @@ var htmx = (function () {
     }
     initNode(elt);
     forEach(findElementsToProcess(elt), function (child) {
+      console.log(" *** Process element ***", child.tagName);
       initNode(child);
     });
     forEach(findHxOnWildcardElements(elt), processHxOnWildcard);
@@ -4824,6 +4859,13 @@ var htmx = (function () {
     const pathNoAnchor = splitPath[0];
     const anchor = splitPath[1];
 
+    console.log(
+      "Build path",
+      path,
+      useUrlParams,
+      !filteredFormData.keys().next().done,
+    );
+
     let finalPath = path;
     if (useUrlParams) {
       finalPath = pathNoAnchor;
@@ -4840,6 +4882,8 @@ var htmx = (function () {
         }
       }
     }
+
+    console.log("FINAL PATH", finalPath);
 
     if (!verifyPath(elt, finalPath, requestConfig)) {
       triggerErrorEvent(elt, "htmx:invalidPath", requestConfig);
@@ -4882,6 +4926,7 @@ var htmx = (function () {
 
     xhr.onload = function () {
       try {
+        console.log("ONLOAD");
         const hierarchy = hierarchyForElt(elt);
         responseInfo.pathInfo.responsePath = getPathFromResponse(xhr);
         responseHandler(elt, responseInfo);
@@ -5215,7 +5260,17 @@ var htmx = (function () {
     )
       return;
 
+    console.log(
+      "*** -- *** Swapping?",
+      shouldSwap,
+      serverResponse,
+      isError,
+      ignoreTitle,
+      selectOverride,
+      swapOverride,
+    );
     if (!triggerEvent(target, "htmx:beforeSwap", beforeSwapDetails)) return;
+    console.log("Swapping!");
 
     target = beforeSwapDetails.target; // allow re-targeting
     serverResponse = beforeSwapDetails.serverResponse; // allow updating content
@@ -5227,6 +5282,8 @@ var htmx = (function () {
     responseInfo.target = target; // Make updated target available to response events
     responseInfo.failed = isError; // Make failed property available to response events
     responseInfo.successful = !isError; // Make successful property available to response events
+
+    console.log("Should swap?", beforeSwapDetails.shouldSwap);
 
     if (beforeSwapDetails.shouldSwap) {
       if (xhr.status === 286) {
