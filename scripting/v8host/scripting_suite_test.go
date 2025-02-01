@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"testing"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	"github.com/gost-dom/browser/html"
 	. "github.com/gost-dom/browser/internal/http"
 	"github.com/gost-dom/browser/internal/test"
 	suite "github.com/gost-dom/browser/internal/test/script-test-suite"
 	"github.com/gost-dom/browser/logger"
 	. "github.com/gost-dom/browser/scripting/v8host"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 func TestScripting(t *testing.T) {
@@ -38,7 +38,7 @@ func OpenTestWindowFromHandler(location string, handler http.Handler) (html.Wind
 }
 
 func init() {
-	logger.SetDefault(test.CreateTestLogger(slog.LevelDebug))
+	logger.SetDefault(test.CreateTestLogger(slog.LevelWarn))
 
 	host = New()
 	scriptTestSuite = suite.NewScriptTestSuite(host, "v8")
