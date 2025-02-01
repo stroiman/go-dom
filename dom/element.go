@@ -380,7 +380,10 @@ func (e *element) String() string {
 }
 
 func (e *element) CloneNode(deep bool) Node {
-	res := e.OwnerDocument().CreateElement(e.TagName())
+	doc := e.OwnerDocument()
+	fmt.Println("OwnerDocument", doc)
+	tag := e.selfElement.TagName()
+	res := doc.CreateElement(tag)
 	for a := range e.Attributes().All() {
 		res.SetAttributeNode(a.CloneNode(deep).(Attr))
 	}
