@@ -11,16 +11,15 @@ import (
 type TestRoundTripper struct{ http.Handler }
 
 func (h TestRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	// if req.Host != "" {
-	// 	// TODO: Not tested, nowhere near the case where we can test this yet, but
-	// 	// the idea is if we are serving content directly from an http.Handler, any
-	// 	// external script or CSS reference (when implemented) should be downloaded,
-	// 	// so the test still works if you reference content from CDN.
-	// 	return http.DefaultTransport.RoundTrip(req)
-	// }
+	// You could possibly test on req.Host and apply different behaviour, e.g.
+	// forwarding to external site, or have mocked external sites, such as IDPs
 	rec := httptest.NewRecorder()
-	serverReq := new(http.Request)
-	*serverReq = *req
+	serverReq, err := http.NewRequest(req.Method, req.URL.String(), req.Body)
+	if err != nil {
+		return nil, err
+	}
+	serverReq.Header = req.Header
+	serverReq.Trailer = req.Trailer
 	if serverReq.Body == nil {
 		serverReq.Body = nullReader{}
 	}
@@ -28,9 +27,11 @@ func (h TestRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	return rec.Result(), nil
 }
 
+// nullReader is just a reader with no content. When _sending_ an HTTP request,
+// a _nil_ body is allowed, but when receiving; there _is_ a body. This fixes
+// the request so the valid output request body is also a valid incoming request
+// body.
 type nullReader struct{}
 
-func (_ nullReader) Read(b []byte) (int, error) {
-	return 0, io.EOF
-}
-func (_ nullReader) Close() error { return nil }
+func (_ nullReader) Read(b []byte) (int, error) { return 0, io.EOF }
+func (_ nullReader) Close() error               { return nil }
