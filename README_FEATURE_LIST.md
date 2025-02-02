@@ -8,6 +8,24 @@ limited DOM
 
 **Do NOT expect a feature to work if not explicitly mentioned here**
 
+## TLDR
+
+What currently works:
+
+- Start a browser, directly on top of an `http.Handler`
+- Load a page using HTMX (you have to supply the assets from the handler, no CDN)
+- Find and click elements, calling `Element.Click()`. If the element has an `hx-get`, the request will be made
+  - Other verbs should work too, but not tested.
+- Click a link, and it will navigate (new script context)
+- Click an hx-boosted link, and HTMX will navigate, i.e., push to the history, but not refres, and keep the script context
+- Form support
+  - Submit a vanilla form, 
+    - Note: Redirects are not followed yet.
+  - Submit a form with `hx-post`, HTMX behaviour will work (i.e., swapping in the form)
+    - Other verbs should work too, but not tested.
+  - The only `<input>` types that are tested are `text` and `submit` (for submitting)
+  - No keyboard simulation, set the value using `element.SetAttribute("value", "foo")`
+
 ## Handling of `<script>`
 
 Go-dom supports blocking script execution; both inline, and downloaded. There is
@@ -19,10 +37,10 @@ See also: [Script engines](./README_SCRIPT_ENGINE.md)
 
 ### execution
 
-Scripts are executed while during DOM construction, so only already constructed
-elements are accessible. But the entire response body has already been
-processed, so implementing `document.write` wouldn't be possible without a
-complete rewrite of the HTML parser.
+Scripts are executed while _during_ DOM construction as it should, But the
+entire response body has already been processed, so implementing
+`document.write` wouldn't be possible without a complete rewrite of the HTML
+parser.
 
 > [!NOTE]
 >

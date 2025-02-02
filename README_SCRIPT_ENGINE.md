@@ -25,9 +25,14 @@ JavaScript features that are not supported in the engine.
 
 ## About v8go
 
-V8 is based on the v8go project, Originally created by [Github user rogchap](https://github.com/rogchap/v8go). It wasn't kept up to date, and now [Tommie's branch](https://github.com/tommie/v8go) is the best maintained. 
+V8 is based on the v8go project, Originally created by [Github user
+rogchap](https://github.com/rogchap/v8go). It wasn't kept up to date, and now
+[Tommie's branch](https://github.com/tommie/v8go) is the best maintained. This
+fork is automatically updated with the latest v8 versions from the chromium
+repository.
 
-However, many v8 necessary v8 features were not implemented in the branch. [My own fork](https://github.com/stroiman/v8go/tree/go-dom-feature-dev) contains 
+However, many v8 necessary v8 features were not implemented. I have added
+support for  these in [my own
+fork](https://github.com/stroiman/v8go/tree/go-dom-feature-dev), and working
+with Tommie to get them merged into his.
 
-Thank's to Tommie, v8go is automatically being updated with the latest v8 engine
-from the chromium sources.
