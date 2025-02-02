@@ -8,6 +8,8 @@ type HTMLInputElement interface {
 	HTMLElement
 	Type() string
 	SetType(value string)
+	Name() string
+	CheckValidity() bool
 }
 
 type htmlInputElement struct{ *htmlElement }
@@ -17,6 +19,9 @@ func NewHTMLInputElement(ownerDocument HTMLDocument) HTMLInputElement {
 	result.SetSelf(result)
 	return result
 }
+
+func (e *htmlInputElement) Name() string        { return e.GetAttributeNode("name").Value() }
+func (e *htmlInputElement) CheckValidity() bool { return true }
 
 func (e *htmlInputElement) Type() string {
 	t, _ := e.GetAttribute("type")
