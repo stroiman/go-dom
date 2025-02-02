@@ -59,14 +59,6 @@ func createHTMLFormElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTempla
 		v8.NewFunctionTemplateWithError(iso, wrapper.method),
 		v8.NewFunctionTemplateWithError(iso, wrapper.setMethod),
 		v8.None)
-	prototypeTmpl.SetAccessorProperty("name",
-		v8.NewFunctionTemplateWithError(iso, wrapper.name),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setName),
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("noValidate",
-		v8.NewFunctionTemplateWithError(iso, wrapper.noValidate),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setNoValidate),
-		v8.None)
 	prototypeTmpl.SetAccessorProperty("target",
 		v8.NewFunctionTemplateWithError(iso, wrapper.target),
 		v8.NewFunctionTemplateWithError(iso, wrapper.setTarget),
@@ -211,22 +203,6 @@ func (e hTMLFormElementV8Wrapper) setMethod(info *v8.FunctionCallbackInfo) (*v8.
 		return nil, nil
 	}
 	return nil, errors.New("HTMLFormElement.setMethod: Missing arguments")
-}
-
-func (e hTMLFormElementV8Wrapper) name(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("HTMLFormElement.name: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
-}
-
-func (e hTMLFormElementV8Wrapper) setName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("HTMLFormElement.setName: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
-}
-
-func (e hTMLFormElementV8Wrapper) noValidate(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("HTMLFormElement.noValidate: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
-}
-
-func (e hTMLFormElementV8Wrapper) setNoValidate(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, errors.New("HTMLFormElement.setNoValidate: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (e hTMLFormElementV8Wrapper) target(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
