@@ -1,6 +1,8 @@
 package v8host
 
 import (
+	"errors"
+
 	v8 "github.com/tommie/v8go"
 )
 
@@ -65,3 +67,8 @@ func (h *argumentHelper) getArg(index int) *v8.Value {
 	}
 	return arg
 }
+
+var (
+	ErrIncompatibleType   = errors.New("Incompatible type")
+	ErrWrongNoOfArguments = errors.New("Not enough arguments passed")
+)

@@ -115,8 +115,3 @@ func (w elementV8Wrapper) getAttribute(info *v8.FunctionCallbackInfo) (*v8.Value
 		return v8.Null(w.scriptHost.iso), nil
 	}
 }
-
-var (
-	ErrIncompatibleType   = errors.New("Incompatible type")
-	ErrWrongNoOfArguments = errors.New("Not enough arguments passed")
-)
