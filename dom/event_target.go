@@ -97,9 +97,13 @@ func (e *eventTarget) dispatchEvent(event Event) bool {
 	listeners := e.lmap[event.Type()]
 
 	for _, l := range listeners {
-		log.Debug("eventTarget.dispatchEvent: Calling egent handler", "type", event.Type())
+		log.Debug("eventTarget.dispatchEvent: Calling event handler", "type", event.Type())
 		if err := l.HandleEvent(event); err != nil {
-			log.Debug("eventTarget.dispatchEvent: Error occurred", "error", err.Error())
+			log.Error(
+				"eventTarget.dispatchEvent: Error occurred in event handler",
+				"error",
+				err.Error(),
+			)
 			e.dispatchError(NewErrorEvent(err))
 		}
 	}
