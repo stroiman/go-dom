@@ -4,7 +4,7 @@ The Go-to headless browser for TDD workflows.
 
 ```go
 browser := NewBrowserFromHandler(pkg.RootHttpHandler)
-window, err := browser.Open("/example")
+window, err := browser.Open("http://example.com/example") // host is ignored
 Expect(err).ToNot(HaveOccurred())
 doc := window.Document()
 button := doc.QuerySelector("button")
@@ -27,11 +27,15 @@ you can treat your HTTP server as a normal Go component.
 
 > [!NOTE] 
 >
-> This is still in development, and has not yet reached a level of usability.
->
-> Expected alpha release for a version supporting forms in the spring 2025.
+> This still early pre-release. Minimal functionality exists for some basic
+> flows, but only just.
 >
 > [Feature list](./README_FEATURE_LIST.md)
+
+> [!IMPORTANT]
+>
+> This package currently requires module replacement, check out the
+> [Installation](#Installation) section.
 
 > [!WARNING]
 >
@@ -47,50 +51,45 @@ Progress so far is the result of too much spare time; but that will not last. If
 If enough people would sponsor this project, it could mean the difference
 between continued development, or death.
 
+## Looking for contributors
+
+This is a massive undertaking, and I would love people to join in.
+
+Particularly if you have experience in the area of building actual browsers (I'm
+not talking about skinning Chromium here, like, implementing an actual rendering
+engine)
+
 ## Join the "community"
 
-[Join my discord server](https://discord.gg/rPBRt8Rf) to chat with me, and stay
-up-to-date on progress: 
-
-- https://discord.gg/rPBRt8Rf
+- [Join my discord server](https://discord.gg/rPBRt8Rf) to chat with me, and stay
+up-to-date on progress
+- Participate in the [github discussions](https://github.com/orgs/gost-dom/discussions), and [say
+hi!](https://github.com/orgs/gost-dom/discussions)
 
 ## Installation
 
-Go get the `browser` package inside this repository, that's where the fun stuff
-is. The root is not a go module.
+After go getting `github.com/gost-dom/browser`, you need replace some modules:
 
 ```sh
-go get github.com/stroiman/go-dom/browser
-```
-
-### "Replace" v8go
-
-After installing, you need to replace the v8go, running the commands:
-
-```
+go mod edit -replace="github.com/ericchiang/css=github.com/gost-dom/css@latest"
 go mod edit -replace="github.com/tommie/v8go=github.com/stroiman/v8go@go-dom-support"
 go mod tidy
 ```
 
-Rerun this, if you get compiler errors after an update.
+The CSS is just a simple fix that allows the CSS selector to accept tag name
+patterns with upper case tag names, which HTMX produces. I've filed a PR, so
+hopefully this will get merged to the source repo soon.
 
-The library is based on [tommie's fork](https://github.com/tommie/v8go) of the
-v8go engine, but depends on v8 features that are not yet supported in that fork.
-You need to use my fork for that. I have a specific branch, `go-dom-support`
-that will be kept up-to-date as `go-dom` requires it.
+For the v8go project, I've added a lot of V8 features that were missing in v8go.
+I'm working with tommie, who runs the [best maintained
+branch](https://github.com/tommie/v8go), but it may be a while before they are
+all merged.
 
-### Automating the update
-
-On a unix-like system, I would suggest adding a new file, `update-v8`, with the contents:
-
-```sh
-#!/bin/sh
-go mod edit -replace="github.com/tommie/v8go=github.com/stroiman/v8go@go-dom-support"
-go mod tidy
-```
-
-Make it executable: `chmod +x ./update-v8`, and now you can run `./update-v8`
-locally.
+> [!NOTE]
+>
+> New features _will probably_ be added to my branch, requiring the replacement
+> to be updated. If you get build errors that look v8-ish, try running the
+> replacement again. Tip: Create a shell script for this.
 
 ## Project background
 
@@ -165,32 +164,10 @@ It also provides the option of alternate implementations. E.g., for location
 services, the simple implementation can provide a single function to set the
 current location / accuracy. The advanced implementation can replay a GPX track.
 
-### Building the code generator.
-
-To build the code generator, you need to build a _curated_ set of files first.
-You need [node.js](https://nodejs.org) installed.
-
-```sh
-$ cd webref
-$ npm install # Or your favourite node package manager
-$ npm run curate
-```
-
-This build a set of files in the `curated/` subfolder.
-
 ## Project status
 
-The browser is currently capable of loading an simple HTMX app; which can fetch
-new contents and swap as a reaction to simple events, such as click.
-
-The test file [htmx_test.go](./browser/scripting/htmx_test.go) verifies that
-content is updated. The application being tested is [found
-here](./browser/internal/test/README.md).
-
-Client-side script is executed using the v8 engine.[^5]
-
-Experimental work is done to also support [goja](https://github.com/dop251/goja)
-for client-side script; but this version is not fully compatible yet.
+Currently, the most basic HTMX app is working, simple click handler with
+swapping, boosted links, and form (at least with text fields).
 
 ### Memory Leaks
 
@@ -221,23 +198,23 @@ have postponed dealing with that issue.
 
 The following are main focus areas ATM
 
-- Complete form handling
 - Handle redirect responses
+- Implement a proper event loop, with proper `setTimeout`, `setInterval`, and
+their clear-counterparts.
+- Implement fast-forwarding of time. 
 - Replace early hand-written JS wrappers with auto-generated code, helping drive
   a more complete implementation.
 
-A parallel project is adding Goda support. A little is added from time to time,
-to eventually replace V8 with Goja as the default script engine. V8 support will
-stay, so there's a fallback, if important JS features are lacking from Goja.
+A parallel project is adding support for [Goja](https://github.com/dop251/goja)
+, to eventually replace V8 with Goja as the default script engine, resulting in
+a pure Go implementation. V8 support will not go away, so there's a fallback, if
+important JS features are lacking from Goja.
 
 ### Future goals
 
 There is much to do, which includes (but this is not a full list):
 
 - Support web-sockets and server events.
-- A proper event loop with time travel. `setTimeout` and `setImmediate` are
-  not implemented by v8. When testing code that has to wait, it is very useful
-  to be able to fast forward simulated time.
 - Implement all standard JavaScript classes that a browser should support; but
   not part of the ECMAScript standard itself.
   - JavaScript polyfills would be a good starting point; which is how xpath is

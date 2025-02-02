@@ -25,6 +25,9 @@ What currently works:
     - Other verbs should work too, but not tested.
   - The only `<input>` types that are tested are `text` and `submit` (for submitting)
   - No keyboard simulation, set the value using `element.SetAttribute("value", "foo")`
+- Cookies
+- `setTimeout`, but with disregard to the actual timeout, scripts will be enqueued for immediate execution.
+  - This is _just enough_ to get base HTMX flow working
 
 ## Handling of `<script>`
 
