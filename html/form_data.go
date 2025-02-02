@@ -28,11 +28,7 @@ func NewFormData() *FormData {
 }
 
 func NewFormDataForm(form HTMLFormElement) *FormData {
-	inputs, err := form.QuerySelectorAll("input")
-	if err != nil {
-		// Shouldn't happen, only an invalid DOM string should generate this error
-		panic(err)
-	}
+	inputs := form.Elements()
 	formData := NewFormData()
 	for _, input := range inputs.All() {
 		if inputElement, ok := input.(HTMLInputElement); ok {

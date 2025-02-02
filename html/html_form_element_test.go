@@ -329,4 +329,34 @@ var _ = Describe("HTML Form", func() {
 			})
 		})
 	})
+
+	Describe("Elements", func() {
+		It("Should be a live collection", func() {
+			Skip("TODO")
+		})
+		It("Should include all relevant element types", func() {
+			Skip("TODO")
+			/*
+				https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements
+
+				Value
+
+				An HTMLFormControlsCollection containing all non-image controls in the form. This is a live collection; if form controls are added to or removed from the form, this collection will update to reflect the change.
+
+				The form controls in the returned collection are in the same order in which they appear in the form by following a preorder, depth-first traversal of the tree. This is called tree order.
+
+				Only the following elements are returned:
+
+				    <button>
+				    <fieldset>
+				    <input> (with the exception that any whose type is "image" are omitted for historical reasons)
+				    <object>
+				    <output>
+				    <select>
+				    <textarea>
+				    form-associated custom elements
+
+			*/
+		})
+	})
 })

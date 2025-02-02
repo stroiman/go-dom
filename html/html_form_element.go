@@ -63,6 +63,7 @@ type HTMLFormElement interface {
 	SetAction(val string)
 	GetMethod() string
 	SetMethod(value string)
+	Elements() dom.NodeList
 	Submit() error
 	RequestSubmit(submitter dom.Element) error
 }
@@ -82,6 +83,14 @@ func NewHtmlFormElement(ownerDocument HTMLDocument) HTMLFormElement {
 func (e *htmlFormElement) Submit() error {
 	formData := NewFormDataForm(e)
 	return e.submitFormData(formData)
+}
+
+func (e *htmlFormElement) Elements() dom.NodeList {
+	inputs, err := e.QuerySelectorAll("input")
+	if err == nil {
+		return inputs
+	}
+	panic(err) // Should only be on invalid css pattern
 }
 
 func (e *htmlFormElement) submitFormData(formData *FormData) error {
