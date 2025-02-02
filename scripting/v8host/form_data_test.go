@@ -42,13 +42,14 @@ var _ = Describe("V8 FormData", func() {
 	})
 
 	It("Should support forEach", func() {
+		// Arg, isn't just Array.from(formData).forEach - key/val are reversed!
 		c := NewTestContext()
 		Expect(c.Eval(`
 			const result = [];
 			data = new FormData();
 			data.append("key1", "value1");
 			data.append("key2", "value2");
-			data.forEach(([k,v]) => { result.push(k + ": " + v) })
+			data.forEach((v,k) => { result.push(k + ": " + v) })
 			result.join(", ")
 			`)).To(Equal("key1: value1, key2: value2"))
 	})

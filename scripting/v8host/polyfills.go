@@ -12,7 +12,7 @@ func installPolyfills(context *V8ScriptContext) error {
 	errs := []error{
 		context.Run(`
 		FormData.prototype.forEach = function(cb) {
-			return Array.from(this).forEach(cb)
+			return Array.from(this).forEach(([k,v]) => { cb(v,k) })
 		}
 	`),
 		context.Run(string(xpath)),
