@@ -1,6 +1,7 @@
 package browser_test
 
 import (
+	"fmt"
 	"net/http"
 
 	. "github.com/gost-dom/browser"
@@ -53,9 +54,7 @@ var _ = Describe("Browser", func() {
 
 	Describe("Navigation", func() {
 		Describe("Page A has been loaded", func() {
-			var (
-				window Window
-			)
+			var window Window
 
 			BeforeEach(func() {
 				var err error
@@ -102,7 +101,45 @@ var _ = Describe("Browser", func() {
 			})
 		})
 	})
+
+	Describe("Cookes", func() {
+
+		It("Should pass a cookie back to the server", func() {
+			browser := NewBrowserFromHandler(http.HandlerFunc(cookieHandler))
+			win, err := browser.Open("http://localhost/")
+			Expect(err).ToNot(HaveOccurred())
+			el := win.Document().GetElementById("gost")
+			Expect(el).To(HaveTextContent(""))
+
+			Expect(win.Navigate("http://localhost/")).To(Succeed())
+			el = win.Document().GetElementById("gost")
+			Expect(el).To(HaveTextContent("Hello, World!"))
+		})
+
+		It("Should not reuse cookies between browsers", func() {
+			browser := NewBrowserFromHandler(http.HandlerFunc(cookieHandler))
+			win, err := browser.Open("http://localhost/")
+			Expect(err).ToNot(HaveOccurred())
+			el := win.Document().GetElementById("gost")
+			Expect(el).To(HaveTextContent(""))
+
+			browser = NewBrowserFromHandler(http.HandlerFunc(cookieHandler))
+			win, err = browser.Open("http://localhost/")
+			Expect(err).ToNot(HaveOccurred())
+			el = win.Document().GetElementById("gost")
+			Expect(el).To(HaveTextContent(""))
+		})
+	})
 })
+
+func cookieHandler(w http.ResponseWriter, r *http.Request) {
+	var gost string
+	if c, _ := r.Cookie("gost"); c != nil {
+		gost = c.Value
+	}
+	w.Header().Add("Set-Cookie", "gost=Hello, World!")
+	w.Write([]byte(fmt.Sprintf(`<body><div id="gost">%s</div></body>`, gost)))
+}
 
 func newBrowserNavigateTestServer() http.Handler {
 	server := http.NewServeMux()
