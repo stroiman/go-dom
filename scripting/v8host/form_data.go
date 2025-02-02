@@ -132,6 +132,20 @@ func createFormData(host *V8ScriptHost) *v8.FunctionTemplate {
 		),
 	)
 	prototype.Set(
+		"delete",
+		v8.NewFunctionTemplateWithError(host.iso,
+			func(info *v8.FunctionCallbackInfo) (result *v8.Value, err error) {
+				args := newArgumentHelper(host, info)
+				instance, err0 := wrapper.getInstance(info)
+				key, err1 := args.getStringArg(0)
+				if err := errors.Join(err0, err1); err != nil {
+					return nil, err
+				}
+				instance.Delete(key)
+				return nil, nil
+			}),
+	)
+	prototype.Set(
 		"keys",
 		v8.NewFunctionTemplateWithError(host.iso,
 			func(info *v8.FunctionCallbackInfo) (result *v8.Value, err error) {
