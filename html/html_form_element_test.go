@@ -32,21 +32,21 @@ var _ = Describe("HTML Form", func() {
 
 		Describe("Getting the value", func() {
 			It("Should return 'get' by default", func() {
-				Expect(form.GetMethod()).To(Equal("get"))
+				Expect(form.Method()).To(Equal("get"))
 			})
 
 			It("Should return 'post' when set to 'post', 'POST', 'PoSt', etc.", func() {
 				for _, value := range []string{"post", "POST", "PoSt"} {
 					form.SetMethod(value)
-					Expect(form.GetMethod()).To(Equal("post"))
+					Expect(form.Method()).To(Equal("post"))
 				}
 			})
 
 			It("Should return 'get' when assigned an invalid value", func() {
 				form.SetMethod("post")
-				Expect(form.GetMethod()).To(Equal("post"))
+				Expect(form.Method()).To(Equal("post"))
 				form.SetMethod("invalid")
-				Expect(form.GetMethod()).To(Equal("get"))
+				Expect(form.Method()).To(Equal("get"))
 			})
 		})
 	})
@@ -108,7 +108,7 @@ var _ = Describe("HTML Form", func() {
 			Describe("Action", func() {
 				Describe("Get", func() {
 					It("Should return the document location when not set", func() {
-						Expect(form.GetAction()).To(Equal(window.Location().Href()))
+						Expect(form.Action()).To(Equal(window.Location().Href()))
 					})
 				})
 
@@ -120,7 +120,7 @@ var _ = Describe("HTML Form", func() {
 							Expect(
 								form,
 							).To(HaveAttribute("action", "/foo-bar"))
-							Expect(form.GetAction()).To(Equal("http://example.com/foo-bar"))
+							Expect(form.Action()).To(Equal("http://example.com/foo-bar"))
 						},
 					)
 				})

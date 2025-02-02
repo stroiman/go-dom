@@ -59,9 +59,9 @@ func newSubmitEvent(submitter dom.Element) FormSubmitEvent {
 
 type HTMLFormElement interface {
 	HTMLElement
-	GetAction() string
+	Action() string
 	SetAction(val string)
-	GetMethod() string
+	Method() string
 	SetMethod(value string)
 	Elements() dom.NodeList
 	Submit() error
@@ -100,13 +100,13 @@ func (e *htmlFormElement) submitFormData(formData *FormData) error {
 		req *http.Request
 		err error
 	)
-	if e.GetMethod() == "get" {
+	if e.Method() == "get" {
 		searchParams := formData.QueryString()
-		targetURL := replaceSearchParams(e.getAction(), searchParams)
+		targetURL := replaceSearchParams(e.action(), searchParams)
 		req, err = http.NewRequest("GET", targetURL, nil)
 	} else {
 		getReader := GetReader(formData)
-		req, err = http.NewRequest("POST", e.GetAction(), getReader.GetReader())
+		req, err = http.NewRequest("POST", e.Action(), getReader.GetReader())
 	}
 	if err != nil {
 		return err
@@ -125,7 +125,7 @@ func (e *htmlFormElement) RequestSubmit(submitter dom.Element) error {
 	return e.submitFormData(formData)
 }
 
-func (e *htmlFormElement) GetMethod() string {
+func (e *htmlFormElement) Method() string {
 	m, _ := e.GetAttribute("method")
 	if strings.ToLower(m) == "post" {
 		return "post"
@@ -136,7 +136,7 @@ func (e *htmlFormElement) GetMethod() string {
 
 func (e *htmlFormElement) SetAction(val string) { e.SetAttribute("action", val) }
 
-func (e *htmlFormElement) getAction() dom.URL {
+func (e *htmlFormElement) action() dom.URL {
 	window := e.window()
 	action, found := e.GetAttribute("action")
 	target := dom.URL(window.Location())
@@ -150,8 +150,8 @@ func (e *htmlFormElement) getAction() dom.URL {
 	}
 	return target
 }
-func (e *htmlFormElement) GetAction() string {
-	return e.getAction().Href()
+func (e *htmlFormElement) Action() string {
+	return e.action().Href()
 }
 
 func (e *htmlFormElement) SetMethod(value string) {

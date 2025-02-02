@@ -6,6 +6,7 @@ import (
 
 	"github.com/gost-dom/browser/dom"
 	. "github.com/gost-dom/browser/dom"
+	"github.com/gost-dom/browser/html"
 	"github.com/gost-dom/browser/internal/entity"
 
 	v8 "github.com/tommie/v8go"
@@ -99,6 +100,21 @@ func (w converters) decodeNode(ctx *V8ScriptContext, val *v8.Value) (dom.Node, e
 	return nil, v8.NewTypeError(ctx.host.iso, "Must be a node")
 }
 
+func (w converters) decodeHTMLElement(
+	ctx *V8ScriptContext,
+	val *v8.Value,
+) (html.HTMLElement, error) {
+	if val.IsObject() {
+		o := val.Object()
+		cached, ok_1 := ctx.getCachedNode(o)
+		if node, ok_2 := cached.(html.HTMLElement); ok_1 && ok_2 {
+			return node, nil
+		}
+	}
+	return nil, v8.NewTypeError(ctx.host.iso, "Must be a node")
+}
+func (c converters) defaultHTMLElement() html.HTMLElement { return nil }
+
 func (w converters) decodeNodeOrText(ctx *V8ScriptContext, val *v8.Value) (dom.Node, error) {
 	if val.IsString() {
 		return NewText(val.String()), nil
@@ -153,6 +169,13 @@ func (w converters) toBoolean(ctx *V8ScriptContext, val bool) (*v8.Value, error)
 
 func (w converters) toNodeList(ctx *V8ScriptContext, val NodeList) (*v8.Value, error) {
 	return ctx.getInstanceForNodeByName("NodeList", val)
+}
+
+func (w converters) toHTMLFormControlsCollection(
+	ctx *V8ScriptContext,
+	val NodeList,
+) (*v8.Value, error) {
+	return w.toNodeList(ctx, val)
 }
 
 type handleReffedObject[T any] struct {
