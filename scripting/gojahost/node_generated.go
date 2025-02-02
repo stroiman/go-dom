@@ -21,6 +21,7 @@ func newNodeWrapper(instance *GojaContext) wrapper {
 func (w nodeWrapper) initializePrototype(prototype *g.Object, vm *g.Runtime) {
 	prototype.Set("getRootNode", w.getRootNode)
 	prototype.Set("cloneNode", w.cloneNode)
+	prototype.Set("isSameNode", w.isSameNode)
 	prototype.Set("contains", w.contains)
 	prototype.Set("insertBefore", w.insertBefore)
 	prototype.Set("appendChild", w.appendChild)
@@ -48,6 +49,13 @@ func (w nodeWrapper) cloneNode(c g.FunctionCall) g.Value {
 	subtree := w.decodeboolean(c.Arguments[0])
 	result := instance.CloneNode(subtree)
 	return w.toNode(result)
+}
+
+func (w nodeWrapper) isSameNode(c g.FunctionCall) g.Value {
+	instance := w.getInstance(c)
+	otherNode := w.decodeNode(c.Arguments[0])
+	result := instance.IsSameNode(otherNode)
+	return w.toBoolean(result)
 }
 
 func (w nodeWrapper) contains(c g.FunctionCall) g.Value {

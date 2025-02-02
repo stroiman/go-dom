@@ -116,6 +116,8 @@ type Node interface {
 	ChildNodes() NodeList
 	CloneNode(deep bool) Node
 	IsConnected() bool
+	// IsSameNode shouldn't be used and may be removed in a future version.
+	IsSameNode(Node) bool
 	Contains(node Node) bool
 	InsertBefore(newNode Node, referenceNode Node) (Node, error)
 	NodeName() string
@@ -255,6 +257,10 @@ func (n *node) IsConnected() (result bool) {
 		result = n.parent.IsConnected()
 	}
 	return
+}
+
+func (n *node) IsSameNode(other Node) (result bool) {
+	return n.getSelf() == other
 }
 
 func (n *node) NodeName() string {
