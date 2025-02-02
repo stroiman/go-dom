@@ -1,6 +1,8 @@
 package v8host_test
 
 import (
+	"fmt"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -11,8 +13,11 @@ import (
 
 var _ = Describe("HTMX Tests", Ordered, func() {
 	var b *browser.Browser
+	var server *app.TestServer
+
 	BeforeEach(func() {
-		b = browser.NewBrowserFromHandler(app.CreateServer())
+		server = app.CreateServer()
+		b = browser.NewBrowserFromHandler(server)
 		DeferCleanup(func() {
 			b.Close()
 		})
@@ -63,5 +68,19 @@ var _ = Describe("HTMX Tests", Ordered, func() {
 		Expect(win.Document()).To(
 			HaveH1("Page B"), "Page heading", "Heading updated, i.e. htmx swapped")
 		Expect(win.Location().Pathname()).To(Equal("/navigation/page-b.html"), "Location updated")
+	})
+
+	It("Should submit forms", func() {
+		win, err := b.Open("/forms/form-1.html")
+		Expect(err).ToNot(HaveOccurred())
+		i1 := win.Document().GetElementById("field-1")
+		i1.SetAttribute("value", "Foo")
+		b := win.Document().GetElementById("submit-btn")
+		Expect(len(server.Requests)).To(Equal(2), "No of requests _before_ click")
+		b.Click()
+		Expect(len(server.Requests)).To(Equal(3), "No of requests _after_ click")
+		elm := win.Document().GetElementById("field-value-1")
+		fmt.Println(elm.OuterHTML())
+		Expect(elm).To(HaveTextContent("Foo"))
 	})
 })

@@ -7,13 +7,29 @@ import (
 	"github.com/gost-dom/browser/internal/test/htmx-app/content"
 )
 
-func CreateServer() http.Handler {
-	server := http.NewServeMux()
+type TestServer struct {
+	Mux      *http.ServeMux
+	Requests []*http.Request
+}
+
+func (s *TestServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.Requests = append(s.Requests, r)
+	s.Mux.ServeHTTP(w, r)
+}
+
+func CreateServer() *TestServer {
+	mux := http.NewServeMux()
 	count := 1
-	server.Handle("GET /", http.FileServer(http.FS(content.FS)))
-	server.HandleFunc("POST /counter/increment", func(res http.ResponseWriter, req *http.Request) {
+	mux.Handle("GET /", http.FileServer(http.FS(content.FS)))
+	mux.HandleFunc("POST /counter/increment", func(w http.ResponseWriter, r *http.Request) {
 		count++
-		res.Write([]byte(fmt.Sprintf("Count: %d", count)))
+		w.Write([]byte(fmt.Sprintf("Count: %d", count)))
 	})
-	return server
+	mux.HandleFunc("POST /forms/form-1", func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		fmt.Println("*** FORM", r.Form, r.Header)
+		w.Write([]byte("Form values:<br />"))
+		w.Write([]byte(fmt.Sprintf(`<div id="field-value-1">%s</div>`, r.FormValue("field-1"))))
+	})
+	return &TestServer{Mux: mux}
 }
