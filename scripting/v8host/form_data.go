@@ -18,9 +18,28 @@ func newFormDataV8Wrapper(host *V8ScriptHost) formDataV8Wrapper {
 
 func (w formDataV8Wrapper) CreateInstance(
 	ctx *V8ScriptContext,
-	this *v8.Object,
+	info *v8.FunctionCallbackInfo,
 ) (*v8.Value, error) {
-	var value = html.NewFormData()
+	this := info.This()
+	var form html.HTMLFormElement
+	if len(info.Args()) > 0 {
+		arg := info.Args()[0]
+		n, err := w.decodeNode(ctx, arg)
+		if err != nil {
+			return nil, err
+		}
+		var ok bool
+		form, ok = n.(html.HTMLFormElement)
+		if !ok {
+			return nil, v8.NewTypeError(w.scriptHost.iso, "form must be an HTMLFormElement")
+		}
+	}
+	var value *html.FormData
+	if form != nil {
+		value = html.NewFormDataForm(form)
+	} else {
+		value = html.NewFormData()
+	}
 	w.store(value, ctx, this)
 	return nil, nil
 }
@@ -32,7 +51,7 @@ func createFormData(host *V8ScriptHost) *v8.FunctionTemplate {
 		host,
 		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 			ctx := host.mustGetContext(info.Context())
-			return wrapper.CreateInstance(ctx, info.This())
+			return wrapper.CreateInstance(ctx, info)
 		},
 	)
 	stringIterator := newIterator(
@@ -74,19 +93,6 @@ func createFormData(host *V8ScriptHost) *v8.FunctionTemplate {
 			return stringIterator.newIteratorInstance(ctx, data.Keys())
 		},
 	)
-	// protoBuilder.CreateFunction(
-	// 	"append",
-	// 	func(instance *dom.FormData, args argumentHelper) (res *v8.Value, err error) {
-	// 		key, err1 := args.GetStringArg(0)
-	// 		value, err2 := args.GetStringArg(1)
-	// 		err = errors.Join(err1, err2)
-	// 		if err != nil {
-	// 			return
-	// 		}
-	// 		instance.Append(key, dom.FormDataValue(value))
-	// 		return
-	// 	},
-	// )
 	prototype.Set(
 		"append",
 		v8.NewFunctionTemplateWithError(
