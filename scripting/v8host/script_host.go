@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"runtime"
 	"strings"
+	"sync"
 
 	. "github.com/gost-dom/browser/dom"
 	"github.com/gost-dom/browser/html"
@@ -26,6 +27,7 @@ type globals struct {
 }
 
 type V8ScriptHost struct {
+	mu              sync.Mutex
 	iso             *v8.Isolate
 	inspector       *v8.Inspector
 	inspectorClient *v8.InspectorClient
@@ -55,6 +57,7 @@ type V8ScriptContext struct {
 	domNodes  map[entity.ObjectId]entity.Entity
 	eventLoop *eventLoop
 	disposers []disposable
+	disposed  bool
 }
 
 func (c *V8ScriptContext) cacheNode(obj *v8.Object, node entity.Entity) (*v8.Value, error) {
@@ -299,6 +302,8 @@ func New() *V8ScriptHost {
 }
 
 func (host *V8ScriptHost) Close() {
+	// host.mu.Lock()
+	// defer host.mu.Unlock()
 	var undiposedContexts []*V8ScriptContext
 	for _, ctx := range host.contexts {
 		undiposedContexts = append(undiposedContexts, ctx)
@@ -336,7 +341,7 @@ func (host *V8ScriptHost) NewContext(w html.Window) html.ScriptContext {
 	errorCallback := func(err error) {
 		w.DispatchEvent(NewCustomEvent("error"))
 	}
-	context.eventLoop = newEventLoop(global, errorCallback)
+	context.eventLoop = newEventLoop(context, global, errorCallback)
 	host.contexts[context.v8ctx] = context
 	context.cacheNode(global, w)
 	context.addDisposer(context.eventLoop.Start())
@@ -351,6 +356,9 @@ func must(err error) {
 }
 
 func (ctx *V8ScriptContext) Close() {
+	// ctx.host.mu.Lock()
+	// ctx.host.mu.Unlock()
+	ctx.disposed = true
 	ctx.host.inspector.ContextDestroyed(ctx.v8ctx)
 	log.Debug("ScriptContext: Dispose")
 	for _, dispose := range ctx.disposers {
@@ -367,6 +375,8 @@ func (ctx *V8ScriptContext) addDisposer(disposer disposable) {
 }
 
 func (ctx *V8ScriptContext) runScript(script string) (*v8.Value, error) {
+	// ctx.host.mu.Lock()
+	// defer ctx.host.mu.Unlock()
 	return ctx.v8ctx.RunScript(script, "")
 }
 

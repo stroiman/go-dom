@@ -9,6 +9,7 @@ type workItem struct {
 }
 
 type eventLoop struct {
+	ctx          *V8ScriptContext
 	workItems    chan workItem
 	globalObject *v8.Object
 	errorCb      func(error)
@@ -21,12 +22,17 @@ func newWorkItem(fn *v8.Function) workItem {
 // dispatch places an item on the event loop to be executed immediately
 func (l *eventLoop) dispatch(w workItem) {
 	go func() {
+		// Have seen issues with scripts being executed while trying to shut down
+		// v8. I want a better, channel based, message passing, solution. But if
+		// this works, it will for for a v 0.1 release
+		l.ctx.host.mu.Lock()
+		defer l.ctx.host.mu.Unlock()
 		l.workItems <- w
 	}()
 }
 
-func newEventLoop(global *v8.Object, cb func(error)) *eventLoop {
-	return &eventLoop{make(chan workItem), global, cb}
+func newEventLoop(context *V8ScriptContext, global *v8.Object, cb func(error)) *eventLoop {
+	return &eventLoop{context, make(chan workItem), global, cb}
 }
 
 type disposable interface {
@@ -41,6 +47,9 @@ func (l *eventLoop) Start() disposable {
 	closer := make(chan bool)
 	go func() {
 		for i := range l.workItems {
+			if l.ctx.disposed {
+				return
+			}
 			_, err := i.fn.Call(l.globalObject)
 			if err != nil {
 				l.errorCb(err)
