@@ -2,6 +2,7 @@ package v8host
 
 import (
 	"errors"
+	"fmt"
 
 	v8 "github.com/tommie/v8go"
 )
@@ -26,7 +27,7 @@ func (h argumentHelper) getFunctionArg(index int) (*v8.Function, error) {
 	if arg.IsFunction() {
 		return arg.AsFunction()
 	}
-	return nil, ErrIncompatibleType
+	return nil, h.newTypeError("Expected function", arg)
 }
 
 func (h argumentHelper) getInt32Arg(index int) (int32, error) {
@@ -38,7 +39,7 @@ func (h argumentHelper) getInt32Arg(index int) (int32, error) {
 	if arg.IsNumber() {
 		return arg.Int32(), nil
 	}
-	return 0, ErrIncompatibleType
+	return 0, h.newTypeError("Expected int32", arg)
 }
 
 func (h argumentHelper) getStringArg(index int) (string, error) {
@@ -47,10 +48,11 @@ func (h argumentHelper) getStringArg(index int) (string, error) {
 		return "", ErrWrongNoOfArguments
 	}
 	arg := args[index]
-	if arg.IsString() {
-		return arg.String(), nil
-	}
-	return "", ErrIncompatibleType
+	return arg.String(), nil
+	// if arg.IsString() {
+	// 	return arg.String(), nil
+	// }
+	// return "", h.newTypeError("Expected string", arg)
 }
 
 func (h *argumentHelper) getArg(index int) *v8.Value {
@@ -66,6 +68,14 @@ func (h *argumentHelper) getArg(index int) *v8.Value {
 		h.noOfReadArguments = index + 1
 	}
 	return arg
+}
+
+func (h *argumentHelper) newTypeError(msg string, v *v8.Value) error {
+	json, _ := v8.JSONStringify(h.ctx.v8ctx, v)
+	return v8.NewTypeError(
+		h.ctx.host.iso,
+		fmt.Sprintf("TypeError: %s\n%s", msg, json),
+	)
 }
 
 var (
