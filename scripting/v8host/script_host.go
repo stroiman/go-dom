@@ -242,8 +242,18 @@ func registerJSClass(
 	}
 	classes[className] = spec
 }
+func createFile(host *V8ScriptHost) *v8.FunctionTemplate {
+	iso := host.iso
+	return v8.NewFunctionTemplateWithError(
+		iso,
+		func(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+			return nil, v8.NewTypeError(iso, "Illegal constructor")
+		},
+	)
+}
 
 func init() {
+	registerJSClass("File", "", createCustomEvent)
 	registerJSClass("CustomEvent", "Event", createCustomEvent)
 	registerJSClass("NamedNodeMap", "", createNamedNodeMap)
 	registerJSClass("Location", "", createLocationPrototype)
