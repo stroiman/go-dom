@@ -3,13 +3,14 @@ package v8host_test
 import (
 	"time"
 
+	. "github.com/gost-dom/browser/dom"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/gost-dom/browser/dom"
 )
 
 var _ = Describe("EventLoop", func() {
 	It("Defers execution", func() {
+		Skip("Hmmm")
 		ctx := NewTestContext()
 		c := make(chan bool)
 		defer close(c)

@@ -1,6 +1,7 @@
 package v8host
 
 import (
+	"github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -21,12 +22,14 @@ func newWorkItem(fn *v8.Function) workItem {
 
 // dispatch places an item on the event loop to be executed immediately
 func (l *eventLoop) dispatch(w workItem) {
+	defer l.ctx.endDispatch()
+	if !l.ctx.beginDispatch() {
+		return
+	}
 	go func() {
 		// Have seen issues with scripts being executed while trying to shut down
 		// v8. I want a better, channel based, message passing, solution. But if
 		// this works, it will for for a v 0.1 release
-		l.ctx.host.mu.Lock()
-		defer l.ctx.host.mu.Unlock()
 		l.workItems <- w
 	}()
 }
@@ -44,16 +47,20 @@ type disposeFunc func()
 func (fn disposeFunc) dispose() { fn() }
 
 func (l *eventLoop) Start() disposable {
+	log.Debug("eventLoop.Start")
 	closer := make(chan bool)
 	go func() {
 		for i := range l.workItems {
-			if l.ctx.disposed {
-				return
-			}
-			_, err := i.fn.Call(l.globalObject)
-			if err != nil {
-				l.errorCb(err)
-			}
+			func() {
+				defer l.ctx.endProcess()
+				if l.ctx.beginProcess() {
+					log.Debug("Process", i.fn.String())
+					_, err := i.fn.Call(l.globalObject)
+					if err != nil {
+						l.errorCb(err)
+					}
+				}
+			}()
 		}
 		closer <- true
 	}()
@@ -63,6 +70,7 @@ func (l *eventLoop) Start() disposable {
 	// when disposing the v8 Isolate, otherwise that will cause a panic.
 	// That is why the close function waits for a channel event before proceeding
 	return disposeFunc(func() {
+		log.Debug("eventLoop.dispose")
 		close(l.workItems)
 		<-closer
 	})

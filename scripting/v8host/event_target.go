@@ -22,7 +22,12 @@ func (l v8EventListener) HandleEvent(e dom.Event) error {
 		var event *v8.Value
 		event, err = l.ctx.getInstanceForNode(e)
 		if err == nil {
-			_, err = f.Call(l.val, event)
+			func() {
+				defer l.ctx.endCallback()
+				if l.ctx.beginCallback() {
+					_, err = f.Call(l.val, event)
+				}
+			}()
 		}
 	}
 	return err

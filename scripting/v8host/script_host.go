@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	. "github.com/gost-dom/browser/dom"
 	"github.com/gost-dom/browser/html"
@@ -27,13 +28,13 @@ type globals struct {
 }
 
 type V8ScriptHost struct {
-	mu              sync.Mutex
-	iso             *v8.Isolate
-	inspector       *v8.Inspector
-	inspectorClient *v8.InspectorClient
-	windowTemplate  *v8.ObjectTemplate
-	globals         globals
-	contexts        map[*v8.Context]*V8ScriptContext
+	mu  *sync.Mutex
+	iso *v8.Isolate
+	// inspector       *v8.Inspector
+	// inspectorClient *v8.InspectorClient
+	windowTemplate *v8.ObjectTemplate
+	globals        globals
+	contexts       map[*v8.Context]*V8ScriptContext
 }
 
 func (h *V8ScriptHost) netContext(v8ctx *v8.Context) (*V8ScriptContext, bool) {
@@ -49,15 +50,74 @@ func (h *V8ScriptHost) mustGetContext(v8ctx *v8.Context) *V8ScriptContext {
 }
 
 type V8ScriptContext struct {
-	host      *V8ScriptHost
-	v8ctx     *v8.Context
-	window    html.Window
-	pinner    runtime.Pinner
-	v8nodes   map[entity.ObjectId]*v8.Value
-	domNodes  map[entity.ObjectId]entity.Entity
-	eventLoop *eventLoop
-	disposers []disposable
-	disposed  bool
+	htmxLoaded    bool
+	mu            *sync.RWMutex
+	workItemCount *atomic.Int64
+	host          *V8ScriptHost
+	v8ctx         *v8.Context
+	window        html.Window
+	pinner        runtime.Pinner
+	v8nodes       map[entity.ObjectId]*v8.Value
+	domNodes      map[entity.ObjectId]entity.Entity
+	eventLoop     *eventLoop
+	disposers     []disposable
+	disposing     bool
+	disposed      bool
+	closer        chan bool
+}
+
+func (c *V8ScriptContext) inc() bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.workItemCount.Add(1) > 0
+}
+
+func (c *V8ScriptContext) dec() { c.decN(1) }
+
+func (c *V8ScriptContext) decN(n int64) {
+	if c.workItemCount.Add(-n) < 0 {
+		go func() {
+			c.mu.Lock()
+			defer c.mu.Unlock()
+			c.closer <- true
+		}()
+	}
+}
+
+// begin/end close are called when we want to close the context
+func (c *V8ScriptContext) beginClose() {
+	log.Warn("v8ctx.beginClose")
+	c.closer = make(chan bool)
+	c.dec()
+	log.Warn("v8ctx.beginClose: Waiting for jobs to finish")
+	<-c.closer
+	log.Warn("v8ctx.beginClose: All jobs finished")
+}
+
+func (c *V8ScriptContext) endClose() {}
+
+// begin/end callback are called when an event handler calls into script code
+func (c *V8ScriptContext) beginCallback() bool { return c.inc() }
+func (c *V8ScriptContext) endCallback()        { c.dec() }
+
+// begin/end script are called when Go code directly calls eval or run
+func (c *V8ScriptContext) beginScript() bool { return c.inc() }
+func (c *V8ScriptContext) endScript()        { c.dec() }
+
+// begin/end dispatch are called when something is about to be dispatched to the
+// event loop. Returns true if we are allowed to execute.
+func (c *V8ScriptContext) beginDispatch() bool { return c.inc() }
+func (c *V8ScriptContext) endDispatch()        {}
+
+// begin/end process are called when picking something from the event loop.
+// Returns true if we are allowed to execute.
+func (c *V8ScriptContext) beginProcess() bool { return c.inc() }
+
+func (c *V8ScriptContext) endProcess() {
+	// Event loop items count as two, one for when they were added, and one for
+	// whey were started. Theoretically, they probably don't need to mark
+	// themselves as started, and probably don't need to return a bool.
+	c.decN(2)
 }
 
 func (c *V8ScriptContext) cacheNode(obj *v8.Object, node entity.Entity) (*v8.Value, error) {
@@ -199,7 +259,6 @@ func (f consoleAPIMessageFunc) ConsoleAPIMessage(message v8.ConsoleAPIMessage) {
 }
 
 func (host *V8ScriptHost) consoleAPIMessage(message v8.ConsoleAPIMessage) {
-	fmt.Println("Message", message)
 	switch message.ErrorLevel {
 	case v8.ErrorLevelDebug:
 		log.Debug(message.Message)
@@ -283,9 +342,12 @@ func init() {
 }
 
 func New() *V8ScriptHost {
-	host := &V8ScriptHost{iso: v8.NewIsolate()}
-	host.inspectorClient = v8.NewInspectorClient(consoleAPIMessageFunc(host.consoleAPIMessage))
-	host.inspector = v8.NewInspector(host.iso, host.inspectorClient)
+	host := &V8ScriptHost{
+		mu:  new(sync.Mutex),
+		iso: v8.NewIsolate(),
+	}
+	// host.inspectorClient = v8.NewInspectorClient(consoleAPIMessageFunc(host.consoleAPIMessage))
+	// host.inspector = v8.NewInspector(host.iso, host.inspectorClient)
 
 	globalInstalls := createGlobals(host)
 	host.globals = globals{make(map[string]*v8.FunctionTemplate)}
@@ -316,8 +378,8 @@ func (host *V8ScriptHost) Close() {
 			ctx.Close()
 		}
 	}
-	host.inspectorClient.Dispose()
-	host.inspector.Dispose()
+	// host.inspectorClient.Dispose()
+	// host.inspector.Dispose()
 	host.iso.Dispose()
 }
 
@@ -325,13 +387,15 @@ var global *v8.Object
 
 func (host *V8ScriptHost) NewContext(w html.Window) html.ScriptContext {
 	context := &V8ScriptContext{
-		host:     host,
-		v8ctx:    v8.NewContext(host.iso, host.windowTemplate),
-		window:   w,
-		v8nodes:  make(map[entity.ObjectId]*v8.Value),
-		domNodes: make(map[entity.ObjectId]entity.Entity),
+		mu:            new(sync.RWMutex),
+		workItemCount: new(atomic.Int64),
+		host:          host,
+		v8ctx:         v8.NewContext(host.iso, host.windowTemplate),
+		window:        w,
+		v8nodes:       make(map[entity.ObjectId]*v8.Value),
+		domNodes:      make(map[entity.ObjectId]entity.Entity),
 	}
-	host.inspector.ContextCreated(context.v8ctx)
+	// host.inspector.ContextCreated(context.v8ctx)
 	err := installPolyfills(context)
 	if err != nil {
 		// TODO: Handle
@@ -356,10 +420,15 @@ func must(err error) {
 }
 
 func (ctx *V8ScriptContext) Close() {
-	// ctx.host.mu.Lock()
-	// ctx.host.mu.Unlock()
+	ctx.beginClose()
+	defer ctx.endClose()
+	ctx.mu.Lock()
+	defer ctx.mu.Unlock()
+	if ctx.disposed {
+		panic("Context already disposed")
+	}
 	ctx.disposed = true
-	ctx.host.inspector.ContextDestroyed(ctx.v8ctx)
+	// ctx.host.inspector.ContextDestroyed(ctx.v8ctx)
 	log.Debug("ScriptContext: Dispose")
 	for _, dispose := range ctx.disposers {
 		dispose.dispose()
@@ -371,13 +440,17 @@ func (ctx *V8ScriptContext) Close() {
 }
 
 func (ctx *V8ScriptContext) addDisposer(disposer disposable) {
+	ctx.mu.Lock()
+	defer ctx.mu.Unlock()
 	ctx.disposers = append(ctx.disposers, disposer)
 }
 
-func (ctx *V8ScriptContext) runScript(script string) (*v8.Value, error) {
-	// ctx.host.mu.Lock()
-	// defer ctx.host.mu.Unlock()
-	return ctx.v8ctx.RunScript(script, "")
+func (ctx *V8ScriptContext) runScript(script string) (res *v8.Value, err error) {
+	defer ctx.endScript()
+	if ctx.beginScript() {
+		res, err = ctx.v8ctx.RunScript(script, "")
+	}
+	return
 }
 
 func (ctx *V8ScriptContext) Run(script string) error {
