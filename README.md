@@ -120,12 +120,12 @@ server is consumed by test code, like any other Go component would, also
 allowing you to replace dependencies for the test if applicable.
 
 This also makes it easy to run parallel tests in isolation as each can create
-their own _instance_ of the HTTP handler.[^2]
+their own _instance_ of the HTTP handler.
 
 ### Drawbacks to Browser automation
 
 - You cannot verify how it look; e.g. you cannot get a screenshot of a failing
-test, nor use such screenshots for snapshot tests.[^3]
+test, nor use such screenshots for snapshot tests.
 - The verification doesn't prove that it works as intended in _all browsers_ you
 want to support.
 
@@ -289,18 +289,3 @@ It is not a goal to be able to provide a visual rendering of the DOM.
 
 But just like the accessibility tree, this could be implemented in a new library
 depending only on the interface from here.
-
----
-
-[^1]: Single-Page app
-[^2]: This is not entirely true. The script host only supports one OS
-    thread running JS code. But true parallelism will eventually be supported.
-[^3]: I generally dislike snapshot tests; as they don't _describe_ expected
-behaviour, only that the outcome mustn't change. There are a few cases where
-where snapshot tests are the right choice, but they should be avoided for a TDD
-process.
-[^4]: E.g., `HTMLFormElement` and `FormData` have circular dependencies.
-[^5]: The engine is based on the v8go project by originally by @rogchap, later
-kept up-to-date by @tommie; who did a remarkale job of automatically keeping the
-v8 dependencies up-to-date. But many necessary features of V8 are not exported;
-which I am adding in my own fork.
