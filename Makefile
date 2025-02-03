@@ -27,7 +27,7 @@ test-html:
 
 .PHONY: test-v8
 test-v8: 
-	gow -c -e=go -e=js -e=html -w ./.. test -vet=off ./scripting/v8host
+	gow -s -e=go -e=js -e=html -w ./.. test -vet=off ./scripting/v8host
 
 .PHONY: test-goja
 test-goja:
