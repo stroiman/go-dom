@@ -117,6 +117,7 @@ func OpenWindowFromLocation(location string, windowOptions ...WindowOption) (Win
 }
 
 func (w *window) initScriptEngine() {
+	w.EventTarget.RemoveAll()
 	factory := w.scriptEngineFactory
 	engine := w.scriptContext
 	if engine != nil {

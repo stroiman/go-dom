@@ -289,6 +289,21 @@ var _ = Describe("Window", func() {
 				Expect(window.Navigate("about:blank")).To(Succeed())
 				Expect(window.Document()).To(HaveH1("Gost-DOM"))
 			})
+
+			It("Should clear event handlers", func() {
+				count := 0
+				Expect(window.Navigate("about:blank")).To(Succeed())
+				window.AddEventListener(
+					"gost-event",
+					dom.NewEventHandlerFunc(func(e dom.Event) error {
+						count++
+						return nil
+					}))
+
+				Expect(window.Navigate("/index")).To(Succeed())
+				window.DispatchEvent(dom.NewCustomEvent("gost-event"))
+				Expect(count).To(Equal(0))
+			})
 		})
 
 		Describe("User navigation (clicking links)", func() {

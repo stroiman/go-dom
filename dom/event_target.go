@@ -12,6 +12,7 @@ type EventTarget interface {
 	RemoveEventListener(eventType string, listener EventHandler)
 	DispatchEvent(event Event) bool
 	SetCatchAllHandler(listener EventHandler)
+	RemoveAll()
 	// Unexported
 	dispatchError(err ErrorEvent)
 	dispatchEvent(event Event) bool
@@ -63,6 +64,10 @@ func (e *eventTarget) AddEventListener(eventType string, listener EventHandler) 
 		}
 	}
 	e.lmap[eventType] = append(listeners, listener)
+}
+
+func (e *eventTarget) RemoveAll() {
+	e.lmap = make(map[string][]EventHandler)
 }
 
 func (e *eventTarget) RemoveEventListener(eventType string, listener EventHandler) {
