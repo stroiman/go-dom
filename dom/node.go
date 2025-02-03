@@ -257,7 +257,6 @@ func (n *node) setParent(parent Node) {
 }
 
 func (n *node) Connected() {
-	fmt.Println("Connected", n.getSelf().NodeName(), n.getSelf().Parent())
 	if p := n.getSelf().Parent(); p != nil {
 		p.Connected()
 	}
@@ -367,7 +366,6 @@ func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
 		}
 		n.childNodes.setNodes(slices.Insert(n.childNodes.All(), i, newNode))
 	}
-	// fmt.Println("Appended node", newNode.NodeName())
 	removeNodeFromParent(newNode)
 	return newNode, nil
 }

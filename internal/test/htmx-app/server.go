@@ -27,7 +27,6 @@ func CreateServer() *TestServer {
 	})
 	mux.HandleFunc("POST /forms/form-1", func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
-		fmt.Println("*** FORM", r.Form, r.Header)
 		w.Write([]byte("Form values:<br />"))
 		w.Write([]byte(fmt.Sprintf(`<div id="field-value-1">%s</div>`, r.FormValue("field-1"))))
 	})

@@ -2,7 +2,6 @@ package html
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 
 	"github.com/gost-dom/browser/dom"
@@ -12,19 +11,16 @@ import (
 type htmlScriptElement struct{ *htmlElement }
 
 func NewHTMLScriptElement(ownerDocument HTMLDocument) HTMLElement {
-	fmt.Println("NEW SCRIPT ELEMENT")
 	result := &htmlScriptElement{newHTMLElement("script", ownerDocument)}
 	result.SetSelf(result)
 	return result
 }
 
 func (e *htmlScriptElement) Connected() {
-	fmt.Println("SCRIPT ELEMENT CONNECTED")
 	var script = ""
 	if src, hasSrc := e.GetAttribute("src"); !hasSrc {
 		script = e.TextContent()
 	} else {
-		fmt.Println("Try executing !!!!!", src)
 		window, _ := e.htmlDocument.getWindow().(*window)
 		resp, err := window.httpClient.Get(src)
 		if err != nil {
@@ -45,6 +41,5 @@ func (e *htmlScriptElement) Connected() {
 }
 
 func (e *htmlScriptElement) AppendChild(n dom.Node) (dom.Node, error) {
-	fmt.Println("APPEND CHILD", n.NodeName())
 	return e.htmlElement.AppendChild(n)
 }
