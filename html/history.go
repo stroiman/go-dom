@@ -93,8 +93,8 @@ func (h *History) Go(relative int) error {
 	}
 }
 
-// ReplaceState the current [Window.Location] and history entry without making a
-// new request.
+// ReplaceState will update the current [Location] and history entry without
+// making a new request.
 //
 // The function corresponds to [replaceState on the History API] with the
 // following notes. If href is empty, the URL will not be updated; as if the
@@ -112,6 +112,14 @@ func (h History) currentIdx() int {
 	return h.currentPos - 1
 }
 
+// ReplaceState will update the current [Location] and push this as a new
+// history entry without making a new request.
+//
+// The function corresponds to [replaceState on the History API] with the
+// following notes. If href is empty, the URL will not be updated; as if the
+// argument was not specified in the JS API.
+//
+// [replaceState on the History API]: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
 func (h *History) PushState(state HistoryState, href string) error {
 	newHref := h.window.setBaseLocation(href)
 	h.pushHistoryEntry(historyEntry{state: state, href: newHref, remote: false})
@@ -131,6 +139,7 @@ func (h *History) pushLoad(href string) {
 	h.pushHistoryEntry(entry)
 }
 
+// State returns the state for the current page.
 func (h History) State() HistoryState {
 	return h.entries[h.currentIdx()].state
 }

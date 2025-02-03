@@ -20,7 +20,7 @@ type Browser struct {
 	windows    []Window
 }
 
-// Open will open a new [http.Window], loading the specified location. If the
+// Open will open a new [html.Window], loading the specified location. If the
 // server does not respons with a 200 status code, an error is returned.
 //
 // See [html.NewWindowReader] about the return value, and when the window

@@ -152,7 +152,7 @@ func (w *window) ParseFragment(
 // error is returned.
 //
 // If this function returns without an error, the DOM will have been parsed and
-// the DOMContentLoaded event has been dispached on the [Document]
+// the DOMContentLoaded event has been dispached on the [dom.Document]
 func NewWindowReader(reader io.Reader, windowOptions ...WindowOption) (Window, error) {
 	window := newWindow(windowOptions...)
 	err := window.parseReader(reader)
