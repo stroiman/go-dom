@@ -1,13 +1,10 @@
 package html
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/gost-dom/browser/dom"
-	"github.com/gost-dom/browser/internal/log"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -68,42 +65,45 @@ func (r BaseRules) Connected(w Window, n dom.Element) {}
 type ScriptElementRules struct{ BaseRules }
 
 func (r ScriptElementRules) Connected(win Window, node dom.Element) {
-	var script string
-	src, hasSrc := node.GetAttribute("src")
-	log.Debug("Process script tag", "src", src)
-	if !hasSrc {
-		b := strings.Builder{}
-		for _, child := range node.ChildNodes().All() {
-			switch n := child.(type) {
-			case dom.Text:
-				b.WriteString(n.Data())
-			}
-		}
-		script = b.String()
-	} else {
-		window := win.(*window)
-		resp, err := window.httpClient.Get(src)
-		if err != nil {
-			panic(err)
-		}
-		if resp.StatusCode != 200 {
-			body, _ := io.ReadAll(resp.Body)
-			log.Error("Error from server", "body", string(body), "src", src)
-			panic("Bad response")
-		}
-
-		buf := bytes.NewBuffer([]byte{})
-		buf.ReadFrom(resp.Body)
-		script = string(buf.Bytes())
-
-	}
-	// TODO: Propagate error for better error handling
-	err := win.Run(script)
-	if err != nil {
-		log.Error("Error loading script")
-	} else {
-		log.Debug("Script loaded/executed")
-	}
+	return
+	// var script string
+	// src, hasSrc := node.GetAttribute("src")
+	// log.Debug("Process script tag", "src", src)
+	// if !hasSrc {
+	// 	b := strings.Builder{}
+	// 	for _, child := range node.ChildNodes().All() {
+	// 		switch n := child.(type) {
+	// 		case dom.Text:
+	// 			b.WriteString(n.Data())
+	// 		}
+	// 	}
+	// 	script = b.String()
+	// } else {
+	// 	window := win.(*window)
+	// 	resp, err := window.httpClient.Get(src)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	if resp.StatusCode != 200 {
+	// 		body, _ := io.ReadAll(resp.Body)
+	// 		log.Error("Error from server", "body", string(body), "src", src)
+	// 		panic("Bad response")
+	// 	}
+	//
+	// 	buf := bytes.NewBuffer([]byte{})
+	// 	buf.ReadFrom(resp.Body)
+	// 	script = string(buf.Bytes())
+	//
+	// }
+	// // TODO: Propagate error for better error handling
+	// if node.IsConnected() {
+	// 	err := win.Run(script)
+	// 	if err != nil {
+	// 		log.Error("Error loading script")
+	// 	} else {
+	// 		log.Debug("Script loaded/executed")
+	// 	}
+	// }
 }
 
 type TemplateElementRules struct{ BaseRules }
@@ -118,7 +118,7 @@ func (TemplateElementRules) AppendChild(parent dom.Node, child dom.Node) dom.Nod
 }
 
 var ElementMap = map[atom.Atom]ElementSteps{
-	atom.Script:   ScriptElementRules{},
+	// atom.Script:   ScriptElementRules{},
 	atom.Template: TemplateElementRules{},
 }
 

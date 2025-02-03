@@ -70,6 +70,8 @@ func (d *htmlDocument) CreateElement(name string) Element {
 		return NewHTMLInputElement(d)
 	case "button":
 		return NewHTMLButtonElement(d)
+	case "script":
+		return NewHTMLScriptElement(d)
 	case "a":
 		return NewHTMLAnchorElement(d)
 	}

@@ -131,6 +131,7 @@ type Node interface {
 	FirstChild() Node
 	TextContent() string
 	SetTextContent(value string)
+	Connected()
 	// SetSelf must be called when creating instances of structs embedding a Node.
 	//
 	// If this is not called, the specialised type, which is itself a Node, will
@@ -212,6 +213,9 @@ func (n *node) InsertBefore(newChild Node, referenceNode Node) (Node, error) {
 	if err == nil {
 		newChild.setParent(n.self)
 	}
+	if newChild.IsConnected() {
+		newChild.Connected()
+	}
 	return result, err
 }
 
@@ -250,6 +254,13 @@ func (n *node) ParentElement() Element {
 func (n *node) setParent(parent Node) {
 	n.parent = parent
 	n.parentTarget = parent
+}
+
+func (n *node) Connected() {
+	fmt.Println("Connected", n.getSelf().NodeName(), n.getSelf().Parent())
+	if p := n.getSelf().Parent(); p != nil {
+		p.Connected()
+	}
 }
 
 func (n *node) IsConnected() (result bool) {
@@ -347,8 +358,6 @@ func (n *node) childElements() []Element {
 }
 
 func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
-	// TODO, Don't allow newNode to be inserted in it's own branch (circular tree)
-	// TODO, Handle a fragment. Also returns nil
 	if referenceNode == nil {
 		n.childNodes.append(newNode)
 	} else {
@@ -358,6 +367,7 @@ func (n *node) insertBefore(newNode Node, referenceNode Node) (Node, error) {
 		}
 		n.childNodes.setNodes(slices.Insert(n.childNodes.All(), i, newNode))
 	}
+	// fmt.Println("Appended node", newNode.NodeName())
 	removeNodeFromParent(newNode)
 	return newNode, nil
 }
