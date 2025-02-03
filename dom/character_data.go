@@ -100,6 +100,5 @@ func (n *textNode) createHtmlNode() *html.Node {
 	}
 }
 
-func (n *textNode) TextContent() string {
-	return n.Data()
-}
+func (n *textNode) NodeName() string    { return "#text" }
+func (n *textNode) TextContent() string { return n.Data() }
