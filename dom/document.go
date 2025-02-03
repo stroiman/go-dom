@@ -18,6 +18,7 @@ const (
 type DocumentParentWindow interface {
 	EventTarget
 	Location() Location
+	Document() Document
 	ParseFragment(ownerDocument Document, reader io.Reader) (DocumentFragment, error)
 }
 
@@ -128,7 +129,7 @@ func (d *document) DocumentElement() Element {
 func (d *document) NodeName() string { return "#document" }
 
 func (d *document) IsConnected() bool {
-	return true
+	return d.ownerWindow.Document() == d.getSelf()
 }
 
 func (d *document) GetElementById(id string) Element {
