@@ -129,6 +129,11 @@ func (d *document) DocumentElement() Element {
 func (d *document) NodeName() string { return "#document" }
 
 func (d *document) IsConnected() bool {
+	if d.ownerWindow == nil {
+		// TODO: Shouldn't be the case in real life, but tests can create documents
+		// without a window.
+		return false
+	}
 	return d.ownerWindow.Document() == d.getSelf()
 }
 
