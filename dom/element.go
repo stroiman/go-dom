@@ -303,7 +303,7 @@ func (e *element) Matches(pattern string) (bool, error) {
 	// upon.
 
 	patterns := strings.Split(pattern, ",")
-	log.Debug("Element.Matches", "pattern", pattern, "element", e.getSelfElement().OuterHTML())
+	// log.Debug("Element.Matches", "pattern", pattern, "element", e.getSelfElement())
 
 	for _, p := range patterns {
 		p = strings.TrimSpace(p)
@@ -365,7 +365,7 @@ func (e *element) Matches(pattern string) (bool, error) {
 			)
 		}
 	}
-	log.Debug("Element.Matches: no match", "pattern", pattern, "e", e.getSelfElement().OuterHTML())
+	// log.Debug("Element.Matches: no match", "pattern", pattern, "e", e.getSelfElement())
 	return false, nil
 }
 
