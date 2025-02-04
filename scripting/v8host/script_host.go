@@ -28,13 +28,13 @@ type globals struct {
 }
 
 type V8ScriptHost struct {
-	mu  *sync.Mutex
-	iso *v8.Isolate
-	// inspector       *v8.Inspector
-	// inspectorClient *v8.InspectorClient
-	windowTemplate *v8.ObjectTemplate
-	globals        globals
-	contexts       map[*v8.Context]*V8ScriptContext
+	mu              *sync.Mutex
+	iso             *v8.Isolate
+	inspector       *v8.Inspector
+	inspectorClient *v8.InspectorClient
+	windowTemplate  *v8.ObjectTemplate
+	globals         globals
+	contexts        map[*v8.Context]*V8ScriptContext
 }
 
 func (h *V8ScriptHost) netContext(v8ctx *v8.Context) (*V8ScriptContext, bool) {
@@ -346,8 +346,8 @@ func New() *V8ScriptHost {
 		mu:  new(sync.Mutex),
 		iso: v8.NewIsolate(),
 	}
-	// host.inspectorClient = v8.NewInspectorClient(consoleAPIMessageFunc(host.consoleAPIMessage))
-	// host.inspector = v8.NewInspector(host.iso, host.inspectorClient)
+	host.inspectorClient = v8.NewInspectorClient(consoleAPIMessageFunc(host.consoleAPIMessage))
+	host.inspector = v8.NewInspector(host.iso, host.inspectorClient)
 
 	globalInstalls := createGlobals(host)
 	host.globals = globals{make(map[string]*v8.FunctionTemplate)}
@@ -378,8 +378,8 @@ func (host *V8ScriptHost) Close() {
 			ctx.Close()
 		}
 	}
-	// host.inspectorClient.Dispose()
-	// host.inspector.Dispose()
+	host.inspectorClient.Dispose()
+	host.inspector.Dispose()
 	host.iso.Dispose()
 }
 
@@ -395,7 +395,7 @@ func (host *V8ScriptHost) NewContext(w html.Window) html.ScriptContext {
 		v8nodes:       make(map[entity.ObjectId]*v8.Value),
 		domNodes:      make(map[entity.ObjectId]entity.Entity),
 	}
-	// host.inspector.ContextCreated(context.v8ctx)
+	host.inspector.ContextCreated(context.v8ctx)
 	err := installPolyfills(context)
 	if err != nil {
 		// TODO: Handle
@@ -428,7 +428,7 @@ func (ctx *V8ScriptContext) Close() {
 		panic("Context already disposed")
 	}
 	ctx.disposed = true
-	// ctx.host.inspector.ContextDestroyed(ctx.v8ctx)
+	ctx.host.inspector.ContextDestroyed(ctx.v8ctx)
 	log.Debug("ScriptContext: Dispose")
 	for _, dispose := range ctx.disposers {
 		dispose.dispose()
