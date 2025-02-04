@@ -1,4 +1,4 @@
-# go-dom - Headless browser for Go
+# Gost-DOM - A headless browser for Go
 
 The Go-to headless browser for TDD workflows.
 
