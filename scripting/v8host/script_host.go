@@ -403,7 +403,7 @@ func (host *V8ScriptHost) NewContext(w html.Window) html.ScriptContext {
 	}
 	global = context.v8ctx.Global()
 	errorCallback := func(err error) {
-		w.DispatchEvent(NewCustomEvent("error"))
+		w.DispatchEvent(NewErrorEvent(err))
 	}
 	context.eventLoop = newEventLoop(context, global, errorCallback)
 	host.contexts[context.v8ctx] = context
