@@ -2,6 +2,7 @@ package v8host
 
 import (
 	"log/slog"
+	"runtime/debug"
 
 	"github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
@@ -58,11 +59,15 @@ func (l *eventLoop) Start() disposable {
 				if l.ctx.beginProcess() {
 					_, err := i.fn.Call(l.globalObject)
 					if err != nil {
-						log.Error(
-							"EventLoop: Error",
-							slog.String("script", i.fn.String()),
-							slog.String("error", err.Error()),
-						)
+						// Wrapped in go func() as it generates a deadlock on linux arm64 tests
+						go func() {
+							log.Error(
+								"EventLoop: Error",
+								slog.String("script", i.fn.String()),
+								slog.String("error", err.Error()),
+								slog.String("stack", string(debug.Stack())),
+							)
+						}()
 						l.errorCb(err)
 					}
 				}
