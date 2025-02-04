@@ -35,6 +35,7 @@ func (w nodeWrapper) initializePrototype(prototype *g.Object, vm *g.Runtime) {
 	prototype.DefineAccessorProperty("firstChild", w.ctx.vm.ToValue(w.firstChild), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("previousSibling", w.ctx.vm.ToValue(w.previousSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
 	prototype.DefineAccessorProperty("nextSibling", w.ctx.vm.ToValue(w.nextSibling), nil, g.FLAG_TRUE, g.FLAG_TRUE)
+	prototype.DefineAccessorProperty("textContent", w.ctx.vm.ToValue(w.textContent), w.ctx.vm.ToValue(w.setTextContent), g.FLAG_TRUE, g.FLAG_TRUE)
 }
 
 func (w nodeWrapper) getRootNode(c g.FunctionCall) g.Value {

@@ -64,6 +64,10 @@ func createNodePrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 		v8.NewFunctionTemplateWithError(iso, wrapper.nextSibling),
 		nil,
 		v8.None)
+	prototypeTmpl.SetAccessorProperty("textContent",
+		v8.NewFunctionTemplateWithError(iso, wrapper.textContent),
+		v8.NewFunctionTemplateWithError(iso, wrapper.setTextContent),
+		v8.None)
 
 	return constructor
 }

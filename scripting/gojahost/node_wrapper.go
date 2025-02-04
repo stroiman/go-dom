@@ -9,6 +9,16 @@ func (w nodeWrapper) constructor(call g.ConstructorCall, r *g.Runtime) *g.Object
 	panic(r.NewTypeError("Illegal Constructor"))
 }
 
+func (w nodeWrapper) textContent(c g.FunctionCall) g.Value {
+	i := w.getInstance(c)
+	return w.ctx.vm.ToValue(i.TextContent())
+}
+func (w nodeWrapper) setTextContent(c g.FunctionCall) g.Value {
+	i := w.getInstance(c)
+	i.SetTextContent(c.Argument(0).String())
+	return g.Undefined()
+}
+
 func (w nodeWrapper) nodeType(c g.FunctionCall) g.Value {
 	instance := w.getInstance(c)
 	return w.toUnsignedShort(int(instance.NodeType()))
