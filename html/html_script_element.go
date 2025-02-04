@@ -10,8 +10,10 @@ import (
 
 type htmlScriptElement struct{ *htmlElement }
 
+type HTMLScriptElement = HTMLElement
+
 func NewHTMLScriptElement(ownerDocument HTMLDocument) HTMLElement {
-	result := &htmlScriptElement{newHTMLElement("script", ownerDocument)}
+	var result HTMLScriptElement = &htmlScriptElement{newHTMLElement("script", ownerDocument)}
 	result.SetSelf(result)
 	return result
 }
