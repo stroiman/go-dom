@@ -113,7 +113,7 @@ func (req *xmlHttpRequest) send(body io.Reader) error {
 	b := new(bytes.Buffer) // TODO, branch out depending on content-type
 	_, err = b.ReadFrom(res.Body)
 	req.response = b.Bytes()
-	log.Info("Response received", "Status", res.StatusCode, "body", string(req.response))
+	log.Debug("Response received", "Status", res.StatusCode)
 	req.DispatchEvent(dom.NewCustomEvent(XHREventLoad))
 	return err
 }
