@@ -22,6 +22,7 @@ func installPolyfills(context *V8ScriptContext) error {
 			XPathExpression.prototype.evaluate = function (context, type, res) {
 				return evaluate.call(this, context, type ?? XPathResult.ANY_TYPE, res);
 			};
+			Element.prototype.scrollIntoView = function() {};
 	`),
 	}
 	return errors.Join(errs...)
