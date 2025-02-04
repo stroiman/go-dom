@@ -1,6 +1,8 @@
 package v8host
 
 import (
+	"log/slog"
+
 	"github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
@@ -54,9 +56,13 @@ func (l *eventLoop) Start() disposable {
 			func() {
 				defer l.ctx.endProcess()
 				if l.ctx.beginProcess() {
-					log.Debug("Process", i.fn.String())
 					_, err := i.fn.Call(l.globalObject)
 					if err != nil {
+						log.Error(
+							"EventLoop: Error",
+							slog.String("script", i.fn.String()),
+							slog.String("error", err.Error()),
+						)
 						l.errorCb(err)
 					}
 				}
