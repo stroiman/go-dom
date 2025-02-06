@@ -11,6 +11,11 @@ type EventTarget interface {
 	AddEventListener(eventType string, listener EventHandler /* TODO: options */)
 	RemoveEventListener(eventType string, listener EventHandler)
 	DispatchEvent(event Event) bool
+	// Adds a listener that will receive _all_ dispatched events. This listener
+	// will not be removed from the window when navigating. This makes it useful
+	// for a test to setup event listeners _before_ navigating, as by the time the
+	// Navigate function returns, the DOMContentLoaded event _has_ fired, and
+	// subscribed listeners have been called.
 	SetCatchAllHandler(listener EventHandler)
 	RemoveAll()
 	// Unexported
