@@ -71,6 +71,7 @@ var _ = Describe("URL", func() {
 			).To(HaveHref("https://test.example.org/api/v2/story"))
 
 		})
+
 		It("Should handle example 4 - parent directory relative", func() {
 			Expect(
 				NewUrlBase("../path", "https://test.example.org/api/v1/v2/"),
@@ -93,6 +94,24 @@ var _ = Describe("URL", func() {
 			Expect(
 				NewUrlBase("/article", "https://example.com/api/v1/"),
 			).To(HaveHref("https://example.com/article"))
+		})
+
+		It("Should ignore base for a complete URL", func() {
+			Expect(
+				NewUrlBase("http://foo.example.com/bar?q=baz", "http://bar.example.com/foobar"),
+			).To(HaveHref("http://foo.example.com/bar?q=baz"))
+		})
+
+		It("Should handle query in the relative URL", func() {
+			Expect(
+				NewUrlBase("/bar?q=baz", "http://bar.example.com/foobar"),
+			).To(HaveHref("http://bar.example.com/bar?q=baz"))
+		})
+
+		It("Should handle query in the relative URL", func() {
+			Expect(
+				NewUrlBase("/bar#baz", "http://bar.example.com/foobar"),
+			).To(HaveHref("http://bar.example.com/bar#baz"))
 		})
 	})
 

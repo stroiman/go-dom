@@ -19,6 +19,12 @@ func NewUrl(rawUrl string) (URL, error) {
 }
 
 func NewUrlBase(relativeUrl string, base string) (result URL, err error) {
+	rel, err := netURL.Parse(relativeUrl)
+	if err == nil {
+		if rel.Host != "" {
+			return NewURLFromNetURL(rel), nil
+		}
+	}
 	var u *netURL.URL
 	if u, err = netURL.Parse(base); err != nil {
 		return
@@ -26,7 +32,9 @@ func NewUrlBase(relativeUrl string, base string) (result URL, err error) {
 	u.RawQuery = ""
 	u.Fragment = ""
 	if strings.HasPrefix(relativeUrl, "/") {
-		u.Path = relativeUrl
+		u.Path = rel.Path
+		u.RawQuery = rel.RawQuery
+		u.Fragment = rel.Fragment
 	} else {
 		// A DOM Url treats the relative path from the last slash in the base URL.
 		// Go's URL doesn't. To get the right behaviour, use the parent dir if the
