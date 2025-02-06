@@ -1,6 +1,9 @@
 package html
 
-import "github.com/gost-dom/browser/dom"
+import (
+	"github.com/gost-dom/browser/dom"
+	"github.com/gost-dom/browser/internal/log"
+)
 
 const HistoryEventPopState = "popstate"
 
@@ -121,6 +124,7 @@ func (h History) currentIdx() int {
 //
 // [replaceState on the History API]: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
 func (h *History) PushState(state HistoryState, href string) error {
+	log.Info("History.PushState", "href", href)
 	newHref := h.window.setBaseLocation(href)
 	h.pushHistoryEntry(historyEntry{state: state, href: newHref, remote: false})
 	return nil
