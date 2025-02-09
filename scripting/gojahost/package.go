@@ -1,4 +1,4 @@
-//go:generate ../../../code-gen/code-gen -g goja
+//go:generate ../../internal/code-gen/code-gen -g goja
 
 // The gojahost package provides functionality to execute client-scripts in
 // gost-dom. The package is a pure Go implementation by using goja.

@@ -10,11 +10,20 @@ codegen-clean:
 
 .PHONY: codegen-watch
 codegen-watch: codegen-clean
-	gow -w ../code-gen -e="" generate ./...
+	gow -w ./internal/code-gen -e="" generate ./...
 
+.PHONY: codegen codegen-build
+codegen-build:
+	$(MAKE) -C internal/code-gen build
 
-.PHONY: test-watch
+codegen: codegen-clean codegen-build
+	go generate ./...
+
+.PHONY: test test-watch test-browser test-v8 test-goja
 test: 
+	go test -v -vet=all ./...
+
+test-watch: 
 	gow -c -e=go -e=js -e=html -v -w=./.. test -vet=off ./...
 
 .PHONY: test-dom
@@ -32,3 +41,10 @@ test-v8:
 .PHONY: test-goja
 test-goja:
 	gow -c -e=go -e=js -e=html -w ./.. test -vet=off ./scripting/gojahost
+
+.PHONY: ci ci-build
+ci-build:
+	go build -v ./...
+
+ci: codegen ci-build test
+	git diff --quiet HEAD
