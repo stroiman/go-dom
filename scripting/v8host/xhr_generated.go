@@ -4,6 +4,7 @@ package v8host
 
 import (
 	"errors"
+	log "github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -78,6 +79,7 @@ func (xhr xmlHttpRequestV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*
 }
 
 func (xhr xmlHttpRequestV8Wrapper) setRequestHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: XMLHttpRequest.setRequestHeader")
 	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	name, err1 := tryParseArg(args, 0, xhr.decodeByteString)
@@ -94,6 +96,7 @@ func (xhr xmlHttpRequestV8Wrapper) setRequestHeader(info *v8.FunctionCallbackInf
 }
 
 func (xhr xmlHttpRequestV8Wrapper) send(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: XMLHttpRequest.send")
 	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	body, err1 := tryParseArg(args, 0, xhr.decodeDocument, xhr.decodeXMLHttpRequestBodyInit)
@@ -113,6 +116,7 @@ func (xhr xmlHttpRequestV8Wrapper) send(info *v8.FunctionCallbackInfo) (*v8.Valu
 }
 
 func (xhr xmlHttpRequestV8Wrapper) abort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: XMLHttpRequest.abort")
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -123,6 +127,7 @@ func (xhr xmlHttpRequestV8Wrapper) abort(info *v8.FunctionCallbackInfo) (*v8.Val
 
 func (xhr xmlHttpRequestV8Wrapper) getResponseHeader(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.mustGetContext(info)
+	log.Debug("V8 Function call: XMLHttpRequest.getResponseHeader")
 	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	name, err1 := tryParseArg(args, 0, xhr.decodeByteString)
@@ -139,6 +144,7 @@ func (xhr xmlHttpRequestV8Wrapper) getResponseHeader(info *v8.FunctionCallbackIn
 
 func (xhr xmlHttpRequestV8Wrapper) getAllResponseHeaders(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.mustGetContext(info)
+	log.Debug("V8 Function call: XMLHttpRequest.getAllResponseHeaders")
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -152,6 +158,7 @@ func (xhr xmlHttpRequestV8Wrapper) getAllResponseHeaders(info *v8.FunctionCallba
 }
 
 func (xhr xmlHttpRequestV8Wrapper) overrideMimeType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: XMLHttpRequest.overrideMimeType")
 	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	mime, err1 := tryParseArg(args, 0, xhr.decodeDOMString)
@@ -167,11 +174,13 @@ func (xhr xmlHttpRequestV8Wrapper) overrideMimeType(info *v8.FunctionCallbackInf
 }
 
 func (xhr xmlHttpRequestV8Wrapper) readyState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: XMLHttpRequest.readyState")
 	return nil, errors.New("XMLHttpRequest.readyState: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) timeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.mustGetContext(info)
+	log.Debug("V8 Function call: XMLHttpRequest.timeout")
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -181,6 +190,7 @@ func (xhr xmlHttpRequestV8Wrapper) timeout(info *v8.FunctionCallbackInfo) (*v8.V
 }
 
 func (xhr xmlHttpRequestV8Wrapper) setTimeout(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: XMLHttpRequest.setTimeout")
 	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	val, err1 := tryParseArg(args, 0, xhr.decodeUnsignedLong)
@@ -197,6 +207,7 @@ func (xhr xmlHttpRequestV8Wrapper) setTimeout(info *v8.FunctionCallbackInfo) (*v
 
 func (xhr xmlHttpRequestV8Wrapper) withCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.mustGetContext(info)
+	log.Debug("V8 Function call: XMLHttpRequest.withCredentials")
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -206,6 +217,7 @@ func (xhr xmlHttpRequestV8Wrapper) withCredentials(info *v8.FunctionCallbackInfo
 }
 
 func (xhr xmlHttpRequestV8Wrapper) setWithCredentials(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: XMLHttpRequest.setWithCredentials")
 	args := newArgumentHelper(xhr.scriptHost, info)
 	instance, err0 := xhr.getInstance(info)
 	val, err1 := tryParseArg(args, 0, xhr.decodeBoolean)
@@ -222,6 +234,7 @@ func (xhr xmlHttpRequestV8Wrapper) setWithCredentials(info *v8.FunctionCallbackI
 
 func (xhr xmlHttpRequestV8Wrapper) responseURL(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.mustGetContext(info)
+	log.Debug("V8 Function call: XMLHttpRequest.responseURL")
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -232,6 +245,7 @@ func (xhr xmlHttpRequestV8Wrapper) responseURL(info *v8.FunctionCallbackInfo) (*
 
 func (xhr xmlHttpRequestV8Wrapper) status(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.mustGetContext(info)
+	log.Debug("V8 Function call: XMLHttpRequest.status")
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -242,6 +256,7 @@ func (xhr xmlHttpRequestV8Wrapper) status(info *v8.FunctionCallbackInfo) (*v8.Va
 
 func (xhr xmlHttpRequestV8Wrapper) statusText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.mustGetContext(info)
+	log.Debug("V8 Function call: XMLHttpRequest.statusText")
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -251,15 +266,18 @@ func (xhr xmlHttpRequestV8Wrapper) statusText(info *v8.FunctionCallbackInfo) (*v
 }
 
 func (xhr xmlHttpRequestV8Wrapper) responseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: XMLHttpRequest.responseType")
 	return nil, errors.New("XMLHttpRequest.responseType: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) setResponseType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: XMLHttpRequest.setResponseType")
 	return nil, errors.New("XMLHttpRequest.setResponseType: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (xhr xmlHttpRequestV8Wrapper) response(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.mustGetContext(info)
+	log.Debug("V8 Function call: XMLHttpRequest.response")
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -270,6 +288,7 @@ func (xhr xmlHttpRequestV8Wrapper) response(info *v8.FunctionCallbackInfo) (*v8.
 
 func (xhr xmlHttpRequestV8Wrapper) responseText(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := xhr.mustGetContext(info)
+	log.Debug("V8 Function call: XMLHttpRequest.responseText")
 	instance, err := xhr.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -279,5 +298,6 @@ func (xhr xmlHttpRequestV8Wrapper) responseText(info *v8.FunctionCallbackInfo) (
 }
 
 func (xhr xmlHttpRequestV8Wrapper) responseXML(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: XMLHttpRequest.responseXML")
 	return nil, errors.New("XMLHttpRequest.responseXML: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }

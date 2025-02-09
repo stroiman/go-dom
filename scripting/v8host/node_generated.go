@@ -4,6 +4,7 @@ package v8host
 
 import (
 	"errors"
+	log "github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -78,6 +79,7 @@ func (n nodeV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, er
 
 func (n nodeV8Wrapper) getRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.getRootNode")
 	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	options, err1 := tryParseArgWithDefault(args, 0, n.defaultGetRootNodeOptions, n.decodeGetRootNodeOptions)
@@ -94,6 +96,7 @@ func (n nodeV8Wrapper) getRootNode(info *v8.FunctionCallbackInfo) (*v8.Value, er
 
 func (n nodeV8Wrapper) cloneNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.cloneNode")
 	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	subtree, err1 := tryParseArgWithDefault(args, 0, n.defaultboolean, n.decodeBoolean)
@@ -110,6 +113,7 @@ func (n nodeV8Wrapper) cloneNode(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 
 func (n nodeV8Wrapper) isSameNode(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.isSameNode")
 	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	otherNode, err1 := tryParseArg(args, 0, n.decodeNode)
@@ -126,6 +130,7 @@ func (n nodeV8Wrapper) isSameNode(info *v8.FunctionCallbackInfo) (*v8.Value, err
 
 func (n nodeV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.contains")
 	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	other, err1 := tryParseArg(args, 0, n.decodeNode)
@@ -142,6 +147,7 @@ func (n nodeV8Wrapper) contains(info *v8.FunctionCallbackInfo) (*v8.Value, error
 
 func (n nodeV8Wrapper) insertBefore(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.insertBefore")
 	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	node, err1 := tryParseArg(args, 0, n.decodeNode)
@@ -163,6 +169,7 @@ func (n nodeV8Wrapper) insertBefore(info *v8.FunctionCallbackInfo) (*v8.Value, e
 
 func (n nodeV8Wrapper) appendChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.appendChild")
 	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	node, err1 := tryParseArg(args, 0, n.decodeNode)
@@ -183,6 +190,7 @@ func (n nodeV8Wrapper) appendChild(info *v8.FunctionCallbackInfo) (*v8.Value, er
 
 func (n nodeV8Wrapper) removeChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.removeChild")
 	args := newArgumentHelper(n.scriptHost, info)
 	instance, err0 := n.getInstance(info)
 	child, err1 := tryParseArg(args, 0, n.decodeNode)
@@ -203,6 +211,7 @@ func (n nodeV8Wrapper) removeChild(info *v8.FunctionCallbackInfo) (*v8.Value, er
 
 func (n nodeV8Wrapper) nodeName(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.nodeName")
 	instance, err := n.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -213,6 +222,7 @@ func (n nodeV8Wrapper) nodeName(info *v8.FunctionCallbackInfo) (*v8.Value, error
 
 func (n nodeV8Wrapper) isConnected(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.isConnected")
 	instance, err := n.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -223,6 +233,7 @@ func (n nodeV8Wrapper) isConnected(info *v8.FunctionCallbackInfo) (*v8.Value, er
 
 func (n nodeV8Wrapper) ownerDocument(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.ownerDocument")
 	instance, err := n.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -233,6 +244,7 @@ func (n nodeV8Wrapper) ownerDocument(info *v8.FunctionCallbackInfo) (*v8.Value, 
 
 func (n nodeV8Wrapper) parentElement(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.parentElement")
 	instance, err := n.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -243,6 +255,7 @@ func (n nodeV8Wrapper) parentElement(info *v8.FunctionCallbackInfo) (*v8.Value, 
 
 func (n nodeV8Wrapper) childNodes(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.childNodes")
 	instance, err := n.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -253,6 +266,7 @@ func (n nodeV8Wrapper) childNodes(info *v8.FunctionCallbackInfo) (*v8.Value, err
 
 func (n nodeV8Wrapper) firstChild(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.firstChild")
 	instance, err := n.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -263,6 +277,7 @@ func (n nodeV8Wrapper) firstChild(info *v8.FunctionCallbackInfo) (*v8.Value, err
 
 func (n nodeV8Wrapper) previousSibling(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.previousSibling")
 	instance, err := n.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -273,6 +288,7 @@ func (n nodeV8Wrapper) previousSibling(info *v8.FunctionCallbackInfo) (*v8.Value
 
 func (n nodeV8Wrapper) nextSibling(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := n.mustGetContext(info)
+	log.Debug("V8 Function call: Node.nextSibling")
 	instance, err := n.getInstance(info)
 	if err != nil {
 		return nil, err

@@ -5,6 +5,7 @@ package v8host
 import (
 	"errors"
 	dom "github.com/gost-dom/browser/dom"
+	log "github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -72,6 +73,7 @@ func (e eventV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, e
 }
 
 func (e eventV8Wrapper) stopPropagation(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: Event.stopPropagation")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -81,6 +83,7 @@ func (e eventV8Wrapper) stopPropagation(info *v8.FunctionCallbackInfo) (*v8.Valu
 }
 
 func (e eventV8Wrapper) preventDefault(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: Event.preventDefault")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -91,6 +94,7 @@ func (e eventV8Wrapper) preventDefault(info *v8.FunctionCallbackInfo) (*v8.Value
 
 func (e eventV8Wrapper) type_(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: Event.type")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -101,6 +105,7 @@ func (e eventV8Wrapper) type_(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 
 func (e eventV8Wrapper) target(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: Event.target")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -111,6 +116,7 @@ func (e eventV8Wrapper) target(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 
 func (e eventV8Wrapper) currentTarget(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: Event.currentTarget")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -121,6 +127,7 @@ func (e eventV8Wrapper) currentTarget(info *v8.FunctionCallbackInfo) (*v8.Value,
 
 func (e eventV8Wrapper) bubbles(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: Event.bubbles")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -131,6 +138,7 @@ func (e eventV8Wrapper) bubbles(info *v8.FunctionCallbackInfo) (*v8.Value, error
 
 func (e eventV8Wrapper) cancelable(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: Event.cancelable")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err

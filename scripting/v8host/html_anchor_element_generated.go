@@ -5,6 +5,7 @@ package v8host
 import (
 	"errors"
 	html "github.com/gost-dom/browser/html"
+	log "github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -88,6 +89,7 @@ func (e hTMLAnchorElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (
 
 func (e hTMLAnchorElementV8Wrapper) target(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.target")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -97,6 +99,7 @@ func (e hTMLAnchorElementV8Wrapper) target(info *v8.FunctionCallbackInfo) (*v8.V
 }
 
 func (e hTMLAnchorElementV8Wrapper) setTarget(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setTarget")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeDOMString)
@@ -113,6 +116,7 @@ func (e hTMLAnchorElementV8Wrapper) setTarget(info *v8.FunctionCallbackInfo) (*v
 
 func (e hTMLAnchorElementV8Wrapper) href(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.href")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -122,6 +126,7 @@ func (e hTMLAnchorElementV8Wrapper) href(info *v8.FunctionCallbackInfo) (*v8.Val
 }
 
 func (e hTMLAnchorElementV8Wrapper) setHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setHref")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeUSVString)
@@ -138,6 +143,7 @@ func (e hTMLAnchorElementV8Wrapper) setHref(info *v8.FunctionCallbackInfo) (*v8.
 
 func (e hTMLAnchorElementV8Wrapper) origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.origin")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -148,6 +154,7 @@ func (e hTMLAnchorElementV8Wrapper) origin(info *v8.FunctionCallbackInfo) (*v8.V
 
 func (e hTMLAnchorElementV8Wrapper) protocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.protocol")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -157,6 +164,7 @@ func (e hTMLAnchorElementV8Wrapper) protocol(info *v8.FunctionCallbackInfo) (*v8
 }
 
 func (e hTMLAnchorElementV8Wrapper) setProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setProtocol")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeUSVString)
@@ -173,6 +181,7 @@ func (e hTMLAnchorElementV8Wrapper) setProtocol(info *v8.FunctionCallbackInfo) (
 
 func (e hTMLAnchorElementV8Wrapper) username(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.username")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -182,6 +191,7 @@ func (e hTMLAnchorElementV8Wrapper) username(info *v8.FunctionCallbackInfo) (*v8
 }
 
 func (e hTMLAnchorElementV8Wrapper) setUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setUsername")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeUSVString)
@@ -198,6 +208,7 @@ func (e hTMLAnchorElementV8Wrapper) setUsername(info *v8.FunctionCallbackInfo) (
 
 func (e hTMLAnchorElementV8Wrapper) password(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.password")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -207,6 +218,7 @@ func (e hTMLAnchorElementV8Wrapper) password(info *v8.FunctionCallbackInfo) (*v8
 }
 
 func (e hTMLAnchorElementV8Wrapper) setPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setPassword")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeUSVString)
@@ -223,6 +235,7 @@ func (e hTMLAnchorElementV8Wrapper) setPassword(info *v8.FunctionCallbackInfo) (
 
 func (e hTMLAnchorElementV8Wrapper) host(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.host")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -232,6 +245,7 @@ func (e hTMLAnchorElementV8Wrapper) host(info *v8.FunctionCallbackInfo) (*v8.Val
 }
 
 func (e hTMLAnchorElementV8Wrapper) setHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setHost")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeUSVString)
@@ -248,6 +262,7 @@ func (e hTMLAnchorElementV8Wrapper) setHost(info *v8.FunctionCallbackInfo) (*v8.
 
 func (e hTMLAnchorElementV8Wrapper) hostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.hostname")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -257,6 +272,7 @@ func (e hTMLAnchorElementV8Wrapper) hostname(info *v8.FunctionCallbackInfo) (*v8
 }
 
 func (e hTMLAnchorElementV8Wrapper) setHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setHostname")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeUSVString)
@@ -273,6 +289,7 @@ func (e hTMLAnchorElementV8Wrapper) setHostname(info *v8.FunctionCallbackInfo) (
 
 func (e hTMLAnchorElementV8Wrapper) port(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.port")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -282,6 +299,7 @@ func (e hTMLAnchorElementV8Wrapper) port(info *v8.FunctionCallbackInfo) (*v8.Val
 }
 
 func (e hTMLAnchorElementV8Wrapper) setPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setPort")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeUSVString)
@@ -298,6 +316,7 @@ func (e hTMLAnchorElementV8Wrapper) setPort(info *v8.FunctionCallbackInfo) (*v8.
 
 func (e hTMLAnchorElementV8Wrapper) pathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.pathname")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -307,6 +326,7 @@ func (e hTMLAnchorElementV8Wrapper) pathname(info *v8.FunctionCallbackInfo) (*v8
 }
 
 func (e hTMLAnchorElementV8Wrapper) setPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setPathname")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeUSVString)
@@ -323,6 +343,7 @@ func (e hTMLAnchorElementV8Wrapper) setPathname(info *v8.FunctionCallbackInfo) (
 
 func (e hTMLAnchorElementV8Wrapper) search(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.search")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -332,6 +353,7 @@ func (e hTMLAnchorElementV8Wrapper) search(info *v8.FunctionCallbackInfo) (*v8.V
 }
 
 func (e hTMLAnchorElementV8Wrapper) setSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setSearch")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeUSVString)
@@ -348,6 +370,7 @@ func (e hTMLAnchorElementV8Wrapper) setSearch(info *v8.FunctionCallbackInfo) (*v
 
 func (e hTMLAnchorElementV8Wrapper) hash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLAnchorElement.hash")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -357,6 +380,7 @@ func (e hTMLAnchorElementV8Wrapper) hash(info *v8.FunctionCallbackInfo) (*v8.Val
 }
 
 func (e hTMLAnchorElementV8Wrapper) setHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLAnchorElement.setHash")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeUSVString)

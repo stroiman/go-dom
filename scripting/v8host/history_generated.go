@@ -4,6 +4,7 @@ package v8host
 
 import (
 	"errors"
+	log "github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -43,6 +44,7 @@ func (h historyV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value,
 }
 
 func (h historyV8Wrapper) go_(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: History.go")
 	args := newArgumentHelper(h.scriptHost, info)
 	instance, err0 := h.getInstance(info)
 	delta, err1 := tryParseArgWithDefault(args, 0, h.defaultDelta, h.decodeLong)
@@ -58,6 +60,7 @@ func (h historyV8Wrapper) go_(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 }
 
 func (h historyV8Wrapper) back(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: History.back")
 	instance, err := h.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -67,6 +70,7 @@ func (h historyV8Wrapper) back(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 }
 
 func (h historyV8Wrapper) forward(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: History.forward")
 	instance, err := h.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -76,6 +80,7 @@ func (h historyV8Wrapper) forward(info *v8.FunctionCallbackInfo) (*v8.Value, err
 }
 
 func (h historyV8Wrapper) pushState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: History.pushState")
 	args := newArgumentHelper(h.scriptHost, info)
 	instance, err0 := h.getInstance(info)
 	data, err1 := tryParseArg(args, 0, h.decodeAny)
@@ -92,6 +97,7 @@ func (h historyV8Wrapper) pushState(info *v8.FunctionCallbackInfo) (*v8.Value, e
 }
 
 func (h historyV8Wrapper) replaceState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: History.replaceState")
 	args := newArgumentHelper(h.scriptHost, info)
 	instance, err0 := h.getInstance(info)
 	data, err1 := tryParseArg(args, 0, h.decodeAny)
@@ -109,6 +115,7 @@ func (h historyV8Wrapper) replaceState(info *v8.FunctionCallbackInfo) (*v8.Value
 
 func (h historyV8Wrapper) length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := h.mustGetContext(info)
+	log.Debug("V8 Function call: History.length")
 	instance, err := h.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -119,6 +126,7 @@ func (h historyV8Wrapper) length(info *v8.FunctionCallbackInfo) (*v8.Value, erro
 
 func (h historyV8Wrapper) state(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := h.mustGetContext(info)
+	log.Debug("V8 Function call: History.state")
 	instance, err := h.getInstance(info)
 	if err != nil {
 		return nil, err

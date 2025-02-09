@@ -4,6 +4,7 @@ package v8host
 
 import (
 	"errors"
+	log "github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -97,6 +98,7 @@ func (u urlV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, err
 
 func (u urlV8Wrapper) toJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
+	log.Debug("V8 Function call: URL.toJSON")
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -111,6 +113,7 @@ func (u urlV8Wrapper) toJSON(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 
 func (u urlV8Wrapper) href(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
+	log.Debug("V8 Function call: URL.href")
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -120,11 +123,13 @@ func (u urlV8Wrapper) href(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u urlV8Wrapper) setHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.setHref")
 	return nil, errors.New("URL.setHref: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
+	log.Debug("V8 Function call: URL.origin")
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -135,6 +140,7 @@ func (u urlV8Wrapper) origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 
 func (u urlV8Wrapper) protocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
+	log.Debug("V8 Function call: URL.protocol")
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -144,27 +150,33 @@ func (u urlV8Wrapper) protocol(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 }
 
 func (u urlV8Wrapper) setProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.setProtocol")
 	return nil, errors.New("URL.setProtocol: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) username(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.username")
 	return nil, errors.New("URL.username: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) setUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.setUsername")
 	return nil, errors.New("URL.setUsername: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) password(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.password")
 	return nil, errors.New("URL.password: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) setPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.setPassword")
 	return nil, errors.New("URL.setPassword: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) host(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
+	log.Debug("V8 Function call: URL.host")
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -174,11 +186,13 @@ func (u urlV8Wrapper) host(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u urlV8Wrapper) setHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.setHost")
 	return nil, errors.New("URL.setHost: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) hostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
+	log.Debug("V8 Function call: URL.hostname")
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -188,11 +202,13 @@ func (u urlV8Wrapper) hostname(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 }
 
 func (u urlV8Wrapper) setHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.setHostname")
 	return nil, errors.New("URL.setHostname: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) port(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
+	log.Debug("V8 Function call: URL.port")
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -202,11 +218,13 @@ func (u urlV8Wrapper) port(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u urlV8Wrapper) setPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.setPort")
 	return nil, errors.New("URL.setPort: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) pathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
+	log.Debug("V8 Function call: URL.pathname")
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -216,11 +234,13 @@ func (u urlV8Wrapper) pathname(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 }
 
 func (u urlV8Wrapper) setPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.setPathname")
 	return nil, errors.New("URL.setPathname: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) search(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
+	log.Debug("V8 Function call: URL.search")
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -230,15 +250,18 @@ func (u urlV8Wrapper) search(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u urlV8Wrapper) setSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.setSearch")
 	return nil, errors.New("URL.setSearch: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) searchParams(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.searchParams")
 	return nil, errors.New("URL.searchParams: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }
 
 func (u urlV8Wrapper) hash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := u.mustGetContext(info)
+	log.Debug("V8 Function call: URL.hash")
 	instance, err := u.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -248,5 +271,6 @@ func (u urlV8Wrapper) hash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 }
 
 func (u urlV8Wrapper) setHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: URL.setHash")
 	return nil, errors.New("URL.setHash: Not implemented. Create an issue: https://github.com/gost-dom/browser/issues")
 }

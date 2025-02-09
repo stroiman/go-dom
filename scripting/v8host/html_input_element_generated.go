@@ -5,6 +5,7 @@ package v8host
 import (
 	"errors"
 	html "github.com/gost-dom/browser/html"
+	log "github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
 
@@ -45,6 +46,7 @@ func (e hTMLInputElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*
 
 func (e hTMLInputElementV8Wrapper) checkValidity(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLInputElement.checkValidity")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -55,6 +57,7 @@ func (e hTMLInputElementV8Wrapper) checkValidity(info *v8.FunctionCallbackInfo) 
 
 func (e hTMLInputElementV8Wrapper) type_(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := e.mustGetContext(info)
+	log.Debug("V8 Function call: HTMLInputElement.type")
 	instance, err := e.getInstance(info)
 	if err != nil {
 		return nil, err
@@ -64,6 +67,7 @@ func (e hTMLInputElementV8Wrapper) type_(info *v8.FunctionCallbackInfo) (*v8.Val
 }
 
 func (e hTMLInputElementV8Wrapper) setType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	log.Debug("V8 Function call: HTMLInputElement.setType")
 	args := newArgumentHelper(e.scriptHost, info)
 	instance, err0 := e.getInstance(info)
 	val, err1 := tryParseArg(args, 0, e.decodeDOMString)

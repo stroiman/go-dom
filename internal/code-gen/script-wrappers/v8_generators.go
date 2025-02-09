@@ -136,9 +136,8 @@ func CreateV8FunctionTemplateCallbackBody(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
-	debug := g.Noop
-	// g.NewValuePackage("Debug", log).Call(
-	// 	g.Lit(fmt.Sprintf("V8 Function call: %s.%s", data.Name(), op.Name)))
+	debug := g.NewValuePackage("Debug", log).Call(
+		g.Lit(fmt.Sprintf("V8 Function call: %s.%s", data.Name(), op.Name)))
 	if op.NotImplemented {
 		errMsg := fmt.Sprintf(
 			"%s.%s: Not implemented. Create an issue: %s", data.Name(), op.Name, ISSUE_URL,
