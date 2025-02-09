@@ -33,7 +33,10 @@ const (
 	gojaSrc  = "github.com/dop251/goja"
 )
 
-func createData(spec idl.Spec, dataData configuration.WrapperTypeSpec) ESConstructorData {
+func createData(
+	spec idl.Spec,
+	dataData *configuration.IdlInterfaceConfiguration,
+) ESConstructorData {
 	idlName, ok := spec.GetType(dataData.TypeName)
 	if !ok {
 		panic("Missing type")
@@ -48,7 +51,7 @@ func createData(spec idl.Spec, dataData configuration.WrapperTypeSpec) ESConstru
 	}
 	return ESConstructorData{
 		Spec:                dataData,
-		InnerTypeName:       wrappedTypeName,
+		IdlInterfaceName:    wrappedTypeName,
 		WrapperTypeName:     lowerCaseFirstLetter(wrapperTypeBaseName),
 		WrapperTypeBaseName: wrapperTypeBaseName,
 		Receiver:            dataData.Receiver,
@@ -61,7 +64,7 @@ func createData(spec idl.Spec, dataData configuration.WrapperTypeSpec) ESConstru
 }
 
 func CreateConstructor(
-	dataData configuration.WrapperTypeSpec,
+	dataData *configuration.IdlInterfaceConfiguration,
 	idlName idl.TypeSpec) *ESOperation {
 	if c, ok := idlName.Constructor(); ok {
 		fmt.Printf("Create constructor %s '%s'\n", dataData.TypeName, c.Name)
@@ -74,7 +77,7 @@ func CreateConstructor(
 }
 
 func CreateInstanceMethods(
-	dataData configuration.WrapperTypeSpec,
+	dataData *configuration.IdlInterfaceConfiguration,
 	idlName idl.TypeSpec) (result []ESOperation) {
 	for instanceMethod := range idlName.InstanceMethods() {
 		op := createOperation(dataData, instanceMethod)
@@ -84,7 +87,7 @@ func CreateInstanceMethods(
 }
 
 func CreateAttributes(
-	dataData configuration.WrapperTypeSpec,
+	dataData *configuration.IdlInterfaceConfiguration,
 	idlName idl.TypeSpec,
 ) (res []ESAttribute) {
 	for attribute := range idlName.IdlInterface.AllAttributes(dataData.IncludeIncludes) {
@@ -133,7 +136,10 @@ func CreateAttributes(
 	return
 }
 
-func createOperation(typeSpec configuration.WrapperTypeSpec, member idl.MemberSpec) ESOperation {
+func createOperation(
+	typeSpec *configuration.IdlInterfaceConfiguration,
+	member idl.MemberSpec,
+) ESOperation {
 	methodCustomization := typeSpec.GetMethodCustomization(member.Name)
 	op := ESOperation{
 		Name:                 member.Name,
@@ -239,8 +245,8 @@ type ESAttribute struct {
 }
 
 type ESConstructorData struct {
-	Spec                *configuration.ESClassWrapper
-	InnerTypeName       string
+	Spec                *configuration.IdlInterfaceConfiguration
+	IdlInterfaceName    string
 	WrapperTypeName     string
 	WrapperTypeBaseName string
 	Receiver            string

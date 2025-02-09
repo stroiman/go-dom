@@ -1,6 +1,6 @@
 package configuration
 
-func CreateSpecs() WrapperGeneratorsSpec {
+func CreateSpecs() WebIdlConfigurations {
 	specs := NewWrapperGeneratorsSpec()
 	domSpecs := specs.Module("dom")
 	domSpecs.SetMultipleFiles(true)
@@ -30,7 +30,7 @@ func CreateSpecs() WrapperGeneratorsSpec {
 	return specs
 }
 
-func CreateV8Specs() WrapperGeneratorsSpec {
+func CreateV8Specs() WebIdlConfigurations {
 	specs := CreateSpecs()
 	xhrModule := specs.Module("xhr")
 	xhr := xhrModule.Type("XMLHttpRequest")

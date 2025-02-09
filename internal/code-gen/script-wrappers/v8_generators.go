@@ -86,7 +86,7 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 
 func CreateV8ConstructorWrapper(data ESConstructorData) JenGenerator {
 	var body g.Generator
-	if IsNodeType(data.InnerTypeName) {
+	if IsNodeType(data.IdlInterfaceName) {
 		body = CreateV8IllegalConstructorBody(data)
 	} else {
 		body = CreateV8ConstructorWrapperBody(data)
@@ -187,7 +187,7 @@ func CreateV8FunctionTemplateCallbackBody(
 }
 
 func prototypeFactoryFunctionName(data ESConstructorData) string {
-	return fmt.Sprintf("create%sPrototype", data.InnerTypeName)
+	return fmt.Sprintf("create%sPrototype", data.IdlInterfaceName)
 }
 
 func CreateV8Constructor(data ESConstructorData) g.Generator {

@@ -29,14 +29,14 @@ type TargetGenerators interface {
 }
 
 type ScriptWrapperModulesGenerator struct {
-	Specs            configuration.WrapperGeneratorsSpec
+	Specs            configuration.WebIdlConfigurations
 	PackagePath      string
 	TargetGenerators TargetGenerators
 }
 
 func (gen ScriptWrapperModulesGenerator) writeModule(
 	writer io.Writer,
-	spec *configuration.WrapperGeneratorFileSpec,
+	spec *configuration.WebIdlConfiguration,
 ) error {
 	data, err := idl.Load(spec.Name)
 	if err != nil {
@@ -54,7 +54,7 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 }
 
 func (gen ScriptWrapperModulesGenerator) writeModuleTypes(
-	spec *configuration.WrapperGeneratorFileSpec,
+	spec *configuration.WebIdlConfiguration,
 ) error {
 	data, err := idl.Load(spec.Name)
 	if err != nil {
@@ -87,12 +87,12 @@ func typeNameToFileName(name string) string {
 }
 
 func (gen ScriptWrapperModulesGenerator) writeModules(
-	specs configuration.WrapperGeneratorsSpec,
+	specs configuration.WebIdlConfigurations,
 ) error {
 	errs := make([]error, len(specs))
 	i := 0
 	for _, spec := range specs {
-		if spec.UseMultipleFiles() {
+		if spec.MultipleFiles {
 			errs[i] = gen.writeModuleTypes(spec)
 		} else {
 			errs[i] = gen.writeModuleSingleFile(spec)
@@ -103,7 +103,7 @@ func (gen ScriptWrapperModulesGenerator) writeModules(
 }
 
 func (gen ScriptWrapperModulesGenerator) writeModuleSingleFile(
-	spec *configuration.WrapperGeneratorFileSpec,
+	spec *configuration.WebIdlConfiguration,
 ) error {
 	outputFileName := fmt.Sprintf("%s_generated.go", spec.Name)
 	if writer, err := os.Create(outputFileName); err != nil {

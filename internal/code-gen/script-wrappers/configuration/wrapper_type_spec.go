@@ -1,12 +1,12 @@
 package configuration
 
-// ESClassWrapper contains information about how to generate ES wrapper code
-// around a class in the web specification.
+// IdlInterfaceConfiguration contains information about how to generate
+// prototype objects for an interface in the IDL.
 //
 // All classes will be generated using a set of defaults. Data in this structure
 // will allow deviating from the defaults.
-type ESClassWrapper struct {
-	DomSpec                   *WrapperGeneratorFileSpec
+type IdlInterfaceConfiguration struct {
+	DomSpec                   *WebIdlConfiguration
 	TypeName                  string
 	InnerTypeName             string
 	WrapperTypeName           string
@@ -18,33 +18,33 @@ type ESClassWrapper struct {
 	Customization             map[string]*ESMethodWrapper
 }
 
-func (w *ESClassWrapper) ensureMap() {
+func (w *IdlInterfaceConfiguration) ensureMap() {
 	if w.Customization == nil {
 		w.Customization = make(map[string]*ESMethodWrapper)
 	}
 }
 
-func (w *ESClassWrapper) MarkMembersAsNotImplemented(names ...string) {
+func (w *IdlInterfaceConfiguration) MarkMembersAsNotImplemented(names ...string) {
 	w.ensureMap()
 	for _, name := range names {
 		w.Customization[name] = &ESMethodWrapper{NotImplemented: true}
 	}
 }
-func (w *ESClassWrapper) MarkMembersAsIgnored(names ...string) {
+func (w *IdlInterfaceConfiguration) MarkMembersAsIgnored(names ...string) {
 	w.ensureMap()
 	for _, name := range names {
 		w.Customization[name] = &ESMethodWrapper{Ignored: true}
 	}
 }
 
-func (w *ESClassWrapper) GetMethodCustomization(name string) (result ESMethodWrapper) {
+func (w *IdlInterfaceConfiguration) GetMethodCustomization(name string) (result ESMethodWrapper) {
 	if val, ok := w.Customization[name]; ok {
 		result = *val
 	}
 	return
 }
 
-func (w *ESClassWrapper) Method(name string) (result *ESMethodWrapper) {
+func (w *IdlInterfaceConfiguration) Method(name string) (result *ESMethodWrapper) {
 	w.ensureMap()
 	var ok bool
 	if result, ok = w.Customization[name]; !ok {
@@ -54,6 +54,6 @@ func (w *ESClassWrapper) Method(name string) (result *ESMethodWrapper) {
 	return result
 }
 
-func (s *ESClassWrapper) CreateWrapper() {
+func (s *IdlInterfaceConfiguration) CreateWrapper() {
 	s.WrapperStruct = true
 }
