@@ -287,7 +287,7 @@ func (w *window) Close() {
 	}
 }
 
-func (w *window) ObjectId() int32 { return -1 }
+func (w *window) ObjectId() entity.ObjectId { return -1 }
 
 // resolveHref takes an href from a <a> tag, or action from a <form> tag and
 // resolves an absolute URL that must be requested.

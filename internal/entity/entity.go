@@ -1,5 +1,7 @@
 package entity
 
+import "sync/atomic"
+
 // An ObjectId uniquely identifies an element in the DOM. It is meant for
 // internal use only, and shouldn't be used by users of the library.
 //
@@ -7,22 +9,10 @@ package entity
 // JavaScript number.
 type ObjectId = int32
 
-var idSeq <-chan ObjectId
-
-func init() {
-	c := make(chan ObjectId)
-	idSeq = c
-	go func() {
-		var nextId ObjectId = 1
-		for {
-			c <- nextId
-			nextId++
-		}
-	}()
-}
+var idSeq atomic.Int32
 
 func NewObjectId() ObjectId {
-	return <-idSeq
+	return idSeq.Add(1)
 }
 
 // An Entity provides a unique identifier of an object that may be retrieved
