@@ -86,12 +86,9 @@ func (c *V8ScriptContext) decN(n int64) {
 
 // begin/end close are called when we want to close the context
 func (c *V8ScriptContext) beginClose() {
-	log.Warn("v8ctx.beginClose")
 	c.closer = make(chan bool)
 	c.dec()
-	log.Warn("v8ctx.beginClose: Waiting for jobs to finish")
 	<-c.closer
-	log.Warn("v8ctx.beginClose: All jobs finished")
 }
 
 func (c *V8ScriptContext) endClose() {}
