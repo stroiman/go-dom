@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/gost-dom/code-gen/script-wrappers/configuration"
 	g "github.com/gost-dom/generators"
 	"github.com/gost-dom/webref/idl"
 
@@ -32,7 +33,7 @@ const (
 	gojaSrc  = "github.com/dop251/goja"
 )
 
-func createData(spec idl.Spec, dataData WrapperTypeSpec) ESConstructorData {
+func createData(spec idl.Spec, dataData configuration.WrapperTypeSpec) ESConstructorData {
 	idlName, ok := spec.GetType(dataData.TypeName)
 	if !ok {
 		panic("Missing type")
@@ -60,7 +61,7 @@ func createData(spec idl.Spec, dataData WrapperTypeSpec) ESConstructorData {
 }
 
 func CreateConstructor(
-	dataData WrapperTypeSpec,
+	dataData configuration.WrapperTypeSpec,
 	idlName idl.TypeSpec) *ESOperation {
 	if c, ok := idlName.Constructor(); ok {
 		fmt.Printf("Create constructor %s '%s'\n", dataData.TypeName, c.Name)
@@ -73,7 +74,7 @@ func CreateConstructor(
 }
 
 func CreateInstanceMethods(
-	dataData WrapperTypeSpec,
+	dataData configuration.WrapperTypeSpec,
 	idlName idl.TypeSpec) (result []ESOperation) {
 	for instanceMethod := range idlName.InstanceMethods() {
 		op := createOperation(dataData, instanceMethod)
@@ -83,7 +84,7 @@ func CreateInstanceMethods(
 }
 
 func CreateAttributes(
-	dataData WrapperTypeSpec,
+	dataData configuration.WrapperTypeSpec,
 	idlName idl.TypeSpec,
 ) (res []ESAttribute) {
 	for attribute := range idlName.IdlInterface.AllAttributes(dataData.IncludeIncludes) {
@@ -132,7 +133,7 @@ func CreateAttributes(
 	return
 }
 
-func createOperation(typeSpec WrapperTypeSpec, member idl.MemberSpec) ESOperation {
+func createOperation(typeSpec configuration.WrapperTypeSpec, member idl.MemberSpec) ESOperation {
 	methodCustomization := typeSpec.GetMethodCustomization(member.Name)
 	op := ESOperation{
 		Name:                 member.Name,
@@ -144,16 +145,16 @@ func createOperation(typeSpec WrapperTypeSpec, member idl.MemberSpec) ESOperatio
 		Arguments:            []ESOperationArgument{},
 	}
 	for _, arg := range member.Arguments {
-		var esArgumentSpec ESMethodArgument
+		var esArgumentSpec configuration.ESMethodArgument
 		if arg := methodCustomization.Argument(arg.Name); arg != nil {
 			esArgumentSpec = *arg
 		}
 		esArg := ESOperationArgument{
 			Name:         arg.Name,
-			Optional:     arg.Optional && !esArgumentSpec.required,
+			Optional:     arg.Optional && !esArgumentSpec.Required,
 			IdlType:      arg.IdlType,
 			ArgumentSpec: esArgumentSpec,
-			Ignore:       esArgumentSpec.ignored,
+			Ignore:       esArgumentSpec.Ignored,
 		}
 		if len(arg.IdlType.Types) > 0 {
 			slog.Warn(
@@ -178,18 +179,18 @@ type ESOperationArgument struct {
 	Optional     bool
 	Variadic     bool
 	IdlType      idl.IdlTypes
-	ArgumentSpec ESMethodArgument
+	ArgumentSpec configuration.ESMethodArgument
 	Ignore       bool
 }
 
 func (a ESOperationArgument) OptionalInGo() bool {
-	hasDefault := a.ArgumentSpec.hasDefault
+	hasDefault := a.ArgumentSpec.HasDefault
 	return a.Optional && !hasDefault
 }
 
 func (a ESOperationArgument) DefaultValueInGo() (name string, ok bool) {
-	ok = a.Optional && a.ArgumentSpec.hasDefault
-	if defaultValue := a.ArgumentSpec.defaultValue; defaultValue != "" {
+	ok = a.Optional && a.ArgumentSpec.HasDefault
+	if defaultValue := a.ArgumentSpec.DefaultValue; defaultValue != "" {
 		name = defaultValue
 	} else {
 		name = fmt.Sprintf("default%s", a.Type)
@@ -203,7 +204,7 @@ type ESOperation struct {
 	RetType              idl.RetType
 	HasError             bool
 	CustomImplementation bool
-	MethodCustomization  ESMethodWrapper
+	MethodCustomization  configuration.ESMethodWrapper
 	Arguments            []ESOperationArgument
 }
 
@@ -238,7 +239,7 @@ type ESAttribute struct {
 }
 
 type ESConstructorData struct {
-	Spec                *ESClassWrapper
+	Spec                *configuration.ESClassWrapper
 	InnerTypeName       string
 	WrapperTypeName     string
 	WrapperTypeBaseName string

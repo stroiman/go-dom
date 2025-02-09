@@ -1,7 +1,9 @@
 package wrappers
 
+import "github.com/gost-dom/code-gen/script-wrappers/configuration"
+
 func NewGojaWrapperModuleGenerator() ScriptWrapperModulesGenerator {
-	specs := CreateSpecs()
+	specs := configuration.CreateSpecs()
 	dom := specs.Module("dom")
 	domNode := dom.Type("Node")
 	domNode.Method("childNodes").SetNotImplemented()
