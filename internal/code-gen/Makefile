@@ -4,5 +4,5 @@ test:
 build:
 	go build .
 
-watch:
+build-watch:
 	gow -s -S "Build done" build

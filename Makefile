@@ -8,13 +8,20 @@ codegen-clean:
 	rm -f dom/*_generated.go
 	rm -f html/*_generated.go
 
-.PHONY: codegen-watch
-codegen-watch: codegen-clean
-	gow -w ./internal/code-gen -e="" generate ./...
+.PHONY: codegen-watch codegen-run
+codegen-run:
+	make -j2 codegen-watch codegen-build-watch
 
-.PHONY: codegen codegen-build
+codegen-watch: codegen-clean
+	gow -w ./internal/code-gen -S="Codegen done" -e="" generate ./...
+
+.PHONY: codegen codegen-build codegen-build-watch
+
 codegen-build:
 	$(MAKE) -C internal/code-gen build
+
+codegen-build-watch:
+	$(MAKE) -C internal/code-gen build-watch
 
 codegen: codegen-clean codegen-build
 	go generate ./...
