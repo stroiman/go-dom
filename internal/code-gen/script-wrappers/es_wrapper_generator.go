@@ -42,9 +42,10 @@ func createData(
 	if !ok {
 		panic("Missing type")
 	}
+	idlInterface := idlName.IdlInterface
 	wrappedTypeName := dataData.InnerTypeName
 	if wrappedTypeName == "" {
-		wrappedTypeName = idlName.IdlInterface.Name
+		wrappedTypeName = idlInterface.Name
 	}
 	wrapperTypeBaseName := dataData.WrapperTypeName
 	if wrapperTypeBaseName == "" {
@@ -57,7 +58,7 @@ func createData(
 		WrapperTypeBaseName: wrapperTypeBaseName,
 		Receiver:            dataData.Receiver,
 		RunCustomCode:       dataData.RunCustomCode,
-		Inheritance:         idlName.Inheritance(),
+		Inheritance:         idlInterface.Inheritance,
 		Constructor:         CreateConstructor(dataData, idlName),
 		Operations:          CreateInstanceMethods(dataData, idlName),
 		Attributes:          CreateAttributes(dataData, idlName),
