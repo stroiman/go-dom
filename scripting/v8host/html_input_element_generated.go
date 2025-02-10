@@ -29,15 +29,18 @@ func createHTMLInputElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTempl
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
-	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("checkValidity", v8.NewFunctionTemplateWithError(iso, wrapper.checkValidity))
-
-	prototypeTmpl.SetAccessorProperty("type",
-		v8.NewFunctionTemplateWithError(iso, wrapper.type_),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setType),
-		v8.None)
+	wrapper.installPrototype(constructor.PrototypeTemplate())
 
 	return constructor
+}
+func (e hTMLInputElementV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := e.scriptHost.iso
+	prototypeTmpl.Set("checkValidity", v8.NewFunctionTemplateWithError(iso, e.checkValidity))
+
+	prototypeTmpl.SetAccessorProperty("type",
+		v8.NewFunctionTemplateWithError(iso, e.type_),
+		v8.NewFunctionTemplateWithError(iso, e.setType),
+		v8.None)
 }
 
 func (e hTMLInputElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

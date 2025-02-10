@@ -29,59 +29,62 @@ func createHTMLFormElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTempla
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
-	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("submit", v8.NewFunctionTemplateWithError(iso, wrapper.submit))
-	prototypeTmpl.Set("requestSubmit", v8.NewFunctionTemplateWithError(iso, wrapper.requestSubmit))
-	prototypeTmpl.Set("reset", v8.NewFunctionTemplateWithError(iso, wrapper.reset))
-	prototypeTmpl.Set("checkValidity", v8.NewFunctionTemplateWithError(iso, wrapper.checkValidity))
-	prototypeTmpl.Set("reportValidity", v8.NewFunctionTemplateWithError(iso, wrapper.reportValidity))
+	wrapper.installPrototype(constructor.PrototypeTemplate())
+
+	return constructor
+}
+func (e hTMLFormElementV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := e.scriptHost.iso
+	prototypeTmpl.Set("submit", v8.NewFunctionTemplateWithError(iso, e.submit))
+	prototypeTmpl.Set("requestSubmit", v8.NewFunctionTemplateWithError(iso, e.requestSubmit))
+	prototypeTmpl.Set("reset", v8.NewFunctionTemplateWithError(iso, e.reset))
+	prototypeTmpl.Set("checkValidity", v8.NewFunctionTemplateWithError(iso, e.checkValidity))
+	prototypeTmpl.Set("reportValidity", v8.NewFunctionTemplateWithError(iso, e.reportValidity))
 
 	prototypeTmpl.SetAccessorProperty("acceptCharset",
-		v8.NewFunctionTemplateWithError(iso, wrapper.acceptCharset),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setAcceptCharset),
+		v8.NewFunctionTemplateWithError(iso, e.acceptCharset),
+		v8.NewFunctionTemplateWithError(iso, e.setAcceptCharset),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("action",
-		v8.NewFunctionTemplateWithError(iso, wrapper.action),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setAction),
+		v8.NewFunctionTemplateWithError(iso, e.action),
+		v8.NewFunctionTemplateWithError(iso, e.setAction),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("autocomplete",
-		v8.NewFunctionTemplateWithError(iso, wrapper.autocomplete),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setAutocomplete),
+		v8.NewFunctionTemplateWithError(iso, e.autocomplete),
+		v8.NewFunctionTemplateWithError(iso, e.setAutocomplete),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("enctype",
-		v8.NewFunctionTemplateWithError(iso, wrapper.enctype),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setEnctype),
+		v8.NewFunctionTemplateWithError(iso, e.enctype),
+		v8.NewFunctionTemplateWithError(iso, e.setEnctype),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("encoding",
-		v8.NewFunctionTemplateWithError(iso, wrapper.encoding),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setEncoding),
+		v8.NewFunctionTemplateWithError(iso, e.encoding),
+		v8.NewFunctionTemplateWithError(iso, e.setEncoding),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("method",
-		v8.NewFunctionTemplateWithError(iso, wrapper.method),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setMethod),
+		v8.NewFunctionTemplateWithError(iso, e.method),
+		v8.NewFunctionTemplateWithError(iso, e.setMethod),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("target",
-		v8.NewFunctionTemplateWithError(iso, wrapper.target),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setTarget),
+		v8.NewFunctionTemplateWithError(iso, e.target),
+		v8.NewFunctionTemplateWithError(iso, e.setTarget),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("rel",
-		v8.NewFunctionTemplateWithError(iso, wrapper.rel),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setRel),
+		v8.NewFunctionTemplateWithError(iso, e.rel),
+		v8.NewFunctionTemplateWithError(iso, e.setRel),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("relList",
-		v8.NewFunctionTemplateWithError(iso, wrapper.relList),
+		v8.NewFunctionTemplateWithError(iso, e.relList),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("elements",
-		v8.NewFunctionTemplateWithError(iso, wrapper.elements),
+		v8.NewFunctionTemplateWithError(iso, e.elements),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("length",
-		v8.NewFunctionTemplateWithError(iso, wrapper.length),
+		v8.NewFunctionTemplateWithError(iso, e.length),
 		nil,
 		v8.None)
-
-	return constructor
 }
 
 func (e hTMLFormElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

@@ -29,58 +29,61 @@ func createHTMLAnchorElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemp
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
-	prototypeTmpl := constructor.PrototypeTemplate()
+	wrapper.installPrototype(constructor.PrototypeTemplate())
+
+	return constructor
+}
+func (e hTMLAnchorElementV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := e.scriptHost.iso
 
 	prototypeTmpl.SetAccessorProperty("target",
-		v8.NewFunctionTemplateWithError(iso, wrapper.target),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setTarget),
+		v8.NewFunctionTemplateWithError(iso, e.target),
+		v8.NewFunctionTemplateWithError(iso, e.setTarget),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("href",
-		v8.NewFunctionTemplateWithError(iso, wrapper.href),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setHref),
+		v8.NewFunctionTemplateWithError(iso, e.href),
+		v8.NewFunctionTemplateWithError(iso, e.setHref),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("origin",
-		v8.NewFunctionTemplateWithError(iso, wrapper.origin),
+		v8.NewFunctionTemplateWithError(iso, e.origin),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("protocol",
-		v8.NewFunctionTemplateWithError(iso, wrapper.protocol),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setProtocol),
+		v8.NewFunctionTemplateWithError(iso, e.protocol),
+		v8.NewFunctionTemplateWithError(iso, e.setProtocol),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("username",
-		v8.NewFunctionTemplateWithError(iso, wrapper.username),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setUsername),
+		v8.NewFunctionTemplateWithError(iso, e.username),
+		v8.NewFunctionTemplateWithError(iso, e.setUsername),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("password",
-		v8.NewFunctionTemplateWithError(iso, wrapper.password),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setPassword),
+		v8.NewFunctionTemplateWithError(iso, e.password),
+		v8.NewFunctionTemplateWithError(iso, e.setPassword),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("host",
-		v8.NewFunctionTemplateWithError(iso, wrapper.host),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setHost),
+		v8.NewFunctionTemplateWithError(iso, e.host),
+		v8.NewFunctionTemplateWithError(iso, e.setHost),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("hostname",
-		v8.NewFunctionTemplateWithError(iso, wrapper.hostname),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setHostname),
+		v8.NewFunctionTemplateWithError(iso, e.hostname),
+		v8.NewFunctionTemplateWithError(iso, e.setHostname),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("port",
-		v8.NewFunctionTemplateWithError(iso, wrapper.port),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setPort),
+		v8.NewFunctionTemplateWithError(iso, e.port),
+		v8.NewFunctionTemplateWithError(iso, e.setPort),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("pathname",
-		v8.NewFunctionTemplateWithError(iso, wrapper.pathname),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setPathname),
+		v8.NewFunctionTemplateWithError(iso, e.pathname),
+		v8.NewFunctionTemplateWithError(iso, e.setPathname),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("search",
-		v8.NewFunctionTemplateWithError(iso, wrapper.search),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setSearch),
+		v8.NewFunctionTemplateWithError(iso, e.search),
+		v8.NewFunctionTemplateWithError(iso, e.setSearch),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("hash",
-		v8.NewFunctionTemplateWithError(iso, wrapper.hash),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setHash),
+		v8.NewFunctionTemplateWithError(iso, e.hash),
+		v8.NewFunctionTemplateWithError(iso, e.setHash),
 		v8.None)
-
-	return constructor
 }
 
 func (e hTMLAnchorElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

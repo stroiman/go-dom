@@ -29,112 +29,115 @@ func createWindowPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
-	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("close", v8.NewFunctionTemplateWithError(iso, wrapper.close))
-	prototypeTmpl.Set("stop", v8.NewFunctionTemplateWithError(iso, wrapper.stop))
-	prototypeTmpl.Set("focus", v8.NewFunctionTemplateWithError(iso, wrapper.focus))
-	prototypeTmpl.Set("blur", v8.NewFunctionTemplateWithError(iso, wrapper.blur))
-	prototypeTmpl.Set("open", v8.NewFunctionTemplateWithError(iso, wrapper.open))
-	prototypeTmpl.Set("alert", v8.NewFunctionTemplateWithError(iso, wrapper.alert))
-	prototypeTmpl.Set("confirm", v8.NewFunctionTemplateWithError(iso, wrapper.confirm))
-	prototypeTmpl.Set("prompt", v8.NewFunctionTemplateWithError(iso, wrapper.prompt))
-	prototypeTmpl.Set("print", v8.NewFunctionTemplateWithError(iso, wrapper.print))
-	prototypeTmpl.Set("postMessage", v8.NewFunctionTemplateWithError(iso, wrapper.postMessage))
+	wrapper.installPrototype(constructor.PrototypeTemplate())
+
+	return constructor
+}
+func (w windowV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := w.scriptHost.iso
+	prototypeTmpl.Set("close", v8.NewFunctionTemplateWithError(iso, w.close))
+	prototypeTmpl.Set("stop", v8.NewFunctionTemplateWithError(iso, w.stop))
+	prototypeTmpl.Set("focus", v8.NewFunctionTemplateWithError(iso, w.focus))
+	prototypeTmpl.Set("blur", v8.NewFunctionTemplateWithError(iso, w.blur))
+	prototypeTmpl.Set("open", v8.NewFunctionTemplateWithError(iso, w.open))
+	prototypeTmpl.Set("alert", v8.NewFunctionTemplateWithError(iso, w.alert))
+	prototypeTmpl.Set("confirm", v8.NewFunctionTemplateWithError(iso, w.confirm))
+	prototypeTmpl.Set("prompt", v8.NewFunctionTemplateWithError(iso, w.prompt))
+	prototypeTmpl.Set("print", v8.NewFunctionTemplateWithError(iso, w.print))
+	prototypeTmpl.Set("postMessage", v8.NewFunctionTemplateWithError(iso, w.postMessage))
 
 	prototypeTmpl.SetAccessorProperty("window",
-		v8.NewFunctionTemplateWithError(iso, wrapper.window),
+		v8.NewFunctionTemplateWithError(iso, w.window),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("self",
-		v8.NewFunctionTemplateWithError(iso, wrapper.self),
+		v8.NewFunctionTemplateWithError(iso, w.self),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("document",
-		v8.NewFunctionTemplateWithError(iso, wrapper.document),
+		v8.NewFunctionTemplateWithError(iso, w.document),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("name",
-		v8.NewFunctionTemplateWithError(iso, wrapper.name),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setName),
+		v8.NewFunctionTemplateWithError(iso, w.name),
+		v8.NewFunctionTemplateWithError(iso, w.setName),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("history",
-		v8.NewFunctionTemplateWithError(iso, wrapper.history),
+		v8.NewFunctionTemplateWithError(iso, w.history),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("navigation",
-		v8.NewFunctionTemplateWithError(iso, wrapper.navigation),
+		v8.NewFunctionTemplateWithError(iso, w.navigation),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("customElements",
-		v8.NewFunctionTemplateWithError(iso, wrapper.customElements),
+		v8.NewFunctionTemplateWithError(iso, w.customElements),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("locationbar",
-		v8.NewFunctionTemplateWithError(iso, wrapper.locationbar),
+		v8.NewFunctionTemplateWithError(iso, w.locationbar),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("menubar",
-		v8.NewFunctionTemplateWithError(iso, wrapper.menubar),
+		v8.NewFunctionTemplateWithError(iso, w.menubar),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("personalbar",
-		v8.NewFunctionTemplateWithError(iso, wrapper.personalbar),
+		v8.NewFunctionTemplateWithError(iso, w.personalbar),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("scrollbars",
-		v8.NewFunctionTemplateWithError(iso, wrapper.scrollbars),
+		v8.NewFunctionTemplateWithError(iso, w.scrollbars),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("statusbar",
-		v8.NewFunctionTemplateWithError(iso, wrapper.statusbar),
+		v8.NewFunctionTemplateWithError(iso, w.statusbar),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("toolbar",
-		v8.NewFunctionTemplateWithError(iso, wrapper.toolbar),
+		v8.NewFunctionTemplateWithError(iso, w.toolbar),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("status",
-		v8.NewFunctionTemplateWithError(iso, wrapper.status),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setStatus),
+		v8.NewFunctionTemplateWithError(iso, w.status),
+		v8.NewFunctionTemplateWithError(iso, w.setStatus),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("closed",
-		v8.NewFunctionTemplateWithError(iso, wrapper.closed),
+		v8.NewFunctionTemplateWithError(iso, w.closed),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("frames",
-		v8.NewFunctionTemplateWithError(iso, wrapper.frames),
+		v8.NewFunctionTemplateWithError(iso, w.frames),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("length",
-		v8.NewFunctionTemplateWithError(iso, wrapper.length),
+		v8.NewFunctionTemplateWithError(iso, w.length),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("top",
-		v8.NewFunctionTemplateWithError(iso, wrapper.top),
+		v8.NewFunctionTemplateWithError(iso, w.top),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("opener",
-		v8.NewFunctionTemplateWithError(iso, wrapper.opener),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setOpener),
+		v8.NewFunctionTemplateWithError(iso, w.opener),
+		v8.NewFunctionTemplateWithError(iso, w.setOpener),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("frameElement",
-		v8.NewFunctionTemplateWithError(iso, wrapper.frameElement),
+		v8.NewFunctionTemplateWithError(iso, w.frameElement),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("navigator",
-		v8.NewFunctionTemplateWithError(iso, wrapper.navigator),
+		v8.NewFunctionTemplateWithError(iso, w.navigator),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("clientInformation",
-		v8.NewFunctionTemplateWithError(iso, wrapper.clientInformation),
+		v8.NewFunctionTemplateWithError(iso, w.clientInformation),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("originAgentCluster",
-		v8.NewFunctionTemplateWithError(iso, wrapper.originAgentCluster),
+		v8.NewFunctionTemplateWithError(iso, w.originAgentCluster),
 		nil,
 		v8.None)
-
-	return constructor
 }
 
 func (w windowV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

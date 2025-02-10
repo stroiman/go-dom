@@ -20,23 +20,26 @@ func createHistoryPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
-	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("go", v8.NewFunctionTemplateWithError(iso, wrapper.go_))
-	prototypeTmpl.Set("back", v8.NewFunctionTemplateWithError(iso, wrapper.back))
-	prototypeTmpl.Set("forward", v8.NewFunctionTemplateWithError(iso, wrapper.forward))
-	prototypeTmpl.Set("pushState", v8.NewFunctionTemplateWithError(iso, wrapper.pushState))
-	prototypeTmpl.Set("replaceState", v8.NewFunctionTemplateWithError(iso, wrapper.replaceState))
+	wrapper.installPrototype(constructor.PrototypeTemplate())
+
+	return constructor
+}
+func (h historyV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := h.scriptHost.iso
+	prototypeTmpl.Set("go", v8.NewFunctionTemplateWithError(iso, h.go_))
+	prototypeTmpl.Set("back", v8.NewFunctionTemplateWithError(iso, h.back))
+	prototypeTmpl.Set("forward", v8.NewFunctionTemplateWithError(iso, h.forward))
+	prototypeTmpl.Set("pushState", v8.NewFunctionTemplateWithError(iso, h.pushState))
+	prototypeTmpl.Set("replaceState", v8.NewFunctionTemplateWithError(iso, h.replaceState))
 
 	prototypeTmpl.SetAccessorProperty("length",
-		v8.NewFunctionTemplateWithError(iso, wrapper.length),
+		v8.NewFunctionTemplateWithError(iso, h.length),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("state",
-		v8.NewFunctionTemplateWithError(iso, wrapper.state),
+		v8.NewFunctionTemplateWithError(iso, h.state),
 		nil,
 		v8.None)
-
-	return constructor
 }
 
 func (h historyV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

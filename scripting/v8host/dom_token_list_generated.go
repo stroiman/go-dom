@@ -20,26 +20,29 @@ func createDomTokenListPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate 
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
-	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("item", v8.NewFunctionTemplateWithError(iso, wrapper.item))
-	prototypeTmpl.Set("contains", v8.NewFunctionTemplateWithError(iso, wrapper.contains))
-	prototypeTmpl.Set("add", v8.NewFunctionTemplateWithError(iso, wrapper.add))
-	prototypeTmpl.Set("remove", v8.NewFunctionTemplateWithError(iso, wrapper.remove))
-	prototypeTmpl.Set("toggle", v8.NewFunctionTemplateWithError(iso, wrapper.toggle))
-	prototypeTmpl.Set("replace", v8.NewFunctionTemplateWithError(iso, wrapper.replace))
-	prototypeTmpl.Set("supports", v8.NewFunctionTemplateWithError(iso, wrapper.supports))
-
-	prototypeTmpl.SetAccessorProperty("length",
-		v8.NewFunctionTemplateWithError(iso, wrapper.length),
-		nil,
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("value",
-		v8.NewFunctionTemplateWithError(iso, wrapper.value),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setValue),
-		v8.None)
+	wrapper.installPrototype(constructor.PrototypeTemplate())
 
 	wrapper.CustomInitialiser(constructor)
 	return constructor
+}
+func (u domTokenListV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := u.scriptHost.iso
+	prototypeTmpl.Set("item", v8.NewFunctionTemplateWithError(iso, u.item))
+	prototypeTmpl.Set("contains", v8.NewFunctionTemplateWithError(iso, u.contains))
+	prototypeTmpl.Set("add", v8.NewFunctionTemplateWithError(iso, u.add))
+	prototypeTmpl.Set("remove", v8.NewFunctionTemplateWithError(iso, u.remove))
+	prototypeTmpl.Set("toggle", v8.NewFunctionTemplateWithError(iso, u.toggle))
+	prototypeTmpl.Set("replace", v8.NewFunctionTemplateWithError(iso, u.replace))
+	prototypeTmpl.Set("supports", v8.NewFunctionTemplateWithError(iso, u.supports))
+
+	prototypeTmpl.SetAccessorProperty("length",
+		v8.NewFunctionTemplateWithError(iso, u.length),
+		nil,
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("value",
+		v8.NewFunctionTemplateWithError(iso, u.value),
+		v8.NewFunctionTemplateWithError(iso, u.setValue),
+		v8.None)
 }
 
 func (u domTokenListV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

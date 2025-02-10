@@ -16,61 +16,64 @@ func createXmlHttpRequestPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplat
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
-	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("open", v8.NewFunctionTemplateWithError(iso, wrapper.open))
-	prototypeTmpl.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, wrapper.setRequestHeader))
-	prototypeTmpl.Set("send", v8.NewFunctionTemplateWithError(iso, wrapper.send))
-	prototypeTmpl.Set("abort", v8.NewFunctionTemplateWithError(iso, wrapper.abort))
-	prototypeTmpl.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, wrapper.getResponseHeader))
-	prototypeTmpl.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, wrapper.getAllResponseHeaders))
-	prototypeTmpl.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, wrapper.overrideMimeType))
+	wrapper.installPrototype(constructor.PrototypeTemplate())
+
+	return constructor
+}
+func (xhr xmlHttpRequestV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := xhr.scriptHost.iso
+	prototypeTmpl.Set("open", v8.NewFunctionTemplateWithError(iso, xhr.open))
+	prototypeTmpl.Set("setRequestHeader", v8.NewFunctionTemplateWithError(iso, xhr.setRequestHeader))
+	prototypeTmpl.Set("send", v8.NewFunctionTemplateWithError(iso, xhr.send))
+	prototypeTmpl.Set("abort", v8.NewFunctionTemplateWithError(iso, xhr.abort))
+	prototypeTmpl.Set("getResponseHeader", v8.NewFunctionTemplateWithError(iso, xhr.getResponseHeader))
+	prototypeTmpl.Set("getAllResponseHeaders", v8.NewFunctionTemplateWithError(iso, xhr.getAllResponseHeaders))
+	prototypeTmpl.Set("overrideMimeType", v8.NewFunctionTemplateWithError(iso, xhr.overrideMimeType))
 
 	prototypeTmpl.SetAccessorProperty("readyState",
-		v8.NewFunctionTemplateWithError(iso, wrapper.readyState),
+		v8.NewFunctionTemplateWithError(iso, xhr.readyState),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("timeout",
-		v8.NewFunctionTemplateWithError(iso, wrapper.timeout),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setTimeout),
+		v8.NewFunctionTemplateWithError(iso, xhr.timeout),
+		v8.NewFunctionTemplateWithError(iso, xhr.setTimeout),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("withCredentials",
-		v8.NewFunctionTemplateWithError(iso, wrapper.withCredentials),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setWithCredentials),
+		v8.NewFunctionTemplateWithError(iso, xhr.withCredentials),
+		v8.NewFunctionTemplateWithError(iso, xhr.setWithCredentials),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("upload",
-		v8.NewFunctionTemplateWithError(iso, wrapper.upload),
+		v8.NewFunctionTemplateWithError(iso, xhr.upload),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseURL",
-		v8.NewFunctionTemplateWithError(iso, wrapper.responseURL),
+		v8.NewFunctionTemplateWithError(iso, xhr.responseURL),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("status",
-		v8.NewFunctionTemplateWithError(iso, wrapper.status),
+		v8.NewFunctionTemplateWithError(iso, xhr.status),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("statusText",
-		v8.NewFunctionTemplateWithError(iso, wrapper.statusText),
+		v8.NewFunctionTemplateWithError(iso, xhr.statusText),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseType",
-		v8.NewFunctionTemplateWithError(iso, wrapper.responseType),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setResponseType),
+		v8.NewFunctionTemplateWithError(iso, xhr.responseType),
+		v8.NewFunctionTemplateWithError(iso, xhr.setResponseType),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("response",
-		v8.NewFunctionTemplateWithError(iso, wrapper.response),
+		v8.NewFunctionTemplateWithError(iso, xhr.response),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseText",
-		v8.NewFunctionTemplateWithError(iso, wrapper.responseText),
+		v8.NewFunctionTemplateWithError(iso, xhr.responseText),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("responseXML",
-		v8.NewFunctionTemplateWithError(iso, wrapper.responseXML),
+		v8.NewFunctionTemplateWithError(iso, xhr.responseXML),
 		nil,
 		v8.None)
-
-	return constructor
 }
 
 func (xhr xmlHttpRequestV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

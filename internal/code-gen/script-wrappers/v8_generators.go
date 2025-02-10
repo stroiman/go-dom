@@ -36,6 +36,7 @@ func CreateV8Generator(data ESConstructorData) g.Generator {
 
 	generator.Append(
 		CreateV8Constructor(data),
+		CreateV8PrototypeInitialiser(data),
 		CreateV8ConstructorWrapper(data),
 		CreateV8WrapperMethods(data),
 	)
@@ -82,6 +83,29 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 	}
 
 	return g.StatementList(wrapperStruct, wrapperConstructor, g.Line)
+}
+
+func CreateV8PrototypeInitialiser(data ESConstructorData) JenGenerator {
+	builder := NewConstructorBuilder()
+	receiver := g.NewValue(data.Receiver)
+	installer := PrototypeInstaller{
+		builder.v8Iso,
+		builder.Proto,
+		WrapperInstance{g.Value{Generator: receiver}},
+	}
+	return g.FunctionDefinition{
+		Name: "installPrototype",
+		Receiver: g.FunctionArgument{
+			Name: receiver,
+			Type: g.Id(data.WrapperTypeName),
+		},
+		Args: g.Arg(builder.Proto, v8ObjectTemplatePtr),
+		Body: g.StatementList(
+			g.Assign(g.NewValue("iso"), receiver.Field("scriptHost").Field("iso")),
+			installer.InstallFunctionHandlers(data),
+			installer.InstallAttributeHandlers(data),
+		),
+	}
 }
 
 func CreateV8ConstructorWrapper(data ESConstructorData) JenGenerator {
@@ -213,9 +237,8 @@ func CreateV8ConstructorBody(data ESConstructorData) g.Generator {
 		g.Assign(builder.InstanceTmpl, constructor.GetInstanceTemplate()),
 		builder.InstanceTmpl.SetInternalFieldCount(1),
 		g.Line,
-		g.Assign(builder.Proto, constructor.GetPrototypeTemplate()),
-		builder.InstallFunctionHandlers(data),
-		builder.InstallAttributeHandlers(data),
+		// g.Assign(builder.Proto, constructor.GetPrototypeTemplate()),
+		builder.Wrapper.Field("installPrototype").Call(constructor.GetPrototypeTemplate()),
 		g.Line,
 	)
 	if data.RunCustomCode {

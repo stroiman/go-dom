@@ -20,30 +20,33 @@ func createHtmlTemplateElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTe
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
-	prototypeTmpl := constructor.PrototypeTemplate()
+	wrapper.installPrototype(constructor.PrototypeTemplate())
+
+	return constructor
+}
+func (e htmlTemplateElementV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := e.scriptHost.iso
 
 	prototypeTmpl.SetAccessorProperty("content",
-		v8.NewFunctionTemplateWithError(iso, wrapper.content),
+		v8.NewFunctionTemplateWithError(iso, e.content),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("shadowRootMode",
-		v8.NewFunctionTemplateWithError(iso, wrapper.shadowRootMode),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setShadowRootMode),
+		v8.NewFunctionTemplateWithError(iso, e.shadowRootMode),
+		v8.NewFunctionTemplateWithError(iso, e.setShadowRootMode),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("shadowRootDelegatesFocus",
-		v8.NewFunctionTemplateWithError(iso, wrapper.shadowRootDelegatesFocus),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setShadowRootDelegatesFocus),
+		v8.NewFunctionTemplateWithError(iso, e.shadowRootDelegatesFocus),
+		v8.NewFunctionTemplateWithError(iso, e.setShadowRootDelegatesFocus),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("shadowRootClonable",
-		v8.NewFunctionTemplateWithError(iso, wrapper.shadowRootClonable),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setShadowRootClonable),
+		v8.NewFunctionTemplateWithError(iso, e.shadowRootClonable),
+		v8.NewFunctionTemplateWithError(iso, e.setShadowRootClonable),
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("shadowRootSerializable",
-		v8.NewFunctionTemplateWithError(iso, wrapper.shadowRootSerializable),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setShadowRootSerializable),
+		v8.NewFunctionTemplateWithError(iso, e.shadowRootSerializable),
+		v8.NewFunctionTemplateWithError(iso, e.setShadowRootSerializable),
 		v8.None)
-
-	return constructor
 }
 
 func (e htmlTemplateElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

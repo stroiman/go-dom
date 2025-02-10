@@ -27,7 +27,14 @@ func (builder ConstructorBuilder) NewFunctionTemplateOfWrappedMethod(name string
 	return builder.NewFunctionTemplate(builder.Wrapper.Method(name))
 }
 
-func (builder ConstructorBuilder) InstallFunctionHandlers(
+type PrototypeInstaller struct {
+	v8Iso
+	Proto v8PrototypeTemplate
+	// InstanceTmpl v8InstanceTemplate
+	Wrapper WrapperInstance
+}
+
+func (builder PrototypeInstaller) InstallFunctionHandlers(
 	data ESConstructorData,
 ) JenGenerator {
 	generators := make([]g.Generator, 0, len(data.Operations))
@@ -44,7 +51,7 @@ func (builder ConstructorBuilder) InstallFunctionHandlers(
 	return g.StatementList(generators...)
 }
 
-func (builder ConstructorBuilder) InstallAttributeHandlers(
+func (builder PrototypeInstaller) InstallAttributeHandlers(
 	data ESConstructorData,
 ) g.Generator {
 	length := len(data.Attributes)
@@ -59,7 +66,7 @@ func (builder ConstructorBuilder) InstallAttributeHandlers(
 	return g.StatementList(generators...)
 }
 
-func (builder ConstructorBuilder) InstallAttributeHandler(
+func (builder PrototypeInstaller) InstallAttributeHandler(
 	op ESAttribute,
 ) g.Generator {
 	wrapper := builder.Wrapper

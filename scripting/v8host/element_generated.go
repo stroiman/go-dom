@@ -20,74 +20,77 @@ func createElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
-	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("hasAttributes", v8.NewFunctionTemplateWithError(iso, wrapper.hasAttributes))
-	prototypeTmpl.Set("getAttributeNames", v8.NewFunctionTemplateWithError(iso, wrapper.getAttributeNames))
-	prototypeTmpl.Set("getAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.getAttribute))
-	prototypeTmpl.Set("getAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.getAttributeNS))
-	prototypeTmpl.Set("setAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.setAttribute))
-	prototypeTmpl.Set("setAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.setAttributeNS))
-	prototypeTmpl.Set("removeAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.removeAttribute))
-	prototypeTmpl.Set("removeAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.removeAttributeNS))
-	prototypeTmpl.Set("toggleAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.toggleAttribute))
-	prototypeTmpl.Set("hasAttribute", v8.NewFunctionTemplateWithError(iso, wrapper.hasAttribute))
-	prototypeTmpl.Set("hasAttributeNS", v8.NewFunctionTemplateWithError(iso, wrapper.hasAttributeNS))
-	prototypeTmpl.Set("getAttributeNode", v8.NewFunctionTemplateWithError(iso, wrapper.getAttributeNode))
-	prototypeTmpl.Set("getAttributeNodeNS", v8.NewFunctionTemplateWithError(iso, wrapper.getAttributeNodeNS))
-	prototypeTmpl.Set("setAttributeNode", v8.NewFunctionTemplateWithError(iso, wrapper.setAttributeNode))
-	prototypeTmpl.Set("setAttributeNodeNS", v8.NewFunctionTemplateWithError(iso, wrapper.setAttributeNodeNS))
-	prototypeTmpl.Set("removeAttributeNode", v8.NewFunctionTemplateWithError(iso, wrapper.removeAttributeNode))
-	prototypeTmpl.Set("attachShadow", v8.NewFunctionTemplateWithError(iso, wrapper.attachShadow))
-	prototypeTmpl.Set("matches", v8.NewFunctionTemplateWithError(iso, wrapper.matches))
-	prototypeTmpl.Set("getElementsByTagName", v8.NewFunctionTemplateWithError(iso, wrapper.getElementsByTagName))
-	prototypeTmpl.Set("getElementsByTagNameNS", v8.NewFunctionTemplateWithError(iso, wrapper.getElementsByTagNameNS))
-	prototypeTmpl.Set("getElementsByClassName", v8.NewFunctionTemplateWithError(iso, wrapper.getElementsByClassName))
-	prototypeTmpl.Set("insertAdjacentElement", v8.NewFunctionTemplateWithError(iso, wrapper.insertAdjacentElement))
-	prototypeTmpl.Set("insertAdjacentText", v8.NewFunctionTemplateWithError(iso, wrapper.insertAdjacentText))
-
-	prototypeTmpl.SetAccessorProperty("namespaceURI",
-		v8.NewFunctionTemplateWithError(iso, wrapper.namespaceURI),
-		nil,
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("prefix",
-		v8.NewFunctionTemplateWithError(iso, wrapper.prefix),
-		nil,
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("localName",
-		v8.NewFunctionTemplateWithError(iso, wrapper.localName),
-		nil,
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("tagName",
-		v8.NewFunctionTemplateWithError(iso, wrapper.tagName),
-		nil,
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("id",
-		v8.NewFunctionTemplateWithError(iso, wrapper.id),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setId),
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("className",
-		v8.NewFunctionTemplateWithError(iso, wrapper.className),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setClassName),
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("classList",
-		v8.NewFunctionTemplateWithError(iso, wrapper.classList),
-		nil,
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("slot",
-		v8.NewFunctionTemplateWithError(iso, wrapper.slot),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setSlot),
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("attributes",
-		v8.NewFunctionTemplateWithError(iso, wrapper.attributes),
-		nil,
-		v8.None)
-	prototypeTmpl.SetAccessorProperty("shadowRoot",
-		v8.NewFunctionTemplateWithError(iso, wrapper.shadowRoot),
-		nil,
-		v8.None)
+	wrapper.installPrototype(constructor.PrototypeTemplate())
 
 	wrapper.CustomInitialiser(constructor)
 	return constructor
+}
+func (e elementV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := e.scriptHost.iso
+	prototypeTmpl.Set("hasAttributes", v8.NewFunctionTemplateWithError(iso, e.hasAttributes))
+	prototypeTmpl.Set("getAttributeNames", v8.NewFunctionTemplateWithError(iso, e.getAttributeNames))
+	prototypeTmpl.Set("getAttribute", v8.NewFunctionTemplateWithError(iso, e.getAttribute))
+	prototypeTmpl.Set("getAttributeNS", v8.NewFunctionTemplateWithError(iso, e.getAttributeNS))
+	prototypeTmpl.Set("setAttribute", v8.NewFunctionTemplateWithError(iso, e.setAttribute))
+	prototypeTmpl.Set("setAttributeNS", v8.NewFunctionTemplateWithError(iso, e.setAttributeNS))
+	prototypeTmpl.Set("removeAttribute", v8.NewFunctionTemplateWithError(iso, e.removeAttribute))
+	prototypeTmpl.Set("removeAttributeNS", v8.NewFunctionTemplateWithError(iso, e.removeAttributeNS))
+	prototypeTmpl.Set("toggleAttribute", v8.NewFunctionTemplateWithError(iso, e.toggleAttribute))
+	prototypeTmpl.Set("hasAttribute", v8.NewFunctionTemplateWithError(iso, e.hasAttribute))
+	prototypeTmpl.Set("hasAttributeNS", v8.NewFunctionTemplateWithError(iso, e.hasAttributeNS))
+	prototypeTmpl.Set("getAttributeNode", v8.NewFunctionTemplateWithError(iso, e.getAttributeNode))
+	prototypeTmpl.Set("getAttributeNodeNS", v8.NewFunctionTemplateWithError(iso, e.getAttributeNodeNS))
+	prototypeTmpl.Set("setAttributeNode", v8.NewFunctionTemplateWithError(iso, e.setAttributeNode))
+	prototypeTmpl.Set("setAttributeNodeNS", v8.NewFunctionTemplateWithError(iso, e.setAttributeNodeNS))
+	prototypeTmpl.Set("removeAttributeNode", v8.NewFunctionTemplateWithError(iso, e.removeAttributeNode))
+	prototypeTmpl.Set("attachShadow", v8.NewFunctionTemplateWithError(iso, e.attachShadow))
+	prototypeTmpl.Set("matches", v8.NewFunctionTemplateWithError(iso, e.matches))
+	prototypeTmpl.Set("getElementsByTagName", v8.NewFunctionTemplateWithError(iso, e.getElementsByTagName))
+	prototypeTmpl.Set("getElementsByTagNameNS", v8.NewFunctionTemplateWithError(iso, e.getElementsByTagNameNS))
+	prototypeTmpl.Set("getElementsByClassName", v8.NewFunctionTemplateWithError(iso, e.getElementsByClassName))
+	prototypeTmpl.Set("insertAdjacentElement", v8.NewFunctionTemplateWithError(iso, e.insertAdjacentElement))
+	prototypeTmpl.Set("insertAdjacentText", v8.NewFunctionTemplateWithError(iso, e.insertAdjacentText))
+
+	prototypeTmpl.SetAccessorProperty("namespaceURI",
+		v8.NewFunctionTemplateWithError(iso, e.namespaceURI),
+		nil,
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("prefix",
+		v8.NewFunctionTemplateWithError(iso, e.prefix),
+		nil,
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("localName",
+		v8.NewFunctionTemplateWithError(iso, e.localName),
+		nil,
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("tagName",
+		v8.NewFunctionTemplateWithError(iso, e.tagName),
+		nil,
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("id",
+		v8.NewFunctionTemplateWithError(iso, e.id),
+		v8.NewFunctionTemplateWithError(iso, e.setId),
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("className",
+		v8.NewFunctionTemplateWithError(iso, e.className),
+		v8.NewFunctionTemplateWithError(iso, e.setClassName),
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("classList",
+		v8.NewFunctionTemplateWithError(iso, e.classList),
+		nil,
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("slot",
+		v8.NewFunctionTemplateWithError(iso, e.slot),
+		v8.NewFunctionTemplateWithError(iso, e.setSlot),
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("attributes",
+		v8.NewFunctionTemplateWithError(iso, e.attributes),
+		nil,
+		v8.None)
+	prototypeTmpl.SetAccessorProperty("shadowRoot",
+		v8.NewFunctionTemplateWithError(iso, e.shadowRoot),
+		nil,
+		v8.None)
 }
 
 func (e elementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {

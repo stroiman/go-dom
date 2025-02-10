@@ -17,6 +17,7 @@ import (
 var (
 	v8FunctionTemplatePtr     = g.NewTypePackage("FunctionTemplate", v8).Pointer()
 	v8FunctionCallbackInfoPtr = g.NewTypePackage("FunctionCallbackInfo", v8).Pointer()
+	v8ObjectTemplatePtr       = g.NewTypePackage("ObjectTemplate", v8).Pointer()
 	v8Value                   = g.NewTypePackage("Value", v8).Pointer()
 	v8ReadOnly                = g.Raw(jen.Qual(v8, "ReadOnly"))
 	v8None                    = g.Raw(jen.Qual(v8, "None"))

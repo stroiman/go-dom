@@ -20,57 +20,60 @@ func createNodePrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 	instanceTmpl := constructor.InstanceTemplate()
 	instanceTmpl.SetInternalFieldCount(1)
 
-	prototypeTmpl := constructor.PrototypeTemplate()
-	prototypeTmpl.Set("getRootNode", v8.NewFunctionTemplateWithError(iso, wrapper.getRootNode))
-	prototypeTmpl.Set("cloneNode", v8.NewFunctionTemplateWithError(iso, wrapper.cloneNode))
-	prototypeTmpl.Set("isSameNode", v8.NewFunctionTemplateWithError(iso, wrapper.isSameNode))
-	prototypeTmpl.Set("contains", v8.NewFunctionTemplateWithError(iso, wrapper.contains))
-	prototypeTmpl.Set("insertBefore", v8.NewFunctionTemplateWithError(iso, wrapper.insertBefore))
-	prototypeTmpl.Set("appendChild", v8.NewFunctionTemplateWithError(iso, wrapper.appendChild))
-	prototypeTmpl.Set("removeChild", v8.NewFunctionTemplateWithError(iso, wrapper.removeChild))
+	wrapper.installPrototype(constructor.PrototypeTemplate())
+
+	return constructor
+}
+func (n nodeV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := n.scriptHost.iso
+	prototypeTmpl.Set("getRootNode", v8.NewFunctionTemplateWithError(iso, n.getRootNode))
+	prototypeTmpl.Set("cloneNode", v8.NewFunctionTemplateWithError(iso, n.cloneNode))
+	prototypeTmpl.Set("isSameNode", v8.NewFunctionTemplateWithError(iso, n.isSameNode))
+	prototypeTmpl.Set("contains", v8.NewFunctionTemplateWithError(iso, n.contains))
+	prototypeTmpl.Set("insertBefore", v8.NewFunctionTemplateWithError(iso, n.insertBefore))
+	prototypeTmpl.Set("appendChild", v8.NewFunctionTemplateWithError(iso, n.appendChild))
+	prototypeTmpl.Set("removeChild", v8.NewFunctionTemplateWithError(iso, n.removeChild))
 
 	prototypeTmpl.SetAccessorProperty("nodeType",
-		v8.NewFunctionTemplateWithError(iso, wrapper.nodeType),
+		v8.NewFunctionTemplateWithError(iso, n.nodeType),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("nodeName",
-		v8.NewFunctionTemplateWithError(iso, wrapper.nodeName),
+		v8.NewFunctionTemplateWithError(iso, n.nodeName),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("isConnected",
-		v8.NewFunctionTemplateWithError(iso, wrapper.isConnected),
+		v8.NewFunctionTemplateWithError(iso, n.isConnected),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("ownerDocument",
-		v8.NewFunctionTemplateWithError(iso, wrapper.ownerDocument),
+		v8.NewFunctionTemplateWithError(iso, n.ownerDocument),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("parentElement",
-		v8.NewFunctionTemplateWithError(iso, wrapper.parentElement),
+		v8.NewFunctionTemplateWithError(iso, n.parentElement),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("childNodes",
-		v8.NewFunctionTemplateWithError(iso, wrapper.childNodes),
+		v8.NewFunctionTemplateWithError(iso, n.childNodes),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("firstChild",
-		v8.NewFunctionTemplateWithError(iso, wrapper.firstChild),
+		v8.NewFunctionTemplateWithError(iso, n.firstChild),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("previousSibling",
-		v8.NewFunctionTemplateWithError(iso, wrapper.previousSibling),
+		v8.NewFunctionTemplateWithError(iso, n.previousSibling),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("nextSibling",
-		v8.NewFunctionTemplateWithError(iso, wrapper.nextSibling),
+		v8.NewFunctionTemplateWithError(iso, n.nextSibling),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("textContent",
-		v8.NewFunctionTemplateWithError(iso, wrapper.textContent),
-		v8.NewFunctionTemplateWithError(iso, wrapper.setTextContent),
+		v8.NewFunctionTemplateWithError(iso, n.textContent),
+		v8.NewFunctionTemplateWithError(iso, n.setTextContent),
 		v8.None)
-
-	return constructor
 }
 
 func (n nodeV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
