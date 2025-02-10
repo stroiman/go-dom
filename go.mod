@@ -1,12 +1,14 @@
 module github.com/gost-dom/browser
 
-go 1.23.2
+go 1.23.4
+
+toolchain go1.23.6
 
 require (
 	github.com/dop251/goja v0.0.0-20241024094426-79f3a7efcdbd
 	github.com/ericchiang/css v1.4.0
-	github.com/onsi/ginkgo/v2 v2.21.0
-	github.com/onsi/gomega v1.35.1
+	github.com/onsi/ginkgo/v2 v2.22.2
+	github.com/onsi/gomega v1.36.2
 	github.com/tommie/v8go v0.28.0
 	golang.org/x/net v0.34.0
 )
@@ -26,7 +28,7 @@ require (
 	github.com/tommie/v8go/deps/linux_arm64 v0.0.0-20250116090852-b2a925bc7092 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	golang.org/x/tools v0.26.0 // indirect
+	golang.org/x/tools v0.28.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
