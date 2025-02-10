@@ -36,42 +36,42 @@ const (
 
 func createData(
 	spec idl.Spec,
-	dataData *configuration.IdlInterfaceConfiguration,
+	interfaceConfig *configuration.IdlInterfaceConfiguration,
 ) ESConstructorData {
-	idlName, ok := spec.GetType(dataData.TypeName)
+	idlName, ok := spec.GetType(interfaceConfig.TypeName)
 	if !ok {
 		panic("Missing type")
 	}
 	idlInterface := idlName.IdlInterface
-	wrappedTypeName := dataData.InnerTypeName
+	wrappedTypeName := interfaceConfig.InnerTypeName
 	if wrappedTypeName == "" {
 		wrappedTypeName = idlInterface.Name
 	}
-	wrapperTypeBaseName := dataData.WrapperTypeName
+	wrapperTypeBaseName := interfaceConfig.WrapperTypeName
 	if wrapperTypeBaseName == "" {
 		wrapperTypeBaseName = fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
 	}
 	return ESConstructorData{
-		Spec:                dataData,
+		Spec:                interfaceConfig,
 		IdlInterfaceName:    wrappedTypeName,
 		WrapperTypeName:     lowerCaseFirstLetter(wrapperTypeBaseName),
 		WrapperTypeBaseName: wrapperTypeBaseName,
-		Receiver:            dataData.Receiver,
-		RunCustomCode:       dataData.RunCustomCode,
+		Receiver:            interfaceConfig.Receiver,
+		RunCustomCode:       interfaceConfig.RunCustomCode,
 		Inheritance:         idlInterface.Inheritance,
-		Constructor:         CreateConstructor(dataData, idlName),
-		Operations:          CreateInstanceMethods(dataData, idlName),
-		Attributes:          CreateAttributes(dataData, idlName),
+		Constructor:         CreateConstructor(interfaceConfig, idlName),
+		Operations:          CreateInstanceMethods(interfaceConfig, idlName),
+		Attributes:          CreateAttributes(interfaceConfig, idlName),
 	}
 }
 
 func CreateConstructor(
-	dataData *configuration.IdlInterfaceConfiguration,
+	interfaceConfig *configuration.IdlInterfaceConfiguration,
 	idlName idl.TypeSpec) *ESOperation {
 	if c, ok := idlName.Constructor(); ok {
-		fmt.Printf("Create constructor %s '%s'\n", dataData.TypeName, c.Name)
+		fmt.Printf("Create constructor %s '%s'\n", interfaceConfig.TypeName, c.Name)
 		c.Name = "constructor"
-		result := createOperation(dataData, c)
+		result := createOperation(interfaceConfig, c)
 		return &result
 	} else {
 		return nil
@@ -79,21 +79,21 @@ func CreateConstructor(
 }
 
 func CreateInstanceMethods(
-	dataData *configuration.IdlInterfaceConfiguration,
+	interfaceConfig *configuration.IdlInterfaceConfiguration,
 	idlName idl.TypeSpec) (result []ESOperation) {
 	for instanceMethod := range idlName.InstanceMethods() {
-		op := createOperation(dataData, instanceMethod)
+		op := createOperation(interfaceConfig, instanceMethod)
 		result = append(result, op)
 	}
 	return
 }
 
 func CreateAttributes(
-	dataData *configuration.IdlInterfaceConfiguration,
+	interfaceConfig *configuration.IdlInterfaceConfiguration,
 	idlName idl.TypeSpec,
 ) (res []ESAttribute) {
-	for attribute := range idlName.IdlInterface.AllAttributes(dataData.IncludeIncludes) {
-		methodCustomization := dataData.GetMethodCustomization(attribute.Name)
+	for attribute := range idlName.IdlInterface.AllAttributes(interfaceConfig.IncludeIncludes) {
+		methodCustomization := interfaceConfig.GetMethodCustomization(attribute.Name)
 		if methodCustomization.Ignored || attribute.Type.Name == "EventHandler" {
 			continue
 		}
@@ -117,7 +117,7 @@ func CreateAttributes(
 			setter = new(ESOperation)
 			*setter = *getter
 			setter.Name = fmt.Sprintf("set%s", idlNameToGoName(getter.Name))
-			methodCustomization := dataData.GetMethodCustomization(setter.Name)
+			methodCustomization := interfaceConfig.GetMethodCustomization(setter.Name)
 			setter.NotImplemented = setter.NotImplemented || methodCustomization.NotImplemented
 			setter.CustomImplementation = setter.CustomImplementation ||
 				methodCustomization.CustomImplementation
@@ -129,7 +129,7 @@ func CreateAttributes(
 				Variadic: false,
 			}}
 		}
-		getterCustomization := dataData.GetMethodCustomization(getter.Name)
+		getterCustomization := interfaceConfig.GetMethodCustomization(getter.Name)
 		getter.NotImplemented = getterCustomization.NotImplemented || getter.NotImplemented
 		getter.CustomImplementation = getterCustomization.CustomImplementation ||
 			getter.CustomImplementation
