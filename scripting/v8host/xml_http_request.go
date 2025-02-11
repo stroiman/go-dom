@@ -44,7 +44,7 @@ func (xhr xmlHttpRequestV8Wrapper) decodeXMLHttpRequestBodyInit(
 	}
 }
 
-func newXmlHttpRequestV8Wrapper(host *V8ScriptHost) xmlHttpRequestV8Wrapper {
+func newXMLHttpRequestV8Wrapper(host *V8ScriptHost) xmlHttpRequestV8Wrapper {
 	return xmlHttpRequestV8Wrapper{newHandleReffedObject[XmlHttpRequest](host)}
 }
 

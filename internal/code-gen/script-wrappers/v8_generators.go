@@ -15,6 +15,18 @@ type NewV8FunctionTemplate struct {
 	f   JenGenerator
 }
 
+type V8NamingStrategy struct {
+	ESConstructorData
+}
+
+func (s V8NamingStrategy) PrototypeWrapperBaseName() string {
+	return fmt.Sprintf("%sV8Wrapper", s.Name())
+}
+
+func (s V8NamingStrategy) PrototypeWrapperName() string {
+	return lowerCaseFirstLetter(s.PrototypeWrapperBaseName())
+}
+
 func (t NewV8FunctionTemplate) Generate() *jen.Statement {
 	return jen.Qual(v8, "NewFunctionTemplateWithError").Call(t.iso.Generate(), t.f.Generate())
 }
@@ -86,6 +98,7 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 }
 
 func CreateV8PrototypeInitialiser(data ESConstructorData) JenGenerator {
+	naming := V8NamingStrategy{data}
 	builder := NewConstructorBuilder()
 	receiver := g.NewValue(data.Receiver)
 	installer := PrototypeInstaller{
@@ -97,7 +110,7 @@ func CreateV8PrototypeInitialiser(data ESConstructorData) JenGenerator {
 		Name: "installPrototype",
 		Receiver: g.FunctionArgument{
 			Name: receiver,
-			Type: g.Id(data.WrapperTypeName),
+			Type: g.Id(naming.PrototypeWrapperName()),
 		},
 		Args: g.Arg(builder.Proto, v8ObjectTemplatePtr),
 		Body: g.StatementList(
@@ -109,6 +122,7 @@ func CreateV8PrototypeInitialiser(data ESConstructorData) JenGenerator {
 }
 
 func CreateV8ConstructorWrapper(data ESConstructorData) JenGenerator {
+	naming := V8NamingStrategy{data}
 	var body g.Generator
 	if IsNodeType(data.IdlInterfaceName) {
 		body = CreateV8IllegalConstructorBody(data)
@@ -121,7 +135,7 @@ func CreateV8ConstructorWrapper(data ESConstructorData) JenGenerator {
 			Name: "Constructor",
 			Receiver: g.FunctionArgument{
 				Name: g.Id(data.Receiver),
-				Type: g.Id(data.WrapperTypeName),
+				Type: g.Id(naming.PrototypeWrapperName()),
 			},
 			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
 			RtnTypes: g.List(v8Value, g.Id("error")),
@@ -142,12 +156,13 @@ func CreateV8WrapperMethod(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
+	naming := V8NamingStrategy{data}
 	return g.StatementList(
 		g.Line,
 		g.FunctionDefinition{
 			Receiver: g.FunctionArgument{
 				Name: g.Id(data.Receiver),
-				Type: g.Id(data.WrapperTypeName),
+				Type: g.Id(naming.PrototypeWrapperName()),
 			},
 			Name:     op.WrapperMethodName(),
 			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
@@ -224,10 +239,11 @@ func CreateV8Constructor(data ESConstructorData) g.Generator {
 }
 
 func CreateV8ConstructorBody(data ESConstructorData) g.Generator {
+	naming := V8NamingStrategy{data}
 	builder := NewConstructorBuilder()
 	constructor := v8FunctionTemplate{g.NewValue("constructor")}
 
-	createWrapperFunction := g.NewValue(fmt.Sprintf("new%s", data.WrapperTypeBaseName))
+	createWrapperFunction := g.NewValue(fmt.Sprintf("new%s", naming.PrototypeWrapperBaseName()))
 
 	statements := g.StatementList(
 		builder.v8Iso.Assign(scriptHost.Field("iso")),

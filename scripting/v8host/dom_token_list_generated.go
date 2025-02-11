@@ -9,12 +9,12 @@ import (
 )
 
 func init() {
-	registerJSClass("DOMTokenList", "", createDomTokenListPrototype)
+	registerJSClass("DOMTokenList", "", createDOMTokenListPrototype)
 }
 
-func createDomTokenListPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
+func createDOMTokenListPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 	iso := scriptHost.iso
-	wrapper := newDomTokenListV8Wrapper(scriptHost)
+	wrapper := newDOMTokenListV8Wrapper(scriptHost)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()

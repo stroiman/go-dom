@@ -34,7 +34,10 @@ const (
 	gojaSrc  = "github.com/dop251/goja"
 )
 
-var KnownAcronyms = []string{"HTML", "URL"}
+// A list of possible acronyms that an interface can start with. Used as a very
+// simple way to generate sensible unexported names for wrapper types. E.g.,
+// HTMLTemplateElement -> htmlTemplateElement.
+var KnownAcronyms = []string{"HTML", "URL", "DOM", "XML"}
 
 func createData(
 	spec idl.Spec,
@@ -49,18 +52,18 @@ func createData(
 	if wrappedTypeName == "" {
 		wrappedTypeName = idlInterface.Name
 	}
-	wrapperTypeBaseName := fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
+	// wrapperTypeBaseName := fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
 	return ESConstructorData{
-		Spec:                interfaceConfig,
-		IdlInterfaceName:    wrappedTypeName,
-		WrapperTypeName:     lowerCaseFirstLetter(wrapperTypeBaseName),
-		WrapperTypeBaseName: wrapperTypeBaseName,
-		Receiver:            "w",
-		RunCustomCode:       interfaceConfig.RunCustomCode,
-		Inheritance:         idlInterface.Inheritance,
-		Constructor:         CreateConstructor(interfaceConfig, idlName),
-		Operations:          CreateInstanceMethods(interfaceConfig, idlName),
-		Attributes:          CreateAttributes(interfaceConfig, idlName),
+		Spec:             interfaceConfig,
+		IdlInterfaceName: wrappedTypeName,
+		// WrapperTypeName:  lowerCaseFirstLetter(wrapperTypeBaseName),
+		// WrapperTypeBaseName: wrapperTypeBaseName,
+		Receiver:      "w",
+		RunCustomCode: interfaceConfig.RunCustomCode,
+		Inheritance:   idlInterface.Inheritance,
+		Constructor:   CreateConstructor(interfaceConfig, idlName),
+		Operations:    CreateInstanceMethods(interfaceConfig, idlName),
+		Attributes:    CreateAttributes(interfaceConfig, idlName),
 	}
 }
 
@@ -246,9 +249,9 @@ type ESAttribute struct {
 }
 
 type ESConstructorData struct {
-	Spec                *configuration.IdlInterfaceConfiguration
-	IdlInterfaceName    string
-	WrapperTypeName     string
+	Spec             *configuration.IdlInterfaceConfiguration
+	IdlInterfaceName string
+	// WrapperTypeName     string
 	WrapperTypeBaseName string
 	Receiver            string
 	Inheritance         string

@@ -14,7 +14,7 @@ type domTokenListV8Wrapper struct {
 	Iterator iterator[string]
 }
 
-func newDomTokenListV8Wrapper(host *V8ScriptHost) domTokenListV8Wrapper {
+func newDOMTokenListV8Wrapper(host *V8ScriptHost) domTokenListV8Wrapper {
 	return domTokenListV8Wrapper{
 		newNodeV8WrapperBase[dom.Element](host),
 		newIterator(host, func(item string, ctx *V8ScriptContext) (*v8.Value, error) {
@@ -76,7 +76,7 @@ type htmlTemplateElementV8Wrapper struct {
 	nodeV8WrapperBase[html.HTMLTemplateElement]
 }
 
-func newHtmlTemplateElementV8Wrapper(host *V8ScriptHost) htmlTemplateElementV8Wrapper {
+func newHTMLTemplateElementV8Wrapper(host *V8ScriptHost) htmlTemplateElementV8Wrapper {
 	return htmlTemplateElementV8Wrapper{newNodeV8WrapperBase[html.HTMLTemplateElement](host)}
 }
 

@@ -9,12 +9,12 @@ import (
 )
 
 func init() {
-	registerJSClass("URL", "", createUrlPrototype)
+	registerJSClass("URL", "", createURLPrototype)
 }
 
-func createUrlPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
+func createURLPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 	iso := scriptHost.iso
-	wrapper := newUrlV8Wrapper(scriptHost)
+	wrapper := newURLV8Wrapper(scriptHost)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()

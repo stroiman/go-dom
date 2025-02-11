@@ -8,9 +8,9 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-func createXmlHttpRequestPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
+func createXMLHttpRequestPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 	iso := scriptHost.iso
-	wrapper := newXmlHttpRequestV8Wrapper(scriptHost)
+	wrapper := newXMLHttpRequestV8Wrapper(scriptHost)
 	constructor := v8.NewFunctionTemplateWithError(iso, wrapper.Constructor)
 
 	instanceTmpl := constructor.InstanceTemplate()

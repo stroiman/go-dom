@@ -12,7 +12,7 @@ type urlV8Wrapper struct {
 	handleReffedObject[dom.URL]
 }
 
-func newUrlV8Wrapper(host *V8ScriptHost) urlV8Wrapper {
+func newURLV8Wrapper(host *V8ScriptHost) urlV8Wrapper {
 	return urlV8Wrapper{newHandleReffedObject[dom.URL](host)}
 }
 
