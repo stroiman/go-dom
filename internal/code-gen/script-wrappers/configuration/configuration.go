@@ -37,7 +37,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	xhrModule := specs.Module("xhr")
 	xhr := xhrModule.Type("XMLHttpRequest")
 	xhr.SkipPrototypeRegistration = true
-	xhr.InnerTypeName = "XmlHttpRequest"
 
 	xhr.MarkMembersAsNotImplemented(
 		"readyState",
@@ -52,7 +51,6 @@ func CreateV8Specs() WebIdlConfigurations {
 
 	urlSpecs := specs.Module("url")
 	url := urlSpecs.Type("URL")
-	url.InnerTypeName = "Url"
 	url.MarkMembersAsNotImplemented(
 		"setHref",
 		"setProtocol",
@@ -136,8 +134,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	)
 
 	domTokenList := domSpecs.Type("DOMTokenList")
-	domTokenList.InnerTypeName = "DomTokenList"
-	// domTokenList.Receiver = "w"
 	domTokenList.RunCustomCode = true
 	domTokenList.Method("item").SetNoError()
 	domTokenList.Method("contains").SetNoError()
@@ -150,7 +146,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	htmlSpecs.SetMultipleFiles(true)
 
 	htmlTemplateElement := htmlSpecs.Type("HTMLTemplateElement")
-	htmlTemplateElement.InnerTypeName = "HtmlTemplateElement"
 	htmlTemplateElement.Method("shadowRootMode").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootDelegatesFocus").SetNotImplemented()
 	htmlTemplateElement.Method("shadowRootClonable").SetNotImplemented()
@@ -236,7 +231,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	input.Method("pattern").Ignore()
 
 	window := htmlSpecs.Type("Window")
-	window.InnerTypeName = "Window"
 	window.CreateWrapper()
 
 	window.Method("window").SetCustomImplementation()

@@ -48,22 +48,15 @@ func createData(
 		panic("Missing type")
 	}
 	idlInterface := idlName.IdlInterface
-	wrappedTypeName := interfaceConfig.InnerTypeName
-	if wrappedTypeName == "" {
-		wrappedTypeName = idlInterface.Name
-	}
-	// wrapperTypeBaseName := fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
+	wrappedTypeName := idlInterface.Name
 	return ESConstructorData{
 		Spec:             interfaceConfig,
 		IdlInterfaceName: wrappedTypeName,
-		// WrapperTypeName:  lowerCaseFirstLetter(wrapperTypeBaseName),
-		// WrapperTypeBaseName: wrapperTypeBaseName,
-		Receiver:      "w",
-		RunCustomCode: interfaceConfig.RunCustomCode,
-		Inheritance:   idlInterface.Inheritance,
-		Constructor:   CreateConstructor(interfaceConfig, idlName),
-		Operations:    CreateInstanceMethods(interfaceConfig, idlName),
-		Attributes:    CreateAttributes(interfaceConfig, idlName),
+		RunCustomCode:    interfaceConfig.RunCustomCode,
+		Inheritance:      idlInterface.Inheritance,
+		Constructor:      CreateConstructor(interfaceConfig, idlName),
+		Operations:       CreateInstanceMethods(interfaceConfig, idlName),
+		Attributes:       CreateAttributes(interfaceConfig, idlName),
 	}
 }
 
@@ -251,14 +244,11 @@ type ESAttribute struct {
 type ESConstructorData struct {
 	Spec             *configuration.IdlInterfaceConfiguration
 	IdlInterfaceName string
-	// WrapperTypeName     string
-	WrapperTypeBaseName string
-	Receiver            string
-	Inheritance         string
-	Operations          []ESOperation
-	Attributes          []ESAttribute
-	Constructor         *ESOperation
-	RunCustomCode       bool
+	Inheritance      string
+	Operations       []ESOperation
+	Attributes       []ESAttribute
+	Constructor      *ESOperation
+	RunCustomCode    bool
 }
 
 func (d ESConstructorData) GetInternalPackage() string {

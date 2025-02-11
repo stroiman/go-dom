@@ -19,6 +19,7 @@ type V8NamingStrategy struct {
 	ESConstructorData
 }
 
+func (s V8NamingStrategy) Receiver() string { return "w" }
 func (s V8NamingStrategy) PrototypeWrapperBaseName() string {
 	return fmt.Sprintf("%sV8Wrapper", s.Name())
 }
@@ -100,7 +101,7 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 func CreateV8PrototypeInitialiser(data ESConstructorData) JenGenerator {
 	naming := V8NamingStrategy{data}
 	builder := NewConstructorBuilder()
-	receiver := g.NewValue(data.Receiver)
+	receiver := g.NewValue(naming.Receiver())
 	installer := PrototypeInstaller{
 		builder.v8Iso,
 		builder.Proto,
@@ -134,7 +135,7 @@ func CreateV8ConstructorWrapper(data ESConstructorData) JenGenerator {
 		g.FunctionDefinition{
 			Name: "Constructor",
 			Receiver: g.FunctionArgument{
-				Name: g.Id(data.Receiver),
+				Name: g.Id(naming.Receiver()),
 				Type: g.Id(naming.PrototypeWrapperName()),
 			},
 			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
@@ -161,7 +162,7 @@ func CreateV8WrapperMethod(
 		g.Line,
 		g.FunctionDefinition{
 			Receiver: g.FunctionArgument{
-				Name: g.Id(data.Receiver),
+				Name: g.Id(naming.Receiver()),
 				Type: g.Id(naming.PrototypeWrapperName()),
 			},
 			Name:     op.WrapperMethodName(),
@@ -175,6 +176,7 @@ func CreateV8FunctionTemplateCallbackBody(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
+	naming := V8NamingStrategy{data}
 	debug := g.NewValuePackage("Debug", log).Call(
 		g.Lit(fmt.Sprintf("V8 Function call: %s.%s", data.Name(), op.Name)))
 	if op.NotImplemented {
@@ -185,7 +187,7 @@ func CreateV8FunctionTemplateCallbackBody(
 			debug,
 			g.Return(g.Nil, g.Raw(jen.Qual("errors", "New").Call(jen.Lit(errMsg)))))
 	}
-	receiver := WrapperInstance{g.NewValue(data.Receiver)}
+	receiver := WrapperInstance{g.NewValue(naming.Receiver())}
 	instance := g.NewValue("instance")
 	readArgsResult := ReadArguments(data, op)
 	err := g.Id("err0")
@@ -267,7 +269,8 @@ func CreateV8ConstructorBody(data ESConstructorData) g.Generator {
 }
 
 func CreateV8ConstructorWrapperBody(data ESConstructorData) g.Generator {
-	receiver := WrapperInstance{g.NewValue(data.Receiver)}
+	naming := V8NamingStrategy{data}
+	receiver := WrapperInstance{g.NewValue(naming.Receiver())}
 	if data.Constructor == nil {
 		return CreateV8IllegalConstructorBody(data)
 	}
@@ -282,7 +285,7 @@ func CreateV8ConstructorWrapperBody(data ESConstructorData) g.Generator {
 	var CreateCall = func(functionName string, argnames []g.Generator, op ESOperation) g.Generator {
 		return g.StatementList(
 			g.Return(
-				g.Raw(jen.Id(data.Receiver).Dot(functionName).CallFunc(func(grp *jen.Group) {
+				g.Raw(jen.Id(naming.Receiver()).Dot(functionName).CallFunc(func(grp *jen.Group) {
 					grp.Add(jen.Id("ctx"))
 					grp.Add(jen.Id("info").Dot("This").Call())
 					for _, name := range argnames {
@@ -478,8 +481,9 @@ func (c V8InstanceInvocation) GetGenerator() V8InstanceInvocationResult {
 }
 
 func CreateV8IllegalConstructorBody(data ESConstructorData) g.Generator {
+	naming := V8NamingStrategy{data}
 	return g.Return(g.Nil, g.NewValuePackage("NewTypeError", v8).
-		Call(g.NewValue(data.Receiver).Field("scriptHost").Field("iso"),
+		Call(g.NewValue(naming.Receiver()).Field("scriptHost").Field("iso"),
 			g.Lit("Illegal Constructor")))
 }
 
@@ -507,15 +511,17 @@ func AssignArgs(data ESConstructorData, op ESOperation) g.Generator {
 	if len(op.Arguments) == 0 {
 		return g.Noop
 	}
+	naming := V8NamingStrategy{data}
 	return g.Assign(
 		g.Id("args"),
 		g.NewValue("newArgumentHelper").Call(
-			g.NewValue(data.Receiver).Field("scriptHost"),
+			g.NewValue(naming.Receiver()).Field("scriptHost"),
 			g.Id("info")),
 	)
 }
 
 func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments) {
+	naming := V8NamingStrategy{data}
 	argCount := len(op.Arguments)
 	res.Args = make([]V8ReadArg, 0, argCount)
 	statements := g.StatementList()
@@ -546,10 +552,10 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments)
 		gConverters := []g.Generator{g.Id("args"), g.Lit(i)}
 		defaultName, hasDefault := arg.DefaultValueInGo()
 		if hasDefault {
-			gConverters = append(gConverters, g.NewValue(data.Receiver).Field(defaultName))
+			gConverters = append(gConverters, g.NewValue(naming.Receiver()).Field(defaultName))
 		}
 		for _, n := range convertNames {
-			gConverters = append(gConverters, g.NewValue(data.Receiver).Field(n))
+			gConverters = append(gConverters, g.NewValue(naming.Receiver()).Field(n))
 		}
 		if hasDefault {
 			statements.Append(g.AssignMany(g.List(argName, errName),
@@ -565,8 +571,9 @@ func ReadArguments(data ESConstructorData, op ESOperation) (res V8ReadArguments)
 }
 
 func GetInstanceAndError(id g.Generator, errId g.Generator, data ESConstructorData) g.Generator {
+	naming := V8NamingStrategy{data}
 	return g.AssignMany(
 		g.List(id, errId),
-		g.NewValue(data.Receiver).Field("getInstance").Call(g.Id("info")),
+		g.NewValue(naming.Receiver()).Field("getInstance").Call(g.Id("info")),
 	)
 }

@@ -8,7 +8,6 @@ package configuration
 type IdlInterfaceConfiguration struct {
 	DomSpec                   *WebIdlConfiguration
 	TypeName                  string
-	InnerTypeName             string
 	RunCustomCode             bool
 	WrapperStruct             bool
 	SkipPrototypeRegistration bool
