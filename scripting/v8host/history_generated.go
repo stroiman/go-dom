@@ -24,33 +24,33 @@ func createHistoryPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 
 	return constructor
 }
-func (h historyV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
-	iso := h.scriptHost.iso
-	prototypeTmpl.Set("go", v8.NewFunctionTemplateWithError(iso, h.go_))
-	prototypeTmpl.Set("back", v8.NewFunctionTemplateWithError(iso, h.back))
-	prototypeTmpl.Set("forward", v8.NewFunctionTemplateWithError(iso, h.forward))
-	prototypeTmpl.Set("pushState", v8.NewFunctionTemplateWithError(iso, h.pushState))
-	prototypeTmpl.Set("replaceState", v8.NewFunctionTemplateWithError(iso, h.replaceState))
+func (w historyV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := w.scriptHost.iso
+	prototypeTmpl.Set("go", v8.NewFunctionTemplateWithError(iso, w.go_))
+	prototypeTmpl.Set("back", v8.NewFunctionTemplateWithError(iso, w.back))
+	prototypeTmpl.Set("forward", v8.NewFunctionTemplateWithError(iso, w.forward))
+	prototypeTmpl.Set("pushState", v8.NewFunctionTemplateWithError(iso, w.pushState))
+	prototypeTmpl.Set("replaceState", v8.NewFunctionTemplateWithError(iso, w.replaceState))
 
 	prototypeTmpl.SetAccessorProperty("length",
-		v8.NewFunctionTemplateWithError(iso, h.length),
+		v8.NewFunctionTemplateWithError(iso, w.length),
 		nil,
 		v8.None)
 	prototypeTmpl.SetAccessorProperty("state",
-		v8.NewFunctionTemplateWithError(iso, h.state),
+		v8.NewFunctionTemplateWithError(iso, w.state),
 		nil,
 		v8.None)
 }
 
-func (h historyV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, v8.NewTypeError(h.scriptHost.iso, "Illegal Constructor")
+func (w historyV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, v8.NewTypeError(w.scriptHost.iso, "Illegal Constructor")
 }
 
-func (h historyV8Wrapper) go_(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w historyV8Wrapper) go_(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: History.go")
-	args := newArgumentHelper(h.scriptHost, info)
-	instance, err0 := h.getInstance(info)
-	delta, err1 := tryParseArgWithDefault(args, 0, h.defaultDelta, h.decodeLong)
+	args := newArgumentHelper(w.scriptHost, info)
+	instance, err0 := w.getInstance(info)
+	delta, err1 := tryParseArgWithDefault(args, 0, w.defaultDelta, w.decodeLong)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {
@@ -62,9 +62,9 @@ func (h historyV8Wrapper) go_(info *v8.FunctionCallbackInfo) (*v8.Value, error) 
 	return nil, errors.New("History.go: Missing arguments")
 }
 
-func (h historyV8Wrapper) back(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w historyV8Wrapper) back(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: History.back")
-	instance, err := h.getInstance(info)
+	instance, err := w.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -72,9 +72,9 @@ func (h historyV8Wrapper) back(info *v8.FunctionCallbackInfo) (*v8.Value, error)
 	return nil, callErr
 }
 
-func (h historyV8Wrapper) forward(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w historyV8Wrapper) forward(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: History.forward")
-	instance, err := h.getInstance(info)
+	instance, err := w.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
@@ -82,12 +82,12 @@ func (h historyV8Wrapper) forward(info *v8.FunctionCallbackInfo) (*v8.Value, err
 	return nil, callErr
 }
 
-func (h historyV8Wrapper) pushState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w historyV8Wrapper) pushState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: History.pushState")
-	args := newArgumentHelper(h.scriptHost, info)
-	instance, err0 := h.getInstance(info)
-	data, err1 := tryParseArg(args, 0, h.decodeAny)
-	url, err3 := tryParseArgWithDefault(args, 2, h.defaultUrl, h.decodeUSVString)
+	args := newArgumentHelper(w.scriptHost, info)
+	instance, err0 := w.getInstance(info)
+	data, err1 := tryParseArg(args, 0, w.decodeAny)
+	url, err3 := tryParseArgWithDefault(args, 2, w.defaultUrl, w.decodeUSVString)
 	if args.noOfReadArguments >= 2 {
 		err := errors.Join(err0, err1, err3)
 		if err != nil {
@@ -99,12 +99,12 @@ func (h historyV8Wrapper) pushState(info *v8.FunctionCallbackInfo) (*v8.Value, e
 	return nil, errors.New("History.pushState: Missing arguments")
 }
 
-func (h historyV8Wrapper) replaceState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w historyV8Wrapper) replaceState(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: History.replaceState")
-	args := newArgumentHelper(h.scriptHost, info)
-	instance, err0 := h.getInstance(info)
-	data, err1 := tryParseArg(args, 0, h.decodeAny)
-	url, err3 := tryParseArgWithDefault(args, 2, h.defaultUrl, h.decodeUSVString)
+	args := newArgumentHelper(w.scriptHost, info)
+	instance, err0 := w.getInstance(info)
+	data, err1 := tryParseArg(args, 0, w.decodeAny)
+	url, err3 := tryParseArgWithDefault(args, 2, w.defaultUrl, w.decodeUSVString)
 	if args.noOfReadArguments >= 2 {
 		err := errors.Join(err0, err1, err3)
 		if err != nil {
@@ -116,24 +116,24 @@ func (h historyV8Wrapper) replaceState(info *v8.FunctionCallbackInfo) (*v8.Value
 	return nil, errors.New("History.replaceState: Missing arguments")
 }
 
-func (h historyV8Wrapper) length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := h.mustGetContext(info)
+func (w historyV8Wrapper) length(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: History.length")
-	instance, err := h.getInstance(info)
+	instance, err := w.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
 	result := instance.Length()
-	return h.toUnsignedLong(ctx, result)
+	return w.toUnsignedLong(ctx, result)
 }
 
-func (h historyV8Wrapper) state(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := h.mustGetContext(info)
+func (w historyV8Wrapper) state(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: History.state")
-	instance, err := h.getInstance(info)
+	instance, err := w.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
 	result := instance.State()
-	return h.toJSON(ctx, result)
+	return w.toJSON(ctx, result)
 }

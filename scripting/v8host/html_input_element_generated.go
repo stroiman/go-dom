@@ -33,47 +33,47 @@ func createHTMLInputElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTempl
 
 	return constructor
 }
-func (e hTMLInputElementV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
-	iso := e.scriptHost.iso
-	prototypeTmpl.Set("checkValidity", v8.NewFunctionTemplateWithError(iso, e.checkValidity))
+func (w hTMLInputElementV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+	iso := w.scriptHost.iso
+	prototypeTmpl.Set("checkValidity", v8.NewFunctionTemplateWithError(iso, w.checkValidity))
 
 	prototypeTmpl.SetAccessorProperty("type",
-		v8.NewFunctionTemplateWithError(iso, e.type_),
-		v8.NewFunctionTemplateWithError(iso, e.setType),
+		v8.NewFunctionTemplateWithError(iso, w.type_),
+		v8.NewFunctionTemplateWithError(iso, w.setType),
 		v8.None)
 }
 
-func (e hTMLInputElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	return nil, v8.NewTypeError(e.scriptHost.iso, "Illegal Constructor")
+func (w hTMLInputElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	return nil, v8.NewTypeError(w.scriptHost.iso, "Illegal Constructor")
 }
 
-func (e hTMLInputElementV8Wrapper) checkValidity(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := e.mustGetContext(info)
+func (w hTMLInputElementV8Wrapper) checkValidity(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLInputElement.checkValidity")
-	instance, err := e.getInstance(info)
+	instance, err := w.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
 	result := instance.CheckValidity()
-	return e.toBoolean(ctx, result)
+	return w.toBoolean(ctx, result)
 }
 
-func (e hTMLInputElementV8Wrapper) type_(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
-	ctx := e.mustGetContext(info)
+func (w hTMLInputElementV8Wrapper) type_(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLInputElement.type")
-	instance, err := e.getInstance(info)
+	instance, err := w.getInstance(info)
 	if err != nil {
 		return nil, err
 	}
 	result := instance.Type()
-	return e.toDOMString(ctx, result)
+	return w.toDOMString(ctx, result)
 }
 
-func (e hTMLInputElementV8Wrapper) setType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w hTMLInputElementV8Wrapper) setType(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLInputElement.setType")
-	args := newArgumentHelper(e.scriptHost, info)
-	instance, err0 := e.getInstance(info)
-	val, err1 := tryParseArg(args, 0, e.decodeDOMString)
+	args := newArgumentHelper(w.scriptHost, info)
+	instance, err0 := w.getInstance(info)
+	val, err1 := tryParseArg(args, 0, w.decodeDOMString)
 	if args.noOfReadArguments >= 1 {
 		err := errors.Join(err0, err1)
 		if err != nil {

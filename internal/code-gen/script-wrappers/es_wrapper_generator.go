@@ -53,7 +53,7 @@ func createData(
 		IdlInterfaceName:    wrappedTypeName,
 		WrapperTypeName:     lowerCaseFirstLetter(wrapperTypeBaseName),
 		WrapperTypeBaseName: wrapperTypeBaseName,
-		Receiver:            interfaceConfig.Receiver,
+		Receiver:            "w",
 		RunCustomCode:       interfaceConfig.RunCustomCode,
 		Inheritance:         idlInterface.Inheritance,
 		Constructor:         CreateConstructor(interfaceConfig, idlName),

@@ -1,7 +1,5 @@
 package configuration
 
-import "github.com/gost-dom/generators"
-
 // WebIdlConfigurations is a list of specifications for generating ES wrapper
 // code. Each key in the map correspond to a specific IDL file
 type WebIdlConfigurations map[string](*WebIdlConfiguration)
@@ -31,7 +29,6 @@ func (s *WebIdlConfiguration) Type(typeName string) *IdlInterfaceConfiguration {
 	result := &IdlInterfaceConfiguration{
 		DomSpec:  s,
 		TypeName: typeName,
-		Receiver: generators.DefaultReceiverName(typeName),
 	}
 	result.ensureMap()
 	s.Interfaces[typeName] = result

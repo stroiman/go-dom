@@ -38,7 +38,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	xhr := xhrModule.Type("XMLHttpRequest")
 	xhr.SkipPrototypeRegistration = true
 	xhr.InnerTypeName = "XmlHttpRequest"
-	xhr.Receiver = "xhr"
 
 	xhr.MarkMembersAsNotImplemented(
 		"readyState",
@@ -54,7 +53,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	urlSpecs := specs.Module("url")
 	url := urlSpecs.Type("URL")
 	url.InnerTypeName = "Url"
-	url.Receiver = "u"
 	url.MarkMembersAsNotImplemented(
 		"setHref",
 		"setProtocol",
@@ -139,7 +137,7 @@ func CreateV8Specs() WebIdlConfigurations {
 
 	domTokenList := domSpecs.Type("DOMTokenList")
 	domTokenList.InnerTypeName = "DomTokenList"
-	domTokenList.Receiver = "u"
+	// domTokenList.Receiver = "w"
 	domTokenList.RunCustomCode = true
 	domTokenList.Method("item").SetNoError()
 	domTokenList.Method("contains").SetNoError()

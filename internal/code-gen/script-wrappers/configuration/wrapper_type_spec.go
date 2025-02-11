@@ -9,7 +9,6 @@ type IdlInterfaceConfiguration struct {
 	DomSpec                   *WebIdlConfiguration
 	TypeName                  string
 	InnerTypeName             string
-	Receiver                  string
 	RunCustomCode             bool
 	WrapperStruct             bool
 	SkipPrototypeRegistration bool
