@@ -8,6 +8,10 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+func init() {
+	registerJSClass("XMLHttpRequest", "XMLHttpRequestEventTarget", createXMLHttpRequestPrototype)
+}
+
 func createXMLHttpRequestPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
 	iso := scriptHost.iso
 	wrapper := newXMLHttpRequestV8Wrapper(scriptHost)

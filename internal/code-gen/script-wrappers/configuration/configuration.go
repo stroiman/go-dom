@@ -36,7 +36,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	specs := CreateSpecs()
 	xhrModule := specs.Module("xhr")
 	xhr := xhrModule.Type("XMLHttpRequest")
-	xhr.SkipPrototypeRegistration = true
 
 	xhr.MarkMembersAsNotImplemented(
 		"readyState",
@@ -291,6 +290,8 @@ func CreateV8Specs() WebIdlConfigurations {
 	anchor.Method("referrerPolicy").Ignore()
 	anchor.Method("relList").Ignore()
 	anchor.Method("text").Ignore()
+
+	// htmlSpecs.Type("HTMLHyperlinkElementUtils")
 
 	return specs
 }
