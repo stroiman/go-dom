@@ -47,10 +47,7 @@ func createData(
 	if wrappedTypeName == "" {
 		wrappedTypeName = idlInterface.Name
 	}
-	wrapperTypeBaseName := interfaceConfig.WrapperTypeName
-	if wrapperTypeBaseName == "" {
-		wrapperTypeBaseName = fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
-	}
+	wrapperTypeBaseName := fmt.Sprintf("%sV8Wrapper", wrappedTypeName)
 	return ESConstructorData{
 		Spec:                interfaceConfig,
 		IdlInterfaceName:    wrappedTypeName,

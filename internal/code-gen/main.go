@@ -1,3 +1,5 @@
+// This is part of an internal code generation tool of Gost-DOM. It's in an
+// internal package and not used by production code.
 package main
 
 import (
