@@ -9,12 +9,12 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type hTMLAnchorElementV8Wrapper struct {
+type htmlAnchorElementV8Wrapper struct {
 	nodeV8WrapperBase[html.HTMLAnchorElement]
 }
 
-func newHTMLAnchorElementV8Wrapper(scriptHost *V8ScriptHost) *hTMLAnchorElementV8Wrapper {
-	return &hTMLAnchorElementV8Wrapper{newNodeV8WrapperBase[html.HTMLAnchorElement](scriptHost)}
+func newHTMLAnchorElementV8Wrapper(scriptHost *V8ScriptHost) *htmlAnchorElementV8Wrapper {
+	return &htmlAnchorElementV8Wrapper{newNodeV8WrapperBase[html.HTMLAnchorElement](scriptHost)}
 }
 
 func init() {
@@ -33,7 +33,7 @@ func createHTMLAnchorElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemp
 
 	return constructor
 }
-func (w hTMLAnchorElementV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
+func (w htmlAnchorElementV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTemplate) {
 	iso := w.scriptHost.iso
 
 	prototypeTmpl.SetAccessorProperty("target",
@@ -86,11 +86,11 @@ func (w hTMLAnchorElementV8Wrapper) installPrototype(prototypeTmpl *v8.ObjectTem
 		v8.None)
 }
 
-func (w hTMLAnchorElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) Constructor(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	return nil, v8.NewTypeError(w.scriptHost.iso, "Illegal Constructor")
 }
 
-func (w hTMLAnchorElementV8Wrapper) target(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) target(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.target")
 	instance, err := w.getInstance(info)
@@ -101,7 +101,7 @@ func (w hTMLAnchorElementV8Wrapper) target(info *v8.FunctionCallbackInfo) (*v8.V
 	return w.toDOMString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setTarget(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setTarget(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setTarget")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)
@@ -117,7 +117,7 @@ func (w hTMLAnchorElementV8Wrapper) setTarget(info *v8.FunctionCallbackInfo) (*v
 	return nil, errors.New("HTMLAnchorElement.setTarget: Missing arguments")
 }
 
-func (w hTMLAnchorElementV8Wrapper) href(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) href(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.href")
 	instance, err := w.getInstance(info)
@@ -128,7 +128,7 @@ func (w hTMLAnchorElementV8Wrapper) href(info *v8.FunctionCallbackInfo) (*v8.Val
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setHref(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setHref")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)
@@ -144,7 +144,7 @@ func (w hTMLAnchorElementV8Wrapper) setHref(info *v8.FunctionCallbackInfo) (*v8.
 	return nil, errors.New("HTMLAnchorElement.setHref: Missing arguments")
 }
 
-func (w hTMLAnchorElementV8Wrapper) origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) origin(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.origin")
 	instance, err := w.getInstance(info)
@@ -155,7 +155,7 @@ func (w hTMLAnchorElementV8Wrapper) origin(info *v8.FunctionCallbackInfo) (*v8.V
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) protocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) protocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.protocol")
 	instance, err := w.getInstance(info)
@@ -166,7 +166,7 @@ func (w hTMLAnchorElementV8Wrapper) protocol(info *v8.FunctionCallbackInfo) (*v8
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setProtocol(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setProtocol")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)
@@ -182,7 +182,7 @@ func (w hTMLAnchorElementV8Wrapper) setProtocol(info *v8.FunctionCallbackInfo) (
 	return nil, errors.New("HTMLAnchorElement.setProtocol: Missing arguments")
 }
 
-func (w hTMLAnchorElementV8Wrapper) username(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) username(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.username")
 	instance, err := w.getInstance(info)
@@ -193,7 +193,7 @@ func (w hTMLAnchorElementV8Wrapper) username(info *v8.FunctionCallbackInfo) (*v8
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setUsername(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setUsername")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)
@@ -209,7 +209,7 @@ func (w hTMLAnchorElementV8Wrapper) setUsername(info *v8.FunctionCallbackInfo) (
 	return nil, errors.New("HTMLAnchorElement.setUsername: Missing arguments")
 }
 
-func (w hTMLAnchorElementV8Wrapper) password(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) password(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.password")
 	instance, err := w.getInstance(info)
@@ -220,7 +220,7 @@ func (w hTMLAnchorElementV8Wrapper) password(info *v8.FunctionCallbackInfo) (*v8
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setPassword(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setPassword")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)
@@ -236,7 +236,7 @@ func (w hTMLAnchorElementV8Wrapper) setPassword(info *v8.FunctionCallbackInfo) (
 	return nil, errors.New("HTMLAnchorElement.setPassword: Missing arguments")
 }
 
-func (w hTMLAnchorElementV8Wrapper) host(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) host(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.host")
 	instance, err := w.getInstance(info)
@@ -247,7 +247,7 @@ func (w hTMLAnchorElementV8Wrapper) host(info *v8.FunctionCallbackInfo) (*v8.Val
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setHost(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setHost")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)
@@ -263,7 +263,7 @@ func (w hTMLAnchorElementV8Wrapper) setHost(info *v8.FunctionCallbackInfo) (*v8.
 	return nil, errors.New("HTMLAnchorElement.setHost: Missing arguments")
 }
 
-func (w hTMLAnchorElementV8Wrapper) hostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) hostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.hostname")
 	instance, err := w.getInstance(info)
@@ -274,7 +274,7 @@ func (w hTMLAnchorElementV8Wrapper) hostname(info *v8.FunctionCallbackInfo) (*v8
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setHostname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setHostname")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)
@@ -290,7 +290,7 @@ func (w hTMLAnchorElementV8Wrapper) setHostname(info *v8.FunctionCallbackInfo) (
 	return nil, errors.New("HTMLAnchorElement.setHostname: Missing arguments")
 }
 
-func (w hTMLAnchorElementV8Wrapper) port(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) port(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.port")
 	instance, err := w.getInstance(info)
@@ -301,7 +301,7 @@ func (w hTMLAnchorElementV8Wrapper) port(info *v8.FunctionCallbackInfo) (*v8.Val
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setPort(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setPort")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)
@@ -317,7 +317,7 @@ func (w hTMLAnchorElementV8Wrapper) setPort(info *v8.FunctionCallbackInfo) (*v8.
 	return nil, errors.New("HTMLAnchorElement.setPort: Missing arguments")
 }
 
-func (w hTMLAnchorElementV8Wrapper) pathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) pathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.pathname")
 	instance, err := w.getInstance(info)
@@ -328,7 +328,7 @@ func (w hTMLAnchorElementV8Wrapper) pathname(info *v8.FunctionCallbackInfo) (*v8
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setPathname(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setPathname")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)
@@ -344,7 +344,7 @@ func (w hTMLAnchorElementV8Wrapper) setPathname(info *v8.FunctionCallbackInfo) (
 	return nil, errors.New("HTMLAnchorElement.setPathname: Missing arguments")
 }
 
-func (w hTMLAnchorElementV8Wrapper) search(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) search(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.search")
 	instance, err := w.getInstance(info)
@@ -355,7 +355,7 @@ func (w hTMLAnchorElementV8Wrapper) search(info *v8.FunctionCallbackInfo) (*v8.V
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setSearch(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setSearch")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)
@@ -371,7 +371,7 @@ func (w hTMLAnchorElementV8Wrapper) setSearch(info *v8.FunctionCallbackInfo) (*v
 	return nil, errors.New("HTMLAnchorElement.setSearch: Missing arguments")
 }
 
-func (w hTMLAnchorElementV8Wrapper) hash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) hash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	ctx := w.mustGetContext(info)
 	log.Debug("V8 Function call: HTMLAnchorElement.hash")
 	instance, err := w.getInstance(info)
@@ -382,7 +382,7 @@ func (w hTMLAnchorElementV8Wrapper) hash(info *v8.FunctionCallbackInfo) (*v8.Val
 	return w.toUSVString(ctx, result)
 }
 
-func (w hTMLAnchorElementV8Wrapper) setHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
+func (w htmlAnchorElementV8Wrapper) setHash(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	log.Debug("V8 Function call: HTMLAnchorElement.setHash")
 	args := newArgumentHelper(w.scriptHost, info)
 	instance, err0 := w.getInstance(info)

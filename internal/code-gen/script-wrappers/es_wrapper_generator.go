@@ -34,6 +34,8 @@ const (
 	gojaSrc  = "github.com/dop251/goja"
 )
 
+var KnownAcronyms = []string{"HTML", "URL"}
+
 func createData(
 	spec idl.Spec,
 	interfaceConfig *configuration.IdlInterfaceConfiguration,
@@ -372,6 +374,11 @@ func idlNameToUnexportedGoName(s string) string {
 }
 
 func lowerCaseFirstLetter(s string) string {
+	for _, acro := range KnownAcronyms {
+		if strings.HasPrefix(s, acro) {
+			return strings.ToLower(acro) + s[len(acro):]
+		}
+	}
 	strLen := len(s)
 	if strLen == 0 {
 		slog.Warn("Passing empty string to upperCaseFirstLetter")
