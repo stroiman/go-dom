@@ -4,12 +4,21 @@ package v8host
 
 import (
 	"errors"
+	dom "github.com/gost-dom/browser/dom"
 	log "github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
 
 func init() {
 	registerJSClass("Node", "EventTarget", createNodePrototype)
+}
+
+type nodeV8Wrapper struct {
+	nodeV8WrapperBase[dom.Node]
+}
+
+func newNodeV8Wrapper(scriptHost *V8ScriptHost) *nodeV8Wrapper {
+	return &nodeV8Wrapper{newNodeV8WrapperBase[dom.Node](scriptHost)}
 }
 
 func createNodePrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {

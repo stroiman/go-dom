@@ -5,14 +5,6 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
-type nodeV8Wrapper struct {
-	nodeV8WrapperBase[dom.Node]
-}
-
-func newNodeV8Wrapper(host *V8ScriptHost) nodeV8Wrapper {
-	return nodeV8Wrapper{newNodeV8WrapperBase[dom.Node](host)}
-}
-
 func (n nodeV8Wrapper) textContent(info *v8.FunctionCallbackInfo) (*v8.Value, error) {
 	i, err := n.getInstance(info)
 	if err != nil {

@@ -36,6 +36,8 @@ func CreateV8Specs() WebIdlConfigurations {
 	specs := CreateSpecs()
 	xhrModule := specs.Module("xhr")
 	xhr := xhrModule.Type("XMLHttpRequest")
+	// TODO: Just need to support non-node objects
+	xhr.SkipWrapper = true
 
 	xhr.MarkMembersAsNotImplemented(
 		"readyState",
@@ -50,6 +52,8 @@ func CreateV8Specs() WebIdlConfigurations {
 
 	urlSpecs := specs.Module("url")
 	url := urlSpecs.Type("URL")
+	// TODO: Just need to use a different base class for non-nodes
+	url.SkipWrapper = true
 	url.MarkMembersAsNotImplemented(
 		"setHref",
 		"setProtocol",
@@ -67,7 +71,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	domSpecs := specs.Module("dom")
 
 	event := domSpecs.Type("Event")
-	event.CreateWrapper()
 	event.Method("constructor").Argument("eventInitDict").SetHasDefault()
 	event.Method("initEvent").Ignore()
 	event.Method("composed").Ignore()
@@ -88,6 +91,7 @@ func CreateV8Specs() WebIdlConfigurations {
 	event.Method("defaultPrevented").Ignore()
 
 	domElement := domSpecs.Type("Element")
+	domElement.SkipWrapper = true
 	domElement.RunCustomCode = true
 	domElement.Method("getAttribute").SetCustomImplementation()
 	domElement.Method("setAttribute").SetNoError()
@@ -133,6 +137,7 @@ func CreateV8Specs() WebIdlConfigurations {
 	)
 
 	domTokenList := domSpecs.Type("DOMTokenList")
+	domTokenList.SkipWrapper = true
 	domTokenList.RunCustomCode = true
 	domTokenList.Method("item").SetNoError()
 	domTokenList.Method("contains").SetNoError()
@@ -151,7 +156,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	htmlTemplateElement.Method("shadowRootSerializable").SetNotImplemented()
 
 	form := htmlSpecs.Type("HTMLFormElement")
-	form.CreateWrapper()
 	form.Method("requestSubmit").Argument("submitter").SetHasDefault()
 	form.Method("reset").SetNotImplemented()
 	form.Method("checkValidity").SetNotImplemented()
@@ -169,7 +173,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	form.Method("noValidate").Ignore()
 
 	input := htmlSpecs.Type("HTMLInputElement")
-	input.CreateWrapper()
 	input.Method("select").Ignore()
 	input.Method("stepUp").Ignore()
 	input.Method("stepDown").Ignore()
@@ -230,7 +233,6 @@ func CreateV8Specs() WebIdlConfigurations {
 	input.Method("pattern").Ignore()
 
 	window := htmlSpecs.Type("Window")
-	window.CreateWrapper()
 
 	window.Method("window").SetCustomImplementation()
 	window.Method("location").Ignore()
@@ -270,6 +272,8 @@ func CreateV8Specs() WebIdlConfigurations {
 	window.Method("length").SetNotImplemented()
 
 	history := htmlSpecs.Type("History")
+	// We need to customize the inner type. This is a struct pointer
+	history.SkipWrapper = true
 	history.Method("go").Argument("delta").HasDefaultValue("defaultDelta")
 	history.Method("pushState").Argument("url").HasDefaultValue("defaultUrl")
 	history.Method("pushState").Argument("unused").Ignore()
@@ -280,7 +284,6 @@ func CreateV8Specs() WebIdlConfigurations {
 
 	anchor := htmlSpecs.Type("HTMLAnchorElement")
 	anchor.IncludeIncludes = true
-	anchor.CreateWrapper()
 	anchor.Method("download").Ignore()
 	anchor.Method("Ping").Ignore()
 	anchor.Method("ping").Ignore()

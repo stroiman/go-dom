@@ -37,16 +37,13 @@ func (s GojaNamingStrategy) ReceiverName() string {
 
 type GojaTargetGenerators struct{}
 
-func (gen GojaTargetGenerators) CreateJSConstructorGenerator(data ESConstructorData) g.Generator {
-	generator := g.StatementList()
+// CreateConstructor has no effect for Goja. It's currently based on a system
+// that it automatically creates the constructors based on whether or not they
+// call the ingerface
+func (gen GojaTargetGenerators) CreateConstructor(ESConstructorData) g.Generator { return g.Noop }
 
-	generator = g.StatementList(
-		gen.CreateWrapperStruct(data),
-		gen.CreatePrototypeInitializer(data),
-		gen.CreateWrapperMethods(data),
-		generator,
-	)
-	return generator
+func (gen GojaTargetGenerators) CreateConstructorWrapper(ESConstructorData) g.Generator {
+	return g.Noop
 }
 
 func (gen GojaTargetGenerators) CreateInitFunction(data ESConstructorData) g.Generator {

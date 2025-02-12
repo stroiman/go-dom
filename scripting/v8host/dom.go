@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/gost-dom/browser/dom"
-	"github.com/gost-dom/browser/html"
 
 	v8 "github.com/tommie/v8go"
 )
@@ -70,14 +69,6 @@ func (l domTokenListV8Wrapper) toggle(info *v8.FunctionCallbackInfo) (*v8.Value,
 		return nil, err
 	}
 	return v8.NewValue(l.scriptHost.iso, instance.Toggle(token))
-}
-
-type htmlTemplateElementV8Wrapper struct {
-	nodeV8WrapperBase[html.HTMLTemplateElement]
-}
-
-func newHTMLTemplateElementV8Wrapper(host *V8ScriptHost) htmlTemplateElementV8Wrapper {
-	return htmlTemplateElementV8Wrapper{newNodeV8WrapperBase[html.HTMLTemplateElement](host)}
 }
 
 func (e htmlTemplateElementV8Wrapper) CreateInstance(

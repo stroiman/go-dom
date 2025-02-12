@@ -4,12 +4,21 @@ package v8host
 
 import (
 	"errors"
+	html "github.com/gost-dom/browser/html"
 	log "github.com/gost-dom/browser/internal/log"
 	v8 "github.com/tommie/v8go"
 )
 
 func init() {
 	registerJSClass("HTMLTemplateElement", "HTMLElement", createHTMLTemplateElementPrototype)
+}
+
+type htmlTemplateElementV8Wrapper struct {
+	nodeV8WrapperBase[html.HTMLTemplateElement]
+}
+
+func newHTMLTemplateElementV8Wrapper(scriptHost *V8ScriptHost) *htmlTemplateElementV8Wrapper {
+	return &htmlTemplateElementV8Wrapper{newNodeV8WrapperBase[html.HTMLTemplateElement](scriptHost)}
 }
 
 func createHTMLTemplateElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {

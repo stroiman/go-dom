@@ -34,23 +34,6 @@ func (t NewV8FunctionTemplate) Generate() *jen.Statement {
 
 type V8TargetGenerators struct{}
 
-func (gen V8TargetGenerators) CreateJSConstructorGenerator(data ESConstructorData) g.Generator {
-	generator := g.StatementList()
-
-	if data.Spec.WrapperStruct {
-		generator.Append(CreateV8WrapperTypeGenerator(data))
-	}
-
-	generator.Append(
-		CreateV8Constructor(data),
-		CreateV8PrototypeInitialiser(data),
-		CreateV8ConstructorWrapper(data),
-		CreateV8WrapperMethods(data),
-	)
-
-	return generator
-}
-
 func (gen V8TargetGenerators) CreateInitFunction(data ESConstructorData) g.Generator {
 	return g.FunctionDefinition{
 		Name: "init",
@@ -61,7 +44,7 @@ func (gen V8TargetGenerators) CreateInitFunction(data ESConstructorData) g.Gener
 	}
 }
 
-func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
+func (gen V8TargetGenerators) CreateWrapperStruct(data ESConstructorData) g.Generator {
 	typeNameBase := fmt.Sprintf("%sV8Wrapper", data.Name())
 	typeName := g.NewType(lowerCaseFirstLetter(typeNameBase))
 	constructorName := fmt.Sprintf("new%s", typeNameBase)
@@ -85,7 +68,7 @@ func CreateV8WrapperTypeGenerator(data ESConstructorData) g.Generator {
 	return g.StatementList(wrapperStruct, wrapperConstructor, g.Line)
 }
 
-func CreateV8PrototypeInitialiser(data ESConstructorData) JenGenerator {
+func (gen V8TargetGenerators) CreatePrototypeInitializer(data ESConstructorData) JenGenerator {
 	naming := V8NamingStrategy{data}
 	builder := NewConstructorBuilder()
 	receiver := g.NewValue(naming.Receiver())
@@ -109,7 +92,7 @@ func CreateV8PrototypeInitialiser(data ESConstructorData) JenGenerator {
 	}
 }
 
-func CreateV8ConstructorWrapper(data ESConstructorData) JenGenerator {
+func (gen V8TargetGenerators) CreateConstructorWrapper(data ESConstructorData) JenGenerator {
 	naming := V8NamingStrategy{data}
 	var body g.Generator
 	if IsNodeType(data.IdlInterfaceName) {
@@ -132,7 +115,7 @@ func CreateV8ConstructorWrapper(data ESConstructorData) JenGenerator {
 	)
 }
 
-func CreateV8WrapperMethods(data ESConstructorData) JenGenerator {
+func (gen V8TargetGenerators) CreateWrapperMethods(data ESConstructorData) JenGenerator {
 	list := g.StatementList()
 	for op := range data.WrapperFunctionsToGenerate() {
 		list.Append(CreateV8WrapperMethod(data, op))
@@ -218,7 +201,7 @@ func prototypeFactoryFunctionName(data ESConstructorData) string {
 	return fmt.Sprintf("create%sPrototype", data.IdlInterfaceName)
 }
 
-func CreateV8Constructor(data ESConstructorData) g.Generator {
+func (gen V8TargetGenerators) CreateConstructor(data ESConstructorData) g.Generator {
 	return g.FunctionDefinition{
 		Name:     prototypeFactoryFunctionName(data),
 		Args:     g.Arg(scriptHost, scriptHostPtr),
@@ -242,7 +225,6 @@ func CreateV8ConstructorBody(data ESConstructorData) g.Generator {
 		g.Assign(builder.InstanceTmpl, constructor.GetInstanceTemplate()),
 		builder.InstanceTmpl.SetInternalFieldCount(1),
 		g.Line,
-		// g.Assign(builder.Proto, constructor.GetPrototypeTemplate()),
 		builder.Wrapper.Field("installPrototype").Call(constructor.GetPrototypeTemplate()),
 		g.Line,
 	)

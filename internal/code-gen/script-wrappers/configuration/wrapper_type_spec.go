@@ -6,10 +6,13 @@ package configuration
 // All classes will be generated using a set of defaults. Data in this structure
 // will allow deviating from the defaults.
 type IdlInterfaceConfiguration struct {
-	DomSpec         *WebIdlConfiguration
-	TypeName        string
-	RunCustomCode   bool
-	WrapperStruct   bool
+	DomSpec       *WebIdlConfiguration
+	TypeName      string
+	RunCustomCode bool
+	// SkipWrapper suppresses the generation of the "wrapper type". This is used
+	// for DomTokenList to include the iterator code as part of the wrapper
+	// type.
+	SkipWrapper     bool
 	IncludeIncludes bool
 	Customization   map[string]*ESMethodWrapper
 }
@@ -48,8 +51,4 @@ func (w *IdlInterfaceConfiguration) Method(name string) (result *ESMethodWrapper
 		w.Customization[name] = result
 	}
 	return result
-}
-
-func (s *IdlInterfaceConfiguration) CreateWrapper() {
-	s.WrapperStruct = true
 }
