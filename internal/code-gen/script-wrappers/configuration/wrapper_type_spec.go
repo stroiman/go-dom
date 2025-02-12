@@ -6,13 +6,12 @@ package configuration
 // All classes will be generated using a set of defaults. Data in this structure
 // will allow deviating from the defaults.
 type IdlInterfaceConfiguration struct {
-	DomSpec                   *WebIdlConfiguration
-	TypeName                  string
-	RunCustomCode             bool
-	WrapperStruct             bool
-	SkipPrototypeRegistration bool
-	IncludeIncludes           bool
-	Customization             map[string]*ESMethodWrapper
+	DomSpec         *WebIdlConfiguration
+	TypeName        string
+	RunCustomCode   bool
+	WrapperStruct   bool
+	IncludeIncludes bool
+	Customization   map[string]*ESMethodWrapper
 }
 
 func (w *IdlInterfaceConfiguration) ensureMap() {

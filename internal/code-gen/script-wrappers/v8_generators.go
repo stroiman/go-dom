@@ -35,31 +35,20 @@ func (t NewV8FunctionTemplate) Generate() *jen.Statement {
 type V8TargetGenerators struct{}
 
 func (_ V8TargetGenerators) CreateJSConstructorGenerator(data ESConstructorData) g.Generator {
-	return CreateV8Generator(data)
-}
-
-func CreateV8Generator(data ESConstructorData) g.Generator {
 	generator := g.StatementList()
-	if !data.Spec.SkipPrototypeRegistration {
-		generator.Append(
-			CreateInitFunction(data),
-			g.Line,
-		)
+
+	if data.Spec.WrapperStruct {
+		generator.Append(CreateV8WrapperTypeGenerator(data))
 	}
 
 	generator.Append(
+		CreateInitFunction(data),
+		g.Line,
 		CreateV8Constructor(data),
 		CreateV8PrototypeInitialiser(data),
 		CreateV8ConstructorWrapper(data),
 		CreateV8WrapperMethods(data),
 	)
-
-	if data.Spec.WrapperStruct {
-		generator = g.StatementList(
-			CreateV8WrapperTypeGenerator(data),
-			generator,
-		)
-	}
 
 	return generator
 }
