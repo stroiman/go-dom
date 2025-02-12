@@ -9,16 +9,16 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+func init() {
+	registerJSClass("Window", "EventTarget", createWindowPrototype)
+}
+
 type windowV8Wrapper struct {
 	nodeV8WrapperBase[html.Window]
 }
 
 func newWindowV8Wrapper(scriptHost *V8ScriptHost) *windowV8Wrapper {
 	return &windowV8Wrapper{newNodeV8WrapperBase[html.Window](scriptHost)}
-}
-
-func init() {
-	registerJSClass("Window", "EventTarget", createWindowPrototype)
 }
 
 func createWindowPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {

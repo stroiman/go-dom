@@ -9,16 +9,16 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+func init() {
+	registerJSClass("HTMLAnchorElement", "HTMLElement", createHTMLAnchorElementPrototype)
+}
+
 type htmlAnchorElementV8Wrapper struct {
 	nodeV8WrapperBase[html.HTMLAnchorElement]
 }
 
 func newHTMLAnchorElementV8Wrapper(scriptHost *V8ScriptHost) *htmlAnchorElementV8Wrapper {
 	return &htmlAnchorElementV8Wrapper{newNodeV8WrapperBase[html.HTMLAnchorElement](scriptHost)}
-}
-
-func init() {
-	registerJSClass("HTMLAnchorElement", "HTMLElement", createHTMLAnchorElementPrototype)
 }
 
 func createHTMLAnchorElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {

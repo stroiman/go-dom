@@ -9,16 +9,16 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+func init() {
+	registerJSClass("Event", "", createEventPrototype)
+}
+
 type eventV8Wrapper struct {
 	nodeV8WrapperBase[dom.Event]
 }
 
 func newEventV8Wrapper(scriptHost *V8ScriptHost) *eventV8Wrapper {
 	return &eventV8Wrapper{newNodeV8WrapperBase[dom.Event](scriptHost)}
-}
-
-func init() {
-	registerJSClass("Event", "", createEventPrototype)
 }
 
 func createEventPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {

@@ -9,16 +9,16 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+func init() {
+	registerJSClass("HTMLFormElement", "HTMLElement", createHTMLFormElementPrototype)
+}
+
 type htmlFormElementV8Wrapper struct {
 	nodeV8WrapperBase[html.HTMLFormElement]
 }
 
 func newHTMLFormElementV8Wrapper(scriptHost *V8ScriptHost) *htmlFormElementV8Wrapper {
 	return &htmlFormElementV8Wrapper{newNodeV8WrapperBase[html.HTMLFormElement](scriptHost)}
-}
-
-func init() {
-	registerJSClass("HTMLFormElement", "HTMLElement", createHTMLFormElementPrototype)
 }
 
 func createHTMLFormElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {

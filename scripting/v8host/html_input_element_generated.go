@@ -9,16 +9,16 @@ import (
 	v8 "github.com/tommie/v8go"
 )
 
+func init() {
+	registerJSClass("HTMLInputElement", "HTMLElement", createHTMLInputElementPrototype)
+}
+
 type htmlInputElementV8Wrapper struct {
 	nodeV8WrapperBase[html.HTMLInputElement]
 }
 
 func newHTMLInputElementV8Wrapper(scriptHost *V8ScriptHost) *htmlInputElementV8Wrapper {
 	return &htmlInputElementV8Wrapper{newNodeV8WrapperBase[html.HTMLInputElement](scriptHost)}
-}
-
-func init() {
-	registerJSClass("HTMLInputElement", "HTMLElement", createHTMLInputElementPrototype)
 }
 
 func createHTMLInputElementPrototype(scriptHost *V8ScriptHost) *v8.FunctionTemplate {
