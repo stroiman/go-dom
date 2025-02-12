@@ -34,11 +34,11 @@ func (t NewV8FunctionTemplate) Generate() *jen.Statement {
 
 type V8TargetGenerators struct{}
 
-func (_ V8TargetGenerators) CreateJSConstructorGenerator(data ESConstructorData) g.Generator {
+func (gen V8TargetGenerators) CreateJSConstructorGenerator(data ESConstructorData) g.Generator {
 	generator := g.StatementList()
 
 	generator.Append(
-		CreateInitFunction(data),
+		gen.CreateInitFunction(data),
 		g.Line,
 	)
 
@@ -56,7 +56,7 @@ func (_ V8TargetGenerators) CreateJSConstructorGenerator(data ESConstructorData)
 	return generator
 }
 
-func CreateInitFunction(data ESConstructorData) g.Generator {
+func (gen V8TargetGenerators) CreateInitFunction(data ESConstructorData) g.Generator {
 	return g.FunctionDefinition{
 		Name: "init",
 		Body: g.NewValue("registerJSClass").Call(
