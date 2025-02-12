@@ -37,11 +37,6 @@ type V8TargetGenerators struct{}
 func (gen V8TargetGenerators) CreateJSConstructorGenerator(data ESConstructorData) g.Generator {
 	generator := g.StatementList()
 
-	generator.Append(
-		gen.CreateInitFunction(data),
-		g.Line,
-	)
-
 	if data.Spec.WrapperStruct {
 		generator.Append(CreateV8WrapperTypeGenerator(data))
 	}

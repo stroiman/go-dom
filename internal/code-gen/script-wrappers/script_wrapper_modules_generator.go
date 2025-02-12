@@ -24,10 +24,6 @@ func writeGenerator(writer io.Writer, packagePath string, generator g.Generator)
 	return file.Render(writer)
 }
 
-type TargetGenerators interface {
-	CreateJSConstructorGenerator(data ESConstructorData) g.Generator
-}
-
 type ScriptWrapperModulesGenerator struct {
 	Specs            configuration.WebIdlConfigurations
 	PackagePath      string
@@ -45,14 +41,21 @@ func (gen ScriptWrapperModulesGenerator) writeModule(
 	generators := g.StatementList()
 	for _, specType := range spec.GetTypesSorted() {
 		typeGenerationInformation := createData(data, specType)
-		generators.Append(
-			gen.TargetGenerators.CreateJSConstructorGenerator(typeGenerationInformation),
-		)
+		generators.Append(gen.createPrototypeGenerator(typeGenerationInformation))
 		generators.Append(g.Line)
 	}
 	return writeGenerator(writer, gen.PackagePath, generators)
 }
 
+func (gen ScriptWrapperModulesGenerator) createPrototypeGenerator(
+	typeGenerationInformation ESConstructorData,
+) g.Generator {
+	return PrototypeWrapperGenerator{
+		Platform: gen.TargetGenerators,
+		Data:     typeGenerationInformation,
+	}
+
+}
 func (gen ScriptWrapperModulesGenerator) writeModuleTypes(
 	spec *configuration.WebIdlConfiguration,
 ) error {
@@ -69,7 +72,7 @@ func (gen ScriptWrapperModulesGenerator) writeModuleTypes(
 			errs[i] = err
 		} else {
 			typeGenerationInformation := createData(data, specType)
-			errs[i] = writeGenerator(writer, gen.PackagePath, gen.TargetGenerators.CreateJSConstructorGenerator(typeGenerationInformation))
+			errs[i] = writeGenerator(writer, gen.PackagePath, gen.createPrototypeGenerator(typeGenerationInformation))
 		}
 	}
 	return errors.Join(errs...)
