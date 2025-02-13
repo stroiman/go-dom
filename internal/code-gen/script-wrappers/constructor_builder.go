@@ -43,7 +43,7 @@ func (builder PrototypeInstaller) InstallFunctionHandlers(
 			generators = append(generators,
 				builder.Proto.Set(
 					op.Name,
-					builder.NewFunctionTemplate(builder.Wrapper.Field(op.WrapperMethodName())),
+					builder.NewFunctionTemplate(builder.Wrapper.Field(op.CallbackMethodName())),
 				),
 			)
 		}
@@ -75,10 +75,10 @@ func (builder PrototypeInstaller) InstallAttributeHandler(
 	if getter == nil {
 		return g.Noop
 	}
-	getterFt := builder.NewFunctionTemplate(wrapper.Field(getter.WrapperMethodName()))
+	getterFt := builder.NewFunctionTemplate(wrapper.Field(getter.CallbackMethodName()))
 	setterFt := g.Nil
 	if setter != nil {
-		setterFt = builder.NewFunctionTemplate(wrapper.Field(setter.WrapperMethodName()))
+		setterFt = builder.NewFunctionTemplate(wrapper.Field(setter.CallbackMethodName()))
 	}
 	return builder.Proto.SetAccessorProperty(
 		op.Name,

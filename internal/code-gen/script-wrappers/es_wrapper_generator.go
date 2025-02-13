@@ -211,7 +211,7 @@ type ESOperation struct {
 	Arguments            []ESOperationArgument
 }
 
-func (o ESOperation) WrapperMethodName() string {
+func (o ESOperation) CallbackMethodName() string {
 	return idl.SanitizeName(o.Name)
 }
 

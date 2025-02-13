@@ -92,7 +92,7 @@ func (gen V8TargetGenerators) CreatePrototypeInitializer(data ESConstructorData)
 	}
 }
 
-func (gen V8TargetGenerators) CreateConstructorWrapper(data ESConstructorData) JenGenerator {
+func (gen V8TargetGenerators) CreateConstructorCallback(data ESConstructorData) JenGenerator {
 	naming := V8NamingStrategy{data}
 	var body g.Generator
 	if IsNodeType(data.IdlInterfaceName) {
@@ -115,15 +115,7 @@ func (gen V8TargetGenerators) CreateConstructorWrapper(data ESConstructorData) J
 	)
 }
 
-func (gen V8TargetGenerators) CreateWrapperMethods(data ESConstructorData) JenGenerator {
-	list := g.StatementList()
-	for op := range data.WrapperFunctionsToGenerate() {
-		list.Append(CreateV8WrapperMethod(data, op))
-	}
-	return list
-}
-
-func CreateV8WrapperMethod(
+func (gen V8TargetGenerators) CreateMethodCallback(
 	data ESConstructorData,
 	op ESOperation,
 ) JenGenerator {
@@ -135,7 +127,7 @@ func CreateV8WrapperMethod(
 				Name: g.Id(naming.Receiver()),
 				Type: g.Id(naming.PrototypeWrapperName()),
 			},
-			Name:     op.WrapperMethodName(),
+			Name:     op.CallbackMethodName(),
 			Args:     g.Arg(g.Id("info"), v8FunctionCallbackInfoPtr),
 			RtnTypes: g.List(v8Value, g.Id("error")),
 			Body:     CreateV8FunctionTemplateCallbackBody(data, op),

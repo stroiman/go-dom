@@ -42,7 +42,7 @@ type GojaTargetGenerators struct{}
 // call the ingerface
 func (gen GojaTargetGenerators) CreateConstructor(ESConstructorData) g.Generator { return g.Noop }
 
-func (gen GojaTargetGenerators) CreateConstructorWrapper(ESConstructorData) g.Generator {
+func (gen GojaTargetGenerators) CreateConstructorCallback(ESConstructorData) g.Generator {
 	return g.Noop
 }
 
@@ -56,8 +56,6 @@ func (gen GojaTargetGenerators) CreateInitFunction(data ESConstructorData) g.Gen
 				g.Lit(data.Inheritance),
 				g.Id(naming.PrototypeWrapperConstructorName()),
 			),
-
-		//g.Lit(data.Name), g.Lit(data.Inheritance), g.Id(naming.PrototypeWrapperConstructorName())),
 	}
 }
 
@@ -124,15 +122,7 @@ func (gen GojaTargetGenerators) CreateWrapperStruct(data ESConstructorData) g.Ge
 	return g.StatementList(wrapperStruct, wrapperConstructor)
 }
 
-func (gen GojaTargetGenerators) CreateWrapperMethods(data ESConstructorData) g.Generator {
-	list := g.StatementList()
-	for op := range data.WrapperFunctionsToGenerate() {
-		list.Append(gen.CreateWrapperMethod(data, op))
-	}
-	return list
-}
-
-func (gen GojaTargetGenerators) CreateWrapperMethod(
+func (gen GojaTargetGenerators) CreateMethodCallback(
 	data ESConstructorData,
 	op ESOperation,
 ) g.Generator {
@@ -145,7 +135,7 @@ func (gen GojaTargetGenerators) CreateWrapperMethod(
 				Name: g.Id(naming.ReceiverName()),
 				Type: g.Id(naming.PrototypeWrapperTypeName()),
 			},
-			Name:     op.Name,
+			Name:     op.CallbackMethodName(),
 			Args:     g.Arg(callArgument, gojaFc),
 			RtnTypes: g.List(gojaValue),
 			Body:     gen.CreateWrapperMethodBody(data, op, callArgument),
